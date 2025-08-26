@@ -40,6 +40,7 @@ export default function Page() {
             <a href="#features" className="hover:text-slate-900">Features</a>
             <a href="#how" className="hover:text-slate-900">How it works</a>
             <a href="#faq" className="hover:text-slate-900">FAQ</a>
+            <a href="/search" className="hover:text-slate-900">Search</a>
           </nav>
           <a href="#waitlist" className="rounded-2xl bg-slate-900 text-white text-sm px-4 py-2 shadow hover:shadow-md">Join waitlist</a>
         </div>
