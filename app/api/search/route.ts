@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     
-    // Build the base query
+    // Build the base query - start with just profiles
     let supabaseQuery = supabase
       .from('profiles')
       .select(`
@@ -35,10 +35,7 @@ export async function GET(request: NextRequest) {
         public_email,
         accepting_work,
         visibility_state,
-        is_listed,
-        profile_specializations!inner(specialization_id),
-        profile_locations!inner(location_id),
-        locations!profile_locations(country, state, city)
+        is_listed
       `)
       .eq('visibility_state', 'verified')
       .eq('is_listed', true);
@@ -51,16 +48,6 @@ export async function GET(request: NextRequest) {
     // Credential type filter
     if (credentialType) {
       supabaseQuery = supabaseQuery.eq('credential_type', credentialType);
-    }
-    
-    // State filter
-    if (state) {
-      supabaseQuery = supabaseQuery.eq('locations.state', state);
-    }
-    
-    // Specialization filter
-    if (specialization) {
-      supabaseQuery = supabaseQuery.eq('profile_specializations.specialization_id', specialization);
     }
     
     // Availability filter
@@ -80,23 +67,85 @@ export async function GET(request: NextRequest) {
       throw new Error(`Database error: ${error.message}`);
     }
     
-    // Transform the data to match our expected format
-    const transformedProfiles = profiles?.map(profile => ({
-      id: profile.id,
-      slug: profile.slug,
-      first_name: profile.first_name,
-      last_name: profile.last_name,
-      headline: profile.headline,
-      bio: profile.bio,
-      credential_type: profile.credential_type,
-      firm_name: profile.firm_name,
-      public_email: profile.public_email,
-      accepting_work: profile.accepting_work,
-      verified: profile.visibility_state === 'verified',
-      specializations: profile.profile_specializations?.map((ps: any) => ps.specialization_id) || [],
-      states: profile.locations?.map((loc: any) => loc.state).filter(Boolean) || [],
-      avatar_url: null
-    })) || [];
+    // If we have profiles, fetch their related data separately
+    let transformedProfiles: any[] = [];
+    
+    if (profiles && profiles.length > 0) {
+      // Fetch specializations for all profiles
+      const profileIds = profiles.map(p => p.id);
+      
+      const { data: specializations, error: specError } = await supabase
+        .from('profile_specializations')
+        .select(`
+          profile_id,
+          specializations!inner(slug, label)
+        `)
+        .in('profile_id', profileIds);
+      
+      if (specError) {
+        console.error('Specialization fetch error:', specError);
+      }
+      
+      // Fetch locations for all profiles
+      const { data: locations, error: locError } = await supabase
+        .from('profile_locations')
+        .select(`
+          profile_id,
+          locations!inner(state, city)
+        `)
+        .in('profile_id', profileIds);
+      
+      if (locError) {
+        console.error('Location fetch error:', locError);
+      }
+      
+      // Group specializations and locations by profile_id
+      const specsByProfile = specializations?.reduce((acc: any, spec: any) => {
+        if (!acc[spec.profile_id]) acc[spec.profile_id] = [];
+        acc[spec.profile_id].push(spec.specializations.slug);
+        return acc;
+      }, {}) || {};
+      
+      const statesByProfile = locations?.reduce((acc: any, loc: any) => {
+        if (!acc[loc.profile_id]) acc[loc.profile_id] = [];
+        if (loc.locations.state && !acc[loc.profile_id].includes(loc.locations.state)) {
+          acc[loc.profile_id].push(loc.locations.state);
+        }
+        return acc;
+      }, {}) || {};
+      
+      // Transform profiles with their related data
+      transformedProfiles = profiles.map(profile => ({
+        id: profile.id,
+        slug: profile.slug,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        headline: profile.headline,
+        bio: profile.bio,
+        credential_type: profile.credential_type,
+        firm_name: profile.firm_name,
+        public_email: profile.public_email,
+        accepting_work: profile.accepting_work,
+        verified: profile.visibility_state === 'verified',
+        specializations: specsByProfile[profile.id] || [],
+        states: statesByProfile[profile.id] || [],
+        avatar_url: null
+      }));
+      
+      // Apply state filter after fetching locations
+      if (state) {
+        transformedProfiles = transformedProfiles.filter(profile => 
+          profile.states.includes(state)
+        );
+      }
+      
+      // Apply specialization filter after fetching specializations
+      if (specialization) {
+        transformedProfiles = transformedProfiles.filter(profile => 
+          profile.specializations.includes(specialization)
+        );
+      }
+    }
     
     // Calculate pagination info
     const total = count || 0;

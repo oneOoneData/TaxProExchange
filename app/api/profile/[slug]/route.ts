@@ -14,7 +14,7 @@ export async function GET(
   try {
     const { slug } = params;
 
-    // Fetch profile with all related data
+    // First, fetch the basic profile
     const { data: profile, error } = await supabase
       .from('profiles')
       .select(`
@@ -32,11 +32,7 @@ export async function GET(
         linkedin_url,
         accepting_work,
         visibility_state,
-        is_listed,
-        profile_specializations!inner(specialization_id),
-        profile_locations!inner(location_id),
-        locations!profile_locations(country, state, city),
-        licenses!inner(license_kind, license_number, issuing_authority, state, expires_on, status)
+        is_listed
       `)
       .eq('slug', slug)
       .eq('visibility_state', 'verified')
@@ -61,6 +57,58 @@ export async function GET(
       );
     }
 
+    // Fetch related data separately
+    let specializations: any[] = [];
+    let locations: any[] = [];
+    let licenses: any[] = [];
+
+    try {
+      // Fetch specializations
+      const { data: specs } = await supabase
+        .from('profile_specializations')
+        .select(`
+          specializations!inner(slug, label)
+        `)
+        .eq('profile_id', profile.id);
+
+      specializations = specs?.map((s: any) => s.specializations.slug) || [];
+    } catch (specError) {
+      console.error('Specialization fetch error:', specError);
+    }
+
+    try {
+      // Fetch locations
+      const { data: locs } = await supabase
+        .from('profile_locations')
+        .select(`
+          locations!inner(state, city)
+        `)
+        .eq('profile_id', profile.id);
+
+      locations = locs?.map((l: any) => l.locations.state).filter(Boolean) || [];
+    } catch (locError) {
+      console.error('Location fetch error:', locError);
+    }
+
+    try {
+      // Fetch licenses
+      const { data: licData } = await supabase
+        .from('licenses')
+        .select(`
+          license_kind,
+          license_number,
+          issuing_authority,
+          state,
+          expires_on,
+          status
+        `)
+        .eq('profile_id', profile.id);
+
+      licenses = licData || [];
+    } catch (licenseError) {
+      console.error('License fetch error:', licenseError);
+    }
+
     // Transform the data to match our expected format
     const transformedProfile = {
       id: profile.id,
@@ -77,16 +125,16 @@ export async function GET(
       linkedin_url: profile.linkedin_url,
       accepting_work: profile.accepting_work,
       verified: profile.visibility_state === 'verified',
-      specializations: profile.profile_specializations?.map((ps: any) => ps.specialization_id) || [],
-      states: profile.locations?.map((loc: any) => loc.state).filter(Boolean) || [],
-      licenses: profile.licenses?.map((license: any) => ({
+      specializations,
+      states: locations,
+      licenses: licenses.map((license: any) => ({
         kind: license.license_kind,
         number: license.license_number,
         authority: license.issuing_authority,
         state: license.state,
         expires: license.expires_on,
         status: license.status
-      })) || [],
+      })),
       avatar_url: null
     };
 
