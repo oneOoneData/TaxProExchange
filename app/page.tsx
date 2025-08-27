@@ -1,9 +1,41 @@
 'use client';
 
-
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function Page() {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('email', email);
+
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Redirect to confirmation page
+        window.location.href = data.redirectUrl;
+      } else {
+        // Handle error
+        alert('Failed to join waitlist. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Failed to join waitlist. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const features = [
     {
@@ -154,18 +186,24 @@ export default function Page() {
               <h3 className="text-xl font-semibold text-slate-900">Get early access</h3>
               <p className="mt-2 text-slate-600">We'll invite the first cohort of CPAs, EAs, and CTEC preparers soon. Add your email to join the beta.</p>
               <form
-                action="/api/waitlist"
-                method="POST"
+                onSubmit={handleSubmit}
                 className="mt-5 flex gap-3"
               >
                 <input
                   type="email"
-                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="you@firm.com"
                   className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 />
-                <button type="submit" className="rounded-xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">Join</button>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="rounded-xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSubmitting ? 'Joining...' : 'Join'}
+                </button>
               </form>
               <p className="mt-3 text-xs text-slate-500">We'll never spam. You can unsubscribe anytime.</p>
             </div>
