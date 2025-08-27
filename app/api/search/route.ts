@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
 
-    // Build the base query
+    // Build the base query with count enabled
     let supabaseQuery = supabase
       .from('profiles')
       .select(`
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         visibility_state,
         is_listed,
         created_at
-      `)
+      `, { count: 'exact' })  // Enable count for pagination
       .eq('visibility_state', 'verified')
       .eq('is_listed', true);
 
@@ -54,13 +54,10 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('profile_locations.location_id', state);
     }
 
-    // Get total count for pagination
-    const { count } = await supabaseQuery.count();
-
-    // Apply pagination
-    const { data: profiles, error } = await supabaseQuery
-      .range(offset, offset + limit - 1)
-      .order('created_at', { ascending: false });
+    // Execute query with count and pagination
+    const { data: profiles, error, count } = await supabaseQuery
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       console.error('Search error:', error);
