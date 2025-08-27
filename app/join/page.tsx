@@ -75,13 +75,13 @@ export default function JoinPage() {
     if (session?.user) {
       setStep('profile');
       // Pre-fill form with session data
-      if (session.user.name) {
+      if (session?.user?.name) {
         const [first, ...lastParts] = session.user.name.split(' ');
         setProfileForm(prev => ({
           ...prev,
-          first_name: first || '',
-          last_name: lastParts.join(' ') || '',
-          public_email: session.user.email || ''
+          first_name: first ?? '',
+          last_name: lastParts.join(' ') ?? '',
+          public_email: session?.user?.email ?? ''
         }));
       }
     }
