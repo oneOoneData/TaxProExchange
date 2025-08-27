@@ -174,7 +174,7 @@ export default function JoinPage() {
           </Link>
           {session && (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-600">Welcome, {session.user.name}</span>
+              <span className="text-sm text-slate-600">Welcome, {session.user?.name || 'User'}</span>
               <button
                 onClick={() => signOut()}
                 className="text-sm text-slate-500 hover:text-slate-700"
