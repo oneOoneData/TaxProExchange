@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { JoinButton } from '@/components/JoinButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export default function Page() {
   ];
 
   const steps = [
-    { n: '1', title: 'Join & Sign In', desc: 'Sign in with Google or LinkedIn to get started.'},
+    { n: '1', title: 'Join & Sign In', desc: 'Sign in with Google to get started.'},
     { n: '2', title: 'Create Profile', desc: 'Set up your professional profile with credentials and specializations.'},
     { n: '3', title: 'Connect & Collaborate', desc: 'Search, filter, and message other professionals. Handle scope and payment off-platform.'},
   ];
@@ -42,7 +43,7 @@ export default function Page() {
             <a href="/search" className="hover:text-slate-900">Search</a>
             <a href="/join" className="hover:text-slate-900">Join</a>
           </nav>
-          <a href="/join" className="rounded-2xl bg-slate-900 text-white text-sm px-4 py-2 shadow hover:shadow-md">Join Now</a>
+          <JoinButton />
         </div>
       </header>
 
@@ -184,7 +185,7 @@ export default function Page() {
             </a>
             <a
               href="#features"
-              className="inline-flex items-center px-8 py-3 border border-slate-300 text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
             >
               Learn More
             </a>

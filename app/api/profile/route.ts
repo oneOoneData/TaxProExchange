@@ -1,44 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { createClient } from '@supabase/supabase-js';
+import { auth } from '@clerk/nextjs/server';
+import { supabaseService } from '@/lib/supabaseService';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 export async function POST(request: NextRequest) {
   try {
-    // Get session to verify user is authenticated
-    const session = await getServerSession();
-    
-    if (!session?.user?.email || !(session.user as any).id) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const {
-      first_name,
-      last_name,
-      headline,
-      bio,
-      credential_type,
-      firm_name,
-      public_email,
-      phone,
-      website_url,
-      linkedin_url,
-      accepting_work,
-      specializations,
-      states
-    }: {
+    const body: {
       first_name: string;
       last_name: string;
       headline: string;
@@ -52,128 +26,96 @@ export async function POST(request: NextRequest) {
       accepting_work: boolean;
       specializations: string[];
       states: string[];
-    } = body;
+    } = await request.json();
 
-    // Validate required fields
-    if (!first_name || !last_name || !headline || !bio || !credential_type || !public_email) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Generate slug from name
-    const slug = `${first_name.toLowerCase()}-${last_name.toLowerCase()}-${credential_type.toLowerCase()}`.replace(/[^a-z0-9-]/g, '');
-
-    // Get user ID from session (added by NextAuth callback)
-    const userId = (session.user as any).id;
-
-    // Check if profile already exists
-    const { data: existingProfile, error: profileCheckError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileCheckError && profileCheckError.code !== 'PGRST116') {
-      console.error('Profile check error:', profileCheckError);
-      throw new Error(`Profile check error: ${profileCheckError.message}`);
-    }
-
-    if (existingProfile) {
-      return NextResponse.json(
-        { error: 'Profile already exists for this user' },
-        { status: 400 }
-      );
-    }
+    const supabase = supabaseService();
 
     // Create profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .insert([{
+      .insert({
         user_id: userId,
-        first_name,
-        last_name,
-        headline,
-        bio,
-        credential_type,
-        firm_name,
-        public_email,
-        phone,
-        website_url,
-        linkedin_url,
-        accepting_work,
-        visibility_state: 'pending_verification',
+        first_name: body.first_name,
+        last_name: body.last_name,
+        headline: body.headline,
+        bio: body.bio,
+        credential_type: body.credential_type,
+        firm_name: body.firm_name,
+        public_email: body.public_email,
+        phone: body.phone,
+        website_url: body.website_url,
+        linkedin_url: body.linkedin_url,
+        accepting_work: body.accepting_work,
+        visibility_state: 'pending',
         is_listed: false,
-        slug
-      }])
-      .select('id')
+        slug: `${body.first_name.toLowerCase()}-${body.last_name.toLowerCase()}-${Date.now()}`
+      })
+      .select()
       .single();
 
     if (profileError) {
       console.error('Profile creation error:', profileError);
-      throw new Error(`Profile creation error: ${profileError.message}`);
+      return NextResponse.json({ error: 'Failed to create profile' }, { status: 500 });
     }
 
     // Create profile specializations
-    if (specializations && specializations.length > 0) {
-      const specializationRecords = specializations.map((specSlug: string) => ({
+    if (body.specializations.length > 0) {
+      const specializationData = body.specializations.map((specSlug: string) => ({
         profile_id: profile.id,
         specialization_id: specSlug
       }));
 
       const { error: specError } = await supabase
         .from('profile_specializations')
-        .insert(specializationRecords);
+        .insert(specializationData);
 
       if (specError) {
         console.error('Specialization creation error:', specError);
-        // Don't fail the whole request for this
+        // Continue anyway, don't fail the whole request
       }
     }
 
     // Create profile locations
-    if (states && states.length > 0) {
-      const locationRecords = states.map((state: string) => ({
+    if (body.states.length > 0) {
+      const locationData = body.states.map((state: string) => ({
         profile_id: profile.id,
         location_id: state
       }));
 
-      const { error: locationError } = await supabase
+      const { error: locError } = await supabase
         .from('profile_locations')
-        .insert(locationRecords);
+        .insert(locationData);
 
-      if (locationError) {
-        console.error('Location creation error:', locationError);
-        // Don't fail the whole request for this
+      if (locError) {
+        console.error('Location creation error:', locError);
+        // Continue anyway, don't fail the whole request
       }
     }
 
     // Create verification request
     const { error: verificationError } = await supabase
       .from('verification_requests')
-      .insert([{
+      .insert({
         profile_id: profile.id,
         status: 'pending',
         notes: 'Profile created, awaiting credential verification'
-      }]);
+      });
 
     if (verificationError) {
       console.error('Verification request creation error:', verificationError);
-      // Don't fail the whole request for this
+      // Continue anyway, don't fail the whole request
     }
 
-    return NextResponse.json({
-      success: true,
+    return NextResponse.json({ 
+      success: true, 
       profile_id: profile.id,
-      slug,
-      message: 'Profile created successfully'
+      message: 'Profile created successfully' 
     });
 
   } catch (error) {
     console.error('Profile creation error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create profile' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
@@ -181,19 +123,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.email || !(session.user as any).id) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    // Get user ID from session (added by NextAuth callback)
-    const userId = (session.user as any).id;
-
-    // Get user's profile using user_id
+    const supabase = supabaseService();
+    
     const { data: profile, error } = await supabase
       .from('profiles')
       .select(`
@@ -206,9 +142,9 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ profile: null });
+        return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
       }
-      throw new Error(`Profile fetch error: ${error.message}`);
+      throw error;
     }
 
     return NextResponse.json({ profile });
@@ -216,7 +152,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Profile fetch error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to fetch profile' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

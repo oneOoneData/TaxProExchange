@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -53,7 +53,7 @@ const states = [
 ];
 
 export default function JoinPage() {
-  const { data: session, status } = useSession();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
   const [step, setStep] = useState<'auth' | 'profile' | 'credentials' | 'complete'>('auth');
   const [loading, setLoading] = useState(false);
@@ -74,31 +74,17 @@ export default function JoinPage() {
   });
 
   useEffect(() => {
-    if (session?.user) {
+    if (user && isLoaded) {
       setStep('profile');
-      // Pre-fill form with session data
-      if (session?.user?.name) {
-        const [first, ...lastParts] = session.user.name.split(' ');
-        setProfileForm(prev => ({
-          ...prev,
-          first_name: first ?? '',
-          last_name: lastParts.join(' ') ?? '',
-          public_email: session?.user?.email ?? ''
-        }));
-      }
+      // Pre-fill form with Clerk user data
+      setProfileForm(prev => ({
+        ...prev,
+        first_name: user.firstName ?? '',
+        last_name: user.lastName ?? '',
+        public_email: user.emailAddresses[0]?.emailAddress ?? ''
+      }));
     }
-  }, [session]);
-
-  const handleSignIn = async (provider: 'google') => {
-    setLoading(true);
-    try {
-      await signIn(provider, { callbackUrl: '/join' });
-    } catch (error) {
-      console.error('Sign in error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, isLoaded]);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +96,7 @@ export default function JoinPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Include session cookies
+        credentials: 'include',
         body: JSON.stringify(profileForm),
       });
 
@@ -156,7 +142,7 @@ export default function JoinPage() {
     }));
   };
 
-  if (status === 'loading') {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
@@ -176,15 +162,10 @@ export default function JoinPage() {
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
             <span className="font-semibold text-slate-900">TaxProExchange</span>
           </Link>
-          {session && (
+          {user && (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-600">Welcome, {session.user?.name || 'User'}</span>
-              <button
-                onClick={() => signOut()}
-                className="text-sm text-slate-500 hover:text-slate-700"
-              >
-                Sign out
-              </button>
+              <span className="text-sm text-slate-600">Welcome, {user.firstName || 'User'}</span>
+              <UserButton afterSignOutUrl="/" />
             </div>
           )}
         </div>
@@ -234,19 +215,17 @@ export default function JoinPage() {
             </p>
             
             <div className="space-y-4">
-              <button
-                onClick={() => handleSignIn('google')}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 px-6 py-3 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continue with Google
-              </button>
+              <SignInButton mode="modal" fallbackRedirectUrl="/join">
+                <button className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 px-6 py-3 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+              </SignInButton>
             </div>
             
             <p className="mt-6 text-xs text-slate-500">
@@ -290,30 +269,33 @@ export default function JoinPage() {
                 </div>
               </div>
 
+              {/* Headline */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Professional Headline *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g., CPA • S-Corp & Multi-State"
                   value={profileForm.headline}
                   onChange={(e) => updateForm('headline', e.target.value)}
+                  placeholder="e.g., Senior Tax Consultant, S-Corp Specialist"
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 />
               </div>
 
+              {/* Bio */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Bio *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Professional Bio *</label>
                 <textarea
                   required
-                  rows={4}
-                  placeholder="Tell us about your experience and what you specialize in..."
                   value={profileForm.bio}
                   onChange={(e) => updateForm('bio', e.target.value)}
+                  placeholder="Tell us about your experience, expertise, and what you're looking for..."
+                  rows={4}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
                 />
               </div>
 
+              {/* Credential Type */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type *</label>
                 <select
@@ -323,110 +305,127 @@ export default function JoinPage() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 >
                   <option value="">Select your credential</option>
-                  {credentialTypes.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
+                  {credentialTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
+              {/* Firm Name */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Firm Name</label>
                 <input
                   type="text"
-                  placeholder="Your firm or company name"
                   value={profileForm.firm_name}
                   onChange={(e) => updateForm('firm_name', e.target.value)}
+                  placeholder="Your firm or company name"
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Public Email *</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="Email for professional inquiries"
-                  value={profileForm.public_email}
-                  onChange={(e) => updateForm('public_email', e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
-                <input
-                  type="tel"
-                  placeholder="(555) 123-4567"
-                  value={profileForm.phone}
-                  onChange={(e) => updateForm('phone', e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Website</label>
-                <input
-                  type="url"
-                  placeholder="https://yourwebsite.com"
-                  value={profileForm.website_url}
-                  onChange={(e) => updateForm('website_url', e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">LinkedIn</label>
-                <input
-                  type="url"
-                  placeholder="https://linkedin.com/in/yourprofile"
-                  value={profileForm.linkedin_url}
-                  onChange={(e) => updateForm('linkedin_url', e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2">
+              {/* Contact Info */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Public Email *</label>
                   <input
-                    type="checkbox"
-                    checked={profileForm.accepting_work}
-                    onChange={(e) => updateForm('accepting_work', e.target.checked)}
-                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                    type="email"
+                    required
+                    value={profileForm.public_email}
+                    onChange={(e) => updateForm('public_email', e.target.value)}
+                    placeholder="Email for professional inquiries"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                   />
-                  <span className="text-sm font-medium text-slate-700">I am currently accepting new work</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    value={profileForm.phone}
+                    onChange={(e) => updateForm('phone', e.target.value)}
+                    placeholder="Professional phone number"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+              </div>
+
+              {/* Website & LinkedIn */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Website</label>
+                  <input
+                    type="url"
+                    value={profileForm.website_url}
+                    onChange={(e) => updateForm('website_url', e.target.value)}
+                    placeholder="https://yourwebsite.com"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">LinkedIn</label>
+                  <input
+                    type="url"
+                    value={profileForm.linkedin_url}
+                    onChange={(e) => updateForm('linkedin_url', e.target.value)}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+              </div>
+
+              {/* Accepting Work */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="accepting_work"
+                  checked={profileForm.accepting_work}
+                  onChange={(e) => updateForm('accepting_work', e.target.checked)}
+                  className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                />
+                <label htmlFor="accepting_work" className="text-sm font-medium text-slate-700">
+                  I am currently accepting new work and collaborations
                 </label>
               </div>
 
+              {/* Specializations */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">Specializations *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-3">Specializations</label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {specializations.map(spec => (
-                    <label key={spec.slug} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={profileForm.specializations.includes(spec.slug)}
-                        onChange={() => toggleSpecialization(spec.slug)}
-                        className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
-                      />
-                      <span className="text-sm text-slate-700">{spec.label}</span>
-                    </label>
+                  {specializations.map((spec) => (
+                    <button
+                      key={spec.slug}
+                      type="button"
+                      onClick={() => toggleSpecialization(spec.slug)}
+                      className={`p-2 rounded-lg text-sm border transition-colors ${
+                        profileForm.specializations.includes(spec.slug)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {spec.label}
+                    </button>
                   ))}
                 </div>
               </div>
 
+              {/* States */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">States You Work In *</label>
-                <div className="grid grid-cols-4 md:grid-cols-6 gap-2 max-h-40 overflow-y-auto">
-                  {states.map(state => (
-                    <label key={state} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={profileForm.states.includes(state)}
-                        onChange={() => toggleState(state)}
-                        className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
-                      />
-                      <span className="text-sm text-slate-700">{state}</span>
-                    </label>
+                <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
+                <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
+                  {states.map((state) => (
+                    <button
+                      key={state}
+                      type="button"
+                      onClick={() => toggleState(state)}
+                      className={`p-2 rounded text-xs border transition-colors ${
+                        profileForm.states.includes(state)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {state}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -436,7 +435,7 @@ export default function JoinPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-xl bg-slate-900 text-white px-8 py-3 text-sm font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Creating Profile...' : 'Continue to Credentials'}
               </button>
@@ -451,28 +450,48 @@ export default function JoinPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl border border-slate-200 p-8"
           >
-            <h2 className="text-2xl font-semibold text-slate-900 mb-6">Submit Credentials</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 mb-6">Submit Credentials for Verification</h2>
             <p className="text-slate-600 mb-6">
-              To verify your professional status, please provide your license or credential information.
-              This will be reviewed by our team before your profile goes live.
+              To ensure trust and quality, we manually verify all professional credentials before profiles go live.
             </p>
             
-            <div className="bg-slate-50 rounded-2xl p-6 mb-6">
-              <h3 className="font-medium text-slate-900 mb-3">What happens next?</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li>• We'll review your credentials within 2-3 business days</li>
-                <li>• You'll receive an email when verification is complete</li>
-                <li>• Once verified, your profile will be visible in search results</li>
-                <li>• You can start connecting with other tax professionals</li>
-              </ul>
-            </div>
-
-            <button
-              onClick={handleCredentialSubmit}
-              className="w-full rounded-xl bg-slate-900 text-white px-8 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
-            >
-              Submit for Verification
-            </button>
+            <form onSubmit={handleCredentialSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">License/Credential Number</label>
+                <input
+                  type="text"
+                  placeholder="Enter your professional license or credential number"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Issuing Authority</label>
+                <input
+                  type="text"
+                  placeholder="e.g., California Board of Accountancy, IRS, CTEC"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Additional Notes</label>
+                <textarea
+                  placeholder="Any additional information that would help with verification..."
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
+                />
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 transition-colors"
+                >
+                  Submit for Review
+                </button>
+              </div>
+            </form>
           </motion.div>
         )}
 
@@ -483,28 +502,28 @@ export default function JoinPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl border border-slate-200 p-8 text-center"
           >
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             
-            <h2 className="text-2xl font-semibold text-slate-900 mb-4">Profile Submitted!</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 mb-4">Profile Submitted Successfully!</h2>
             <p className="text-slate-600 mb-6">
-              Thank you for joining TaxProExchange. Your profile has been submitted for verification.
-              We'll review your credentials and notify you via email within 2-3 business days.
+              Thank you for joining TaxProExchange! We'll review your credentials and get back to you within 2-3 business days.
             </p>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Link
                 href="/search"
-                className="inline-block w-full rounded-xl bg-slate-900 text-white px-8 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
+                className="inline-block rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 transition-colors"
               >
                 Browse Other Professionals
               </Link>
+              <br />
               <Link
                 href="/"
-                className="inline-block w-full rounded-xl border border-slate-300 text-slate-700 px-8 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="inline-block rounded-xl bg-white text-slate-900 border border-slate-300 px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
               >
                 Return to Home
               </Link>
