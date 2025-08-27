@@ -33,8 +33,12 @@ export async function POST(request: NextRequest) {
 
     // if (error) throw error;
 
-    // Redirect to confirmation page with query parameters
-    const redirectUrl = new URL('/waitlist/confirmation', request.url);
+    // Get the host from the request headers
+    const host = request.headers.get('host') || 'taxproexchange.com';
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    
+    // Construct the redirect URL properly
+    const redirectUrl = new URL('/waitlist/confirmation', `${protocol}://${host}`);
     redirectUrl.searchParams.set('email', email);
     if (roleInterest) redirectUrl.searchParams.set('role', roleInterest);
 
@@ -43,8 +47,12 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Waitlist submission error:', error);
     
+    // Get the host from the request headers
+    const host = request.headers.get('host') || 'taxproexchange.com';
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    
     // Redirect to confirmation page with error parameter
-    const redirectUrl = new URL('/waitlist/confirmation', request.url);
+    const redirectUrl = new URL('/waitlist/confirmation', `${protocol}://${host}`);
     redirectUrl.searchParams.set('error', 'true');
     
     return NextResponse.redirect(redirectUrl);
