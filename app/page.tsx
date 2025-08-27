@@ -9,29 +9,38 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    console.log('Form submission prevented, handling with JavaScript');
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
       formData.append('email', email);
 
+      console.log('Submitting form with email:', email);
+
       const response = await fetch('/api/waitlist', {
         method: 'POST',
         body: formData,
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      if (data.success) {
-        // Redirect to confirmation page
+      const data = await response.json();
+      console.log('API response:', data);
+
+      if (data.success && data.redirectUrl) {
+        console.log('Redirecting to:', data.redirectUrl);
+        // Use router.push for better navigation, or fallback to window.location
         window.location.href = data.redirectUrl;
       } else {
-        // Handle error
-        alert('Failed to join waitlist. Please try again.');
+        throw new Error(data.error || 'Unknown error occurred');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Failed to join waitlist. Please try again.');
+      alert(`Failed to join waitlist: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -188,6 +197,7 @@ export default function Page() {
               <form
                 onSubmit={handleSubmit}
                 className="mt-5 flex gap-3"
+                noValidate
               >
                 <input
                   type="email"
