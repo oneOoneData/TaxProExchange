@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+
 import { motion } from 'framer-motion';
 
 export default function Page() {
-  const [email, setEmail] = useState('');
 
   const features = [
     {
@@ -155,15 +154,15 @@ export default function Page() {
               <h3 className="text-xl font-semibold text-slate-900">Get early access</h3>
               <p className="mt-2 text-slate-600">We'll invite the first cohort of CPAs, EAs, and CTEC preparers soon. Add your email to join the beta.</p>
               <form
+                action="/api/waitlist"
+                method="POST"
                 className="mt-5 flex gap-3"
-                onSubmit={(e) => { e.preventDefault(); const u = 'https://tally.so/r/REPLACE_WITH_TALLY_URL'; window.open(u, '_blank'); }}
               >
                 <input
                   type="email"
+                  name="email"
                   required
                   placeholder="you@firm.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 />
                 <button type="submit" className="rounded-xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">Join</button>
@@ -171,14 +170,26 @@ export default function Page() {
               <p className="mt-3 text-xs text-slate-500">We'll never spam. You can unsubscribe anytime.</p>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white overflow-hidden">
-              {/* Embedded external form (Tally/Typeform/Google Forms). Replace src below. */}
-              <iframe
-                title="Waitlist Form"
-                src="https://tally.so/r/REPLACE_WITH_TALLY_URL"
-                className="w-full h-[520px]"
-                frameBorder="0"
-              />
+            <div className="rounded-3xl border border-slate-200 bg-white p-8">
+              <h3 className="text-xl font-semibold text-slate-900">Why join the waitlist?</h3>
+              <div className="mt-4 space-y-4 text-sm text-slate-600">
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                  <span>Early access to create your professional profile</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                  <span>Priority support during onboarding and verification</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                  <span>Shape the platform with early feedback</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-2 h-2 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                  <span>First to know when we launch</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
