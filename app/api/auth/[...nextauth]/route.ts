@@ -14,10 +14,10 @@ const handler = NextAuth({
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET!,
     }),
   ],
-  adapter: SupabaseAdapter({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  }),
+  // adapter: SupabaseAdapter({
+  //   url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  //   secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  // }),
   callbacks: {
     async session({ session, user }) {
       // Add user ID to session for profile management
@@ -27,13 +27,19 @@ const handler = NextAuth({
       return session;
     },
     async signIn({ user, account, profile }) {
+      console.log('SignIn callback:', { user, account, profile });
       // Ensure user has required fields
       if (!user.email) {
+        console.log('No email provided');
         return false;
       }
       return true;
     },
   },
+  session: {
+    strategy: 'jwt',
+  },
+  debug: process.env.NODE_ENV === 'development',
 
 
 });
