@@ -75,6 +75,7 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (user && isLoaded) {
+      // Skip directly to profile creation since user is already authenticated
       setStep('profile');
       // Pre-fill form with Clerk user data
       setProfileForm(prev => ({

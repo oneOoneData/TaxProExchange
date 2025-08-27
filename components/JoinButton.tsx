@@ -5,7 +5,7 @@ export function JoinButton() {
   return (
     <>
       <SignedOut>
-        <SignInButton mode="modal">
+        <SignInButton mode="modal" fallbackRedirectUrl="/join">
           <button className="rounded-2xl bg-slate-900 text-white text-sm px-4 py-2 shadow hover:shadow-md">
             Join Now
           </button>
