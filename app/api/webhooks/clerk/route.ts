@@ -38,19 +38,44 @@ export async function POST(req: Request) {
       const supabase = supabaseService();
       
       // Extract email from the correct path in the data structure
-      const email = u.primary_email_address_id ? 
-        u.email_addresses?.find((e: any) => e.id === u.primary_email_address_id)?.email_address : 
-        u.email_addresses?.[0]?.email_address ?? null;
+      let email = null;
+      
+      // Try multiple ways to get the email
+      if (u.primary_email_address_id && u.email_addresses) {
+        const primaryEmail = u.email_addresses.find((e: any) => e.id === u.primary_email_address_id);
+        email = primaryEmail?.email_address;
+      }
+      
+      if (!email && u.email_addresses && u.email_addresses.length > 0) {
+        email = u.email_addresses[0].email_address;
+      }
+      
+      // Fallback: try to get from user object directly
+      if (!email && u.email_addresses) {
+        email = u.email_addresses[0]?.email_address;
+      }
 
       console.log('Processing user:', u.id, 'Email:', email);
+      console.log('User data structure:', JSON.stringify(u, null, 2));
 
       const { error } = await supabase
         .from("profiles")
         .upsert({
           clerk_id: u.id,
           email,
-          first_name: u.first_name ?? null,
-          last_name: u.last_name ?? null,
+          first_name: u.first_name ?? 'New User',
+          last_name: u.last_name ?? '',
+          headline: `${u.first_name || 'New'} ${u.last_name || 'User'}`,
+          credential_type: 'Other', // Set default value
+          firm_name: null,
+          public_email: email,
+          phone: null,
+          website_url: null,
+          linkedin_url: null,
+          accepting_work: false,
+          visibility_state: 'pending',
+          is_listed: false,
+          slug: `${u.id}-${Date.now()}`,
           image_url: u.image_url ?? null,
         }, { onConflict: "clerk_id" });
         
