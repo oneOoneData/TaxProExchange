@@ -91,7 +91,7 @@ export async function POST(req: Request) {
           website_url: null,
           linkedin_url: null,
           accepting_work: false,
-          visibility_state: 'hidden',
+          // visibility_state will use database default ('hidden')
           is_listed: false,
           slug: `${u.id}-${Date.now()}`,
           image_url: u.image_url ?? null,
