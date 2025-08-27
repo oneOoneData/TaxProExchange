@@ -12,10 +12,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     // Get profile by slug
     const { data: profile, error: profileError } = await supabase
@@ -100,7 +100,7 @@ export async function GET(
   } catch (error) {
     console.error('Profile fetch error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }
