@@ -62,43 +62,40 @@ export async function POST(request: NextRequest) {
     // Generate slug from name
     const slug = `${first_name.toLowerCase()}-${last_name.toLowerCase()}-${credential_type.toLowerCase()}`.replace(/[^a-z0-9-]/g, '');
 
-    // Get or create user record using email from session
-    let { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
+    // Get user ID from auth.users table using email from session
+    let { data: authUser, error: authUserError } = await supabase.auth.admin.getUserByEmail(session.user.email);
 
-    if (userError && userError.code !== 'PGRST116') {
-      console.error('User lookup error:', userError);
-      throw new Error(`User lookup error: ${userError.message}`);
+    if (authUserError || !authUser.user) {
+      console.error('Auth user lookup error:', authUserError);
+      throw new Error(`Auth user lookup error: ${authUserError?.message || 'User not found'}`);
     }
 
-    if (!user) {
-      // Create new user
-      const { data: newUser, error: createUserError } = await supabase
-        .from('users')
-        .insert([{
-          email: session.user.email,
-          auth_provider: 'google', // Default, could be enhanced
-          role: 'member'
-        }])
-        .select('id')
-        .single();
+    const userId = authUser.user.id;
 
-      if (createUserError) {
-        console.error('User creation error:', createUserError);
-        throw new Error(`User creation error: ${createUserError.message}`);
-      }
+    // Check if profile already exists
+    const { data: existingProfile, error: profileCheckError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
 
-      user = newUser;
+    if (profileCheckError && profileCheckError.code !== 'PGRST116') {
+      console.error('Profile check error:', profileCheckError);
+      throw new Error(`Profile check error: ${profileCheckError.message}`);
+    }
+
+    if (existingProfile) {
+      return NextResponse.json(
+        { error: 'Profile already exists for this user' },
+        { status: 400 }
+      );
     }
 
     // Create profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .insert([{
-        user_id: user.id,
+        user_id: userId,
         first_name,
         last_name,
         headline,
@@ -197,16 +194,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user's profile using email from session
+    // Get user ID from auth.users table
+    const { data: authUser, error: authUserError } = await supabase.auth.admin.getUserByEmail(session.user.email);
+
+    if (authUserError || !authUser.user) {
+      console.error('Auth user lookup error:', authUserError);
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    const userId = authUser.user.id;
+
+    // Get user's profile using user_id
     const { data: profile, error } = await supabase
       .from('profiles')
       .select(`
         *,
-        profile_specializations!inner(specialization_id),
-        profile_locations!inner(location_id),
-        locations!profile_locations(country, state, city)
+        profile_specializations(specialization_id),
+        profile_locations(location_id)
       `)
-      .eq('users.email', session.user.email)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
