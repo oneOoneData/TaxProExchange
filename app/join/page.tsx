@@ -110,13 +110,15 @@ export default function JoinPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include session cookies
         body: JSON.stringify(profileForm),
       });
 
       if (response.ok) {
         setStep('credentials');
       } else {
-        throw new Error('Failed to create profile');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create profile');
       }
     } catch (error) {
       console.error('Profile creation error:', error);
