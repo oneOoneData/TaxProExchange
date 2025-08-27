@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     // Get session to verify user is authenticated
     const session = await getServerSession();
     
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !(session.user as any).id) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -62,19 +62,8 @@ export async function POST(request: NextRequest) {
     // Generate slug from name
     const slug = `${first_name.toLowerCase()}-${last_name.toLowerCase()}-${credential_type.toLowerCase()}`.replace(/[^a-z0-9-]/g, '');
 
-    // Get user ID from auth.users table using email from session
-    let { data: authUser, error: authUserError } = await supabase
-      .from('auth.users')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
-
-    if (authUserError || !authUser) {
-      console.error('Auth user lookup error:', authUserError);
-      throw new Error(`Auth user lookup error: ${authUserError?.message || 'User not found'}`);
-    }
-
-    const userId = authUser.id;
+    // Get user ID from session (added by NextAuth callback)
+    const userId = (session.user as any).id;
 
     // Check if profile already exists
     const { data: existingProfile, error: profileCheckError } = await supabase
@@ -191,29 +180,15 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
     
-    if (!session?.user?.email) {
+    if (!session?.user?.email || !(session.user as any).id) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    // Get user ID from auth.users table
-    const { data: authUser, error: authUserError } = await supabase
-      .from('auth.users')
-      .select('id')
-      .eq('email', session.user.email)
-      .single();
-
-    if (authUserError || !authUser) {
-      console.error('Auth user lookup error:', authUserError);
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    const userId = authUser.id;
+    // Get user ID from session (added by NextAuth callback)
+    const userId = (session.user as any).id;
 
     // Get user's profile using user_id
     const { data: profile, error } = await supabase
