@@ -35,6 +35,20 @@ export async function POST(request: NextRequest) {
       accepting_work,
       specializations,
       states
+    }: {
+      first_name: string;
+      last_name: string;
+      headline: string;
+      bio: string;
+      credential_type: string;
+      firm_name: string;
+      public_email: string;
+      phone: string;
+      website_url: string;
+      linkedin_url: string;
+      accepting_work: boolean;
+      specializations: string[];
+      states: string[];
     } = body;
 
     // Validate required fields
@@ -110,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     // Create profile specializations
     if (specializations && specializations.length > 0) {
-      const specializationRecords = specializations.map(specSlug => ({
+      const specializationRecords = specializations.map((specSlug: string) => ({
         profile_id: profile.id,
         specialization_id: specSlug
       }));
@@ -127,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     // Create profile locations
     if (states && states.length > 0) {
-      const locationRecords = states.map(state => ({
+      const locationRecords = states.map((state: string) => ({
         profile_id: profile.id,
         location_id: state
       }));
