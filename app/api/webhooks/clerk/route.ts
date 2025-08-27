@@ -17,13 +17,14 @@ export async function POST(req: Request) {
     }
 
     const wh = new Webhook(secret);
+    const headersList = await headers();
 
     let evt: any;
     try {
       evt = wh.verify(payload, {
-        "svix-id": headers().get("svix-id")!,
-        "svix-timestamp": headers().get("svix-timestamp")!,
-        "svix-signature": headers().get("svix-signature")!,
+        "svix-id": headersList.get("svix-id")!,
+        "svix-timestamp": headersList.get("svix-timestamp")!,
+        "svix-signature": headersList.get("svix-signature")!,
       } as WebhookRequiredHeaders);
     } catch (error) {
       console.error('Webhook signature verification failed:', error);
