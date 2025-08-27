@@ -1,21 +1,21 @@
-import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
-import { SupabaseAdapter } from '@auth/supabase-adapter';
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+import { SupabaseAdapter } from "@auth/supabase-adapter";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";        // avoid edge
+export const dynamic = "force-dynamic"; // don't prerender this route
 
 const handler = NextAuth({
+  adapter: SupabaseAdapter({
+    url: process.env.SUPABASE_URL!,
+    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!, // server-only
+  }),
   providers: [
-    GoogleProvider({
+    Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  adapter: SupabaseAdapter({
-    url: process.env.SUPABASE_URL!,
-    secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  }),
   callbacks: {
     async session({ session, user }) {
       // Add user ID to session for profile management
