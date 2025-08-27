@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
         profile_specializations(specialization_id),
         profile_locations(location_id)
       `)
-      .eq('user_id', userId)
+      .eq('clerk_id', userId)
       .single();
 
     if (error) {
@@ -147,10 +147,55 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json({ profile });
+    return NextResponse.json(profile);
 
   } catch (error) {
     console.error('Profile fetch error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const supabase = supabaseService();
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: body.first_name,
+        last_name: body.last_name,
+        headline: body.headline,
+        bio: body.bio,
+        credential_type: body.credential_type,
+        firm_name: body.firm_name,
+        public_email: body.public_email,
+        phone: body.phone,
+        website_url: body.website_url,
+        linkedin_url: body.linkedin_url,
+        accepting_work: body.accepting_work,
+        updated_at: new Date().toISOString()
+      })
+      .eq('clerk_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Profile update error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(profile);
+  } catch (error) {
+    console.error('Profile update error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

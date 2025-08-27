@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useUser, SignInButton, UserButton } from '@clerk/nextjs';
+import { useUser, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -75,9 +75,27 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (user && isLoaded) {
-      // Skip directly to profile creation since user is already authenticated
+      // Check if user already has a profile
+      checkExistingProfile();
+    }
+  }, [user, isLoaded]);
+
+  const checkExistingProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch('/api/profile', {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        // User already has a profile, redirect to home
+        router.push('/');
+        return;
+      }
+      
+      // No profile exists, show profile creation form
       setStep('profile');
-      // Pre-fill form with Clerk user data
       setProfileForm(prev => ({
         ...prev,
         first_name: user.firstName ?? '',
@@ -85,16 +103,18 @@ export default function JoinPage() {
         public_email: user.emailAddresses[0]?.emailAddress ?? ''
       }));
       
-      // Log user info to debug
-      console.log('User authenticated:', {
+      console.log('New user, creating profile:', {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: user.emailAddresses[0]?.emailAddress,
-        emailAddresses: user.emailAddresses
+        email: user.emailAddresses[0]?.emailAddress
       });
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      // On error, assume new user and show profile creation
+      setStep('profile');
     }
-  }, [user, isLoaded]);
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,7 +245,7 @@ export default function JoinPage() {
             </p>
             
             <div className="space-y-4">
-                             <SignInButton mode="modal" fallbackRedirectUrl="/join">
+                             <SignUpButton mode="modal" fallbackRedirectUrl="/join">
                  <button className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 px-6 py-3 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                    <svg className="w-5 h-5" viewBox="0 0 24 24">
                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -235,7 +255,7 @@ export default function JoinPage() {
                    </svg>
                    Continue with Google
                  </button>
-               </SignInButton>
+                                </SignUpButton>
             </div>
             
             <p className="mt-6 text-xs text-slate-500">
