@@ -1,444 +1,237 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
-  const [email, setEmail] = useState('');
-  const [roleInterest, setRoleInterest] = useState('');
-  const [notes, setNotes] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const features = [
+    {
+      title: 'Verified Professionals',
+      desc: 'CPA, EA, and CTEC IDs checked before profiles go live. Trust is the default.'
+    },
+    {
+      title: 'Smart Discovery',
+      desc: 'Find pros by credential, state, specialization, and availability.'
+    },
+    {
+      title: 'Handoff-Ready',
+      desc: 'Connect for overflow work, review & sign-off, or IRS representation — payments handled offline.'
+    },
+  ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!email.trim()) return;
-    
-    setLoading(true);
-    
-    try {
-      const response = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          roleInterest,
-          notes,
-          source: 'landing_page'
-        }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSubmitted(true);
-        // Redirect to confirmation page
-        window.location.href = data.redirectUrl;
-      } else {
-        console.error('Failed to join waitlist:', response.status);
-        alert('Failed to join waitlist. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Error submitting form. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Redirecting to confirmation...</p>
-        </div>
-      </div>
-    );
-  }
+  const steps = [
+    { n: '1', title: 'Join & Sign In', desc: 'Sign in with Google or LinkedIn to get started.'},
+    { n: '2', title: 'Create Profile', desc: 'Set up your professional profile with credentials and specializations.'},
+    { n: '3', title: 'Connect & Collaborate', desc: 'Search, filter, and message other professionals. Handle scope and payment off-platform.'},
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">TX</span>
-                </div>
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {/* Nav */}
+      <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
+        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
+            <span className="font-semibold text-slate-900">TaxProExchange</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
+            <a href="#features" className="hover:text-slate-900">Features</a>
+            <a href="#how" className="hover:text-slate-900">How it works</a>
+            <a href="#faq" className="hover:text-slate-900">FAQ</a>
+            <a href="/search" className="hover:text-slate-900">Search</a>
+            <a href="/join" className="hover:text-slate-900">Join</a>
+          </nav>
+          <a href="/join" className="rounded-2xl bg-slate-900 text-white text-sm px-4 py-2 shadow hover:shadow-md">Join Now</a>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="mx-auto max-w-6xl px-4 pt-16 pb-10 md:pt-24 md:pb-16">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900">
+                Where Tax Professionals
+                <span className="block">Connect and Collaborate</span>
+              </h1>
+              <p className="mt-4 text-slate-600 text-lg">
+                A trusted directory for CPAs, EAs, and CTEC preparers to find each other for
+                handoffs, overflow work, and representation. No payments or file exchange — just
+                verified connections.
+              </p>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <a href="/join" className="rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">
+                  Join Now
+                </a>
+                <a href="#features" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-5 py-3 text-sm font-medium hover:bg-slate-50">
+                  See how it works
+                </a>
               </div>
-              <div className="ml-3">
-                <span className="text-xl font-semibold text-slate-900">TaxProExchange</span>
+              <div className="mt-6 flex items-center gap-3 text-sm text-slate-500">
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Manual credential checks</span>
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Free to list during beta</span>
               </div>
-            </div>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <a href="#features" className="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">Features</a>
-                <a href="#how-it-works" className="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">How It Works</a>
-                <a href="#about" className="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-medium">About</a>
-                <a href="/join" className="hover:text-slate-900">Join</a>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
+              <div className="relative rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="text-xs uppercase tracking-wider text-slate-500 mb-2">Example search</div>
+                <div className="rounded-xl border bg-slate-50 p-3 text-sm">CPA • California • S-Corp Reviews • Accepting work</div>
+                <ul className="mt-4 space-y-3">
+                  {[
+                    { name: 'Jordan C., CPA', tag: 'S-Corp / Multi-State', state: 'CA', verified: true },
+                    { name: 'Maya R., EA', tag: 'IRS Representation', state: 'TX', verified: true },
+                    { name: 'Leo P., CTEC', tag: '1040 + Sched C', state: 'CA', verified: true },
+                  ].map((p, i) => (
+                    <li key={i} className="flex items-center justify-between rounded-xl border p-3">
+                      <div>
+                        <div className="font-medium text-slate-900 flex items-center gap-2">
+                          {p.name}
+                          {p.verified && <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Verified</span>}
+                        </div>
+                        <div className="text-sm text-slate-500">{p.tag} • {p.state}</div>
+                      </div>
+                      <button className="text-sm rounded-xl border px-3 py-2 hover:bg-slate-50">Connect</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4 text-xs text-slate-500">*Profiles shown are illustrative.</div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </nav>
+      </section>
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative z-10 pb-8 bg-gradient-to-br from-slate-50 to-slate-100 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-            <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-              <div className="sm:text-center lg:text-left">
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="text-4xl tracking-tight font-extrabold text-slate-900 sm:text-5xl md:text-6xl"
-                >
-                  <span className="block">Find the Perfect</span>
-                  <span className="block text-blue-600">Tax Professional</span>
-                </motion.h1>
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0"
-                >
-                  Connect with verified tax professionals, CPAs, and enrolled agents. 
-                  Get expert help for your tax needs, business accounting, and financial planning.
-                </motion.p>
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                  className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start"
-                >
-                  <div className="rounded-md shadow">
-                    <a
-                      href="#join-form"
-                      className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
-                    >
-                      Join now to get on the waitlist
-                    </a>
-                  </div>
-                  <div className="mt-3 sm:mt-0 sm:ml-3">
-                    <a
-                      href="#how-it-works"
-                      className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10"
-                    >
-                      Learn More
-                    </a>
-                  </div>
-                </motion.div>
-              </div>
-            </main>
+      {/* Logos / social proof (optional placeholders) */}
+      <section className="py-6">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-500">
+            Built by tax pros, for tax pros. Join now to create your professional profile.
           </div>
         </div>
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-          <div className="h-56 w-full bg-gradient-to-br from-blue-400 to-blue-600 sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center">
-            <div className="text-center text-white">
-              <div className="text-6xl font-bold mb-4">📊</div>
-              <p className="text-xl font-semibold">Professional Network</p>
-              <p className="text-blue-100">Trusted by thousands</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
 
-      {/* Join Form Section */}
-      <div id="join-form" className="py-16 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-3xl font-extrabold text-slate-900 sm:text-4xl"
-            >
-              Join the Waitlist
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="mt-4 text-lg text-slate-600"
-            >
-              Be among the first to access our professional network when we launch.
-            </motion.p>
-          </div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="bg-slate-50 rounded-lg p-8"
-          >
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="your.email@example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="roleInterest" className="block text-sm font-medium text-slate-700 mb-2">
-                  I'm interested in joining as a:
-                </label>
-                <select
-                  id="roleInterest"
-                  value={roleInterest}
-                  onChange={(e) => setRoleInterest(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select your role</option>
-                  <option value="tax_professional">Tax Professional (CPA, EA, etc.)</option>
-                  <option value="business_owner">Business Owner</option>
-                  <option value="individual">Individual Taxpayer</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-slate-700 mb-2">
-                  Additional Notes (Optional)
-                </label>
-                <textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Tell us more about what you're looking for..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || !email.trim()}
-                className="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Joining...' : 'Join Waitlist'}
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div id="features" className="py-16 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-3xl font-extrabold text-slate-900 sm:text-4xl"
-            >
-              Why Choose TaxProExchange?
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: "🔍",
-                title: "Verified Professionals",
-                description: "All professionals are verified and licensed. No more guessing about credentials."
-              },
-              {
-                icon: "📍",
-                title: "Local & Remote Options",
-                description: "Find professionals in your area or work remotely with experts nationwide."
-              },
-              {
-                icon: "💼",
-                title: "Specialized Expertise",
-                description: "Match with professionals who specialize in your specific tax situation."
-              },
-              {
-                icon: "⭐",
-                title: "Transparent Reviews",
-                description: "See real feedback from other clients to make informed decisions."
-              },
-              {
-                icon: "🔒",
-                title: "Secure Communication",
-                description: "Built-in messaging and file sharing with enterprise-grade security."
-              },
-              {
-                icon: "📱",
-                title: "Easy to Use",
-                description: "Simple interface to find, connect, and work with tax professionals."
-              }
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                <p className="text-slate-600">{feature.description}</p>
+      {/* Features */}
+      <section id="features" className="py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid md:grid-cols-3 gap-6">
+            {features.map((f, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-slate-900">{f.title}</h3>
+                <p className="mt-2 text-slate-600">{f.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* How It Works Section */}
-      <div id="how-it-works" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-3xl font-extrabold text-slate-900 sm:text-4xl"
-            >
-              How It Works
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {[
-              {
-                step: "1",
-                title: "Search & Filter",
-                description: "Use our advanced search to find professionals by location, specialization, and availability."
-              },
-              {
-                step: "2",
-                title: "Review & Connect",
-                description: "Read profiles, reviews, and credentials. Send a message to start the conversation."
-              },
-              {
-                step: "3",
-                title: "Work Together",
-                description: "Collaborate securely through our platform. Share documents and track progress."
-              }
-            ].map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-                  {step.step}
+      {/* How it works */}
+      <section id="how" className="py-8">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-8">
+            <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
+            <div className="mt-6 grid md:grid-cols-3 gap-6">
+              {steps.map((s, i) => (
+                <div key={i} className="rounded-2xl border p-6">
+                  <div className="text-slate-400 text-sm">Step {s.n}</div>
+                  <div className="mt-1 font-semibold text-slate-900">{s.title}</div>
+                  <div className="mt-2 text-slate-600 text-sm">{s.desc}</div>
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">{step.title}</h3>
-                <p className="text-slate-600">{step.description}</p>
-              </motion.div>
-            ))}
+              ))}
+            </div>
+            <div className="mt-6">
+              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">Join Now</a>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* About Section */}
-      <div id="about" className="py-16 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* Join CTA Section */}
+      <section className="py-16 bg-slate-50">
+        <div className="mx-auto max-w-4xl px-4 text-center">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-3xl font-extrabold text-slate-900 sm:text-4xl mb-8"
+            className="text-3xl font-extrabold text-slate-900 sm:text-4xl mb-6"
           >
-            Made for Tax Pros, by Tax Pros
+            Ready to Connect?
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="text-lg text-slate-600 mb-8"
+            className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto"
           >
-            TaxProExchange was built by tax professionals who understand the challenges of finding 
-            the right expertise and building trust with clients. We're creating a platform that 
-            makes it easier for everyone to connect with qualified professionals.
+            Join TaxProExchange today and start building your professional network. 
+            Create your profile, get verified, and connect with other tax professionals.
           </motion.p>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <a
-              href="#join-form"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              href="/join"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all"
             >
-              Join the Waitlist
+              Join Now
+            </a>
+            <a
+              href="#features"
+              className="inline-flex items-center px-8 py-3 border border-slate-300 text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
+            >
+              Learn More
             </a>
           </motion.div>
         </div>
-      </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center mr-3">
-                  <span className="text-slate-900 font-bold text-sm">TX</span>
-                </div>
-                <span className="text-xl font-semibold">TaxProExchange</span>
+      {/* FAQ */}
+      <section id="faq" className="py-8">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-8">
+            <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
+            <div className="mt-6 grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium text-slate-900">Do you process payments or hold funds?</h4>
+                <p className="mt-2 text-sm text-slate-600">No. TaxProExchange is a connection-only platform. Professionals handle contracts and payments off-platform.</p>
               </div>
-              <p className="text-slate-400 mb-4">
-                Connecting tax professionals with clients who need their expertise. 
-                Building trust through transparency and verification.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase mb-4">
-                Platform
-              </h3>
-              <ul className="space-y-2">
-                <li><a href="#features" className="text-slate-400 hover:text-white">Features</a></li>
-                <li><a href="#how-it-works" className="text-slate-400 hover:text-white">How It Works</a></li>
-                <li><a href="#about" className="text-slate-400 hover:text-white">About</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-300 tracking-wider uppercase mb-4">
-                Connect
-              </h3>
-              <ul className="space-y-2">
-                <li><a href="#join-form" className="text-slate-400 hover:text-white">Join Waitlist</a></li>
-                <li><a href="/join" className="text-slate-400 hover:text-white">Professional Signup</a></li>
-              </ul>
+              <div>
+                <h4 className="font-medium text-slate-900">How do you verify credentials?</h4>
+                <p className="mt-2 text-sm text-slate-600">During beta we manually check state CPA boards, IRS EA enrollment, and CTEC registration before profiles are visible.</p>
+              </div>
+              <div>
+                <h4 className="font-medium text-slate-900">Is it free?</h4>
+                <p className="mt-2 text-sm text-slate-600">Yes during beta. Later we may offer featured listings and optional subscriptions.</p>
+              </div>
+              <div>
+                <h4 className="font-medium text-slate-900">Can clients use this?</h4>
+                <p className="mt-2 text-sm text-slate-600">This is built for professionals only: CPAs, EAs, and registered preparers who need collaboration and referrals.</p>
+              </div>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-slate-800 text-center">
-            <p className="text-slate-400">
-              © 2024 TaxProExchange. All rights reserved.
-            </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-10">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
+              <span>© {new Date().getFullYear()} TaxProExchange</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#" className="hover:text-slate-900">Privacy</a>
+              <a href="#" className="hover:text-slate-900">Terms</a>
+              <a href="/join" className="hover:text-slate-900">Join Now</a>
+            </div>
           </div>
         </div>
       </footer>
