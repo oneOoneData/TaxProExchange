@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface VerificationRequest {
   id: string;
   profile_id: string;

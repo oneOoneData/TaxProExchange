@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 interface Profile {
   id: string;
   slug: string;

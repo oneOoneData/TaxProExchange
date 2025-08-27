@@ -6,6 +6,8 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface ProfileForm {
   first_name: string;
   last_name: string;

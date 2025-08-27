@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { SessionProvider } from 'next-auth/react';
+import Providers from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -75,9 +75,9 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
       </head>
       <body className={inter.className}>
-        <SessionProvider>
+        <Providers>
           {children}
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   );

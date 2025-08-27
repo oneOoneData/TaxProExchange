@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface Profile {
   id: string;
   slug: string;
