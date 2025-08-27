@@ -19,6 +19,8 @@ interface ProfileForm {
   website_url: string;
   linkedin_url: string;
   accepting_work: boolean;
+  software: string[];
+  other_software: string[];
 }
 
 const credentialTypes = [
@@ -26,6 +28,79 @@ const credentialTypes = [
   { value: 'EA', label: 'EA (Enrolled Agent)' },
   { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
   { value: 'Other', label: 'Other Tax Professional' }
+];
+
+const softwareOptions = [
+  // Consumer tax prep
+  { slug: 'turbotax', label: 'TurboTax' },
+  { slug: 'hr_block', label: 'H&R Block Online' },
+  { slug: 'taxact', label: 'TaxAct' },
+  { slug: 'taxslayer', label: 'TaxSlayer' },
+  { slug: 'freetaxusa', label: 'FreeTaxUSA' },
+  { slug: 'cash_app_taxes', label: 'Cash App Taxes' },
+  
+  // Professional preparer suites
+  { slug: 'lacerte', label: 'Intuit Lacerte' },
+  { slug: 'proseries', label: 'Intuit ProSeries' },
+  { slug: 'drake_tax', label: 'Drake Tax' },
+  { slug: 'ultratax', label: 'Thomson Reuters UltraTax CS' },
+  { slug: 'cch_axcess', label: 'CCH Axcess Tax' },
+  { slug: 'cch_prosystem', label: 'CCH ProSystem fx Tax' },
+  { slug: 'atx', label: 'ATX' },
+  { slug: 'taxwise', label: 'TaxWise' },
+  { slug: 'canopy', label: 'Canopy' },
+  { slug: 'taxdome', label: 'TaxDome' },
+  
+  // Corporate & enterprise
+  { slug: 'corptax', label: 'CSC Corptax' },
+  { slug: 'onesource', label: 'Thomson Reuters ONESOURCE' },
+  { slug: 'longview', label: 'Wolters Kluwer Longview Tax' },
+  { slug: 'oracle_tax', label: 'Oracle Tax Reporting Cloud' },
+  
+  // Indirect tax & sales tax
+  { slug: 'avalara', label: 'Avalara' },
+  { slug: 'vertex', label: 'Vertex (O Series)' },
+  { slug: 'sovos', label: 'Sovos' },
+  { slug: 'taxjar', label: 'TaxJar' },
+  { slug: 'stripe_tax', label: 'Stripe Tax' },
+  
+  // Payroll & employer
+  { slug: 'adp', label: 'ADP' },
+  { slug: 'paychex', label: 'Paychex' },
+  { slug: 'gusto', label: 'Gusto' },
+  { slug: 'quickbooks_payroll', label: 'QuickBooks Payroll' },
+  { slug: 'rippling', label: 'Rippling' },
+  
+  // Information returns
+  { slug: 'track1099', label: 'Track1099' },
+  { slug: 'tax1099', label: 'Tax1099 (Zenwork)' },
+  { slug: 'yearli', label: 'Yearli (Greatland)' },
+  { slug: 'efile4biz', label: 'efile4Biz' },
+  
+  // Crypto tax
+  { slug: 'cointracker', label: 'CoinTracker' },
+  { slug: 'koinly', label: 'Koinly' },
+  { slug: 'coinledger', label: 'CoinLedger' },
+  { slug: 'taxbit', label: 'TaxBit' },
+  { slug: 'zenledger', label: 'ZenLedger' },
+  
+  // Fixed assets & depreciation
+  { slug: 'bloomberg_fixed_assets', label: 'Bloomberg Tax Fixed Assets' },
+  { slug: 'sage_fixed_assets', label: 'Sage Fixed Assets' },
+  { slug: 'cch_fixed_assets', label: 'CCH ProSystem fx Fixed Assets' },
+  
+  // Tax research & content
+  { slug: 'checkpoint', label: 'Thomson Reuters Checkpoint' },
+  { slug: 'cch_intelliconnect', label: 'CCH IntelliConnect' },
+  { slug: 'bloomberg_tax', label: 'Bloomberg Tax & Accounting' },
+  { slug: 'lexisnexis_tax', label: 'LexisNexis Tax' },
+  { slug: 'taxnotes', label: 'TaxNotes' },
+  
+  // Workpapers & engagement
+  { slug: 'caseware', label: 'CaseWare Working Papers' },
+  { slug: 'workiva', label: 'Workiva' },
+  { slug: 'sureprep', label: 'SurePrep' },
+  { slug: 'cch_workstream', label: 'CCH Axcess Workstream' }
 ];
 
 export default function EditProfilePage() {
@@ -43,7 +118,9 @@ export default function EditProfilePage() {
     phone: '',
     website_url: '',
     linkedin_url: '',
-    accepting_work: true
+    accepting_work: true,
+    software: [],
+    other_software: []
   });
 
   useEffect(() => {
@@ -102,6 +179,15 @@ export default function EditProfilePage() {
 
   const updateForm = (field: keyof ProfileForm, value: any) => {
     setProfileForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleSoftware = (softwareSlug: string) => {
+    setProfileForm(prev => ({
+      ...prev,
+      software: prev.software.includes(softwareSlug)
+        ? prev.software.filter(s => s !== softwareSlug)
+        : [...prev.software, softwareSlug]
+    }));
   };
 
   if (!isLoaded) {
@@ -271,19 +357,58 @@ export default function EditProfilePage() {
               </div>
             </div>
 
-            {/* Accepting Work */}
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="accepting_work"
-                checked={profileForm.accepting_work}
-                onChange={(e) => updateForm('accepting_work', e.target.checked)}
-                className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
-              />
-              <label htmlFor="accepting_work" className="text-sm font-medium text-slate-700">
-                I am currently accepting new work and collaborations
-              </label>
-            </div>
+                         {/* Accepting Work */}
+             <div className="flex items-center gap-3">
+               <input
+                 type="checkbox"
+                 id="accepting_work"
+                 checked={profileForm.accepting_work}
+                 onChange={(e) => updateForm('accepting_work', e.target.checked)}
+                 className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+               />
+               <label htmlFor="accepting_work" className="text-sm font-medium text-slate-700">
+                 I am currently accepting new work and collaborations
+               </label>
+             </div>
+
+             {/* Software Proficiency */}
+             <div>
+               <label className="block text-sm font-medium text-slate-700 mb-3">
+                 Tax Software & Tools You're Comfortable With
+               </label>
+               <p className="text-xs text-slate-500 mb-3">
+                 Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+               </p>
+               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                 {softwareOptions.map((software) => (
+                   <button
+                     key={software.slug}
+                     type="button"
+                     onClick={() => toggleSoftware(software.slug)}
+                     className={`p-2 rounded-lg text-xs border transition-colors ${
+                       profileForm.software.includes(software.slug)
+                         ? 'bg-slate-900 text-white border-slate-900'
+                         : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                     }`}
+                   >
+                     {software.label}
+                   </button>
+                 ))}
+               </div>
+               <div className="mt-3">
+                 <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
+                 <input
+                   type="text"
+                   placeholder="e.g., Custom in-house tools, specialized software, etc."
+                   value={profileForm.other_software?.join(', ') || ''}
+                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                   onChange={(e) => {
+                     const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                     updateForm('other_software', otherSoftware);
+                   }}
+                 />
+               </div>
+             </div>
 
             <div className="mt-8 flex justify-end gap-4">
               <Link

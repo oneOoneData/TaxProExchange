@@ -22,6 +22,8 @@ interface ProfileForm {
   accepting_work: boolean;
   specializations: string[];
   states: string[];
+  software: string[];
+  other_software: string[];
 }
 
 const credentialTypes = [
@@ -52,6 +54,79 @@ const states = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
+const softwareOptions = [
+  // Consumer tax prep
+  { slug: 'turbotax', label: 'TurboTax' },
+  { slug: 'hr_block', label: 'H&R Block Online' },
+  { slug: 'taxact', label: 'TaxAct' },
+  { slug: 'taxslayer', label: 'TaxSlayer' },
+  { slug: 'freetaxusa', label: 'FreeTaxUSA' },
+  { slug: 'cash_app_taxes', label: 'Cash App Taxes' },
+  
+  // Professional preparer suites
+  { slug: 'lacerte', label: 'Intuit Lacerte' },
+  { slug: 'proseries', label: 'Intuit ProSeries' },
+  { slug: 'drake_tax', label: 'Drake Tax' },
+  { slug: 'ultratax', label: 'Thomson Reuters UltraTax CS' },
+  { slug: 'cch_axcess', label: 'CCH Axcess Tax' },
+  { slug: 'cch_prosystem', label: 'CCH ProSystem fx Tax' },
+  { slug: 'atx', label: 'ATX' },
+  { slug: 'taxwise', label: 'TaxWise' },
+  { slug: 'canopy', label: 'Canopy' },
+  { slug: 'taxdome', label: 'TaxDome' },
+  
+  // Corporate & enterprise
+  { slug: 'corptax', label: 'CSC Corptax' },
+  { slug: 'onesource', label: 'Thomson Reuters ONESOURCE' },
+  { slug: 'longview', label: 'Wolters Kluwer Longview Tax' },
+  { slug: 'oracle_tax', label: 'Oracle Tax Reporting Cloud' },
+  
+  // Indirect tax & sales tax
+  { slug: 'avalara', label: 'Avalara' },
+  { slug: 'vertex', label: 'Vertex (O Series)' },
+  { slug: 'sovos', label: 'Sovos' },
+  { slug: 'taxjar', label: 'TaxJar' },
+  { slug: 'stripe_tax', label: 'Stripe Tax' },
+  
+  // Payroll & employer
+  { slug: 'adp', label: 'ADP' },
+  { slug: 'paychex', label: 'Paychex' },
+  { slug: 'gusto', label: 'Gusto' },
+  { slug: 'quickbooks_payroll', label: 'QuickBooks Payroll' },
+  { slug: 'rippling', label: 'Rippling' },
+  
+  // Information returns
+  { slug: 'track1099', label: 'Track1099' },
+  { slug: 'tax1099', label: 'Tax1099 (Zenwork)' },
+  { slug: 'yearli', label: 'Yearli (Greatland)' },
+  { slug: 'efile4biz', label: 'efile4Biz' },
+  
+  // Crypto tax
+  { slug: 'cointracker', label: 'CoinTracker' },
+  { slug: 'koinly', label: 'Koinly' },
+  { slug: 'coinledger', label: 'CoinLedger' },
+  { slug: 'taxbit', label: 'TaxBit' },
+  { slug: 'zenledger', label: 'ZenLedger' },
+  
+  // Fixed assets & depreciation
+  { slug: 'bloomberg_fixed_assets', label: 'Bloomberg Tax Fixed Assets' },
+  { slug: 'sage_fixed_assets', label: 'Sage Fixed Assets' },
+  { slug: 'cch_fixed_assets', label: 'CCH ProSystem fx Fixed Assets' },
+  
+  // Tax research & content
+  { slug: 'checkpoint', label: 'Thomson Reuters Checkpoint' },
+  { slug: 'cch_intelliconnect', label: 'CCH IntelliConnect' },
+  { slug: 'bloomberg_tax', label: 'Bloomberg Tax & Accounting' },
+  { slug: 'lexisnexis_tax', label: 'LexisNexis Tax' },
+  { slug: 'taxnotes', label: 'TaxNotes' },
+  
+  // Workpapers & engagement
+  { slug: 'caseware', label: 'CaseWare Working Papers' },
+  { slug: 'workiva', label: 'Workiva' },
+  { slug: 'sureprep', label: 'SurePrep' },
+  { slug: 'cch_workstream', label: 'CCH Axcess Workstream' }
+];
+
 export default function JoinPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
@@ -70,7 +145,9 @@ export default function JoinPage() {
     linkedin_url: '',
     accepting_work: true,
     specializations: [],
-    states: []
+    states: [],
+    software: [],
+    other_software: []
   });
 
   useEffect(() => {
@@ -169,6 +246,15 @@ export default function JoinPage() {
       states: prev.states.includes(state)
         ? prev.states.filter(s => s !== state)
         : [...prev.states, state]
+    }));
+  };
+
+  const toggleSoftware = (softwareSlug: string) => {
+    setProfileForm(prev => ({
+      ...prev,
+      software: prev.software.includes(softwareSlug)
+        ? prev.software.filter(s => s !== softwareSlug)
+        : [...prev.software, softwareSlug]
     }));
   };
 
@@ -439,26 +525,64 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* States */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
-                  {states.map((state) => (
-                    <button
-                      key={state}
-                      type="button"
-                      onClick={() => toggleState(state)}
-                      className={`p-2 rounded text-xs border transition-colors ${
-                        profileForm.states.includes(state)
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                      }`}
-                    >
-                      {state}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                             {/* States */}
+               <div>
+                 <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
+                 <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
+                   {states.map((state) => (
+                     <button
+                       key={state}
+                       type="button"
+                       onClick={() => toggleState(state)}
+                       className={`p-2 rounded text-xs border transition-colors ${
+                         profileForm.states.includes(state)
+                           ? 'bg-slate-900 text-white border-slate-900'
+                           : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                       }`}
+                     >
+                       {state}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+
+               {/* Software Proficiency */}
+               <div>
+                 <label className="block text-sm font-medium text-slate-700 mb-3">
+                   Tax Software & Tools You're Comfortable With
+                 </label>
+                 <p className="text-xs text-slate-500 mb-3">
+                   Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+                 </p>
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                   {softwareOptions.map((software) => (
+                     <button
+                       key={software.slug}
+                       type="button"
+                       onClick={() => toggleSoftware(software.slug)}
+                       className={`p-2 rounded-lg text-xs border transition-colors ${
+                         profileForm.software.includes(software.slug)
+                           ? 'bg-slate-900 text-white border-slate-900'
+                           : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                       }`}
+                     >
+                       {software.label}
+                     </button>
+                   ))}
+                 </div>
+                 <div className="mt-3">
+                   <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
+                   <input
+                     type="text"
+                     placeholder="e.g., Custom in-house tools, specialized software, etc."
+                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                     onChange={(e) => {
+                       const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                       setProfileForm(prev => ({ ...prev, other_software: otherSoftware }));
+                     }}
+                   />
+                 </div>
+               </div>
             </div>
 
             <div className="mt-8 flex justify-end">
