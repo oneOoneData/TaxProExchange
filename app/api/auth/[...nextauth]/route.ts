@@ -20,10 +20,8 @@ const handler = NextAuth({
   }),
   callbacks: {
     async session({ session, user }) {
-      // Add user ID to session for profile management
-      if (session.user) {
-        session.user.id = user.id;
-      }
+      // The user object from the adapter contains the database user info
+      // We can access user.id here if needed for profile management
       return session;
     },
     async signIn({ user, account, profile }) {

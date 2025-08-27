@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Generate slug from name
     const slug = `${first_name.toLowerCase()}-${last_name.toLowerCase()}-${credential_type.toLowerCase()}`.replace(/[^a-z0-9-]/g, '');
 
-    // Get or create user record
+    // Get or create user record using email from session
     let { data: user, error: userError } = await supabase
       .from('users')
       .select('id')
@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user's profile
+    // Get user's profile using email from session
     const { data: profile, error } = await supabase
       .from('profiles')
       .select(`
