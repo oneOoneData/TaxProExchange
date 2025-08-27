@@ -20,8 +20,10 @@ const handler = NextAuth({
   }),
   callbacks: {
     async session({ session, user }) {
-      // The user object from the adapter contains the database user info
-      // We can access user.id here if needed for profile management
+      // Add user ID to session for profile management
+      if (user && session.user) {
+        (session.user as any).id = user.id;
+      }
       return session;
     },
     async signIn({ user, account, profile }) {
@@ -33,9 +35,7 @@ const handler = NextAuth({
     },
   },
 
-  session: {
-    strategy: 'jwt',
-  },
+
 });
 
 export { handler as GET, handler as POST };
