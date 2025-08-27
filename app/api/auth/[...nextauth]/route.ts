@@ -32,10 +32,7 @@ const handler = NextAuth({
       return true;
     },
   },
-  pages: {
-    signIn: '/join',
-    newUser: '/join',
-  },
+
   session: {
     strategy: 'jwt',
   },
