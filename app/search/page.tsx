@@ -29,30 +29,10 @@ interface SearchFilters {
   accepting_work: string;
 }
 
-const specializations = [
-  { slug: 's_corp', label: 'S-Corporation' },
-  { slug: 'multi_state', label: 'Multi-State' },
-  { slug: 'real_estate', label: 'Real Estate' },
-  { slug: 'crypto', label: 'Cryptocurrency' },
-  { slug: 'irs_rep', label: 'IRS Representation' },
-  { slug: '1040', label: 'Individual Returns' },
-  { slug: 'business', label: 'Business Returns' },
-  { slug: 'partnership', label: 'Partnership Returns' },
-  { slug: 'estate_tax', label: 'Estate & Gift Tax' },
-  { slug: 'international', label: 'International Tax' }
-];
-
-const states = [
-  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
-];
-
 export default function SearchPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [specializations, setSpecializations] = useState<Array<{slug: string, label: string}>>([]);
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     credential_type: '',
@@ -61,9 +41,30 @@ export default function SearchPage() {
     accepting_work: ''
   });
 
+  const states = [
+    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+    'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+    'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+    'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+    'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+  ];
+
   useEffect(() => {
+    fetchSpecializations();
     searchProfiles();
   }, [filters]);
+
+  const fetchSpecializations = async () => {
+    try {
+      const response = await fetch('/api/specializations');
+      if (response.ok) {
+        const data = await response.json();
+        setSpecializations(data);
+      }
+    } catch (error) {
+      console.error('Error fetching specializations:', error);
+    }
+  };
 
   const searchProfiles = async () => {
     setLoading(true);

@@ -1,52 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-// Mock data for now - will be replaced with Supabase queries
-const mockProfiles = [
-  {
-    id: '1',
-    slug: 'jordan-chan-cpa',
-    first_name: 'Jordan',
-    last_name: 'Chan',
-    headline: 'CPA • S-Corp & Multi-State',
-    bio: '10+ years reviewing S-corps and multi-state filings; open for seasonal overflow.',
-    credential_type: 'CPA',
-    firm_name: 'Chan & Co.',
-    public_email: 'jordan@chanandco.com',
-    accepting_work: true,
-    verified: true,
-    specializations: ['s_corp', 'multi_state'],
-    states: ['CA', 'AZ'],
-    avatar_url: null
-  },
-  {
-    id: '2',
-    slug: 'maya-rodriguez-ea',
-    headline: 'EA • IRS Representation',
-    bio: 'Specializing in tax resolution and IRS representation for individuals and small businesses.',
-    credential_type: 'EA',
-    firm_name: 'Rodriguez Tax Solutions',
-    public_email: 'maya@rodrigueztax.com',
-    accepting_work: true,
-    verified: true,
-    specializations: ['irs_rep', '1040'],
-    states: ['TX'],
-    avatar_url: null
-  },
-  {
-    id: '3',
-    slug: 'leo-peterson-ctec',
-    headline: 'CTEC • 1040 + Schedule C',
-    bio: 'Seasonal tax preparer specializing in individual returns and small business schedules.',
-    credential_type: 'CTEC',
-    firm_name: 'Peterson Tax Prep',
-    public_email: 'leo@petersontax.com',
-    accepting_work: false,
-    verified: true,
-    specializations: ['1040', 'business'],
-    states: ['CA'],
-    avatar_url: null
-  }
-];
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(request: NextRequest) {
   try {
@@ -61,50 +20,90 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     
-    // Filter profiles based on search criteria
-    let filteredProfiles = mockProfiles.filter(profile => {
-      // Text search
-      if (query) {
-        const searchText = `${profile.headline} ${profile.bio} ${profile.firm_name}`.toLowerCase();
-        if (!searchText.includes(query.toLowerCase())) {
-          return false;
-        }
-      }
-      
-      // Credential type filter
-      if (credentialType && profile.credential_type !== credentialType) {
-        return false;
-      }
-      
-      // State filter
-      if (state && !profile.states.includes(state)) {
-        return false;
-      }
-      
-      // Specialization filter
-      if (specialization && !profile.specializations.includes(specialization)) {
-        return false;
-      }
-      
-      // Availability filter
-      if (acceptingWork === 'true' && !profile.accepting_work) {
-        return false;
-      }
-      
-      return true;
-    });
+    // Build the base query
+    let supabaseQuery = supabase
+      .from('profiles')
+      .select(`
+        id,
+        slug,
+        first_name,
+        last_name,
+        headline,
+        bio,
+        credential_type,
+        firm_name,
+        public_email,
+        accepting_work,
+        visibility_state,
+        is_listed,
+        profile_specializations!inner(specialization_id),
+        profile_locations!inner(location_id),
+        locations!profile_locations(country, state, city)
+      `)
+      .eq('visibility_state', 'verified')
+      .eq('is_listed', true);
+    
+    // Text search using full-text search
+    if (query) {
+      supabaseQuery = supabaseQuery.or(`headline.ilike.%${query}%,bio.ilike.%${query}%,firm_name.ilike.%${query}%`);
+    }
+    
+    // Credential type filter
+    if (credentialType) {
+      supabaseQuery = supabaseQuery.eq('credential_type', credentialType);
+    }
+    
+    // State filter
+    if (state) {
+      supabaseQuery = supabaseQuery.eq('locations.state', state);
+    }
+    
+    // Specialization filter
+    if (specialization) {
+      supabaseQuery = supabaseQuery.eq('profile_specializations.specialization_id', specialization);
+    }
+    
+    // Availability filter
+    if (acceptingWork === 'true') {
+      supabaseQuery = supabaseQuery.eq('accepting_work', true);
+    }
     
     // Pagination
     const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
+    supabaseQuery = supabaseQuery.range(startIndex, startIndex + limit - 1);
+    
+    // Execute query
+    const { data: profiles, error, count } = await supabaseQuery;
+    
+    if (error) {
+      console.error('Supabase search error:', error);
+      throw new Error(`Database error: ${error.message}`);
+    }
+    
+    // Transform the data to match our expected format
+    const transformedProfiles = profiles?.map(profile => ({
+      id: profile.id,
+      slug: profile.slug,
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      headline: profile.headline,
+      bio: profile.bio,
+      credential_type: profile.credential_type,
+      firm_name: profile.firm_name,
+      public_email: profile.public_email,
+      accepting_work: profile.accepting_work,
+      verified: profile.visibility_state === 'verified',
+      specializations: profile.profile_specializations?.map((ps: any) => ps.specialization_id) || [],
+      states: profile.locations?.map((loc: any) => loc.state).filter(Boolean) || [],
+      avatar_url: null
+    })) || [];
     
     // Calculate pagination info
-    const total = filteredProfiles.length;
+    const total = count || 0;
     const totalPages = Math.ceil(total / limit);
     
     return NextResponse.json({
-      profiles: paginatedProfiles,
+      profiles: transformedProfiles,
       pagination: {
         page,
         limit,

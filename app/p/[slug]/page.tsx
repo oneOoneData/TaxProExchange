@@ -25,57 +25,49 @@ interface Profile {
   avatar_url: string | null;
 }
 
-const specializations = [
-  { slug: 's_corp', label: 'S-Corporation' },
-  { slug: 'multi_state', label: 'Multi-State' },
-  { slug: 'real_estate', label: 'Real Estate' },
-  { slug: 'crypto', label: 'Cryptocurrency' },
-  { slug: 'irs_rep', label: 'IRS Representation' },
-  { slug: '1040', label: 'Individual Returns' },
-  { slug: 'business', label: 'Business Returns' },
-  { slug: 'partnership', label: 'Partnership Returns' },
-  { slug: 'estate_tax', label: 'Estate & Gift Tax' },
-  { slug: 'international', label: 'International Tax' }
-];
-
 export default function ProfilePage() {
   const params = useParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [specializations, setSpecializations] = useState<Array<{slug: string, label: string}>>([]);
 
   useEffect(() => {
     if (params.slug) {
       loadProfile(params.slug as string);
+      fetchSpecializations();
     }
   }, [params.slug]);
+
+  const fetchSpecializations = async () => {
+    try {
+      const response = await fetch('/api/specializations');
+      if (response.ok) {
+        const data = await response.json();
+        setSpecializations(data);
+      }
+    } catch (error) {
+      console.error('Error fetching specializations:', error);
+    }
+  };
 
   const loadProfile = async (slug: string) => {
     setLoading(true);
     try {
-      // For now, we'll use mock data - this will be replaced with actual API call
-      const mockProfile: Profile = {
-        id: '1',
-        slug: slug,
-        first_name: 'Jordan',
-        last_name: 'Chan',
-        headline: 'CPA • S-Corp & Multi-State',
-        bio: '10+ years reviewing S-corps and multi-state filings; open for seasonal overflow. Specializing in complex business structures and multi-state compliance. Available for review and sign-off work, overflow preparation, and consultation.',
-        credential_type: 'CPA',
-        firm_name: 'Chan & Co.',
-        public_email: 'jordan@chanandco.com',
-        phone: '(555) 123-4567',
-        website_url: 'https://chanandco.com',
-        linkedin_url: 'https://linkedin.com/in/jordanchan',
-        accepting_work: true,
-        verified: true,
-        specializations: ['s_corp', 'multi_state', 'business'],
-        states: ['CA', 'AZ', 'NV'],
-        avatar_url: null
-      };
+      const response = await fetch(`/api/profile/${slug}`);
       
-      setProfile(mockProfile);
+      if (!response.ok) {
+        if (response.status === 404) {
+          setProfile(null);
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const profileData = await response.json();
+      setProfile(profileData);
     } catch (error) {
       console.error('Error loading profile:', error);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
