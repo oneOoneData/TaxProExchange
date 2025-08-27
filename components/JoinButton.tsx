@@ -1,5 +1,6 @@
 'use client';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export function JoinButton() {
   return (
@@ -18,9 +19,17 @@ export function JoinButton() {
           </SignUpButton>
         </div>
       </SignedOut>
-      <SignedIn>
-        <UserButton afterSignOutUrl="/" />
-      </SignedIn>
+                   <SignedIn>
+               <div className="flex items-center gap-3">
+                 <Link 
+                   href="/profile/edit" 
+                   className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+                 >
+                   Edit Profile
+                 </Link>
+                 <UserButton afterSignOutUrl="/" />
+               </div>
+             </SignedIn>
     </>
   );
 }

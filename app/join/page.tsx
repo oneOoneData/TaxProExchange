@@ -152,26 +152,16 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (user && isLoaded) {
+      console.log('User loaded, checking profile...');
       // Check if user already has a profile
       checkExistingProfile();
     }
   }, [user, isLoaded]);
 
-  const checkExistingProfile = async () => {
-    if (!user) return;
-    
-    try {
-      const response = await fetch('/api/profile', {
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        // User already has a profile, redirect to home
-        router.push('/');
-        return;
-      }
-      
-      // No profile exists, show profile creation form
+  // Fallback: if user is authenticated but step is still 'auth', show profile creation
+  useEffect(() => {
+    if (user && isLoaded && step === 'auth') {
+      console.log('Fallback: User authenticated but step still auth, showing profile creation');
       setStep('profile');
       setProfileForm(prev => ({
         ...prev,
@@ -179,13 +169,51 @@ export default function JoinPage() {
         last_name: user.lastName ?? '',
         public_email: user.emailAddresses[0]?.emailAddress ?? ''
       }));
-      
-      console.log('New user, creating profile:', {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.emailAddresses[0]?.emailAddress
+    }
+  }, [user, isLoaded, step]);
+
+  const checkExistingProfile = async () => {
+    if (!user) return;
+    
+    console.log('Checking existing profile for user:', user.id);
+    
+    try {
+      const response = await fetch('/api/profile', {
+        credentials: 'include',
       });
+      
+      console.log('Profile check response status:', response.status);
+      
+      if (response.ok) {
+        const profile = await response.json();
+        console.log('Existing profile found:', profile);
+        // User already has a profile, redirect to home
+        router.push('/');
+        return;
+      }
+      
+      if (response.status === 404) {
+        console.log('No profile found, showing profile creation form');
+        // No profile exists, show profile creation form
+        setStep('profile');
+        setProfileForm(prev => ({
+          ...prev,
+          first_name: user.firstName ?? '',
+          last_name: user.lastName ?? '',
+          public_email: user.emailAddresses[0]?.emailAddress ?? ''
+        }));
+        
+        console.log('New user, creating profile:', {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.emailAddresses[0]?.emailAddress
+        });
+      } else {
+        console.error('Unexpected response status:', response.status);
+        // On unexpected status, assume new user and show profile creation
+        setStep('profile');
+      }
     } catch (error) {
       console.error('Error checking profile:', error);
       // On error, assume new user and show profile creation
