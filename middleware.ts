@@ -1,12 +1,27 @@
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  // For now, just pass through all requests
-  // We'll implement proper auth protection once Clerk is fully configured
+const isProtectedRoute = createRouteMatcher([
+  '/api/profile(.*)',
+  '/join',
+  '/profile(.*)'
+]);
+
+export default clerkMiddleware((auth, req) => {
+  // Allow public routes to pass through
+  if (!isProtectedRoute(req)) {
+    return NextResponse.next();
+  }
+
+  // For protected routes, Clerk will handle auth automatically
   return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|images|fonts).*)"],
+  matcher: [
+    // Skip static files and images
+    '/((?!_next/static|_next/image|favicon.ico|images|fonts).*)',
+    // Always run on API routes
+    '/api/(.*)',
+  ],
 };
