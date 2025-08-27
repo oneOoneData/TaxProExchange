@@ -8,8 +8,20 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
+    console.log('=== WEBHOOK REQUEST RECEIVED ===');
+    console.log('Request method:', req.method);
+    console.log('Request URL:', req.url);
+    console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+    
     const payload = await req.text();
+    console.log('Payload received, length:', payload.length);
+    console.log('Payload preview:', payload.substring(0, 200));
+    
     const secret = process.env.CLERK_WEBHOOK_SECRET!;
+    
+    console.log('CLERK_WEBHOOK_SECRET exists:', !!secret);
+    console.log('CLERK_WEBHOOK_SECRET length:', secret ? secret.length : 0);
+    console.log('CLERK_WEBHOOK_SECRET starts with:', secret ? secret.substring(0, 10) + '...' : 'NOT SET');
     
     if (!secret) {
       console.error('CLERK_WEBHOOK_SECRET is not set');
