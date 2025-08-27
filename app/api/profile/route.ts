@@ -63,14 +63,18 @@ export async function POST(request: NextRequest) {
     const slug = `${first_name.toLowerCase()}-${last_name.toLowerCase()}-${credential_type.toLowerCase()}`.replace(/[^a-z0-9-]/g, '');
 
     // Get user ID from auth.users table using email from session
-    let { data: authUser, error: authUserError } = await supabase.auth.admin.getUserByEmail(session.user.email);
+    let { data: authUser, error: authUserError } = await supabase
+      .from('auth.users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single();
 
-    if (authUserError || !authUser.user) {
+    if (authUserError || !authUser) {
       console.error('Auth user lookup error:', authUserError);
       throw new Error(`Auth user lookup error: ${authUserError?.message || 'User not found'}`);
     }
 
-    const userId = authUser.user.id;
+    const userId = authUser.id;
 
     // Check if profile already exists
     const { data: existingProfile, error: profileCheckError } = await supabase
@@ -195,9 +199,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user ID from auth.users table
-    const { data: authUser, error: authUserError } = await supabase.auth.admin.getUserByEmail(session.user.email);
+    const { data: authUser, error: authUserError } = await supabase
+      .from('auth.users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single();
 
-    if (authUserError || !authUser.user) {
+    if (authUserError || !authUser) {
       console.error('Auth user lookup error:', authUserError);
       return NextResponse.json(
         { error: 'User not found' },
@@ -205,7 +213,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userId = authUser.user.id;
+    const userId = authUser.id;
 
     // Get user's profile using user_id
     const { data: profile, error } = await supabase
