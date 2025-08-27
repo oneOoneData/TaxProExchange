@@ -1,4 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: NextRequest) {
   try {
@@ -6,7 +13,7 @@ export async function POST(request: NextRequest) {
     const email = formData.get('email') as string;
     const roleInterest = formData.get('role_interest') as string;
     const notes = formData.get('notes') as string;
-    const source = formData.get('source') as string;
+    const source = formData.get('source') || 'website';
 
     // Validate email
     if (!email || !email.includes('@')) {
@@ -16,22 +23,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, we'll just log the submission
-    // Later this will be replaced with Supabase database insertion
-    console.log('Waitlist submission:', {
-      email,
-      role_interest: roleInterest,
-      notes,
-      source,
-      timestamp: new Date().toISOString()
-    });
+    // Insert into Supabase waitlist table
+    const { data, error } = await supabase
+      .from('waitlist')
+      .insert([{ 
+        email, 
+        role_interest: roleInterest || null, 
+        notes: notes || null, 
+        source 
+      }])
+      .select();
 
-    // TODO: Insert into Supabase waitlist table when database is ready
-    // const { data, error } = await supabase
-    //   .from('waitlist')
-    //   .insert([{ email, role_interest: roleInterest, notes, source }]);
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(`Database error: ${error.message}`);
+    }
 
-    // if (error) throw error;
+    console.log('Waitlist submission saved:', data);
 
     // Return success response with redirect URL
     return NextResponse.json({
@@ -46,7 +54,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to join waitlist',
+        error: error instanceof Error ? error.message : 'Failed to join waitlist',
         redirectUrl: '/waitlist/confirmation?error=true'
       },
       { status: 500 }

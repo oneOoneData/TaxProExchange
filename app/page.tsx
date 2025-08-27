@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 
 export default function Page() {
   const [email, setEmail] = useState('');
+  const [roleInterest, setRoleInterest] = useState('');
+  const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,6 +18,8 @@ export default function Page() {
     try {
       const formData = new FormData();
       formData.append('email', email);
+      if (roleInterest) formData.append('role_interest', roleInterest);
+      if (notes) formData.append('notes', notes);
 
       console.log('Submitting form with email:', email);
 
@@ -196,23 +200,43 @@ export default function Page() {
               <p className="mt-2 text-slate-600">We'll invite the first cohort of CPAs, EAs, and CTEC preparers soon. Add your email to join the beta.</p>
               <form
                 onSubmit={handleSubmit}
-                className="mt-5 flex gap-3"
+                className="mt-5 space-y-3"
                 noValidate
               >
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@firm.com"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="you@firm.com"
+                    className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                  <select
+                    value={roleInterest}
+                    onChange={(e) => setRoleInterest(e.target.value)}
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  >
+                    <option value="">Role (optional)</option>
+                    <option value="CPA">CPA</option>
+                    <option value="EA">EA</option>
+                    <option value="CTEC">CTEC</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="What are you looking for? (optional)"
+                  rows={2}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
                 />
                 <button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="rounded-xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full rounded-xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {isSubmitting ? 'Joining...' : 'Join'}
+                  {isSubmitting ? 'Joining...' : 'Join the waitlist'}
                 </button>
               </form>
               <p className="mt-3 text-xs text-slate-500">We'll never spam. You can unsubscribe anytime.</p>
