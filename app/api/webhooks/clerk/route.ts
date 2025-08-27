@@ -70,6 +70,12 @@ export async function POST(req: Request) {
       console.log('Processing user:', u.id, 'Email:', email);
       console.log('User data structure:', JSON.stringify(u, null, 2));
 
+      // If no email, use a placeholder or skip the insert
+      if (!email) {
+        console.log('No email found for user, skipping profile creation');
+        return NextResponse.json({ ok: true, message: "User created but no email available" });
+      }
+
       const { error } = await supabase
         .from("profiles")
         .upsert({
@@ -85,7 +91,7 @@ export async function POST(req: Request) {
           website_url: null,
           linkedin_url: null,
           accepting_work: false,
-          visibility_state: 'pending',
+          visibility_state: 'hidden',
           is_listed: false,
           slug: `${u.id}-${Date.now()}`,
           image_url: u.image_url ?? null,
