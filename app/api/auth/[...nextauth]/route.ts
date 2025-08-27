@@ -19,10 +19,17 @@ const handler = NextAuth({
   //   secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   // }),
   callbacks: {
-    async session({ session, user }) {
-      // Add user ID to session for profile management
-      if (user && session.user) {
-        (session.user as any).id = user.id;
+    async jwt({ token, user, account }) {
+      // Persist the user ID to the token right after signin
+      if (account && user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Send properties to the client
+      if (token && session.user) {
+        (session.user as any).id = token.id;
       }
       return session;
     },
@@ -40,8 +47,6 @@ const handler = NextAuth({
     strategy: 'jwt',
   },
   debug: process.env.NODE_ENV === 'development',
-
-
 });
 
 export { handler as GET, handler as POST };
