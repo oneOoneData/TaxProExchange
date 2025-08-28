@@ -8,6 +8,13 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
+  // Force www to prevent host flips during Google SSO
+  if (req.nextUrl.hostname === "taxproexchange.com") {
+    const url = req.nextUrl.clone();
+    url.hostname = "www.taxproexchange.com";
+    return NextResponse.redirect(url);
+  }
+
   // Allow public routes to pass through
   if (!isProtectedRoute(req)) {
     return NextResponse.next();
