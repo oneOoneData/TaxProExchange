@@ -41,20 +41,14 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return response;
   }
 
-  // Check if onboarding is complete - try multiple cookie variations
-  const onboardingComplete = 
-    req.cookies.get('onboarding_complete')?.value === '1' ||
-    req.cookies.get('onboarding_complete')?.value === 'true' ||
-    req.headers.get('x-onboarding-complete') === '1';
-  
+  // Check if onboarding is complete
+  const onboardingComplete = req.cookies.get('onboarding_complete')?.value === '1';
   response.headers.set('x-debug-onboarding-check', onboardingComplete ? 'complete' : 'incomplete');
   
+  // If onboarding is not complete, redirect to profile edit
   if (!onboardingComplete) {
-    // Only redirect if we're not already on the profile edit page
-    if (pathname !== '/profile/edit') {
-      response.headers.set('x-debug-redirect', 'profile/edit (incomplete)');
-      return NextResponse.redirect(new URL('/profile/edit', req.url));
-    }
+    response.headers.set('x-debug-redirect', 'profile/edit (incomplete)');
+    return NextResponse.redirect(new URL('/profile/edit', req.url));
   }
 
   response.headers.set('x-debug-redirect', 'none (complete)');
@@ -62,5 +56,5 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 });
 
 export const config = {
-  matcher: ['/api/(.*)', '/((?!_next|.*\\..*).*)'],
+  matcher: ['/((?!_next|.*\\..*).*)'],
 };
