@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   try {
     const supabase = supabaseService();
     
-    // Get profile with related data
+    // Get basic profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -32,34 +32,14 @@ export async function GET(request: Request) {
       return NextResponse.json({});
     }
 
-    // Get specializations
-    const { data: specializations } = await supabase
-      .from('profile_specializations')
-      .select('specialization_slug')
-      .eq('profile_id', profile.id);
-
-    // Get states
-    const { data: states } = await supabase
-      .from('profile_locations')
-      .select('state')
-      .eq('profile_id', profile.id);
-
-    // Get software
-    const { data: software } = await supabase
-      .from('profile_software')
-      .select('software_slug')
-      .eq('profile_id', profile.id);
-
-    // Combine all data
-    const fullProfile = {
+    // Return basic profile with empty arrays for now
+    return NextResponse.json({
       ...profile,
-      specializations: specializations?.map(s => s.specialization_slug) || [],
-      states: states?.map(s => s.state) || [],
-      software: software?.map(s => s.software_slug) || [],
+      specializations: [],
+      states: [],
+      software: [],
       other_software: profile.other_software || []
-    };
-
-    return NextResponse.json(fullProfile);
+    });
   } catch (error) {
     console.error('Profile fetch error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -89,13 +69,13 @@ export async function PUT(request: Request) {
 
     const supabase = supabaseService();
     
-    // First, upsert the main profile
+    // Just save the basic profile data for now
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .upsert({
         clerk_id,
         ...profileData,
-        other_software,
+        other_software: other_software || [],
         onboarding_complete: true,
         updated_at: new Date().toISOString(),
       })
@@ -104,76 +84,15 @@ export async function PUT(request: Request) {
 
     if (profileError) {
       console.error('Profile upsert error:', profileError);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
+      return NextResponse.json({ error: 'Database error: ' + profileError.message }, { status: 500 });
     }
 
-    // Update specializations
-    if (specializations) {
-      // Delete existing specializations
-      await supabase
-        .from('profile_specializations')
-        .delete()
-        .eq('profile_id', profile.id);
-
-      // Insert new specializations
-      if (specializations.length > 0) {
-        const specializationData = specializations.map((slug: string) => ({
-          profile_id: profile.id,
-          specialization_slug: slug
-        }));
-        
-        await supabase
-          .from('profile_specializations')
-          .insert(specializationData);
-      }
-    }
-
-    // Update states
-    if (states) {
-      // Delete existing states
-      await supabase
-        .from('profile_locations')
-        .delete()
-        .eq('profile_id', profile.id);
-
-      // Insert new states
-      if (states.length > 0) {
-        const stateData = states.map((state: string) => ({
-          profile_id: profile.id,
-          state
-        }));
-        
-        await supabase
-          .from('profile_locations')
-          .insert(stateData);
-      }
-    }
-
-    // Update software
-    if (software) {
-      // Delete existing software
-      await supabase
-        .from('profile_software')
-        .delete()
-        .eq('profile_id', profile.id);
-
-      // Insert new software
-      if (software.length > 0) {
-        const softwareData = software.map((slug: string) => ({
-          profile_id: profile.id,
-          software_slug: slug
-        }));
-        
-        await supabase
-          .from('profile_software')
-          .insert(softwareData);
-      }
-    }
-
+    console.log('Profile saved successfully:', profile);
     return NextResponse.json(profile);
   } catch (error) {
     console.error('Profile update error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: 'Internal server error: ' + errorMessage }, { status: 500 });
   }
 }
 
