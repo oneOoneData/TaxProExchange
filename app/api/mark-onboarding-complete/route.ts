@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     secure: process.env.NODE_ENV === 'production',
   };
 
-  // Set domain based on environment
+  // Set domain based on environment - be more permissive
   if (host.endsWith('taxproexchange.com')) {
     cookie.domain = '.taxproexchange.com';
     console.log('[debug] Setting domain-scoped cookie for production');
@@ -27,9 +27,14 @@ export async function POST(req: Request) {
     // No domain for localhost - cookie will be host-only
     console.log('[debug] Setting host-only cookie for localhost');
   } else if (host.includes('vercel.app')) {
-    // Vercel preview deployments
-    cookie.domain = host;
-    console.log('[debug] Setting domain-scoped cookie for Vercel preview');
+    // For Vercel, try to set a broader domain
+    const parts = host.split('.');
+    if (parts.length >= 3) {
+      cookie.domain = `.${parts.slice(-2).join('.')}`;
+      console.log(`[debug] Setting domain-scoped cookie for Vercel: ${cookie.domain}`);
+    } else {
+      console.log('[debug] Setting host-only cookie for Vercel (could not determine domain)');
+    }
   }
 
   const res = NextResponse.json({ 
@@ -39,7 +44,11 @@ export async function POST(req: Request) {
     message: 'Onboarding marked as complete'
   });
   
+  // Set the cookie
   res.cookies.set('onboarding_complete', '1', cookie);
+  
+  // Also set a header as backup
+  res.headers.set('x-onboarding-complete', '1');
   
   // Add debug headers
   res.headers.set('x-debug-cookie-set', 'true');
