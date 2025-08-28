@@ -23,6 +23,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return response;
   }
 
+  // API routes bypass - let them handle their own auth
+  if (pathname.startsWith('/api/')) {
+    response.headers.set('x-debug-bypass', 'api-route');
+    return response;
+  }
+
   // Public routes always allowed
   if (isPublic(req)) {
     response.headers.set('x-debug-redirect', 'none (public)');
