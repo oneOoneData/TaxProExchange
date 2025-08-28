@@ -16,6 +16,7 @@ export async function POST() {
     maxAge: 60 * 60 * 24 * 365, // 1 year
     httpOnly: false, // middleware can read
     sameSite: 'lax',
+    secure: true, // required for HTTPS
   });
   return res;
 }

@@ -1,56 +1,32 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-// Only protect specific routes, keep "/" public
-const isProtectedRoute = createRouteMatcher([
-  '/api/profile(.*)',
-  '/join',
-  '/profile(.*)',
-  '/onboarding'
-]);
-
-const isOnboard = createRouteMatcher(['/onboarding', '/profile/edit']);
+// Define what's public vs onboarding vs protected
+const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/join', '/sign-in', '/sign-up']);
+const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit']);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Canonicalize apex → www to avoid SSO host flips
-  if (req.nextUrl.hostname === 'taxproexchange.com') {
-    const url = req.nextUrl.clone();
-    url.hostname = 'www.taxproexchange.com';
-    return NextResponse.redirect(url);
-  }
+  const { userId, sessionId } = await auth(); // MUST call auth()
 
-  // Allow public routes to pass through (including "/")
-  if (!isProtectedRoute(req)) {
-    return NextResponse.next();
-  }
+  // Let public pages through completely
+  if (isPublic(req)) return;
 
-  // For protected routes, check if user needs onboarding
-  const { userId, sessionId } = await auth();
-  
-  // Not signed in? Let Clerk handle auth
-  if (!userId || !sessionId) {
-    return NextResponse.next();
-  }
+  // If not signed in, let Clerk handle it; don't force our own redirect
+  if (!userId || !sessionId) return;
 
-  // If already on onboarding pages, let it pass
-  if (isOnboard(req)) {
-    return NextResponse.next();
-  }
+  // Already on onboarding pages? allow.
+  if (isOnboarding(req)) return;
 
-  // Check if onboarding is complete via cookie
+  // For all other protected routes, check if onboarding is complete
   const hasCookie = req.cookies.get('onboarding_complete')?.value === '1';
   if (!hasCookie) {
     return NextResponse.redirect(new URL('/profile/edit', req.url));
   }
-
-  return NextResponse.next();
+  
+  // Onboarding complete, allow access
+  return;
 });
 
 export const config = {
-  matcher: [
-    // Skip static files and images
-    '/((?!_next/static|_next/image|favicon.ico|images|fonts).*)',
-    // Always run on API routes
-    '/api/(.*)',
-  ],
+  matcher: ['/((?!_next|.*\\..*|api).*)'],
 };
