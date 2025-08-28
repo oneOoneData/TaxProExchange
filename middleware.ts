@@ -1,21 +1,23 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+// Only protect specific routes, keep "/" public
 const isProtectedRoute = createRouteMatcher([
   '/api/profile(.*)',
   '/join',
-  '/profile(.*)'
+  '/profile(.*)',
+  '/onboarding'
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  // Force www to prevent host flips during Google SSO
-  if (req.nextUrl.hostname === "taxproexchange.com") {
+  // Canonicalize apex → www to avoid SSO host flips
+  if (req.nextUrl.hostname === 'taxproexchange.com') {
     const url = req.nextUrl.clone();
-    url.hostname = "www.taxproexchange.com";
+    url.hostname = 'www.taxproexchange.com';
     return NextResponse.redirect(url);
   }
 
-  // Allow public routes to pass through
+  // Allow public routes to pass through (including "/")
   if (!isProtectedRoute(req)) {
     return NextResponse.next();
   }

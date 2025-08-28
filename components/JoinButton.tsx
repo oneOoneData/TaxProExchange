@@ -35,7 +35,7 @@ export function JoinButton() {
               Sign In
             </button>
           </SignInButton>
-          <SignUpButton mode="modal" forceRedirectUrl="/onboarding">
+          <SignUpButton mode="modal" forceRedirectUrl="/onboarding" fallbackRedirectUrl="/">
             <button className="rounded-2xl bg-slate-900 text-white text-sm px-4 py-2 shadow hover:shadow-md">
               Join Now
             </button>
