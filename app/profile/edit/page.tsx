@@ -223,13 +223,13 @@ export default function EditProfilePage() {
         }),
       });
 
-             if (response.ok) {
-         const result = await response.json();
-         console.log('Profile update successful:', result);
-         alert('Profile updated successfully!');
-         // Navigate back to home page
-         router.push('/');
-       } else {
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Profile update successful:', result);
+        alert('Profile updated successfully!');
+        // Navigate back to home page
+        router.push('/');
+      } else {
         const errorData = await response.json();
         console.error('Profile update failed:', errorData);
         throw new Error(errorData.error || 'Failed to update profile');
@@ -319,10 +319,10 @@ export default function EditProfilePage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
-            <span className="font-semibold text-slate-900">TaxProExchange</span>
-          </Link>
+                     <button onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer">
+             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
+             <span className="font-semibold text-slate-900">TaxProExchange</span>
+           </button>
                      <div className="flex items-center gap-4">
              <span className="text-sm text-slate-600">Edit Profile</span>
              <button
@@ -516,18 +516,59 @@ export default function EditProfilePage() {
                      States Where You Work
                    </label>
                    <p className="text-xs text-slate-500 mb-3">
-                     Enter the states where you're licensed to practice or can handle tax work (comma-separated).
+                     Select the states where you're licensed to practice or can handle tax work.
                    </p>
-                   <input
-                     type="text"
-                     placeholder="e.g., CA, NY, TX"
-                     value={profileForm.states.join(', ')}
-                     onChange={(e) => {
-                       const stateList = e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
-                       updateForm('states', stateList);
-                     }}
-                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                   />
+                   <div className="relative">
+                     <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
+                       {profileForm.states.length === 0 && (
+                         <span className="text-slate-400 text-sm">Select states...</span>
+                       )}
+                       {profileForm.states.map((state) => (
+                         <span
+                           key={state}
+                           className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
+                         >
+                           {state}
+                           <button
+                             type="button"
+                             onClick={() => toggleState(state)}
+                             className="ml-1 text-slate-400 hover:text-slate-600"
+                           >
+                             ×
+                           </button>
+                         </span>
+                       ))}
+                     </div>
+                     <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-50">
+                       <div className="p-2">
+                         <input
+                           type="text"
+                           placeholder="Search states..."
+                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none mb-2"
+                           onChange={(e) => {
+                             const searchTerm = e.target.value.toLowerCase();
+                             // You could add state filtering logic here if needed
+                           }}
+                         />
+                         <div className="grid grid-cols-3 gap-1">
+                           {states.map((state) => (
+                             <button
+                               key={state}
+                               type="button"
+                               onClick={() => toggleState(state)}
+                               className={`p-2 text-xs rounded-lg border transition-colors ${
+                                 profileForm.states.includes(state)
+                                   ? 'bg-slate-900 text-white border-slate-900'
+                                   : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                               }`}
+                             >
+                               {state}
+                             </button>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                  </div>
 
                                                        {/* Software Proficiency */}
@@ -536,19 +577,38 @@ export default function EditProfilePage() {
                    Tax Software & Tools You're Comfortable With
                  </label>
                  <p className="text-xs text-slate-500 mb-3">
-                   Enter the software you're proficient in (comma-separated). This helps other professionals understand your technical capabilities.
+                   Select the software you're proficient in. This helps other professionals understand your technical capabilities.
                  </p>
                  
-                 <input
-                   type="text"
-                   placeholder="e.g., TurboTax, Lacerte, Drake Tax, Custom tools"
-                   value={profileForm.software.join(', ')}
-                   onChange={(e) => {
-                     const softwareList = e.target.value.split(',').map(s => s.trim()).filter(s => s);
-                     updateForm('software', softwareList);
-                   }}
-                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                 />
+                 {/* Software Search */}
+                 <div className="mb-3">
+                   <input
+                     type="text"
+                     placeholder="Search software..."
+                     className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none"
+                     onChange={(e) => {
+                       const searchTerm = e.target.value.toLowerCase();
+                       // You could add software filtering logic here if needed
+                     }}
+                   />
+                 </div>
+                 
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
+                   {softwareOptions.map((software) => (
+                     <button
+                       key={software.slug}
+                       type="button"
+                       onClick={() => toggleSoftware(software.slug)}
+                       className={`p-2 rounded-lg text-xs border transition-colors ${
+                         safeIncludes(profileForm.software, software.slug)
+                           ? 'bg-slate-900 text-white border-slate-900'
+                           : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                       }`}
+                     >
+                       {software.label}
+                     </button>
+                   ))}
+                 </div>
                  
                  <div className="mt-3">
                    <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
