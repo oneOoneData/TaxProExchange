@@ -4,8 +4,8 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/privacy', '/terms']);
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit']);
 
-export default clerkMiddleware((auth, req: NextRequest) => {
-  const { userId, sessionId } = auth();
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  const { userId, sessionId } = await auth();
   const hostname = req.nextUrl.hostname;
   
   // Debug headers
