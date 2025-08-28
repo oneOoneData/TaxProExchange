@@ -32,12 +32,37 @@ export async function GET(request: Request) {
       return NextResponse.json({});
     }
 
-    // Return basic profile with empty arrays for now
+    // Fetch related data
+    const [specializationsResult, statesResult, softwareResult] = await Promise.all([
+      supabase
+        .from('profile_specializations')
+        .select('specialization_slug')
+        .eq('profile_id', profile.id),
+      supabase
+        .from('profile_locations')
+        .select('state')
+        .eq('profile_id', profile.id),
+      supabase
+        .from('profile_software')
+        .select('software_slug')
+        .eq('profile_id', profile.id)
+    ]);
+
+    // Debug logging
+    console.log('Profile data being returned:', {
+      profile: profile,
+      specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
+      states: statesResult.data?.map(s => s.state) || [],
+      software: softwareResult.data?.map(s => s.software_slug) || [],
+      other_software: profile.other_software || []
+    });
+
+    // Return profile with actual relationship data
     return NextResponse.json({
       ...profile,
-      specializations: [],
-      states: [],
-      software: [],
+      specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
+      states: statesResult.data?.map(s => s.state) || [],
+      software: softwareResult.data?.map(s => s.software_slug) || [],
       other_software: profile.other_software || []
     });
   } catch (error) {
@@ -63,28 +88,156 @@ export async function PUT(request: Request) {
       ...profileData 
     } = body;
 
+    // Debug logging
+    console.log('Received profile data:', {
+      clerk_id,
+      specializations,
+      states,
+      software,
+      other_software,
+      profileData
+    });
+
     if (clerk_id !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const supabase = supabaseService();
     
-    // Just save the basic profile data for now
-    const { data: profile, error: profileError } = await supabase
+    // First, check if a profile already exists
+    const { data: existingProfiles, error: checkError } = await supabase
       .from('profiles')
-      .upsert({
-        clerk_id,
-        ...profileData,
-        other_software: other_software || [],
-        onboarding_complete: true,
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+      .select('id')
+      .eq('clerk_id', clerk_id);
+
+    if (checkError) {
+      console.error('Profile check error:', checkError);
+      return NextResponse.json({ error: 'Database error: ' + checkError.message }, { status: 500 });
+    }
+
+    // If there are multiple profiles (shouldn't happen after constraint fix), use the first one
+    const existingProfile = existingProfiles?.[0];
+
+    let profile;
+    let profileError;
+
+    if (existingProfile) {
+      // Update existing profile
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          ...profileData,
+          other_software: other_software || [],
+          onboarding_complete: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('clerk_id', clerk_id)
+        .select()
+        .single();
+      
+      profile = updatedProfile;
+      profileError = updateError;
+    } else {
+      // Insert new profile
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          clerk_id,
+          ...profileData,
+          other_software: other_software || [],
+          onboarding_complete: true,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      
+      profile = newProfile;
+      profileError = insertError;
+    }
+
+    // If profile was saved successfully, save the relationships
+    if (profile && !profileError) {
+      const profileId = profile.id;
+      
+      // Save specializations
+      if (specializations && specializations.length > 0) {
+        console.log('Saving specializations:', specializations);
+        
+        // Delete existing specializations
+        const { error: deleteError } = await supabase
+          .from('profile_specializations')
+          .delete()
+          .eq('profile_id', profileId);
+        
+        if (deleteError) console.log('Delete specializations error:', deleteError);
+        
+        // Insert new specializations
+        const specializationData = specializations.map((slug: string) => ({
+          profile_id: profileId,
+          specialization_slug: slug
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('profile_specializations')
+          .insert(specializationData);
+        
+        if (insertError) console.log('Insert specializations error:', insertError);
+        else console.log('Specializations saved successfully');
+      }
+      
+      // Save states (locations)
+      if (states && states.length > 0) {
+        // Delete existing locations
+        await supabase
+          .from('profile_locations')
+          .delete()
+          .eq('profile_id', profileId);
+        
+        // Insert new states
+        const stateData = states.map((state: string) => ({
+          profile_id: profileId,
+          state: state
+        }));
+        
+        await supabase
+          .from('profile_locations')
+          .insert(stateData);
+      }
+      
+      // Save software
+      if (software && software.length > 0) {
+        // Delete existing software
+        await supabase
+          .from('profile_software')
+          .delete()
+          .eq('profile_id', profileId);
+        
+        // Insert new software
+        const softwareData = software.map((slug: string) => ({
+          profile_id: profileId,
+          software_slug: slug
+        }));
+        
+        await supabase
+          .from('profile_software')
+          .insert(softwareData);
+      }
+    }
 
     if (profileError) {
-      console.error('Profile upsert error:', profileError);
-      return NextResponse.json({ error: 'Database error: ' + profileError.message }, { status: 500 });
+      console.error('Profile save error:', profileError);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Database error';
+      if (profileError.code === '23505') {
+        errorMessage = 'Profile already exists with this information';
+      } else if (profileError.code === '23503') {
+        errorMessage = 'Invalid reference data';
+      } else if (profileError.message) {
+        errorMessage = profileError.message;
+      }
+      
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 
     console.log('Profile saved successfully:', profile);

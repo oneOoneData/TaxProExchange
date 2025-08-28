@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { safeIncludes, safeMap } from '@/lib/safe';
 
 export const dynamic = 'force-dynamic';
@@ -131,6 +130,7 @@ export default function EditProfilePage() {
   const { user, isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [profileForm, setProfileForm] = useState<ProfileForm>({
     first_name: '',
     last_name: '',
@@ -221,7 +221,6 @@ export default function EditProfilePage() {
         await fetch('/api/mark-onboarding-complete', { method: 'POST' });
         router.push('/');
       } else {
-        // Try to parse JSON; if empty, fall back to text/status
         let msg = `Failed (${response.status})`;
         try { 
           const j = await response.json(); 
@@ -235,7 +234,19 @@ export default function EditProfilePage() {
       }
     } catch (error) {
       console.error('Profile update error:', error);
-      alert('Failed to update profile. Please try again.');
+      
+      let errorMessage = 'Failed to update profile. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('duplicate key value violates unique constraint')) {
+          errorMessage = 'A profile with this information already exists. Please check your details.';
+        } else if (error.message.includes('Database error')) {
+          errorMessage = 'Database error occurred. Please try again or contact support.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -272,6 +283,48 @@ export default function EditProfilePage() {
     }));
   };
 
+  const handleBackToHome = async () => {
+    try {
+      await fetch('/api/mark-onboarding-complete', { method: 'POST' });
+      router.push('/');
+    } catch (error) {
+      console.error('Failed to mark onboarding complete:', error);
+      router.push('/');
+    }
+  };
+
+  const nextStep = () => {
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const getStepTitle = () => {
+    switch (currentStep) {
+      case 1: return 'Professional Information';
+      case 2: return 'Tax Specializations';
+      case 3: return 'Service Areas';
+      case 4: return 'Software & Tools';
+      default: return 'Edit Profile';
+    }
+  };
+
+  const getStepDescription = () => {
+    switch (currentStep) {
+      case 1: return 'Tell us about yourself and your credentials';
+      case 2: return 'Select the types of tax work you specialize in';
+      case 3: return 'Choose where you can provide services';
+      case 4: return 'Select the software and tools you\'re familiar with';
+      default: return '';
+    }
+  };
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -280,177 +333,206 @@ export default function EditProfilePage() {
     );
   }
 
-  if (!isSignedIn) return null; // redirected above
+  if (!isSignedIn) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-                     <button onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer">
-             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
-             <span className="font-semibold text-slate-900">TaxProExchange</span>
-           </button>
-                     <div className="flex items-center gap-4">
-             <span className="text-sm text-slate-600">Edit Profile</span>
-             <button
-               onClick={() => router.push('/')}
-               className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
-             >
-               Back to Home
-             </button>
-           </div>
+          <button onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
+            <span className="font-semibold text-slate-900">TaxProExchange</span>
+          </button>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-slate-600">Edit Profile</span>
+            <button
+              onClick={handleBackToHome}
+              className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
+            >
+              Back to Home
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 py-12">
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            {[1, 2, 3, 4].map((step) => (
+              <div key={step} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step <= currentStep 
+                    ? 'bg-slate-900 text-white' 
+                    : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {step}
+                </div>
+                {step < 4 && (
+                  <div className={`w-16 h-1 mx-2 ${
+                    step < currentStep ? 'bg-slate-900' : 'bg-slate-200'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-slate-900">{getStepTitle()}</h1>
+            <p className="text-slate-600 mt-2">{getStepDescription()}</p>
+          </div>
+        </div>
+
+        {/* Step Content */}
         <div className="bg-white rounded-3xl border border-slate-200 p-8">
-          <h1 className="text-3xl font-semibold text-slate-900 mb-6">Edit Your Profile</h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Info */}
-            <div className="grid md:grid-cols-2 gap-4">
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              {/* Basic Info */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">First Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.first_name}
+                    onChange={(e) => updateForm('first_name', e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Last Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.last_name}
+                    onChange={(e) => updateForm('last_name', e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+              </div>
+
+              {/* Headline */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">First Name *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Professional Headline *</label>
                 <input
                   type="text"
                   required
-                  value={profileForm.first_name}
-                  onChange={(e) => updateForm('first_name', e.target.value)}
+                  value={profileForm.headline}
+                  onChange={(e) => updateForm('headline', e.target.value)}
+                  placeholder="e.g., Senior Tax Consultant, S-Corp Specialist"
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 />
               </div>
+
+              {/* Bio */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Last Name *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Professional Bio *</label>
+                <textarea
+                  required
+                  value={profileForm.bio}
+                  onChange={(e) => updateForm('bio', e.target.value)}
+                  placeholder="Tell us about your experience, expertise, and what you're looking for..."
+                  rows={4}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
+                />
+              </div>
+
+              {/* Credential Type */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type *</label>
+                <select
+                  required
+                  value={profileForm.credential_type}
+                  onChange={(e) => updateForm('credential_type', e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                >
+                  <option value="">Select your credential</option>
+                  {credentialTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Firm Name */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Firm Name</label>
                 <input
                   type="text"
-                  required
-                  value={profileForm.last_name}
-                  onChange={(e) => updateForm('last_name', e.target.value)}
+                  value={profileForm.firm_name}
+                  onChange={(e) => updateForm('firm_name', e.target.value)}
+                  placeholder="Your firm or company name"
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                 />
               </div>
-            </div>
 
-            {/* Headline */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Professional Headline *</label>
-              <input
-                type="text"
-                required
-                value={profileForm.headline}
-                onChange={(e) => updateForm('headline', e.target.value)}
-                placeholder="e.g., Senior Tax Consultant, S-Corp Specialist"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-              />
-            </div>
+              {/* Contact Info */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Public Email *</label>
+                  <input
+                    type="email"
+                    required
+                    value={profileForm.public_email}
+                    onChange={(e) => updateForm('public_email', e.target.value)}
+                    placeholder="Email for professional inquiries"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    value={profileForm.phone}
+                    onChange={(e) => updateForm('phone', e.target.value)}
+                    placeholder="Professional phone number"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+              </div>
 
-            {/* Bio */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Professional Bio *</label>
-              <textarea
-                required
-                value={profileForm.bio}
-                onChange={(e) => updateForm('bio', e.target.value)}
-                placeholder="Tell us about your experience, expertise, and what you're looking for..."
-                rows={4}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
-              />
-            </div>
+              {/* Website & LinkedIn */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Website</label>
+                  <input
+                    type="url"
+                    value={profileForm.website_url}
+                    onChange={(e) => updateForm('website_url', e.target.value)}
+                    placeholder="https://yourwebsite.com"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">LinkedIn</label>
+                  <input
+                    type="url"
+                    value={profileForm.linkedin_url}
+                    onChange={(e) => updateForm('linkedin_url', e.target.value)}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  />
+                </div>
+              </div>
 
-            {/* Credential Type */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type *</label>
-              <select
-                required
-                value={profileForm.credential_type}
-                onChange={(e) => updateForm('credential_type', e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-              >
-                <option value="">Select your credential</option>
-                {credentialTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Firm Name */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Firm Name</label>
-              <input
-                type="text"
-                value={profileForm.firm_name}
-                onChange={(e) => updateForm('firm_name', e.target.value)}
-                placeholder="Your firm or company name"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-              />
-            </div>
-
-            {/* Contact Info */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Public Email *</label>
+              {/* Accepting Work */}
+              <div className="flex items-center gap-3">
                 <input
-                  type="email"
-                  required
-                  value={profileForm.public_email}
-                  onChange={(e) => updateForm('public_email', e.target.value)}
-                  placeholder="Email for professional inquiries"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  type="checkbox"
+                  id="accepting_work"
+                  checked={profileForm.accepting_work}
+                  onChange={(e) => updateForm('accepting_work', e.target.checked)}
+                  className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={profileForm.phone}
-                  onChange={(e) => updateForm('phone', e.target.value)}
-                  placeholder="Professional phone number"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
+                <label htmlFor="accepting_work" className="text-sm font-medium text-slate-700">
+                  I am currently accepting new work and collaborations
+                </label>
               </div>
             </div>
+          )}
 
-            {/* Website & LinkedIn */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Website</label>
-                <input
-                  type="url"
-                  value={profileForm.website_url}
-                  onChange={(e) => updateForm('website_url', e.target.value)}
-                  placeholder="https://yourwebsite.com"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">LinkedIn</label>
-                <input
-                  type="url"
-                  value={profileForm.linkedin_url}
-                  onChange={(e) => updateForm('linkedin_url', e.target.value)}
-                  placeholder="https://linkedin.com/in/yourprofile"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-            </div>
-
-             {/* Accepting Work */}
-             <div className="flex items-center gap-3">
-               <input
-                 type="checkbox"
-                 id="accepting_work"
-                 checked={profileForm.accepting_work}
-                 onChange={(e) => updateForm('accepting_work', e.target.checked)}
-                 className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
-               />
-               <label htmlFor="accepting_work" className="text-sm font-medium text-slate-700">
-                 I am currently accepting new work and collaborations
-               </label>
-             </div>
-
-              {/* Specializations */}
+          {currentStep === 2 && (
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-3">
                   Tax Specializations & Areas of Expertise
@@ -474,144 +556,141 @@ export default function EditProfilePage() {
                     </button>
                   ))}
                 </div>
-                
               </div>
+            </div>
+          )}
 
-                   {/* States */}
-                   <div className="mb-8">
-                     <label className="block text-sm font-medium text-slate-700 mb-3">
-                       States Where You Work
-                     </label>
-                     <p className="text-xs text-slate-500 mb-3">
-                       Select the states where you're licensed to practice or can handle tax work.
-                     </p>
-                     <div className="relative">
-                       <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
-                         {profileForm.states.length === 0 && (
-                           <span className="text-slate-400 text-sm">Select states...</span>
-                         )}
-                         {profileForm.states.map((state) => (
-                           <span
-                             key={state}
-                             className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
-                           >
-                             {state}
-                             <button
-                               type="button"
-                               onClick={() => toggleState(state)}
-                               className="ml-1 text-slate-400 hover:text-slate-600"
-                             >
-                               ×
-                             </button>
-                           </span>
-                         ))}
-                       </div>
-                       <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-[9999]">
-                         <div className="p-2">
-                           <input
-                             type="text"
-                             placeholder="Search states..."
-                             className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none mb-2"
-                             onChange={(e) => {
-                               const searchTerm = e.target.value.toLowerCase();
-                               // You could add state filtering logic here if needed
-                             }}
-                           />
-                           <div className="grid grid-cols-3 gap-1">
-                             {states.map((state) => (
-                               <button
-                                 key={state}
-                                 type="button"
-                                 onClick={() => toggleState(state)}
-                                 className={`p-2 text-xs rounded-lg border transition-colors ${
-                                   profileForm.states.includes(state)
-                                     ? 'bg-slate-900 text-white border-slate-900'
-                                     : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                                 }`}
-                               >
-                                 {state}
-                               </button>
-                             ))}
-                           </div>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  States Where You Work
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Select the states where you're licensed to practice or can handle tax work.
+                </p>
+                <div className="relative">
+                  <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
+                    {profileForm.states.length === 0 && (
+                      <span className="text-slate-400 text-sm">Select states...</span>
+                    )}
+                    {profileForm.states.map((state) => (
+                      <span
+                        key={state}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
+                      >
+                        {state}
+                        <button
+                          type="button"
+                          onClick={() => toggleState(state)}
+                          className="ml-1 text-slate-400 hover:text-slate-600"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-4 max-h-64 overflow-y-auto bg-white border border-slate-300 rounded-xl p-4">
+                    <div className="grid grid-cols-3 gap-2">
+                      {states.map((state) => (
+                        <button
+                          key={state}
+                          type="button"
+                          onClick={() => toggleState(state)}
+                          className={`p-2 text-xs rounded-lg border transition-colors ${
+                            profileForm.states.includes(state)
+                              ? 'bg-slate-900 text-white border-slate-900'
+                              : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                          }`}
+                        >
+                          {state}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-                   {/* Clear separation between sections */}
-                   <div className="h-20"></div>
+          {currentStep === 4 && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  Tax Software & Tools You're Comfortable With
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+                </p>
+                
+                <div className="max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {softwareOptions.map((software) => (
+                      <button
+                        key={software.slug}
+                        type="button"
+                        onClick={() => toggleSoftware(software.slug)}
+                        className={`p-2 rounded-lg text-xs border transition-colors ${
+                          safeIncludes(profileForm.software, software.slug)
+                            ? 'bg-slate-900 text-white border-slate-900'
+                            : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                        }`}
+                      >
+                        {software.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Custom in-house tools, specialized software, etc."
+                    value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    onChange={(e) => {
+                      const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                      updateForm('other_software', otherSoftware);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
-                   {/* Software Proficiency */}
-                   <div className="relative z-10">
-                     <label className="block text-sm font-medium text-slate-700 mb-3">
-                       Tax Software & Tools You're Comfortable With
-                     </label>
-                     <p className="text-xs text-slate-500 mb-3">
-                       Select the software you're proficient in. This helps other professionals understand your technical capabilities.
-                     </p>
-                     
-                     {/* Software Search */}
-                     <div className="mb-3">
-                       <input
-                         type="text"
-                         placeholder="Search software..."
-                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none"
-                         onChange={(e) => {
-                           const searchTerm = e.target.value.toLowerCase();
-                           // You could add software filtering logic here if needed
-                         }}
-                       />
-                     </div>
-                     
-                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
-                       {softwareOptions.map((software) => (
-                         <button
-                           key={software.slug}
-                           type="button"
-                           onClick={() => toggleSoftware(software.slug)}
-                           className={`p-2 rounded-lg text-xs border transition-colors ${
-                             safeIncludes(profileForm.software, software.slug)
-                               ? 'bg-slate-900 text-white border-slate-900'
-                               : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                           }`}
-                         >
-                           {software.label}
-                         </button>
-                       ))}
-                     </div>
-                     
-                     <div className="mt-3">
-                       <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
-                       <input
-                         type="text"
-                         placeholder="e.g., Custom in-house tools, specialized software, etc."
-                         value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
-                         className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                         onChange={(e) => {
-                           const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
-                           updateForm('other_software', otherSoftware);
-                         }}
-                       />
-                     </div>
-                   </div>
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className="rounded-xl border border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
 
-                         <div className="mt-8 flex justify-end gap-4">
-               <button
-                 type="button"
-                 onClick={() => router.push('/')}
-                 className="rounded-xl border border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
-               >
-                 Cancel
-               </button>
-               <button
-                 type="submit"
-                 disabled={loading}
-                 className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-               >
-                 {loading ? 'Updating...' : 'Update Profile'}
-               </button>
-             </div>
-          </form>
+            <div className="flex gap-4">
+              {currentStep < 4 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 transition-colors"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {loading ? 'Saving...' : 'Save Profile'}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

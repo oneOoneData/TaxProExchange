@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const cookie: Parameters<typeof NextResponse.prototype.cookies.set>[2] = {
     path: '/',
     maxAge: 60 * 60 * 24 * 365, // 1 year
-    httpOnly: true,
+    httpOnly: false, // Changed from true to false so JavaScript can read it
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   };
