@@ -1,32 +1,55 @@
-import { NextResponse } from 'next/server';
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
-// Define what's public vs onboarding vs protected
-const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/join', '/sign-in', '/sign-up']);
-const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit']);
+const PUBLIC_PATHS = new Set(['/', '/about', '/pricing']);
+const ONBOARDING_PATHS = new Set(['/onboarding', '/profile/edit']);
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionId } = await auth(); // MUST call auth()
+export default async function middleware(req: NextRequest) {
+  const url = req.nextUrl;
+  const pathname = url.pathname;
 
-  // Let public pages through completely
-  if (isPublic(req)) return;
-
-  // If not signed in, let Clerk handle it; don't force our own redirect
-  if (!userId || !sessionId) return;
-
-  // Already on onboarding pages? allow.
-  if (isOnboarding(req)) return;
-
-  // For all other protected routes, check if onboarding is complete
-  const hasCookie = req.cookies.get('onboarding_complete')?.value === '1';
-  if (!hasCookie) {
-    return NextResponse.redirect(new URL('/profile/edit', req.url));
+  // Always allow public
+  if (PUBLIC_PATHS.has(pathname)) {
+    const res = NextResponse.next();
+    res.headers.set('x-debug-public', '1');
+    return res;
   }
-  
-  // Onboarding complete, allow access
-  return;
-});
 
+  // Auth (must await in middleware without Clerk wrapper)
+  const { userId, sessionId } = await auth();
+  if (!userId || !sessionId) {
+    const res = NextResponse.next();
+    res.headers.set('x-debug-signed-in', '0');
+    return res;
+  }
+
+  // Allow onboarding pages
+  if (ONBOARDING_PATHS.has(pathname)) {
+    const res = NextResponse.next();
+    res.headers.set('x-debug-onboarding-page', '1');
+    return res;
+  }
+
+  // Gate by cookie
+  const cookieVal = req.cookies.get('onboarding_complete')?.value ?? '';
+  const hasCookie = cookieVal === '1';
+
+  if (!hasCookie) {
+    const redirectUrl = new URL('/profile/edit', req.url);
+    const res = NextResponse.redirect(redirectUrl);
+    res.headers.set('x-debug-redirect', 'profile-edit');
+    res.headers.set('x-debug-cookie', cookieVal || 'missing');
+    res.headers.set('x-debug-domain', url.hostname);
+    return res;
+  }
+
+  const res = NextResponse.next();
+  res.headers.set('x-debug-cookie', cookieVal || 'missing');
+  res.headers.set('x-debug-domain', url.hostname);
+  return res;
+}
+
+// Keep matcher narrow: don't catch /api or static
 export const config = {
   matcher: ['/((?!_next|.*\\..*|api).*)'],
 };
