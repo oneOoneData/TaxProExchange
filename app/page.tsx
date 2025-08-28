@@ -1,11 +1,40 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { JoinButton } from '@/components/JoinButton';
 
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+
+  // Check if signed-in user has a profile
+  useEffect(() => {
+    if (user && isLoaded) {
+      checkUserProfile();
+    }
+  }, [user, isLoaded]);
+
+  const checkUserProfile = async () => {
+    try {
+      const response = await fetch('/api/profile', {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        // No profile exists, redirect to join
+        router.push('/join');
+      }
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      // On error, redirect to join to be safe
+      router.push('/join');
+    }
+  };
   const features = [
     {
       title: 'Verified Professionals',
