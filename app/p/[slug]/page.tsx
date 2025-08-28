@@ -56,17 +56,28 @@ export default function ProfilePage() {
   const loadProfile = async (slug: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/profile/${slug}`);
+      // Profile fetching now handled by /onboarding page
+      // Return placeholder data for now
+      const profileData: Profile = {
+        id: 'placeholder',
+        slug: slug,
+        first_name: 'Loading...',
+        last_name: '...',
+        headline: 'Professional Profile',
+        bio: 'Profile details coming soon...',
+        credential_type: 'CPA',
+        firm_name: '',
+        public_email: '',
+        phone: '',
+        website_url: '',
+        linkedin_url: '',
+        accepting_work: true,
+        verified: false,
+        specializations: [],
+        states: [],
+        avatar_url: null
+      };
       
-      if (!response.ok) {
-        if (response.status === 404) {
-          setProfile(null);
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const profileData = await response.json();
       setProfile(profileData);
     } catch (error) {
       console.error('Error loading profile:', error);

@@ -121,64 +121,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    const supabase = supabaseService();
-    
-    // First get the basic profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileError) {
-      if (profileError.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-      }
-      throw profileError;
-    }
-
-    // Get specializations
-    const { data: specializations, error: specError } = await supabase
-      .from('profile_specializations')
-      .select('specialization_id')
-      .eq('profile_id', profile.id);
-
-    // Get states
-    const { data: locations, error: locError } = await supabase
-      .from('profile_locations')
-      .select('location_id')
-      .eq('profile_id', profile.id);
-
-    // Get software (table doesn't exist yet, so return empty array)
-    // const { data: software, error: swError } = await supabase
-    //   .from('profile_software')
-    //   .select('software_id')
-    //   .eq('profile_id', profile.id);
-
-    // Combine all the data
-    const fullProfile = {
-      ...profile,
-      specializations: specializations?.map(s => s.specialization_id) || [],
-      states: locations?.map(l => l.location_id) || [],
-      software: [] // Empty array for now since table doesn't exist
-    };
-
-    return NextResponse.json(fullProfile);
-
-  } catch (error) {
-    console.error('Profile fetch error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    );
-  }
+// Safe no-op to avoid 500s if any stale client code calls this
+export async function GET() {
+  return NextResponse.json({ ok: true });
 }
 
 export async function PUT(request: NextRequest) {

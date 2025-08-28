@@ -167,9 +167,15 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (user && isLoaded) {
-      console.log('User loaded, checking profile...');
-      // Check if user already has a profile
-      checkExistingProfile();
+      console.log('User loaded, showing profile creation form...');
+      // Show profile creation form for new users
+      setStep('profile');
+      setProfileForm(prev => ({
+        ...prev,
+        first_name: user.firstName ?? '',
+        last_name: user.lastName ?? '',
+        public_email: user.emailAddresses[0]?.emailAddress ?? ''
+      }));
     }
   }, [user, isLoaded]);
 
@@ -187,81 +193,27 @@ export default function JoinPage() {
     }
   }, [user, isLoaded, step]);
 
-  const checkExistingProfile = async () => {
-    if (!user) return;
-    
-    console.log('Checking existing profile for user:', user.id);
-    
-    try {
-      const response = await fetch('/api/profile', {
-        credentials: 'include',
-      });
-      
-      console.log('Profile check response status:', response.status);
-      
-      if (response.ok) {
-        const profile = await response.json();
-        console.log('Existing profile found:', profile);
-        // User already has a profile, redirect to home
-        router.push('/');
-        return;
-      }
-      
-      if (response.status === 404) {
-        console.log('No profile found, showing profile creation form');
-        // No profile exists, show profile creation form
-        setStep('profile');
-        setProfileForm(prev => ({
-          ...prev,
-          first_name: user.firstName ?? '',
-          last_name: user.lastName ?? '',
-          public_email: user.emailAddresses[0]?.emailAddress ?? ''
-        }));
-        
-        console.log('New user, creating profile:', {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.emailAddresses[0]?.emailAddress
-        });
-      } else {
-        console.error('Unexpected response status:', response.status);
-        // On unexpected status, assume new user and show profile creation
-        setStep('profile');
-      }
-    } catch (error) {
-      console.error('Error checking profile:', error);
-      // On error, assume new user and show profile creation
+  // Show profile creation form for new users
+  useEffect(() => {
+    if (user && isLoaded) {
       setStep('profile');
+      setProfileForm(prev => ({
+        ...prev,
+        first_name: user.firstName ?? '',
+        last_name: user.lastName ?? '',
+        public_email: user.emailAddresses[0]?.emailAddress ?? ''
+      }));
     }
-  };
+  }, [user, isLoaded]);
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(profileForm),
-      });
-
-      if (response.ok) {
-        setStep('credentials');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create profile');
-      }
-    } catch (error) {
-      console.error('Profile creation error:', error);
-      alert('Failed to create profile. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Profile creation now handled by /onboarding page
+    // Just move to next step
+    setStep('credentials');
+    setLoading(false);
   };
 
   const handleCredentialSubmit = async (e: React.FormEvent) => {

@@ -66,12 +66,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         {isBuildTime ? children : (
-          <ClerkProvider
-            signInUrl="/sign-in"
-            signUpUrl="/sign-up"
-            afterSignInUrl="/onboarding"
-            afterSignUpUrl="/onboarding"
-          >
+          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
             {children}
           </ClerkProvider>
         )}

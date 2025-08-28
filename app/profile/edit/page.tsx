@@ -166,79 +166,27 @@ export default function EditProfilePage() {
     }
   }, [clerkUser.user, clerkUser.isLoaded, router]);
 
+  // Initialize form with user data
   useEffect(() => {
     if (clerkUser.user && clerkUser.isLoaded) {
-      loadExistingProfile();
+      setProfileForm(prev => ({
+        ...prev,
+        first_name: clerkUser.user.firstName ?? '',
+        last_name: clerkUser.user.lastName ?? '',
+        public_email: clerkUser.user.emailAddresses[0]?.emailAddress ?? ''
+      }));
     }
   }, [clerkUser.user, clerkUser.isLoaded]);
-
-  const loadExistingProfile = async () => {
-    if (!clerkUser.user) return;
-    
-    console.log('🔍 Loading profile for user:', clerkUser.user.emailAddresses?.[0]?.emailAddress);
-    
-    try {
-      const response = await fetch('/api/profile', {
-        credentials: 'include',
-      });
-      
-      console.log('📡 API Response status:', response.status);
-      
-      if (response.ok) {
-        const profile = await response.json();
-        console.log('✅ Profile loaded successfully:', profile);
-        // Ensure arrays are always initialized as arrays
-        setProfileForm({
-          ...profile,
-          specializations: profile.specializations || [],
-          states: profile.states || [],
-          software: profile.software || [],
-          other_software: profile.other_software || []
-        });
-      } else {
-        // No profile exists, redirect to join
-        console.log('❌ No profile found, redirecting to /join');
-        router.push('/join');
-      }
-    } catch (error) {
-      console.error('❌ Error loading profile:', error);
-      router.push('/join');
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Debug: Log what we're sending
-    console.log('Submitting profile data:', profileForm);
-    
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(profileForm),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Profile update successful:', result);
-        alert('Profile updated successfully!');
-        router.push('/');
-      } else {
-        const errorData = await response.json();
-        console.error('Profile update failed:', errorData);
-        throw new Error(errorData.error || 'Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Profile update error:', error);
-      alert('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Profile updates now handled by /onboarding page
+    // Just redirect to home for now
+    alert('Profile update functionality coming soon!');
+    router.push('/');
+    setLoading(false);
   };
 
   const updateForm = (field: keyof ProfileForm, value: any) => {

@@ -12,29 +12,19 @@ export default function Page() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  // Check if signed-in user has a profile
+  // Redirect to profile edit if user is signed in
   useEffect(() => {
     if (user && isLoaded) {
-      checkUserProfile();
+      router.push('/profile/edit');
     }
-  }, [user, isLoaded]);
+  }, [user, isLoaded, router]);
 
-  const checkUserProfile = async () => {
-    try {
-      const response = await fetch('/api/profile', {
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        // No profile exists, redirect to join
-        router.push('/join');
-      }
-    } catch (error) {
-      console.error('Error checking profile:', error);
-      // On error, redirect to join to be safe
-      router.push('/join');
+  // Redirect to profile edit if user is signed in
+  useEffect(() => {
+    if (user && isLoaded) {
+      router.push('/profile/edit');
     }
-  };
+  }, [user, isLoaded, router]);
   const features = [
     {
       title: 'Verified Professionals',
