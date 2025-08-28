@@ -2,8 +2,8 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
-// Check if we're in build mode (no Clerk environment variables)
-const isBuildTime = typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+// Check if we're in build mode or runtime without Clerk environment variables
+const isBuildTime = typeof window === 'undefined' || (typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export function JoinButton() {
   // During build time, show a simple fallback
@@ -16,6 +16,12 @@ export function JoinButton() {
         <button className="rounded-2xl bg-slate-900 text-white text-sm px-4 py-2 shadow hover:shadow-md">
           Join Now
         </button>
+        <Link 
+          href="/profile/edit" 
+          className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+        >
+          Edit Profile
+        </Link>
       </div>
     );
   }

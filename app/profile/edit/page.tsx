@@ -105,7 +105,11 @@ const softwareOptions = [
 ];
 
 export default function EditProfilePage() {
-  // Only use Clerk hooks on the client side
+  // Check if we're in build mode (no Clerk environment variables)
+  const isBuildTime = typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  
+  // Use Clerk hooks when available, fallback to local state
+  const clerkUser = isBuildTime ? { user: null, isLoaded: false } : useUser();
   const [user, setUser] = useState<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
@@ -126,22 +130,26 @@ export default function EditProfilePage() {
     other_software: []
   });
 
-  // Load user data only on client side
+  // Load user data from Clerk when available
   useEffect(() => {
-    // This will only run on the client
-    if (typeof window !== 'undefined') {
-      // Simulate loading state for now
+    if (clerkUser.user && clerkUser.isLoaded) {
+      setUser(clerkUser.user);
       setIsLoaded(true);
+    } else if (clerkUser.isLoaded && !clerkUser.user) {
+      // User is not signed in
+      router.push('/');
     }
-  }, []);
+  }, [clerkUser.user, clerkUser.isLoaded, router]);
 
   useEffect(() => {
-    if (user && isLoaded) {
+    if (clerkUser.user && clerkUser.isLoaded) {
       loadExistingProfile();
     }
-  }, [user, isLoaded]);
+  }, [clerkUser.user, clerkUser.isLoaded]);
 
   const loadExistingProfile = async () => {
+    if (!clerkUser.user) return;
+    
     try {
       const response = await fetch('/api/profile', {
         credentials: 'include',
@@ -218,9 +226,15 @@ export default function EditProfilePage() {
     );
   }
 
-  if (!user) {
-    router.push('/');
-    return null;
+  if (!clerkUser.user || !clerkUser.isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
+          <p className="mt-2 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
