@@ -121,9 +121,64 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Safe no-op to avoid 500s if any stale client code calls this
-export async function GET() {
-  return NextResponse.json({ ok: true });
+// Get profile by clerk_id
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const clerkId = searchParams.get('clerk_id');
+    
+    if (!clerkId) {
+      return NextResponse.json({ error: 'clerk_id parameter required' }, { status: 400 });
+    }
+
+    const supabase = supabaseService();
+
+    // Get basic profile info
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('clerk_id', clerkId)
+      .single();
+
+    if (profileError) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    // Get specializations
+    const { data: specializations } = await supabase
+      .from('profile_specializations')
+      .select('specialization_slug')
+      .eq('profile_id', profile.id);
+
+    // Get states
+    const { data: states } = await supabase
+      .from('profile_locations')
+      .select('state')
+      .eq('profile_id', profile.id);
+
+    // Get software
+    const { data: software } = await supabase
+      .from('profile_software')
+      .select('software_slug')
+      .eq('profile_id', profile.id);
+
+    // Combine all data
+    const profileData = {
+      ...profile,
+      specializations: specializations?.map(s => s.specialization_slug) || [],
+      states: states?.map(s => s.state) || [],
+      software: software?.map(s => s.software_slug) || []
+    };
+
+    return NextResponse.json(profileData);
+
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(request: NextRequest) {

@@ -164,16 +164,47 @@ export default function EditProfilePage() {
     // Don't auto-redirect unauthenticated users - let them see the page and handle auth naturally
   }, [clerkUser.user, clerkUser.isLoaded]);
 
-  // Initialize form with user data
+  // Load existing profile data when component mounts
   useEffect(() => {
-    if (clerkUser.user && clerkUser.isLoaded) {
-      setProfileForm(prev => ({
-        ...prev,
-        first_name: clerkUser.user.firstName ?? '',
-        last_name: clerkUser.user.lastName ?? '',
-        public_email: clerkUser.user.emailAddresses[0]?.emailAddress ?? ''
-      }));
-    }
+    const loadExistingProfile = async () => {
+      if (clerkUser.user && clerkUser.isLoaded) {
+        try {
+          const response = await fetch(`/api/profile?clerk_id=${clerkUser.user.id}`);
+          if (response.ok) {
+            const profileData = await response.json();
+            setProfileForm(prev => ({
+              ...prev,
+              first_name: profileData.first_name || clerkUser.user.firstName || '',
+              last_name: profileData.last_name || clerkUser.user.lastName || '',
+              headline: profileData.headline || '',
+              bio: profileData.bio || '',
+              credential_type: profileData.credential_type || '',
+              firm_name: profileData.firm_name || '',
+              public_email: profileData.public_email || clerkUser.user.emailAddresses[0]?.emailAddress || '',
+              phone: profileData.phone || '',
+              website_url: profileData.website_url || '',
+              linkedin_url: profileData.linkedin_url || '',
+              accepting_work: profileData.accepting_work ?? true,
+              specializations: profileData.specializations || [],
+              states: profileData.states || [],
+              software: profileData.software || [],
+              other_software: profileData.other_software || []
+            }));
+          }
+        } catch (error) {
+          console.error('Error loading profile:', error);
+          // Fallback to basic user data
+          setProfileForm(prev => ({
+            ...prev,
+            first_name: clerkUser.user.firstName ?? '',
+            last_name: clerkUser.user.lastName ?? '',
+            public_email: clerkUser.user.emailAddresses[0]?.emailAddress ?? ''
+          }));
+        }
+      }
+    };
+
+    loadExistingProfile();
   }, [clerkUser.user, clerkUser.isLoaded]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -475,123 +506,60 @@ export default function EditProfilePage() {
                 
               </div>
 
-                                                           {/* States */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-3">
-                    States Where You Work
-                  </label>
-                  <p className="text-xs text-slate-500 mb-3">
-                    Select the states where you're licensed to practice or can handle tax work.
-                  </p>
-                  <div className="relative">
-                    <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
-                      {profileForm.states.length === 0 && (
-                        <span className="text-slate-400 text-sm">Select states...</span>
-                      )}
-                      {profileForm.states.map((state) => (
-                        <span
-                          key={state}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
-                        >
-                          {state}
-                          <button
-                            type="button"
-                            onClick={() => toggleState(state)}
-                            className="ml-1 text-slate-400 hover:text-slate-600"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                    <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-50">
-                      <div className="p-2">
-                        <input
-                          type="text"
-                          placeholder="Search states..."
-                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-slate-300 focus:outline-none"
-                          onChange={(e) => {
-                            const searchTerm = e.target.value.toLowerCase();
-                            const filteredStates = states.filter(state => 
-                              state.toLowerCase().includes(searchTerm)
-                            );
-                            // You could add state filtering logic here if needed
-                          }}
-                        />
-                        <div className="grid grid-cols-3 gap-1">
-                          {states.map((state) => (
-                            <button
-                              key={state}
-                              type="button"
-                              onClick={() => toggleState(state)}
-                              className={`p-2 text-xs text-left rounded transition-colors ${
-                                safeIncludes(profileForm.states, state)
-                                  ? 'bg-slate-900 text-white'
-                                  : 'hover:bg-slate-50 text-slate-700'
-                              }`}
-                            >
-                              {state}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                                                                                         {/* States */}
+                 <div>
+                   <label className="block text-sm font-medium text-slate-700 mb-3">
+                     States Where You Work
+                   </label>
+                   <p className="text-xs text-slate-500 mb-3">
+                     Enter the states where you're licensed to practice or can handle tax work (comma-separated).
+                   </p>
+                   <input
+                     type="text"
+                     placeholder="e.g., CA, NY, TX"
+                     value={profileForm.states.join(', ')}
+                     onChange={(e) => {
+                       const stateList = e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
+                       updateForm('states', stateList);
+                     }}
+                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                   />
+                 </div>
 
-                           {/* Software Proficiency */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Tax Software & Tools You're Comfortable With
-                </label>
-                <p className="text-xs text-slate-500 mb-3">
-                  Select the software you're proficient in. This helps other professionals understand your technical capabilities.
-                </p>
-                
-                {/* Software Search */}
-                <div className="mb-3">
-                  <input
-                    type="text"
-                    placeholder="Search software..."
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none"
-                    onChange={(e) => {
-                      const searchTerm = e.target.value.toLowerCase();
-                      // You could add software filtering logic here if needed
-                    }}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
-                  {softwareOptions.map((software) => (
-                    <button
-                      key={software.slug}
-                      type="button"
-                      onClick={() => toggleSoftware(software.slug)}
-                      className={`p-2 rounded-lg text-xs border transition-colors ${
-                        safeIncludes(profileForm.software, software.slug)
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                      }`}
-                    >
-                      {software.label}
-                    </button>
-                  ))}
-                </div>
-                
-                <div className="mt-3">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Custom in-house tools, specialized software, etc."
-                    value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                    onChange={(e) => {
-                      const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
-                      updateForm('other_software', otherSoftware);
-                    }}
-                  />
-                </div>
-              </div>
+                                                       {/* Software Proficiency */}
+               <div>
+                 <label className="block text-sm font-medium text-slate-700 mb-3">
+                   Tax Software & Tools You're Comfortable With
+                 </label>
+                 <p className="text-xs text-slate-500 mb-3">
+                   Enter the software you're proficient in (comma-separated). This helps other professionals understand your technical capabilities.
+                 </p>
+                 
+                 <input
+                   type="text"
+                   placeholder="e.g., TurboTax, Lacerte, Drake Tax, Custom tools"
+                   value={profileForm.software.join(', ')}
+                   onChange={(e) => {
+                     const softwareList = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                     updateForm('software', softwareList);
+                   }}
+                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                 />
+                 
+                 <div className="mt-3">
+                   <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
+                   <input
+                     type="text"
+                     placeholder="e.g., Custom in-house tools, specialized software, etc."
+                     value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
+                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                     onChange={(e) => {
+                       const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                       updateForm('other_software', otherSoftware);
+                     }}
+                   />
+                 </div>
+               </div>
 
             <div className="mt-8 flex justify-end gap-4">
               <Link

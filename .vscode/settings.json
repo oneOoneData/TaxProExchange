@@ -1,0 +1,38 @@
+{
+    "search.useIgnoreFiles": true,
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/out": true,
+      "**/.turbo": true,
+      "**/.vercel": true,
+      "**/coverage": true,
+      "**/.pnpm-store": true,
+      "**/public/vendor": true,
+      "**/*.min.js": true,
+      "**/*.map": true
+    },
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/.next/**": true,
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/out/**": true,
+      "**/.turbo/**": true,
+      "**/.vercel/**": true,
+      "**/coverage/**": true,
+      "**/.pnpm-store/**": true,
+      "**/public/vendor/**": true
+    },
+    "files.exclude": {
+      "**/.git": true,
+      "**/.next": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/build": true
+    },
+    "typescript.tsserver.maxTsServerMemory": 4096
+  }
+  
