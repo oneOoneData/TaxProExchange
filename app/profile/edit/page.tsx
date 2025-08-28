@@ -221,9 +221,17 @@ export default function EditProfilePage() {
         await fetch('/api/mark-onboarding-complete', { method: 'POST' });
         router.push('/');
       } else {
-        const errorData = await response.json();
-        console.error('Profile update failed:', errorData);
-        throw new Error(errorData.error || 'Failed to update profile');
+        // Try to parse JSON; if empty, fall back to text/status
+        let msg = `Failed (${response.status})`;
+        try { 
+          const j = await response.json(); 
+          if (j?.error) msg = j.error; 
+        } catch { 
+          try { 
+            msg = await response.text(); 
+          } catch {} 
+        }
+        throw new Error(msg);
       }
     } catch (error) {
       console.error('Profile update error:', error);

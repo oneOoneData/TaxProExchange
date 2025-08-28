@@ -88,7 +88,7 @@ export async function PUT(request: Request) {
     }
 
     console.log('Profile saved successfully:', profile);
-    return NextResponse.json(profile);
+    return NextResponse.json({ ok: true, profile });
   } catch (error) {
     console.error('Profile update error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

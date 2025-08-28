@@ -9,6 +9,8 @@ const isProtectedRoute = createRouteMatcher([
   '/onboarding'
 ]);
 
+const isOnboard = createRouteMatcher(['/onboarding', '/profile/edit']);
+
 export default clerkMiddleware(async (auth, req) => {
   // Canonicalize apex → www to avoid SSO host flips
   if (req.nextUrl.hostname === 'taxproexchange.com') {
@@ -22,8 +24,25 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // For now, just let all protected routes pass through
-  // We'll re-enable onboarding logic once the basic profile saving works
+  // For protected routes, check if user needs onboarding
+  const { userId, sessionId } = await auth();
+  
+  // Not signed in? Let Clerk handle auth
+  if (!userId || !sessionId) {
+    return NextResponse.next();
+  }
+
+  // If already on onboarding pages, let it pass
+  if (isOnboard(req)) {
+    return NextResponse.next();
+  }
+
+  // Check if onboarding is complete via cookie
+  const hasCookie = req.cookies.get('onboarding_complete')?.value === '1';
+  if (!hasCookie) {
+    return NextResponse.redirect(new URL('/profile/edit', req.url));
+  }
+
   return NextResponse.next();
 });
 

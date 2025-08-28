@@ -3,9 +3,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 
-// Check if we're in build mode (no Clerk environment variables)
-const isBuildTime = typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -65,11 +62,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {isBuildTime ? children : (
-          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-            {children}
-          </ClerkProvider>
-        )}
+        <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );
