@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const clerkId = searchParams.get('clerk_id') ?? null;
@@ -66,7 +68,7 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

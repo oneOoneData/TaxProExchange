@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher, auth } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 // Only protect specific routes, keep "/" public
@@ -11,7 +11,7 @@ const isProtectedRoute = createRouteMatcher([
 
 const ONBOARDING_PATHS = ['/onboarding', '/profile/edit'];
 
-export default clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware((auth, req) => {
   // Canonicalize apex → www to avoid SSO host flips
   if (req.nextUrl.hostname === 'taxproexchange.com') {
     const url = req.nextUrl.clone();
@@ -25,7 +25,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // For protected routes, check if user needs onboarding
-  const { userId, sessionId } = await auth();
+  const { userId, sessionId } = auth;
   
   // Not signed in? Let Clerk handle auth
   if (!userId || !sessionId) {
