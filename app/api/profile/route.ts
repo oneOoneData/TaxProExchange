@@ -156,18 +156,18 @@ export async function GET(request: NextRequest) {
       .select('location_id')
       .eq('profile_id', profile.id);
 
-    // Get software
-    const { data: software, error: swError } = await supabase
-      .from('profile_software')
-      .select('software_id')
-      .eq('profile_id', profile.id);
+    // Get software (table doesn't exist yet, so return empty array)
+    // const { data: software, error: swError } = await supabase
+    //   .from('profile_software')
+    //   .select('software_id')
+    //   .eq('profile_id', profile.id);
 
     // Combine all the data
     const fullProfile = {
       ...profile,
       specializations: specializations?.map(s => s.specialization_id) || [],
       states: locations?.map(l => l.location_id) || [],
-      software: software?.map(s => s.software_id) || []
+      software: [] // Empty array for now since table doesn't exist
     };
 
     return NextResponse.json(fullProfile);
@@ -275,28 +275,28 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    // Update software
-    if (body.software && body.software.length > 0) {
-      // Delete existing software
-      await supabase
-        .from('profile_software')
-        .delete()
-        .eq('profile_id', existingProfile.id);
+    // Update software (table doesn't exist yet, so skip for now)
+    // if (body.software && body.software.length > 0) {
+    //   // Delete existing software
+    //   await supabase
+    //     .from('profile_software')
+    //     .delete()
+    //     .eq('profile_id', existingProfile.id);
 
-      // Insert new software
-      const softwareData = body.software.map((softwareSlug: string) => ({
-        profile_id: existingProfile.id,
-        software_id: softwareSlug
-      }));
+    //   // Insert new software
+    //   const softwareData = body.software.map((softwareSlug: string) => ({
+    //     profile_id: existingProfile.id,
+    //     software_id: softwareSlug
+    //   }));
 
-      const { error: swError } = await supabase
-        .from('profile_software')
-        .insert(softwareData);
+    //   const { error: swError } = await supabase
+    //     .from('profile_software')
+    //     .insert(softwareData);
 
-      if (swError) {
-        console.error('Software update error:', swError);
-      }
-    }
+    //   if (swError) {
+    //     console.error('Software update error:', swError);
+    //   }
+    // }
 
     return NextResponse.json(profile);
   } catch (error) {

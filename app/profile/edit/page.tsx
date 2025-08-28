@@ -175,13 +175,18 @@ export default function EditProfilePage() {
   const loadExistingProfile = async () => {
     if (!clerkUser.user) return;
     
+    console.log('🔍 Loading profile for user:', clerkUser.user.emailAddresses?.[0]?.emailAddress);
+    
     try {
       const response = await fetch('/api/profile', {
         credentials: 'include',
       });
       
+      console.log('📡 API Response status:', response.status);
+      
       if (response.ok) {
         const profile = await response.json();
+        console.log('✅ Profile loaded successfully:', profile);
         // Ensure arrays are always initialized as arrays
         setProfileForm({
           ...profile,
@@ -192,10 +197,11 @@ export default function EditProfilePage() {
         });
       } else {
         // No profile exists, redirect to join
+        console.log('❌ No profile found, redirecting to /join');
         router.push('/join');
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      console.error('❌ Error loading profile:', error);
       router.push('/join');
     }
   };
@@ -439,7 +445,7 @@ export default function EditProfilePage() {
               </div>
             </div>
 
-                                                    {/* Accepting Work */}
+             {/* Accepting Work */}
              <div className="flex items-center gap-3">
                <input
                  type="checkbox"
