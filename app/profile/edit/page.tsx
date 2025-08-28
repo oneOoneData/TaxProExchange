@@ -128,13 +128,7 @@ const softwareOptions = [
 ];
 
 export default function EditProfilePage() {
-  // Check if we're in build mode (no Clerk environment variables)
-  const isBuildTime = typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  
-  // Use Clerk hooks when available, fallback to local state
-  const clerkUser = isBuildTime ? { user: null, isLoaded: false } : useUser();
-  const [user, setUser] = useState<any>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { user, isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [profileForm, setProfileForm] = useState<ProfileForm>({
@@ -155,57 +149,53 @@ export default function EditProfilePage() {
     other_software: []
   });
 
-  // Load user data from Clerk when available
+  // Redirect unauthenticated users to home
   useEffect(() => {
-    if (clerkUser.user && clerkUser.isLoaded) {
-      setUser(clerkUser.user);
-      setIsLoaded(true);
+    if (isLoaded && !isSignedIn) {
+      router.push('/');
     }
-    // Don't auto-redirect unauthenticated users - let them see the page and handle auth naturally
-  }, [clerkUser.user, clerkUser.isLoaded]);
+  }, [isLoaded, isSignedIn, router]);
 
-  // Load existing profile data when component mounts
+  // Load existing profile when signed-in
   useEffect(() => {
-    const loadExistingProfile = async () => {
-      if (clerkUser.user && clerkUser.isLoaded) {
+    const run = async () => {
+      if (isLoaded && isSignedIn && user) {
         try {
-          const response = await fetch(`/api/profile?clerk_id=${clerkUser.user.id}`);
-          if (response.ok) {
-            const profileData = await response.json();
+          const res = await fetch(`/api/profile?clerk_id=${user.id}`);
+          if (res.ok) {
+            const p = await res.json();
             setProfileForm(prev => ({
               ...prev,
-              first_name: profileData.first_name || clerkUser.user.firstName || '',
-              last_name: profileData.last_name || clerkUser.user.lastName || '',
-              headline: profileData.headline || '',
-              bio: profileData.bio || '',
-              credential_type: profileData.credential_type || '',
-              firm_name: profileData.firm_name || '',
-              public_email: profileData.public_email || clerkUser.user.emailAddresses[0]?.emailAddress || '',
-              phone: profileData.phone || '',
-              website_url: profileData.website_url || '',
-              linkedin_url: profileData.linkedin_url || '',
-              accepting_work: profileData.accepting_work ?? true,
-              specializations: profileData.specializations || [],
-              states: profileData.states || [],
-              software: profileData.software || [],
-              other_software: profileData.other_software || []
+              first_name: p.first_name || user.firstName || '',
+              last_name:  p.last_name  || user.lastName  || '',
+              headline:   p.headline   || '',
+              bio:        p.bio        || '',
+              credential_type: p.credential_type || '',
+              firm_name:  p.firm_name  || '',
+              public_email: p.public_email || user.emailAddresses[0]?.emailAddress || '',
+              phone:      p.phone      || '',
+              website_url: p.website_url || '',
+              linkedin_url: p.linkedin_url || '',
+              accepting_work: p.accepting_work ?? true,
+              specializations: p.specializations || [],
+              states:     p.states     || [],
+              software:   p.software   || [],
+              other_software: p.other_software || []
             }));
           }
-        } catch (error) {
-          console.error('Error loading profile:', error);
-          // Fallback to basic user data
+        } catch (e) {
+          // best-effort fallback
           setProfileForm(prev => ({
             ...prev,
-            first_name: clerkUser.user.firstName ?? '',
-            last_name: clerkUser.user.lastName ?? '',
-            public_email: clerkUser.user.emailAddresses[0]?.emailAddress ?? ''
+            first_name: user?.firstName ?? '',
+            last_name:  user?.lastName  ?? '',
+            public_email: user?.emailAddresses[0]?.emailAddress ?? ''
           }));
         }
       }
     };
-
-    loadExistingProfile();
-  }, [clerkUser.user, clerkUser.isLoaded]);
+    run();
+  }, [isLoaded, isSignedIn, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,7 +208,7 @@ export default function EditProfilePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          clerk_id: clerkUser.user?.id,
+          clerk_id: user?.id,
           ...profileForm
         }),
       });
@@ -226,8 +216,9 @@ export default function EditProfilePage() {
       if (response.ok) {
         const result = await response.json();
         console.log('Profile update successful:', result);
-        alert('Profile updated successfully!');
-        // Navigate back to home page
+        
+        // Mark onboarding as complete and redirect
+        await fetch('/api/mark-onboarding-complete', { method: 'POST' });
         router.push('/');
       } else {
         const errorData = await response.json();
@@ -275,45 +266,13 @@ export default function EditProfilePage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
-          <p className="mt-2 text-slate-600">Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading…</p>
       </div>
     );
   }
 
-  if (!clerkUser.isLoaded) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
-          <p className="mt-2 text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show sign-in prompt if user is not authenticated
-  if (!clerkUser.user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <h1 className="text-2xl font-semibold text-slate-900 mb-4">Sign In Required</h1>
-          <p className="text-slate-600 mb-6">
-            You need to be signed in to edit your profile.
-          </p>
-          <Link
-            href="/"
-            className="inline-block rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 transition-colors"
-          >
-            Go to Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  if (!isSignedIn) return null; // redirected above
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">

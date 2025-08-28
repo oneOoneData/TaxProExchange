@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher, auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 // Only protect specific routes, keep "/" public
@@ -9,7 +9,9 @@ const isProtectedRoute = createRouteMatcher([
   '/onboarding'
 ]);
 
-export default clerkMiddleware((auth, req) => {
+const ONBOARDING_PATHS = ['/onboarding', '/profile/edit'];
+
+export default clerkMiddleware(async (auth, req) => {
   // Canonicalize apex → www to avoid SSO host flips
   if (req.nextUrl.hostname === 'taxproexchange.com') {
     const url = req.nextUrl.clone();
@@ -22,7 +24,27 @@ export default clerkMiddleware((auth, req) => {
     return NextResponse.next();
   }
 
-  // For protected routes, Clerk will handle auth automatically
+  // For protected routes, check if user needs onboarding
+  const { userId, sessionId } = await auth();
+  
+  // Not signed in? Let Clerk handle auth
+  if (!userId || !sessionId) {
+    return NextResponse.next();
+  }
+
+  // If already on onboarding pages, let it pass
+  if (ONBOARDING_PATHS.includes(req.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  // Check if onboarding is complete via cookie
+  const completeCookie = req.cookies.get('onboarding_complete')?.value === '1';
+
+  if (!completeCookie) {
+    // Redirect to profile edit if onboarding not complete
+    return NextResponse.redirect(new URL('/profile/edit', req.url));
+  }
+
   return NextResponse.next();
 });
 
