@@ -160,11 +160,9 @@ export default function EditProfilePage() {
     if (clerkUser.user && clerkUser.isLoaded) {
       setUser(clerkUser.user);
       setIsLoaded(true);
-    } else if (clerkUser.isLoaded && !clerkUser.user) {
-      // User is not signed in
-      router.push('/');
     }
-  }, [clerkUser.user, clerkUser.isLoaded, router]);
+    // Don't auto-redirect unauthenticated users - let them see the page and handle auth naturally
+  }, [clerkUser.user, clerkUser.isLoaded]);
 
   // Initialize form with user data
   useEffect(() => {
@@ -254,12 +252,32 @@ export default function EditProfilePage() {
     );
   }
 
-  if (!clerkUser.user || !clerkUser.isLoaded) {
+  if (!clerkUser.isLoaded) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
           <p className="mt-2 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show sign-in prompt if user is not authenticated
+  if (!clerkUser.user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <h1 className="text-2xl font-semibold text-slate-900 mb-4">Sign In Required</h1>
+          <p className="text-slate-600 mb-6">
+            You need to be signed in to edit your profile.
+          </p>
+          <Link
+            href="/"
+            className="inline-block rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 transition-colors"
+          >
+            Go to Home
+          </Link>
         </div>
       </div>
     );
@@ -457,108 +475,123 @@ export default function EditProfilePage() {
                 
               </div>
 
-                             {/* States */}
-               <div>
-                 <label className="block text-sm font-medium text-slate-700 mb-3">
-                   States Where You Work
-                 </label>
-                 <p className="text-xs text-slate-500 mb-3">
-                   Select the states where you're licensed to practice or can handle tax work.
-                 </p>
-                 <div className="relative">
-                   <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
-                     {profileForm.states.length === 0 && (
-                       <span className="text-slate-400 text-sm">Select states...</span>
-                     )}
-                     {profileForm.states.map((state) => (
-                       <span
-                         key={state}
-                         className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
-                       >
-                         {state}
-                         <button
-                           type="button"
-                           onClick={() => toggleState(state)}
-                           className="ml-1 text-slate-400 hover:text-slate-600"
-                         >
-                           ×
-                         </button>
-                       </span>
-                     ))}
-                   </div>
-                   <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-10">
-                     <div className="p-2">
-                       <input
-                         type="text"
-                         placeholder="Search states..."
-                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-slate-300 focus:outline-none"
-                         onChange={(e) => {
-                           const searchTerm = e.target.value.toLowerCase();
-                           const filteredStates = states.filter(state => 
-                             state.toLowerCase().includes(searchTerm)
-                           );
-                           // You could add state filtering logic here if needed
-                         }}
-                       />
-                       <div className="grid grid-cols-3 gap-1">
-                         {states.map((state) => (
-                           <button
-                             key={state}
-                             type="button"
-                             onClick={() => toggleState(state)}
-                             className={`p-2 text-xs text-left rounded transition-colors ${
-                               safeIncludes(profileForm.states, state)
-                                 ? 'bg-slate-900 text-white'
-                                 : 'hover:bg-slate-50 text-slate-700'
-                             }`}
-                           >
-                             {state}
-                           </button>
-                         ))}
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
+                                                           {/* States */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">
+                    States Where You Work
+                  </label>
+                  <p className="text-xs text-slate-500 mb-3">
+                    Select the states where you're licensed to practice or can handle tax work.
+                  </p>
+                  <div className="relative">
+                    <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
+                      {profileForm.states.length === 0 && (
+                        <span className="text-slate-400 text-sm">Select states...</span>
+                      )}
+                      {profileForm.states.map((state) => (
+                        <span
+                          key={state}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
+                        >
+                          {state}
+                          <button
+                            type="button"
+                            onClick={() => toggleState(state)}
+                            className="ml-1 text-slate-400 hover:text-slate-600"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-50">
+                      <div className="p-2">
+                        <input
+                          type="text"
+                          placeholder="Search states..."
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-slate-300 focus:outline-none"
+                          onChange={(e) => {
+                            const searchTerm = e.target.value.toLowerCase();
+                            const filteredStates = states.filter(state => 
+                              state.toLowerCase().includes(searchTerm)
+                            );
+                            // You could add state filtering logic here if needed
+                          }}
+                        />
+                        <div className="grid grid-cols-3 gap-1">
+                          {states.map((state) => (
+                            <button
+                              key={state}
+                              type="button"
+                              onClick={() => toggleState(state)}
+                              className={`p-2 text-xs text-left rounded transition-colors ${
+                                safeIncludes(profileForm.states, state)
+                                  ? 'bg-slate-900 text-white'
+                                  : 'hover:bg-slate-50 text-slate-700'
+                              }`}
+                            >
+                              {state}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-             {/* Software Proficiency */}
-             <div>
-               <label className="block text-sm font-medium text-slate-700 mb-3">
-                 Tax Software & Tools You're Comfortable With
-               </label>
-               <p className="text-xs text-slate-500 mb-3">
-                 Select the software you're proficient in. This helps other professionals understand your technical capabilities.
-               </p>
-               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                 {softwareOptions.map((software) => (
-                   <button
-                     key={software.slug}
-                     type="button"
-                     onClick={() => toggleSoftware(software.slug)}
-                     className={`p-2 rounded-lg text-xs border transition-colors ${
-                       safeIncludes(profileForm.software, software.slug)
-                         ? 'bg-slate-900 text-white border-slate-900'
-                         : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                     }`}
-                   >
-                     {software.label}
-                   </button>
-                 ))}
-               </div>
-               <div className="mt-3">
-                 <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
-                 <input
-                   type="text"
-                   placeholder="e.g., Custom in-house tools, specialized software, etc."
-                   value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
-                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                   onChange={(e) => {
-                     const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
-                     updateForm('other_software', otherSoftware);
-                   }}
-                 />
-               </div>
-             </div>
+                           {/* Software Proficiency */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  Tax Software & Tools You're Comfortable With
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+                </p>
+                
+                {/* Software Search */}
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    placeholder="Search software..."
+                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none"
+                    onChange={(e) => {
+                      const searchTerm = e.target.value.toLowerCase();
+                      // You could add software filtering logic here if needed
+                    }}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
+                  {softwareOptions.map((software) => (
+                    <button
+                      key={software.slug}
+                      type="button"
+                      onClick={() => toggleSoftware(software.slug)}
+                      className={`p-2 rounded-lg text-xs border transition-colors ${
+                        safeIncludes(profileForm.software, software.slug)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {software.label}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Custom in-house tools, specialized software, etc."
+                    value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    onChange={(e) => {
+                      const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+                      updateForm('other_software', otherSoftware);
+                    }}
+                  />
+                </div>
+              </div>
 
             <div className="mt-8 flex justify-end gap-4">
               <Link

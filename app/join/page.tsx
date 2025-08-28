@@ -554,82 +554,97 @@ export default function JoinPage() {
                 </div>
               </div>
 
-                             {/* States */}
-               <div>
-                 <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
-                 <div className="relative">
-                   <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
-                     {profileForm.states.length === 0 && (
-                       <span className="text-slate-400 text-sm">Select states...</span>
-                     )}
-                     {safeMap(profileForm.states, (state) => (
-                       <span
-                         key={state}
-                         className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
-                       >
-                         {state}
-                         <button
-                           type="button"
-                           onClick={() => toggleState(state)}
-                           className="ml-1 text-slate-400 hover:text-slate-600"
-                         >
-                           ×
-                         </button>
-                       </span>
-                     ))}
-                   </div>
-                   <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-10">
-                     <div className="p-2">
-                       <input
-                         type="text"
-                         placeholder="Search states..."
-                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-slate-300 focus:outline-none"
-                       />
-                       <div className="grid grid-cols-3 gap-1">
-                         {safeMap(states, (state) => (
-                           <button
-                             key={state}
-                             type="button"
-                             onClick={() => toggleState(state)}
-                             className={`p-2 text-xs text-left rounded transition-colors ${
-                               safeIncludes(profileForm.states, state)
-                                 ? 'bg-slate-900 text-white'
-                                 : 'hover:bg-slate-50 text-slate-700'
-                             }`}
-                           >
-                             {state}
-                           </button>
-                         ))}
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-
-              {/* Software Proficiency */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Tax Software & Tools You're Comfortable With
-                </label>
-                <p className="text-xs text-slate-500 mb-3">
-                  Select the software you're proficient in. This helps other professionals understand your technical capabilities.
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {safeMap(softwareOptions, (software) => (
-                    <button
-                      key={software.slug}
-                      type="button"
-                      onClick={() => toggleSoftware(software.slug)}
-                      className={`p-2 rounded-lg text-xs border transition-colors ${
-                        safeIncludes(profileForm.software, software.slug)
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-300 hover:border-slate-400'
-                      }`}
-                    >
-                      {software.label}
-                    </button>
-                  ))}
+                                                           {/* States */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
+                  <div className="relative">
+                    <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
+                      {profileForm.states.length === 0 && (
+                        <span className="text-slate-400 text-sm">Select states...</span>
+                      )}
+                      {safeMap(profileForm.states, (state) => (
+                        <span
+                          key={state}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
+                        >
+                          {state}
+                          <button
+                            type="button"
+                            onClick={() => toggleState(state)}
+                            className="ml-1 text-slate-400 hover:text-slate-600"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-50">
+                      <div className="p-2">
+                        <input
+                          type="text"
+                          placeholder="Search states..."
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-slate-300 focus:outline-none"
+                        />
+                        <div className="grid grid-cols-3 gap-1">
+                          {safeMap(states, (state) => (
+                            <button
+                              key={state}
+                              type="button"
+                              onClick={() => toggleState(state)}
+                              className={`p-2 text-xs text-left rounded transition-colors ${
+                                safeIncludes(profileForm.states, state)
+                                  ? 'bg-slate-900 text-white'
+                                  : 'hover:bg-slate-50 text-slate-700'
+                              }`}
+                            >
+                              {state}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
+                             {/* Software Proficiency */}
+               <div>
+                 <label className="block text-sm font-medium text-slate-700 mb-3">
+                   Tax Software & Tools You're Comfortable With
+                 </label>
+                 <p className="text-xs text-slate-500 mb-3">
+                   Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+                 </p>
+                 
+                 {/* Software Search */}
+                 <div className="mb-3">
+                   <input
+                     type="text"
+                     placeholder="Search software..."
+                     className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-300 focus:outline-none"
+                     onChange={(e) => {
+                       const searchTerm = e.target.value.toLowerCase();
+                       // You could add software filtering logic here if needed
+                     }}
+                   />
+                 </div>
+                 
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
+                   {safeMap(softwareOptions, (software) => (
+                     <button
+                       key={software.slug}
+                       type="button"
+                       onClick={() => toggleSoftware(software.slug)}
+                       className={`p-2 rounded-lg text-xs border transition-colors ${
+                         safeIncludes(profileForm.software, software.slug)
+                           ? 'bg-slate-900 text-white border-slate-900'
+                           : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                       }`}
+                     >
+                       {software.label}
+                     </button>
+                   ))}
+                 </div>
+                 
                  <div className="mt-3">
                    <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
                    <input
