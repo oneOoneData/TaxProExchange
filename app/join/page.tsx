@@ -580,51 +580,51 @@ export default function JoinPage() {
                 </div>
               </div>
 
-                             {/* States */}
-               <div>
-                 <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
-                 <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
-                   {safeMap(states, (state) => (
-                     <button
-                       key={state}
-                       type="button"
-                       onClick={() => toggleState(state)}
-                       className={`p-2 rounded text-xs border transition-colors ${
-                         safeIncludes(profileForm.states, state)
-                           ? 'bg-slate-900 text-white border-slate-900'
-                           : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                       }`}
-                     >
-                       {state}
-                     </button>
-                   ))}
-                 </div>
-               </div>
+              {/* States */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
+                <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
+                  {safeMap(states, (state) => (
+                    <button
+                      key={state}
+                      type="button"
+                      onClick={() => toggleState(state)}
+                      className={`p-2 rounded text-xs border transition-colors ${
+                        safeIncludes(profileForm.states, state)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {state}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-               {/* Software Proficiency */}
-               <div>
-                 <label className="block text-sm font-medium text-slate-700 mb-3">
-                   Tax Software & Tools You're Comfortable With
-                 </label>
-                 <p className="text-xs text-slate-500 mb-3">
-                   Select the software you're proficient in. This helps other professionals understand your technical capabilities.
-                 </p>
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                   {safeMap(softwareOptions, (software) => (
-                  <button
-                    key={software.slug}
-                    type="button"
-                    onClick={() => toggleSoftware(software.slug)}
-                    className={`p-2 rounded-lg text-xs border transition-colors ${
-                      safeIncludes(profileForm.software, software.slug)
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-300 hover:border-slate-400'
-                    }`}
-                  >
-                    {software.label}
-                  </button>
-                ))}
-                 </div>
+              {/* Software Proficiency */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  Tax Software & Tools You're Comfortable With
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {safeMap(softwareOptions, (software) => (
+                    <button
+                      key={software.slug}
+                      type="button"
+                      onClick={() => toggleSoftware(software.slug)}
+                      className={`p-2 rounded-lg text-xs border transition-colors ${
+                        safeIncludes(profileForm.software, software.slug)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {software.label}
+                    </button>
+                  ))}
+                </div>
                  <div className="mt-3">
                    <label className="block text-sm font-medium text-slate-700 mb-2">Other Software (comma-separated)</label>
                    <input
