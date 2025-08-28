@@ -223,12 +223,13 @@ export default function EditProfilePage() {
         }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Profile update successful:', result);
-        alert('Profile updated successfully!');
-        router.push('/');
-      } else {
+             if (response.ok) {
+         const result = await response.json();
+         console.log('Profile update successful:', result);
+         alert('Profile updated successfully!');
+         // Navigate back to home page
+         router.push('/');
+       } else {
         const errorData = await response.json();
         console.error('Profile update failed:', errorData);
         throw new Error(errorData.error || 'Failed to update profile');
@@ -322,12 +323,15 @@ export default function EditProfilePage() {
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
             <span className="font-semibold text-slate-900">TaxProExchange</span>
           </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">Edit Profile</span>
-            <Link href="/" className="text-sm text-slate-600 hover:text-slate-900">
-              Back to Home
-            </Link>
-          </div>
+                     <div className="flex items-center gap-4">
+             <span className="text-sm text-slate-600">Edit Profile</span>
+             <button
+               onClick={() => router.push('/')}
+               className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
+             >
+               Back to Home
+             </button>
+           </div>
         </div>
       </header>
 
@@ -561,21 +565,22 @@ export default function EditProfilePage() {
                  </div>
                </div>
 
-            <div className="mt-8 flex justify-end gap-4">
-              <Link
-                href="/"
-                className="rounded-xl border border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? 'Updating...' : 'Update Profile'}
-              </button>
-            </div>
+                         <div className="mt-8 flex justify-end gap-4">
+               <button
+                 type="button"
+                 onClick={() => router.push('/')}
+                 className="rounded-xl border border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
+               >
+                 Cancel
+               </button>
+               <button
+                 type="submit"
+                 disabled={loading}
+                 className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+               >
+                 {loading ? 'Updating...' : 'Update Profile'}
+               </button>
+             </div>
           </form>
         </div>
       </div>
