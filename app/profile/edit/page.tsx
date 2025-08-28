@@ -20,6 +20,8 @@ interface ProfileForm {
   website_url: string;
   linkedin_url: string;
   accepting_work: boolean;
+  specializations: string[];
+  states: string[];
   software: string[];
   other_software: string[];
 }
@@ -29,6 +31,27 @@ const credentialTypes = [
   { value: 'EA', label: 'EA (Enrolled Agent)' },
   { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
   { value: 'Other', label: 'Other Tax Professional' }
+];
+
+const specializations = [
+  { slug: 's_corp', label: 'S-Corporation' },
+  { slug: 'multi_state', label: 'Multi-State' },
+  { slug: 'real_estate', label: 'Real Estate' },
+  { slug: 'crypto', label: 'Cryptocurrency' },
+  { slug: 'irs_rep', label: 'IRS Representation' },
+  { slug: '1040', label: 'Individual Returns' },
+  { slug: 'business', label: 'Business Returns' },
+  { slug: 'partnership', label: 'Partnership Returns' },
+  { slug: 'estate_tax', label: 'Estate & Gift Tax' },
+  { slug: 'international', label: 'International Tax' }
+];
+
+const states = [
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
 const softwareOptions = [
@@ -126,6 +149,8 @@ export default function EditProfilePage() {
     website_url: '',
     linkedin_url: '',
     accepting_work: true,
+    specializations: [],
+    states: [],
     software: [],
     other_software: []
   });
@@ -157,9 +182,11 @@ export default function EditProfilePage() {
       
       if (response.ok) {
         const profile = await response.json();
-        // Ensure software arrays are always initialized as arrays
+        // Ensure arrays are always initialized as arrays
         setProfileForm({
           ...profile,
+          specializations: profile.specializations || [],
+          states: profile.states || [],
           software: profile.software || [],
           other_software: profile.other_software || []
         });
@@ -177,6 +204,9 @@ export default function EditProfilePage() {
     e.preventDefault();
     setLoading(true);
     
+    // Debug: Log what we're sending
+    console.log('Submitting profile data:', profileForm);
+    
     try {
       const response = await fetch('/api/profile', {
         method: 'PUT',
@@ -188,10 +218,13 @@ export default function EditProfilePage() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log('Profile update successful:', result);
         alert('Profile updated successfully!');
         router.push('/');
       } else {
         const errorData = await response.json();
+        console.error('Profile update failed:', errorData);
         throw new Error(errorData.error || 'Failed to update profile');
       }
     } catch (error) {
@@ -204,6 +237,24 @@ export default function EditProfilePage() {
 
   const updateForm = (field: keyof ProfileForm, value: any) => {
     setProfileForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleSpecialization = (specSlug: string) => {
+    setProfileForm(prev => ({
+      ...prev,
+      specializations: prev.specializations.includes(specSlug)
+        ? prev.specializations.filter(s => s !== specSlug)
+        : [...prev.specializations, specSlug]
+    }));
+  };
+
+  const toggleState = (state: string) => {
+    setProfileForm(prev => ({
+      ...prev,
+      states: prev.states.includes(state)
+        ? prev.states.filter(s => s !== state)
+        : [...prev.states, state]
+    }));
   };
 
   const toggleSoftware = (softwareSlug: string) => {
@@ -388,7 +439,7 @@ export default function EditProfilePage() {
               </div>
             </div>
 
-                         {/* Accepting Work */}
+                                                    {/* Accepting Work */}
              <div className="flex items-center gap-3">
                <input
                  type="checkbox"
@@ -401,6 +452,66 @@ export default function EditProfilePage() {
                  I am currently accepting new work and collaborations
                </label>
              </div>
+
+              {/* Specializations */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  Tax Specializations & Areas of Expertise
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Select the types of tax work you specialize in and want to do.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {specializations.map((spec) => (
+                    <button
+                      key={spec.slug}
+                      type="button"
+                      onClick={() => toggleSpecialization(spec.slug)}
+                      className={`p-2 rounded-lg text-xs border transition-colors ${
+                        safeIncludes(profileForm.specializations, spec.slug)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {spec.label}
+                    </button>
+                  ))}
+                </div>
+                {/* Debug info */}
+                <p className="text-xs text-red-500 mt-2">
+                  Debug: {specializations.length} specializations loaded
+                </p>
+              </div>
+
+              {/* States */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-3">
+                  States Where You Work
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Select the states where you're licensed to practice or can handle tax work.
+                </p>
+                <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
+                  {states.map((state) => (
+                    <button
+                      key={state}
+                      type="button"
+                      onClick={() => toggleState(state)}
+                      className={`p-2 rounded text-xs border transition-colors ${
+                        safeIncludes(profileForm.states, state)
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                      }`}
+                    >
+                      {state}
+                    </button>
+                  ))}
+                </div>
+                {/* Debug info */}
+                <p className="text-xs text-red-500 mt-2">
+                  Debug: {states.length} states loaded
+                </p>
+              </div>
 
              {/* Software Proficiency */}
              <div>

@@ -130,24 +130,47 @@ export async function GET(request: NextRequest) {
 
     const supabase = supabaseService();
     
-    const { data: profile, error } = await supabase
+    // First get the basic profile
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        profile_specializations(specialization_id),
-        profile_locations(location_id)
-      `)
-      .eq('clerk_id', userId)
+      .select('*')
+      .eq('user_id', userId)
       .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
+    if (profileError) {
+      if (profileError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
       }
-      throw error;
+      throw profileError;
     }
 
-    return NextResponse.json(profile);
+    // Get specializations
+    const { data: specializations, error: specError } = await supabase
+      .from('profile_specializations')
+      .select('specialization_id')
+      .eq('profile_id', profile.id);
+
+    // Get states
+    const { data: locations, error: locError } = await supabase
+      .from('profile_locations')
+      .select('location_id')
+      .eq('profile_id', profile.id);
+
+    // Get software
+    const { data: software, error: swError } = await supabase
+      .from('profile_software')
+      .select('software_id')
+      .eq('profile_id', profile.id);
+
+    // Combine all the data
+    const fullProfile = {
+      ...profile,
+      specializations: specializations?.map(s => s.specialization_id) || [],
+      states: locations?.map(l => l.location_id) || [],
+      software: software?.map(s => s.software_id) || []
+    };
+
+    return NextResponse.json(fullProfile);
 
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -168,6 +191,19 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const supabase = supabaseService();
 
+    // First, get the existing profile to get the profile_id
+    const { data: existingProfile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('Profile fetch error:', fetchError);
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    // Update basic profile info
     const { data: profile, error } = await supabase
       .from('profiles')
       .update({
@@ -184,13 +220,82 @@ export async function PUT(request: NextRequest) {
         accepting_work: body.accepting_work,
         updated_at: new Date().toISOString()
       })
-      .eq('clerk_id', userId)
+      .eq('user_id', userId)
       .select()
       .single();
 
     if (error) {
       console.error('Profile update error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Update specializations
+    if (body.specializations && body.specializations.length > 0) {
+      // Delete existing specializations
+      await supabase
+        .from('profile_specializations')
+        .delete()
+        .eq('profile_id', existingProfile.id);
+
+      // Insert new specializations
+      const specializationData = body.specializations.map((specSlug: string) => ({
+        profile_id: existingProfile.id,
+        specialization_id: specSlug
+      }));
+
+      const { error: specError } = await supabase
+        .from('profile_specializations')
+        .insert(specializationData);
+
+      if (specError) {
+        console.error('Specialization update error:', specError);
+      }
+    }
+
+    // Update states
+    if (body.states && body.states.length > 0) {
+      // Delete existing locations
+      await supabase
+        .from('profile_locations')
+        .delete()
+        .eq('profile_id', existingProfile.id);
+
+      // Insert new locations
+      const locationData = body.states.map((state: string) => ({
+        profile_id: existingProfile.id,
+        location_id: state
+      }));
+
+      const { error: locError } = await supabase
+        .from('profile_locations')
+        .insert(locationData);
+
+      if (locError) {
+        console.error('Location update error:', locError);
+      }
+    }
+
+    // Update software
+    if (body.software && body.software.length > 0) {
+      // Delete existing software
+      await supabase
+        .from('profile_software')
+        .delete()
+        .eq('profile_id', existingProfile.id);
+
+      // Insert new software
+      const softwareData = body.software.map((softwareSlug: string) => ({
+        profile_id: existingProfile.id,
+        software_id: softwareSlug
+      }));
+
+      const { error: swError } = await supabase
+        .from('profile_software')
+        .insert(softwareData);
+
+      if (swError) {
+        console.error('Software update error:', swError);
+      }
     }
 
     return NextResponse.json(profile);
