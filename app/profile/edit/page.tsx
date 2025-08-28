@@ -572,9 +572,12 @@ export default function EditProfilePage() {
                   </div>
 
                   {/* Add extra spacing to prevent overlap */}
-                  <div className="mb-12"></div>
+                  <div className="mb-12">                   </div>
 
-                                                        {/* Software Proficiency */}
+                   {/* Add extra spacing to prevent overlap */}
+                   <div className="mb-16"></div>
+
+                                                         {/* Software Proficiency */}
                <div>
                  <label className="block text-sm font-medium text-slate-700 mb-3">
                    Tax Software & Tools You're Comfortable With
