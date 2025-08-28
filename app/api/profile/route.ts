@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .insert({
-        user_id: userId,
+        clerk_id: userId,
         first_name: body.first_name,
         last_name: body.last_name,
         headline: body.headline,
@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest) {
     const { data: existingProfile, error: fetchError } = await supabase
       .from('profiles')
       .select('id')
-      .eq('user_id', userId)
+      .eq('clerk_id', userId)
       .single();
 
     if (fetchError) {
@@ -163,9 +163,10 @@ export async function PUT(request: NextRequest) {
         website_url: body.website_url,
         linkedin_url: body.linkedin_url,
         accepting_work: body.accepting_work,
+        other_software: body.other_software || [],
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', userId)
+      .eq('clerk_id', userId)
       .select()
       .single();
 
@@ -175,75 +176,85 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update specializations
-    if (body.specializations && body.specializations.length > 0) {
+    if (body.specializations) {
       // Delete existing specializations
       await supabase
         .from('profile_specializations')
         .delete()
         .eq('profile_id', existingProfile.id);
 
-      // Insert new specializations
-      const specializationData = body.specializations.map((specSlug: string) => ({
-        profile_id: existingProfile.id,
-        specialization_id: specSlug
-      }));
+      // Insert new specializations if any
+      if (body.specializations.length > 0) {
+        const specializationData = body.specializations.map((specSlug: string) => ({
+          profile_id: existingProfile.id,
+          specialization_slug: specSlug
+        }));
 
-      const { error: specError } = await supabase
-        .from('profile_specializations')
-        .insert(specializationData);
+        const { error: specError } = await supabase
+          .from('profile_specializations')
+          .insert(specializationData);
 
-      if (specError) {
-        console.error('Specialization update error:', specError);
+        if (specError) {
+          console.error('Specialization update error:', specError);
+        }
       }
     }
 
     // Update states
-    if (body.states && body.states.length > 0) {
+    if (body.states) {
       // Delete existing locations
       await supabase
         .from('profile_locations')
         .delete()
         .eq('profile_id', existingProfile.id);
 
-      // Insert new locations
-      const locationData = body.states.map((state: string) => ({
-        profile_id: existingProfile.id,
-        location_id: state
-      }));
+      // Insert new locations if any
+      if (body.states.length > 0) {
+        const locationData = body.states.map((state: string) => ({
+          profile_id: existingProfile.id,
+          state: state
+        }));
 
-      const { error: locError } = await supabase
-        .from('profile_locations')
-        .insert(locationData);
+        const { error: locError } = await supabase
+          .from('profile_locations')
+          .insert(locationData);
 
-      if (locError) {
-        console.error('Location update error:', locError);
+        if (locError) {
+          console.error('Location update error:', locError);
+        }
       }
     }
 
-    // Update software (table doesn't exist yet, so skip for now)
-    // if (body.software && body.software.length > 0) {
-    //   // Delete existing software
-    //   await supabase
-    //     .from('profile_software')
-    //     .delete()
-    //     .eq('profile_id', existingProfile.id);
+    // Update software
+    if (body.software) {
+      // Delete existing software
+      await supabase
+        .from('profile_software')
+        .delete()
+        .eq('profile_id', existingProfile.id);
 
-    //   // Insert new software
-    //   const softwareData = body.software.map((softwareSlug: string) => ({
-    //     profile_id: existingProfile.id,
-    //     software_id: softwareSlug
-    //   }));
+      // Insert new software if any
+      if (body.software.length > 0) {
+        const softwareData = body.software.map((softwareSlug: string) => ({
+          profile_id: existingProfile.id,
+          software_slug: softwareSlug
+        }));
 
-    //   const { error: swError } = await supabase
-    //     .from('profile_software')
-    //     .insert(softwareData);
+        const { error: swError } = await supabase
+          .from('profile_software')
+          .insert(softwareData);
 
-    //   if (swError) {
-    //     console.error('Software update error:', swError);
-    //   }
-    // }
+        if (swError) {
+          console.error('Software update error:', swError);
+        }
+      }
+    }
 
-    return NextResponse.json(profile);
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Profile updated successfully',
+      profile: profile
+    });
   } catch (error) {
     console.error('Profile update error:', error);
     return NextResponse.json(

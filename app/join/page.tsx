@@ -210,10 +210,32 @@ export default function JoinPage() {
     e.preventDefault();
     setLoading(true);
     
-    // Profile creation now handled by /onboarding page
-    // Just move to next step
-    setStep('credentials');
-    setLoading(false);
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...profileForm
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Profile creation successful:', result);
+        setStep('credentials');
+      } else {
+        const errorData = await response.json();
+        console.error('Profile creation failed:', errorData);
+        throw new Error(errorData.error || 'Failed to create profile');
+      }
+    } catch (error) {
+      console.error('Profile creation error:', error);
+      alert('Failed to create profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCredentialSubmit = async (e: React.FormEvent) => {
@@ -532,26 +554,57 @@ export default function JoinPage() {
                 </div>
               </div>
 
-              {/* States */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
-                <div className="grid grid-cols-5 md:grid-cols-10 gap-1">
-                  {safeMap(states, (state) => (
-                    <button
-                      key={state}
-                      type="button"
-                      onClick={() => toggleState(state)}
-                      className={`p-2 rounded text-xs border transition-colors ${
-                        safeIncludes(profileForm.states, state)
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                      }`}
-                    >
-                      {state}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                             {/* States */}
+               <div>
+                 <label className="block text-sm font-medium text-slate-700 mb-3">States Where You Work</label>
+                 <div className="relative">
+                   <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
+                     {profileForm.states.length === 0 && (
+                       <span className="text-slate-400 text-sm">Select states...</span>
+                     )}
+                     {safeMap(profileForm.states, (state) => (
+                       <span
+                         key={state}
+                         className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-lg border border-slate-200"
+                       >
+                         {state}
+                         <button
+                           type="button"
+                           onClick={() => toggleState(state)}
+                           className="ml-1 text-slate-400 hover:text-slate-600"
+                         >
+                           ×
+                         </button>
+                       </span>
+                     ))}
+                   </div>
+                   <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-slate-300 rounded-xl shadow-lg z-10">
+                     <div className="p-2">
+                       <input
+                         type="text"
+                         placeholder="Search states..."
+                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg mb-2 focus:ring-2 focus:ring-slate-300 focus:outline-none"
+                       />
+                       <div className="grid grid-cols-3 gap-1">
+                         {safeMap(states, (state) => (
+                           <button
+                             key={state}
+                             type="button"
+                             onClick={() => toggleState(state)}
+                             className={`p-2 text-xs text-left rounded transition-colors ${
+                               safeIncludes(profileForm.states, state)
+                                 ? 'bg-slate-900 text-white'
+                                 : 'hover:bg-slate-50 text-slate-700'
+                             }`}
+                           >
+                             {state}
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
 
               {/* Software Proficiency */}
               <div>

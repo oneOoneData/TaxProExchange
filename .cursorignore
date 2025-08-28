@@ -1,0 +1,13 @@
+node_modules/
+.next/
+dist/
+build/
+out/
+coverage/
+.turbo/
+.vercel/
+.pnpm-store/
+**/*.min.js
+**/*.map
+public/vendor/**
+tmp/
