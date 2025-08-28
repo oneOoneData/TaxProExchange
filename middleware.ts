@@ -11,7 +11,7 @@ const isProtectedRoute = createRouteMatcher([
 
 const ONBOARDING_PATHS = ['/onboarding', '/profile/edit'];
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   // Canonicalize apex → www to avoid SSO host flips
   if (req.nextUrl.hostname === 'taxproexchange.com') {
     const url = req.nextUrl.clone();
@@ -25,7 +25,7 @@ export default clerkMiddleware((auth, req) => {
   }
 
   // For protected routes, check if user needs onboarding
-  const { userId, sessionId } = auth;
+  const { userId, sessionId } = await auth();
   
   // Not signed in? Let Clerk handle auth
   if (!userId || !sessionId) {
