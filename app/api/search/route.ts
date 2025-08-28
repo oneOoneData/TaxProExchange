@@ -5,13 +5,25 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('Supabase environment variables not configured');
+}
+
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if Supabase is configured
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Database not configured' },
+        { status: 503 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
     const specialization = searchParams.get('specialization') || '';

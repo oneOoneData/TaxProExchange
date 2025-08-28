@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { safeMap, safeLength } from '@/lib/safe';
 
 export const dynamic = 'force-dynamic';
 
@@ -260,7 +261,7 @@ export default function SearchPage() {
                         <p className="text-slate-600 text-sm mb-3">{profile.bio}</p>
                         
                         <div className="flex flex-wrap gap-2 mb-3">
-                          {profile.specializations.map(spec => {
+                          {safeMap(profile.specializations, spec => {
                             const specLabel = specializations.find(s => s.slug === spec)?.label || spec;
                             return (
                               <span
@@ -274,7 +275,7 @@ export default function SearchPage() {
                         </div>
                         
                         <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span>States: {profile.states.join(', ')}</span>
+                          <span>States: {profile.states ? profile.states.join(', ') : 'Not specified'}</span>
                           <span className={profile.accepting_work ? 'text-emerald-600' : 'text-slate-400'}>
                             {profile.accepting_work ? 'Accepting work' : 'Not accepting work'}
                           </span>

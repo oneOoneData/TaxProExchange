@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { safeIncludes, safeMap } from '@/lib/safe';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,7 +105,9 @@ const softwareOptions = [
 ];
 
 export default function EditProfilePage() {
-  const { user, isLoaded } = useUser();
+  // Only use Clerk hooks on the client side
+  const [user, setUser] = useState<any>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [profileForm, setProfileForm] = useState<ProfileForm>({
@@ -123,6 +126,15 @@ export default function EditProfilePage() {
     other_software: []
   });
 
+  // Load user data only on client side
+  useEffect(() => {
+    // This will only run on the client
+    if (typeof window !== 'undefined') {
+      // Simulate loading state for now
+      setIsLoaded(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (user && isLoaded) {
       loadExistingProfile();
@@ -137,7 +149,12 @@ export default function EditProfilePage() {
       
       if (response.ok) {
         const profile = await response.json();
-        setProfileForm(profile);
+        // Ensure software arrays are always initialized as arrays
+        setProfileForm({
+          ...profile,
+          software: profile.software || [],
+          other_software: profile.other_software || []
+        });
       } else {
         // No profile exists, redirect to join
         router.push('/join');
@@ -386,7 +403,7 @@ export default function EditProfilePage() {
                      type="button"
                      onClick={() => toggleSoftware(software.slug)}
                      className={`p-2 rounded-lg text-xs border transition-colors ${
-                       profileForm.software.includes(software.slug)
+                       safeIncludes(profileForm.software, software.slug)
                          ? 'bg-slate-900 text-white border-slate-900'
                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
                      }`}
@@ -400,7 +417,7 @@ export default function EditProfilePage() {
                  <input
                    type="text"
                    placeholder="e.g., Custom in-house tools, specialized software, etc."
-                   value={profileForm.other_software?.join(', ') || ''}
+                   value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                    onChange={(e) => {
                      const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);

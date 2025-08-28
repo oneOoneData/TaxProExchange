@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { safeMap, safeLength } from '@/lib/safe';
 
 export const dynamic = 'force-dynamic';
 
@@ -204,7 +205,7 @@ export default function ProfilePage() {
             >
               <h2 className="text-xl font-semibold text-slate-900 mb-4">Specializations</h2>
               <div className="flex flex-wrap gap-2">
-                {profile.specializations.map(spec => {
+                {safeMap(profile.specializations, spec => {
                   const specLabel = specializations.find(s => s.slug === spec)?.label || spec;
                   return (
                     <span
