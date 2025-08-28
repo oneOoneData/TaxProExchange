@@ -1,54 +1,56 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-// Define what's public vs onboarding vs protected
-const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/join', '/sign-in', '/sign-up']);
+const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/privacy', '/terms']);
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit']);
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionId } = await auth(); // call synchronously inside clerkMiddleware
+export default clerkMiddleware((auth, req: NextRequest) => {
+  const { userId, sessionId } = auth();
+  const hostname = req.nextUrl.hostname;
+  
+  // Debug headers
+  const response = NextResponse.next();
+  response.headers.set('x-debug-host', hostname);
+  response.headers.set('x-debug-cookie', req.cookies.get('onboarding_complete')?.value || 'missing');
+  response.headers.set('x-debug-user-id', userId || 'none');
+  response.headers.set('x-debug-session-id', sessionId || 'none');
 
-  // Always allow public
+  // Localhost bypass for development
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    response.headers.set('x-debug-bypass', 'localhost');
+    return response;
+  }
+
+  // Public routes always allowed
   if (isPublic(req)) {
-    const res = NextResponse.next();
-    res.headers.set('x-debug-public', '1');
-    return res;
+    response.headers.set('x-debug-redirect', 'none (public)');
+    return response;
   }
 
-  // If not signed in → let Clerk handle
+  // No user - allow (will be handled by Clerk auth)
   if (!userId || !sessionId) {
-    const res = NextResponse.next();
-    res.headers.set('x-debug-signed-in', '0');
-    return res;
+    response.headers.set('x-debug-redirect', 'none (no user)');
+    return response;
   }
 
-  // Allow onboarding pages
+  // Onboarding routes always allowed for signed-in users
   if (isOnboarding(req)) {
-    const res = NextResponse.next();
-    res.headers.set('x-debug-onboarding-page', '1');
-    return res;
+    response.headers.set('x-debug-redirect', 'none (onboarding)');
+    return response;
   }
 
-  // Gate by cookie
-  const cookieVal = req.cookies.get('onboarding_complete')?.value ?? '';
-  const hasCookie = cookieVal === '1';
-
-  if (!hasCookie) {
-    const redirectUrl = new URL('/profile/edit', req.url);
-    const res = NextResponse.redirect(redirectUrl);
-    res.headers.set('x-debug-redirect', 'profile-edit');
-    res.headers.set('x-debug-cookie', cookieVal || 'missing');
-    res.headers.set('x-debug-domain', req.nextUrl.hostname);
-    return res;
+  // Check if onboarding is complete
+  const onboardingComplete = req.cookies.get('onboarding_complete')?.value === '1';
+  
+  if (!onboardingComplete) {
+    response.headers.set('x-debug-redirect', 'profile/edit (incomplete)');
+    return NextResponse.redirect(new URL('/profile/edit', req.url));
   }
 
-  const res = NextResponse.next();
-  res.headers.set('x-debug-cookie', cookieVal || 'missing');
-  res.headers.set('x-debug-domain', req.nextUrl.hostname);
-  return res;
+  response.headers.set('x-debug-redirect', 'none (complete)');
+  return response;
 });
 
 export const config = {
-  // exclude static files (anything with a dot), _next, and api
-  matcher: ['/((?!_next|.*\\..*|api).*)'],
+  matcher: ['/api/(.*)', '/((?!_next|.*\\..*).*)'],
 };

@@ -8,41 +8,42 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const url = new URL(req.url);
-  const host = url.hostname; // e.g. www.taxproexchange.com or *.vercel.app
-  // Use apex-wide cookie in prod; in preview, set to the preview hostname
-  const cookieDomain = host.endsWith('taxproexchange.com')
-    ? '.taxproexchange.com'
-    : host; // e.g. taxproexchange-git-xyz.vercel.app
+  const host = new URL(req.url).hostname;
+  console.log(`[debug] Setting onboarding_complete cookie for host: ${host}`);
 
-  const res = NextResponse.json({ ok: true, domain: cookieDomain });
-
-  // Clear any old cookies that might conflict (host-scoped or wrong domain)
-  // host-scoped
-  res.cookies.set('onboarding_complete', '', {
+  const cookie: Parameters<typeof NextResponse.prototype.cookies.set>[2] = {
     path: '/',
-    maxAge: 0,
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+    httpOnly: true,
     sameSite: 'lax',
-    secure: true,
-  });
-  // apex-scoped (prod)
-  res.cookies.set('onboarding_complete', '', {
-    path: '/',
-    domain: '.taxproexchange.com',
-    maxAge: 0,
-    sameSite: 'lax',
-    secure: true,
-  });
+    secure: process.env.NODE_ENV === 'production',
+  };
 
-  // Now set the good one
-  res.cookies.set('onboarding_complete', '1', {
-    path: '/',
-    domain: cookieDomain,
-    maxAge: 60 * 60 * 24 * 365,
-    httpOnly: true,      // flip to false temporarily only if you need to inspect via document.cookie
-    sameSite: 'lax',
-    secure: true,
-  });
+  // Set domain based on environment
+  if (host.endsWith('taxproexchange.com')) {
+    cookie.domain = '.taxproexchange.com';
+    console.log('[debug] Setting domain-scoped cookie for production');
+  } else if (host === 'localhost' || host === '127.0.0.1') {
+    // No domain for localhost - cookie will be host-only
+    console.log('[debug] Setting host-only cookie for localhost');
+  } else if (host.includes('vercel.app')) {
+    // Vercel preview deployments
+    cookie.domain = host;
+    console.log('[debug] Setting domain-scoped cookie for Vercel preview');
+  }
 
+  const res = NextResponse.json({ 
+    ok: true, 
+    host,
+    cookieDomain: cookie.domain || 'host-only',
+    message: 'Onboarding marked as complete'
+  });
+  
+  res.cookies.set('onboarding_complete', '1', cookie);
+  
+  // Add debug headers
+  res.headers.set('x-debug-cookie-set', 'true');
+  res.headers.set('x-debug-cookie-domain', cookie.domain || 'host-only');
+  
   return res;
 }

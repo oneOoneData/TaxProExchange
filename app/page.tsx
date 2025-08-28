@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { JoinButton } from '@/components/JoinButton';
 
 export const dynamic = 'force-dynamic';
@@ -11,20 +11,35 @@ export const dynamic = 'force-dynamic';
 export default function Page() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
 
-  // Redirect to profile edit if user is signed in
+  // Check onboarding status and redirect only if incomplete
   useEffect(() => {
     if (user && isLoaded) {
-      router.push('/profile/edit');
+      // Check if onboarding is complete via cookie
+      const onboardingComplete = document.cookie.includes('onboarding_complete=1');
+      
+      if (!onboardingComplete) {
+        console.log('[trace] router.push → /profile/edit (onboarding incomplete)');
+        router.push('/profile/edit');
+      } else {
+        console.log('[trace] onboarding complete, staying on home page');
+      }
+      setIsCheckingOnboarding(false);
+    } else if (isLoaded) {
+      setIsCheckingOnboarding(false);
     }
   }, [user, isLoaded, router]);
 
-  // Redirect to profile edit if user is signed in
-  useEffect(() => {
-    if (user && isLoaded) {
-      router.push('/profile/edit');
-    }
-  }, [user, isLoaded, router]);
+  // Show loading state while checking
+  if (isCheckingOnboarding) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+        <div className="text-slate-600">Loading...</div>
+      </div>
+    );
+  }
+
   const features = [
     {
       title: 'Verified Professionals',

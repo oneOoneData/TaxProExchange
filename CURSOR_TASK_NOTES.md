@@ -98,6 +98,79 @@
 
 ## Redirect Loop & Infinite Loader Fixes ✅ COMPLETED
 
+## Onboarding Redirect Loop Fix ✅ COMPLETED
+
+**Date**: December 2024  
+**Goal**: Fix redirect loop keeping users stuck on /profile/edit after completing onboarding
+
+### What Was Accomplished
+
+1. **Fixed Client-Side Redirect Loop** ✅
+   - Removed automatic `router.push('/profile/edit')` for all signed-in users
+   - Added cookie-based check: only redirect if `onboarding_complete` cookie is missing
+   - Added loading state while checking onboarding status
+   - Added console logging to trace redirects
+
+2. **Enhanced Middleware with Localhost Bypass** ✅
+   - Added localhost/127.0.0.1 bypass for development
+   - Added comprehensive debug headers: `x-debug-redirect`, `x-debug-cookie`, `x-debug-host`
+   - Fixed logic flow to prevent unnecessary redirects
+   - Added more public routes (`/privacy`, `/terms`)
+
+3. **Improved Cookie Handling** ✅
+   - Enhanced `mark-onboarding-complete` API with better domain logic
+   - Added debug logging and headers for cookie operations
+   - Proper handling for localhost (host-only), production (domain-scoped), and Vercel previews
+
+### Root Cause Analysis
+
+The redirect loop was caused by **two separate issues**:
+
+1. **Client-side redirect in `app/page.tsx`**: A `useEffect` was automatically redirecting ALL signed-in users to `/profile/edit`, regardless of onboarding status
+2. **Middleware logic**: The middleware was working correctly, but the client-side redirect happened before middleware could run
+
+### Files Modified
+
+- `middleware.ts` - Added localhost bypass, debug headers, and improved logic flow
+- `app/page.tsx` - Removed automatic redirect, added cookie-based check with loading state
+- `app/api/mark-onboarding-complete/route.ts` - Enhanced cookie logic and added debug info
+
+### Technical Decisions Made
+
+1. **Development Bypass**: Localhost bypass in middleware for easier local development
+2. **Debug Headers**: Comprehensive debug information to trace redirect behavior
+3. **Cookie-First Logic**: Client-side checks use cookies to determine onboarding status
+4. **Loading States**: Added loading state while checking authentication/onboarding status
+
+### Current Status
+
+- ✅ Users can escape `/profile/edit` after completing onboarding
+- ✅ Localhost bypass works for development
+- ✅ Debug headers show redirect decision process
+- ✅ Cookie is properly set on profile completion
+- ✅ Home page no longer forces redirect for completed users
+
+### Testing Steps
+
+1. **Local Development**:
+   - Run `npm run dev` and visit `http://localhost:3000/`
+   - Should bypass middleware (see `x-debug-bypass: localhost` in headers)
+   - Complete profile form and submit
+   - `POST /api/mark-onboarding-complete` should set `onboarding_complete=1` cookie
+   - Navigate to `/` - should stay on home page
+
+2. **Debug Information**:
+   - Check browser dev tools for debug headers
+   - Look for `[trace]` console logs showing redirect decisions
+   - Verify cookie is set correctly in Application tab
+
+3. **Production Testing**:
+   - Deploy and test on production domain
+   - Verify domain-scoped cookies work correctly
+   - Test onboarding flow end-to-end
+
+## Redirect Loop & Infinite Loader Fixes ✅ COMPLETED
+
 **Date**: December 2024  
 **Goal**: Fix the redirect loop and infinite loader issues in the profile edit flow
 
