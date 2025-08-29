@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { JoinButton } from '@/components/JoinButton';
 import UserMenu from '@/components/UserMenu';
+import Logo from '@/components/Logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,16 +68,15 @@ export default function Page() {
       {/* Nav */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
-            <span className="font-semibold text-slate-900">TaxProExchange</span>
-          </div>
+          <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="#features" className="hover:text-slate-900">Features</a>
             <a href="#how" className="hover:text-slate-900">How it works</a>
             <a href="#faq" className="hover:text-slate-900">FAQ</a>
             <a href="/search" className="hover:text-slate-900">Search</a>
-            <a href="/join" className="hover:text-slate-900">Join</a>
+            {!user && (
+              <a href="/join" className="hover:text-slate-900">Join</a>
+            )}
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
@@ -105,14 +105,16 @@ export default function Page() {
                 handoffs, overflow work, and representation. No payments or file exchange — just
                 verified connections.
               </p>
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <a href="/join" className="rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">
-                  Join Now
-                </a>
-                <a href="#features" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-5 py-3 text-sm font-medium hover:bg-slate-50">
-                  See how it works
-                </a>
-              </div>
+                              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  {!user && (
+                    <a href="/join" className="rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">
+                      Join Now
+                    </a>
+                  )}
+                  <a href="#features" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-5 py-3 text-sm font-medium hover:bg-slate-50">
+                    See how it works
+                  </a>
+                </div>
               <div className="mt-6 flex items-center gap-3 text-sm text-slate-500">
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Manual credential checks</span>
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Free to list during beta</span>

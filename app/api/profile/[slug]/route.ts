@@ -21,6 +21,7 @@ export async function GET(
   try {
     // Check if Supabase is configured
     if (!supabase) {
+      console.log('❌ Supabase not configured');
       return NextResponse.json(
         { error: 'Database not configured' },
         { status: 503 }
@@ -28,6 +29,9 @@ export async function GET(
     }
 
     const { slug } = await params;
+    
+    console.log('🔍 Looking for profile with slug:', slug);
+    console.log('🔍 Request URL:', request.url);
 
     // Fetch the profile
     const { data: profile, error: profileError } = await supabase
@@ -55,7 +59,32 @@ export async function GET(
       .eq('is_listed', true)
       .single();
 
+    console.log('🔍 Supabase query result:');
+    console.log('  - Profile data:', profile);
+    console.log('  - Profile error:', profileError);
+    console.log('  - Query conditions: slug=', slug, 'visibility_state=verified, is_listed=true');
+
     if (profileError || !profile) {
+      console.log('❌ Profile not found for slug:', slug);
+      console.log('Error:', profileError);
+      
+      // Let's see what profiles actually exist
+      const { data: allProfiles } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, slug, visibility_state, is_listed')
+        .limit(5);
+      
+      console.log('📋 Available profiles:', allProfiles);
+      
+      // Let's also check if there are any profiles with similar slugs
+      const { data: similarProfiles } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, slug, visibility_state, is_listed')
+        .ilike('slug', `%${slug}%`)
+        .limit(5);
+      
+      console.log('🔍 Profiles with similar slugs:', similarProfiles);
+      
       return NextResponse.json(
         { error: 'Profile not found' },
         { status: 404 }

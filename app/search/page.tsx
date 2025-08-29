@@ -7,6 +7,7 @@ import { safeMap, safeLength } from '@/lib/safe';
 import { useUser } from '@clerk/nextjs';
 import UserMenu from '@/components/UserMenu';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,10 +132,7 @@ export default function SearchPage() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
-            <span className="font-semibold text-slate-900">TaxProExchange</span>
-          </Link>
+          <Logo />
           <nav className="flex items-center gap-6 text-sm text-slate-600">
             <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/search" className="hover:text-slate-900 font-medium">Search</Link>
@@ -263,14 +261,18 @@ export default function SearchPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {profiles.map((profile, index) => (
-                  <motion.div
-                    key={profile.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
-                  >
+                {profiles.map((profile, index) => {
+                  // Debug: log profile data to see slug issues
+                  console.log('Profile data:', { id: profile.id, slug: profile.slug, name: `${profile.first_name} ${profile.last_name}` });
+                  
+                  return (
+                    <motion.div
+                      key={profile.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+                    >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -317,7 +319,7 @@ export default function SearchPage() {
                       
                       <div className="flex flex-col gap-2 ml-4">
                         <Link
-                          href={`/p/${profile.slug}`}
+                          href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}
                           className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
                         >
                           View Profile
@@ -330,7 +332,8 @@ export default function SearchPage() {
                       </div>
                     </div>
                   </motion.div>
-                ))}
+                );
+                })}
               </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import UserMenu from '@/components/UserMenu';
+import Logo from '@/components/Logo';
 
 interface License {
   license_kind: string;
@@ -140,10 +141,7 @@ export default function VerifyPage() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
-            <span className="font-semibold text-slate-900">TaxProExchange</span>
-          </Link>
+          <Logo />
           <nav className="flex items-center gap-6 text-sm text-slate-600">
             <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/profile/edit" className="hover:text-slate-900">Edit Profile</Link>

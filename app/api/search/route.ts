@@ -82,6 +82,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log('🔍 Search API - Raw profiles found:', profiles?.length || 0);
+    if (profiles && profiles.length > 0) {
+      console.log('🔍 First profile sample:', {
+        id: profiles[0].id,
+        name: `${profiles[0].first_name} ${profiles[0].last_name}`,
+        slug: profiles[0].slug,
+        visibility_state: profiles[0].visibility_state,
+        is_listed: profiles[0].is_listed
+      });
+    }
+
     // Filter by specialization if specified
     let filteredProfiles = profiles;
     if (specialization) {
