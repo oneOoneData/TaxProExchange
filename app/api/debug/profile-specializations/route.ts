@@ -56,8 +56,8 @@ export async function GET() {
       totalCount,
       profileSpecializations: profileSpecs,
       errors: {
-        table: tableError?.message,
-        profile: profileError?.message
+        table: tableError ? tableError.message : null,
+        profile: profileError ? profileError.message : null
       }
     });
 
