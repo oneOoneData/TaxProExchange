@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { safeIncludes, safeMap } from '@/lib/safe';
+import UserMenu from '@/components/UserMenu';
 
 export const dynamic = 'force-dynamic';
 
@@ -351,6 +352,10 @@ export default function EditProfilePage() {
             >
               Back to Home
             </button>
+            <UserMenu 
+              userName={user?.fullName || undefined}
+              userEmail={user?.primaryEmailAddress?.emailAddress}
+            />
           </div>
         </div>
       </header>

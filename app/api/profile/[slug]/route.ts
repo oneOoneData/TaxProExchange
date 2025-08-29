@@ -29,7 +29,7 @@ export async function GET(
 
     const { slug } = await params;
 
-    // Get profile by slug
+    // Fetch the profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select(`
@@ -40,12 +40,14 @@ export async function GET(
         bio,
         credential_type,
         firm_name,
+        slug,
         public_email,
         phone,
         website_url,
         linkedin_url,
         accepting_work,
-        slug,
+        visibility_state,
+        is_listed,
         created_at
       `)
       .eq('slug', slug)
@@ -53,66 +55,53 @@ export async function GET(
       .eq('is_listed', true)
       .single();
 
-    if (profileError) {
-      if (profileError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: 'Profile not found' },
-          { status: 404 }
-        );
-      }
-      throw new Error(`Profile fetch error: ${profileError.message}`);
+    if (profileError || !profile) {
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      );
     }
 
-    // Get specializations
-    let specializations: any[] = [];
-    try {
-      const { data: specData } = await supabase
-        .from('profile_specializations')
-        .select('specialization_id')
-        .eq('profile_id', profile.id);
-      specializations = specData || [];
-    } catch (error) {
-      console.error('Specializations fetch error:', error);
-    }
+    // Fetch specializations
+    const { data: specializations } = await supabase
+      .from('profile_specializations')
+      .select('specialization_id')
+      .eq('profile_id', profile.id);
 
-    // Get locations
-    let locations: any[] = [];
-    try {
-      const { data: locData } = await supabase
-        .from('profile_locations')
-        .select('location_id')
-        .eq('profile_id', profile.id);
-      locations = locData || [];
-    } catch (error) {
-      console.error('Locations fetch error:', error);
-    }
+    // Fetch locations
+    const { data: locations } = await supabase
+      .from('profile_locations')
+      .select('location_id')
+      .eq('profile_id', profile.id);
 
-    // Get licenses
-    let licenses: any[] = [];
-    try {
-      const { data: licenseData } = await supabase
-        .from('licenses')
-        .select('*')
-        .eq('profile_id', profile.id);
-      licenses = licenseData || [];
-    } catch (error) {
-      console.error('Licenses fetch error:', error);
-    }
+    // Fetch licenses
+    const { data: licenses } = await supabase
+      .from('licenses')
+      .select(`
+        license_kind,
+        license_number,
+        issuing_authority,
+        state,
+        expires_on,
+        status
+      `)
+      .eq('profile_id', profile.id)
+      .eq('status', 'verified');
 
-    const transformedProfile = {
+    const profileWithDetails = {
       ...profile,
-      specializations: specializations.map(s => s.specialization_id),
-      locations: locations.map(l => l.location_id),
-      licenses,
-      verified: true
+      specializations: specializations?.map(s => s.specialization_id) || [],
+      states: locations?.map(l => l.location_id) || [],
+      verified: profile.visibility_state === 'verified',
+      licenses: licenses || []
     };
 
-    return NextResponse.json(transformedProfile);
+    return NextResponse.json(profileWithDetails);
 
   } catch (error) {
     console.error('Profile fetch error:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

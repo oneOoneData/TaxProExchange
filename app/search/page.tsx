@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { safeMap, safeLength } from '@/lib/safe';
+import { useUser } from '@clerk/nextjs';
+import UserMenu from '@/components/UserMenu';
+import { useRouter } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +36,8 @@ interface SearchFilters {
 }
 
 export default function SearchPage() {
+  const router = useRouter();
+  const { user, isLoaded } = useUser();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [specializations, setSpecializations] = useState<Array<{slug: string, label: string}>>([]);
@@ -53,9 +58,17 @@ export default function SearchPage() {
   ];
 
   useEffect(() => {
-    fetchSpecializations();
-    searchProfiles();
-  }, [filters]);
+    // Check authentication
+    if (isLoaded && !user) {
+      router.push('/sign-in');
+      return;
+    }
+    
+    if (user) {
+      fetchSpecializations();
+      searchProfiles();
+    }
+  }, [isLoaded, user, router]);
 
   const fetchSpecializations = async () => {
     try {
@@ -101,6 +114,18 @@ export default function SearchPage() {
     });
   };
 
+  // Show loading state while checking authentication
+  if (!isLoaded || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
+          <p className="mt-2 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
@@ -114,6 +139,14 @@ export default function SearchPage() {
             <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/search" className="hover:text-slate-900 font-medium">Search</Link>
           </nav>
+          <div className="flex items-center gap-4">
+            {user && (
+              <UserMenu 
+                userName={user.fullName || undefined}
+                userEmail={user.primaryEmailAddress?.emailAddress}
+              />
+            )}
+          </div>
         </div>
       </header>
 

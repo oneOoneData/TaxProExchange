@@ -26,13 +26,15 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
+    const credential_type = searchParams.get('credential_type') || '';
     const specialization = searchParams.get('specialization') || '';
     const state = searchParams.get('state') || '';
+    const accepting_work = searchParams.get('accepting_work') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
 
-    // Build the base query with count enabled
+    // Build the base query with proper joins
     let supabaseQuery = supabase
       .from('profiles')
       .select(`
@@ -48,25 +50,26 @@ export async function GET(request: NextRequest) {
         visibility_state,
         is_listed,
         created_at
-      `, { count: 'exact' })  // Enable count for pagination
+      `, { count: 'exact' })
       .eq('visibility_state', 'verified')
       .eq('is_listed', true);
 
     // Apply text search
     if (query) {
-      supabaseQuery = supabaseQuery.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%`);
+      supabaseQuery = supabaseQuery.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%,firm_name.ilike.%${query}%`);
     }
 
-    // Apply filters
-    if (specialization) {
-      supabaseQuery = supabaseQuery.eq('profile_specializations.specialization_id', specialization);
+    // Apply credential type filter
+    if (credential_type) {
+      supabaseQuery = supabaseQuery.eq('credential_type', credential_type);
     }
 
-    if (state) {
-      supabaseQuery = supabaseQuery.eq('profile_locations.location_id', state);
+    // Apply accepting work filter
+    if (accepting_work === 'true') {
+      supabaseQuery = supabaseQuery.eq('accepting_work', true);
     }
 
-    // Execute query with count and pagination
+    // Execute the base query first
     const { data: profiles, error, count } = await supabaseQuery
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -79,9 +82,44 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Filter by specialization if specified
+    let filteredProfiles = profiles;
+    if (specialization) {
+      const { data: profileSpecs } = await supabase
+        .from('profile_specializations')
+        .select('profile_id')
+        .eq('specialization_id', (await supabase
+          .from('specializations')
+          .select('id')
+          .eq('slug', specialization)
+          .single()).data?.id);
+      
+      if (profileSpecs) {
+        const profileIds = profileSpecs.map(ps => ps.profile_id);
+        filteredProfiles = profiles.filter(p => profileIds.includes(p.id));
+      }
+    }
+
+    // Filter by state if specified
+    if (state) {
+      const { data: profileLocs } = await supabase
+        .from('profile_locations')
+        .select('profile_id')
+        .eq('location_id', (await supabase
+          .from('locations')
+          .select('id')
+          .eq('state', state)
+          .single()).data?.id);
+      
+      if (profileLocs) {
+        const profileIds = profileLocs.map(pl => pl.profile_id);
+        filteredProfiles = filteredProfiles.filter(p => profileIds.includes(p.id));
+      }
+    }
+
     // Fetch specializations and locations for each profile
     const profilesWithDetails = await Promise.all(
-      profiles.map(async (profile) => {
+      filteredProfiles.map(async (profile) => {
         // Get specializations
         const { data: specializations } = await supabase
           .from('profile_specializations')
@@ -97,7 +135,8 @@ export async function GET(request: NextRequest) {
         return {
           ...profile,
           specializations: specializations?.map(s => s.specialization_id) || [],
-          locations: locations?.map(l => l.location_id) || []
+          states: locations?.map(l => l.location_id) || [],
+          verified: profile.visibility_state === 'verified'
         };
       })
     );
@@ -107,8 +146,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: filteredProfiles.length,
+        totalPages: Math.ceil(filteredProfiles.length / limit)
       }
     });
 

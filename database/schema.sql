@@ -138,7 +138,14 @@ INSERT INTO locations (country, state, city) VALUES
 ('US', 'TX', 'Houston'),
 ('US', 'TX', 'Dallas'),
 ('US', 'FL', 'Miami'),
-('US', 'IL', 'Chicago')
+('US', 'IL', 'Chicago'),
+-- Add state-only locations for broader coverage
+('US', 'CA', NULL),
+('US', 'AZ', NULL),
+('US', 'NV', NULL),
+('US', 'TX', NULL),
+('US', 'NY', NULL),
+('US', 'FL', NULL)
 ON CONFLICT (country, state, city) DO NOTHING;
 
 -- Row Level Security (RLS) policies

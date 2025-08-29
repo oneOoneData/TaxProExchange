@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { JoinButton } from '@/components/JoinButton';
+import UserMenu from '@/components/UserMenu';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,11 +77,17 @@ export default function Page() {
             <a href="#faq" className="hover:text-slate-900">FAQ</a>
             <a href="/search" className="hover:text-slate-900">Search</a>
             <a href="/join" className="hover:text-slate-900">Join</a>
-            {user && (
-              <a href="/profile/edit" className="hover:text-slate-900">My Profile</a>
-            )}
           </nav>
-          <JoinButton />
+          <div className="flex items-center gap-4">
+            {user ? (
+              <UserMenu 
+                userName={user.fullName || undefined}
+                userEmail={user.primaryEmailAddress?.emailAddress}
+              />
+            ) : (
+              <JoinButton />
+            )}
+          </div>
         </div>
       </header>
 
