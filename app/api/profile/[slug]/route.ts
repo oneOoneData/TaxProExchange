@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn('Supabase environment variables not configured');
@@ -33,8 +33,26 @@ export async function GET(
     console.log('🔍 Looking for profile with slug:', slug);
     console.log('🔍 Request URL:', request.url);
 
-    // Fetch the profile
-    const { data: profile, error: profileError } = await supabase
+    // Check if this is an admin request
+    const referer = request.headers.get('referer');
+    const isAdminRequest = referer && referer.includes('/admin');
+    const { searchParams } = new URL(request.url);
+    const adminParam = searchParams.get('admin');
+    
+    const isAdmin = isAdminRequest || adminParam === 'true';
+
+    console.log('🔍 Admin check details:');
+    console.log('  - Request URL:', request.url);
+    console.log('  - Search params:', Object.fromEntries(searchParams.entries()));
+    console.log('  - Admin param:', adminParam);
+    console.log('  - Admin param type:', typeof adminParam);
+    console.log('  - Admin param === "true":', adminParam === 'true');
+    console.log('  - Referer:', referer);
+    console.log('  - Is admin request (referer):', isAdminRequest);
+    console.log('  - Final isAdmin:', isAdmin);
+
+    // Build the query
+    let query = supabase
       .from('profiles')
       .select(`
         id,
@@ -52,12 +70,29 @@ export async function GET(
         accepting_work,
         visibility_state,
         is_listed,
+        public_contact,
+        works_multistate,
+        works_international,
+        countries,
         created_at
       `)
-      .eq('slug', slug)
-      .eq('visibility_state', 'verified')
-      .eq('is_listed', true)
-      .single();
+      .eq('slug', slug);
+
+    // Apply visibility restrictions only for non-admin users
+    if (!isAdmin) {
+      query = query
+        .eq('visibility_state', 'verified')
+        .eq('is_listed', true);
+    }
+
+    console.log('🔍 Query being executed:', {
+      isAdmin,
+      slug,
+      hasVisibilityRestrictions: !isAdmin
+    });
+
+    // Fetch the profile
+    const { data: profile, error: profileError } = await query.single();
 
     console.log('🔍 Supabase query result:');
     console.log('  - Profile data:', profile);
@@ -91,17 +126,29 @@ export async function GET(
       );
     }
 
-    // Fetch specializations
-    const { data: specializations } = await supabase
+    // Fetch specializations with labels
+    const { data: specializations, error: specError } = await supabase
       .from('profile_specializations')
-      .select('specialization_id')
+      .select(`specialization_slug`)
       .eq('profile_id', profile.id);
 
-    // Fetch locations
-    const { data: locations } = await supabase
+    console.log('🔍 Specializations query result:', { specializations, specError, profileId: profile.id });
+
+    // Fetch states (locations)
+    const { data: locations, error: locError } = await supabase
       .from('profile_locations')
-      .select('location_id')
+      .select('state')
       .eq('profile_id', profile.id);
+
+    console.log('🔍 Locations query result:', { locations, locError, profileId: profile.id });
+
+    // Fetch software
+    const { data: software, error: softError } = await supabase
+      .from('profile_software')
+      .select(`software_slug`)
+      .eq('profile_id', profile.id);
+
+    console.log('🔍 Software query result:', { software, softError, profileId: profile.id });
 
     // Fetch licenses
     const { data: licenses } = await supabase
@@ -119,11 +166,25 @@ export async function GET(
 
     const profileWithDetails = {
       ...profile,
-      specializations: specializations?.map(s => s.specialization_id) || [],
-      states: locations?.map(l => l.location_id) || [],
+      specializations: specializations?.map(s => s.specialization_slug) || [],
+      states: locations?.map(l => l.state) || [],
+      software: software?.map(s => s.software_slug) || [],
       verified: profile.visibility_state === 'verified',
+      public_contact: profile.public_contact || false,
+      works_multistate: profile.works_multistate || false,
+      works_international: profile.works_international || false,
+      countries: profile.countries || [],
       licenses: licenses || []
     };
+
+    console.log('🔍 Final profile data:', {
+      originalSpecializations: specializations,
+      transformedSpecializations: profileWithDetails.specializations,
+      originalStates: locations,
+      transformedStates: profileWithDetails.states,
+      originalSoftware: software,
+      transformedSoftware: profileWithDetails.software
+    });
 
     return NextResponse.json(profileWithDetails);
 

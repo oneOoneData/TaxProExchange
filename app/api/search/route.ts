@@ -49,6 +49,9 @@ export async function GET(request: NextRequest) {
         accepting_work,
         visibility_state,
         is_listed,
+        works_multistate,
+        works_international,
+        countries,
         created_at
       `, { count: 'exact' })
       .eq('visibility_state', 'verified')
@@ -113,19 +116,32 @@ export async function GET(request: NextRequest) {
 
     // Filter by state if specified
     if (state) {
-      const { data: profileLocs } = await supabase
-        .from('profile_locations')
-        .select('profile_id')
-        .eq('location_id', (await supabase
-          .from('locations')
-          .select('id')
-          .eq('state', state)
-          .single()).data?.id);
+      // Get profiles that either work in this specific state OR are multi-state
+      const { data: stateProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .or(`works_multistate.eq.true,id.in.(${filteredProfiles.map(p => `'${p.id}'`).join(',')})`);
       
-      if (profileLocs) {
-        const profileIds = profileLocs.map(pl => pl.profile_id);
-        filteredProfiles = filteredProfiles.filter(p => profileIds.includes(p.id));
+      if (stateProfiles) {
+        // Filter to only include profiles that are either multi-state or have this specific state
+        filteredProfiles = filteredProfiles.filter(p => 
+          p.works_multistate || stateProfiles.some(sp => sp.id === p.id)
+        );
       }
+    }
+
+    // Filter by international if specified
+    const international = searchParams.get('international') || '';
+    if (international === 'true') {
+      filteredProfiles = filteredProfiles.filter(p => p.works_international);
+    }
+
+    // Filter by specific country if specified
+    const country = searchParams.get('country') || '';
+    if (country) {
+      filteredProfiles = filteredProfiles.filter(p => 
+        p.works_international && p.countries && p.countries.includes(country)
+      );
     }
 
     // Fetch specializations and locations for each profile
@@ -147,7 +163,10 @@ export async function GET(request: NextRequest) {
           ...profile,
           specializations: specializations?.map(s => s.specialization_id) || [],
           states: locations?.map(l => l.location_id) || [],
-          verified: profile.visibility_state === 'verified'
+          verified: profile.visibility_state === 'verified',
+          works_multistate: profile.works_multistate || false,
+          works_international: profile.works_international || false,
+          countries: profile.countries || []
         };
       })
     );

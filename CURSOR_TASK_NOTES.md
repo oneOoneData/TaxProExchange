@@ -1,112 +1,133 @@
-# TaxProExchange - Cursor Task Notes
+# Cursor Task Notes
 
-## Recent Changes & Decisions
+## Completed Tasks
 
-### 2024-12-28: User Menu & Authentication Updates
+### 2025-01-XX: Fixed Admin Profile View Issue ✅
 
-#### ✅ **UserMenu Component Created**
-- **File**: `components/UserMenu.tsx`
-- **Features**:
-  - Dropdown menu under user icon (shows initials or default icon)
-  - Combines profile actions: View Profile, Edit Profile, Verification Status
-  - Admin Panel access for admin users
-  - Smooth animations with Framer Motion
-  - Click outside to close functionality
+**Goal**: Resolve issue where admin users clicking "View" on profiles were getting null URLs (`/p/null?admin=true`) and couldn't view profiles.
 
-#### ✅ **Authentication Required for Search**
-- **File**: `app/search/page.tsx`
-- **Changes**:
-  - Added `useUser` hook from Clerk
-  - Redirects unauthenticated users to `/sign-in`
-  - Shows loading state while checking authentication
-  - Only allows search for signed-in users
+**Root Cause**: 
+- Some profiles in the database don't have slugs generated
+- Admin profiles API was returning profiles with `null` slugs
+- View links were being generated as `/p/null?admin=true` causing 404 errors
 
-#### ✅ **UserMenu Integration**
-- **Files Updated**:
-  - `app/page.tsx` - Home page header
-  - `app/search/page.tsx` - Search page header  
-  - `app/profile/edit/page.tsx` - Profile edit page header
-  - `app/profile/verify/page.tsx` - Verification page header
+**Changes Made**:
 
-#### ✅ **Authentication Check API**
-- **File**: `app/api/auth/check/route.ts`
-- **Purpose**: Endpoint to verify user authentication status
-- **Uses**: Clerk's `auth()` function
+1. **Profile API** (`app/api/profile/[slug]/route.ts`)
+   - Added admin context detection via referer header and query parameter
+   - Bypasses visibility restrictions (`visibility_state = 'verified'` and `is_listed = true`) for admin requests
+   - Allows admins to view any profile regardless of status
 
-### Previous Changes
+2. **Admin Profiles API** (`app/api/admin/profiles/route.ts`)
+   - Added fallback slug generation for profiles without slugs
+   - Format: `{firstname}-{lastname}-{id-prefix}`
+   - Added debugging to track profile data and slug generation
 
-#### ✅ **Admin System Implementation**
-- **Files**: Multiple admin pages and APIs
-- **Features**: Dashboard, verification review, profile management
-- **Admin Role**: Added `is_admin` flag to profiles table
+3. **Admin Profiles Page** (`app/admin/profiles/page.tsx`)
+   - Added conditional rendering for View link (only shows when slug exists)
+   - Added visual warning indicator for profiles without slugs
+   - View links now include `?admin=true` parameter
+   - Added debugging to track API responses
 
-#### ✅ **Profile Cleanup & Slug Fix**
-- **Files**: `database/fix_profile_slug.sql`
-- **Purpose**: Fixes profile slugs and visibility after cleanup
-- **Status**: Ready to run in Supabase
+4. **Profile View Page** (`app/p/[slug]/page.tsx`)
+   - Added admin context detection via URL parameter
+   - Shows admin navigation links when viewing in admin mode
+   - Maintains existing functionality for regular users
 
-## Current Status
+**Technical Details**:
+- Admin detection via referer header (`/admin`) or query param (`?admin=true`)
+- Fallback slug generation ensures all profiles can be viewed
+- Conditional View link prevents broken URLs
+- Visual indicators help admins identify problematic profiles
 
-### 🎯 **Completed Features**
-1. ✅ User authentication with Clerk
-2. ✅ Profile creation and editing
-3. ✅ Search functionality (authenticated users only)
-4. ✅ Profile verification workflow
-5. ✅ Admin system for profile management
-6. ✅ UserMenu component for unified navigation
-7. ✅ Authentication protection on search page
+**Files Modified**: 4 files, ~50 lines changed
 
-### 🔧 **Pending Tasks**
-1. **Run Profile Slug Fix Script**: Execute `database/fix_profile_slug.sql` in Supabase
-2. **Test UserMenu**: Verify dropdown works on all pages
-3. **Test Authentication**: Ensure search redirects unauthenticated users
+**Testing Checklist**:
+- [ ] Admin can view profiles with valid slugs
+- [ ] Admin can view profiles without slugs (fallback generated)
+- [ ] View links include admin parameter
+- [ ] Non-admin users still see visibility restrictions
+- [ ] Visual warnings show for profiles without slugs
+- [ ] Console debugging shows profile data correctly
 
-### 🚀 **Next Steps**
-1. Test the complete user flow
-2. Verify admin functionality
-3. Consider additional features (messaging, connections)
+**Next Steps**:
+- Test admin profile viewing functionality
+- Verify fallback slug generation works
+- Check that regular user access is still restricted
+- Consider implementing proper slug generation for new profiles
 
-## Technical Decisions
+---
 
-### **Authentication Strategy**
-- **Clerk**: Primary auth provider (Google, LinkedIn)
-- **Protected Routes**: Search page requires authentication
-- **User State**: Managed via Clerk's `useUser` hook
+### 2025-01-XX: Implemented Grouped Taxonomy for Tax Specializations ✅
 
-### **Navigation Pattern**
-- **UserMenu**: Centralized user actions under profile icon
-- **Consistent Headers**: All pages use similar header structure
-- **Responsive Design**: Mobile-friendly navigation
+**Goal**: Replace flat "Tax Specializations" with a grouped taxonomy for better organization and user experience.
 
-### **Database Schema**
-- **Profiles Table**: Main user data storage
-- **Admin Role**: `is_admin` boolean flag
-- **Verification**: `visibility_state` enum for profile status
+**Changes Made**:
 
-## Files Changed in This Session
+1. **Database Migration** (`database/2025_add_specialization_groups.sql`)
+   - Created `specialization_groups` table with 13 categories
+   - Added `group_key` column to `specializations` table
+   - Seeded with comprehensive taxonomy (85+ specializations across all groups)
+   - Added performance indexes
 
-1. `components/UserMenu.tsx` - New component
-2. `app/api/auth/check/route.ts` - New API endpoint
-3. `app/page.tsx` - Updated header
-4. `app/search/page.tsx` - Added authentication + UserMenu
-5. `app/profile/edit/page.tsx` - Added UserMenu
-6. `app/profile/verify/page.tsx` - Added UserMenu
-7. `CURSOR_TASK_NOTES.md` - Updated documentation
+2. **API Updates** (`app/api/specializations/route.ts`)
+   - Updated to return grouped data structure
+   - Added TypeScript interfaces for `SpecializationGroup` and `Specialization`
+   - Groups specializations by their `group_key`
 
-## Testing Checklist
+3. **Profile Edit Page** (`app/profile/edit/page.tsx`)
+   - Replaced flat specialization list with grouped accordion-style UI
+   - Added search functionality to filter specializations
+   - Added "Clear Group" and "Clear All" functionality
+   - Shows selected count and organized by categories
 
-### **UserMenu Component**
-- [ ] Dropdown opens/closes correctly
-- [ ] All links navigate properly
-- [ ] Click outside closes menu
-- [ ] Shows user initials when available
+4. **Public Profile Page** (`app/p/[slug]/page.tsx`)
+   - Updated to display specializations grouped by category
+   - Added proper TypeScript interfaces
+   - Maintains existing styling while showing organizational structure
 
-### **Authentication Protection**
-- [ ] Unauthenticated users redirected from search
-- [ ] Loading states display correctly
-- [ ] Authenticated users can access search
+5. **Search Page** (`app/search/page.tsx`)
+   - Updated filters to use grouped specializations
+   - Added radio button selection for each specialization
+   - Organized filters by category for better UX
+   - Fixed layout to use proper sidebar structure
 
-### **Navigation Consistency**
-- [ ] All pages show UserMenu when authenticated
-- [ ] Headers maintain consistent styling
-- [ ] Mobile responsiveness works
+**Taxonomy Groups Implemented**:
+- Returns & Entities (11 specializations)
+- Representation & Controversy (7 specializations)
+- Multi-State & Local (7 specializations)
+- International (12 specializations)
+- Industry Vertical (13 specializations)
+- Transactions & Planning (15 specializations)
+- Credits & Incentives (5 specializations)
+- Estate, Gift & Fiduciary (4 specializations)
+- Nonprofit & Exempt Orgs (3 specializations)
+- Bookkeeping & Close (4 specializations)
+- Payroll & Contractor Compliance (3 specializations)
+- Disaster & Special Situations (2 specializations)
+- Life Events & Individuals (5 specializations)
+
+**Technical Details**:
+- No breaking changes to existing `profile_specializations` table
+- Maintains existing RLS policies
+- Uses existing safe helpers for null safety
+- Responsive design with proper mobile support
+- Keyboard accessible UI components
+
+**Files Modified**: 4 files, ~150 lines changed
+**Database**: 1 new migration file
+
+**Next Steps**:
+- Run the database migration in Supabase
+- Test the new grouped UI in profile edit
+- Verify search filters work correctly
+- Test public profile display
+
+**Testing Checklist**:
+- [ ] Profile edit shows grouped specializations
+- [ ] Search and filter works within groups
+- [ ] Public profiles display grouped chips
+- [ ] Search API filters by specialization correctly
+- [ ] No console errors or TypeScript issues
+- [ ] Mobile responsive design works
+- [ ] Keyboard navigation accessible

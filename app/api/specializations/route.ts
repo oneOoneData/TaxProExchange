@@ -14,6 +14,19 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+interface Specialization {
+  id: string;
+  slug: string;
+  label: string;
+  group_key: string;
+}
+
+interface SpecializationGroup {
+  key: string;
+  label: string;
+  items: Specialization[];
+}
+
 export async function GET() {
   try {
     // Check if Supabase is configured
@@ -24,6 +37,7 @@ export async function GET() {
       );
     }
 
+    // Fetch all specializations with their groups
     const { data: specializations, error } = await supabase
       .from('specializations')
       .select('*')
@@ -37,7 +51,28 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(specializations);
+    // Fetch all groups
+    const { data: groups, error: groupsError } = await supabase
+      .from('specialization_groups')
+      .select('*')
+      .order('label');
+
+    if (groupsError) {
+      console.error('Groups fetch error:', groupsError);
+      return NextResponse.json(
+        { error: 'Failed to fetch specialization groups' },
+        { status: 500 }
+      );
+    }
+
+    // Group specializations by their group_key
+    const groupedSpecializations: SpecializationGroup[] = groups.map(group => ({
+      key: group.key,
+      label: group.label,
+      items: specializations.filter(spec => spec.group_key === group.key)
+    }));
+
+    return NextResponse.json(groupedSpecializations);
   } catch (error) {
     console.error('Specializations error:', error);
     return NextResponse.json(

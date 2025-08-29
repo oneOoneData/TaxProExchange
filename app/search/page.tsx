@@ -36,12 +36,25 @@ interface SearchFilters {
   accepting_work: string;
 }
 
+interface Specialization {
+  id: string;
+  slug: string;
+  label: string;
+  group_key: string;
+}
+
+interface SpecializationGroup {
+  key: string;
+  label: string;
+  items: Specialization[];
+}
+
 export default function SearchPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [specializations, setSpecializations] = useState<Array<{slug: string, label: string}>>([]);
+  const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     credential_type: '',
@@ -76,7 +89,7 @@ export default function SearchPage() {
       const response = await fetch('/api/specializations');
       if (response.ok) {
         const data = await response.json();
-        setSpecializations(data);
+        setSpecializationGroups(data);
       }
     } catch (error) {
       console.error('Error fetching specializations:', error);
@@ -114,6 +127,85 @@ export default function SearchPage() {
       accepting_work: ''
     });
   };
+
+  const renderSpecializationFilters = () => (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-slate-900">Specializations</h3>
+      
+      {/* Specialization Search */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search specializations..."
+          value={filters.specialization}
+          onChange={(e) => setFilters(prev => ({ ...prev, specialization: e.target.value }))}
+          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        />
+        {filters.specialization && (
+          <button
+            onClick={() => setFilters(prev => ({ ...prev, specialization: '' }))}
+            className="absolute right-2 top-2 text-slate-400 hover:text-slate-600"
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      {/* Quick Filter Buttons for Common Specializations */}
+      <div className="space-y-2">
+        <p className="text-xs text-slate-600 font-medium">Quick Filters:</p>
+        <div className="flex flex-wrap gap-2">
+          {['1040_individual', '1120s_s_corp', 'real_estate_investors', 'crypto_defi_nft', 'irs_rep_exams_audits'].map((specSlug) => {
+            const spec = specializationGroups.flatMap(group => group.items).find(s => s.slug === specSlug);
+            if (!spec) return null;
+            return (
+              <button
+                key={specSlug}
+                onClick={() => setFilters(prev => ({ ...prev, specialization: specSlug }))}
+                className={`px-2 py-1 text-xs rounded border transition-colors ${
+                  filters.specialization === specSlug
+                    ? 'bg-blue-100 text-blue-700 border-blue-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                }`}
+              >
+                {spec.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Grouped Specializations (Collapsible) */}
+      <details className="group">
+        <summary className="cursor-pointer text-sm font-medium text-slate-700 hover:text-slate-900">
+          Browse All Specializations
+          <span className="ml-2 text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+        </summary>
+        <div className="mt-3 space-y-3 max-h-64 overflow-y-auto">
+          {specializationGroups.map((group) => (
+            <div key={group.key} className="space-y-2">
+              <h4 className="text-xs font-medium text-slate-600 uppercase tracking-wide">{group.label}</h4>
+              <div className="grid grid-cols-1 gap-1">
+                {group.items.map((spec) => (
+                  <label key={spec.slug} className="flex items-center space-x-2 text-xs">
+                    <input
+                      type="radio"
+                      name="specialization"
+                      value={spec.slug}
+                      checked={filters.specialization === spec.slug}
+                      onChange={(e) => setFilters(prev => ({ ...prev, specialization: e.target.value }))}
+                      className="text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-slate-700">{spec.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </details>
+    </div>
+  );
 
   // Show loading state while checking authentication
   if (!isLoaded || !user) {
@@ -158,51 +250,44 @@ export default function SearchPage() {
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-900">Filters</h3>
-                  <button
-                    onClick={clearFilters}
-                    className="text-sm text-slate-500 hover:text-slate-700"
-                  >
-                    Clear all
-                  </button>
-                </div>
-
-                {/* Search Input */}
-                <div className="mb-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+                <h2 className="text-xl font-semibold text-slate-900">Filters</h2>
+                
+                {/* Search Query */}
+                <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Search</label>
                   <input
                     type="text"
                     placeholder="Name, firm, or keywords..."
                     value={filters.q}
-                    onChange={(e) => updateFilter('q', e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    onChange={(e) => setFilters(prev => ({ ...prev, q: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
 
                 {/* Credential Type */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Credential</label>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type</label>
                   <select
                     value={filters.credential_type}
-                    onChange={(e) => updateFilter('credential_type', e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    onChange={(e) => setFilters(prev => ({ ...prev, credential_type: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All credentials</option>
                     <option value="CPA">CPA</option>
                     <option value="EA">EA</option>
                     <option value="CTEC">CTEC</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
                 {/* State */}
-                <div className="mb-4">
+                <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">State</label>
                   <select
                     value={filters.state}
-                    onChange={(e) => updateFilter('state', e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    onChange={(e) => setFilters(prev => ({ ...prev, state: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All states</option>
                     {states.map(state => (
@@ -211,33 +296,37 @@ export default function SearchPage() {
                   </select>
                 </div>
 
-                {/* Specialization */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Specialization</label>
+                {/* Specializations */}
+                {renderSpecializationFilters()}
+
+                {/* Accepting Work */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Availability</label>
                   <select
-                    value={filters.specialization}
-                    onChange={(e) => updateFilter('specialization', e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    value={filters.accepting_work}
+                    onChange={(e) => setFilters(prev => ({ ...prev, accepting_work: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">All specializations</option>
-                    {specializations.map(spec => (
-                      <option key={spec.slug} value={spec.slug}>{spec.label}</option>
-                    ))}
+                    <option value="">All profiles</option>
+                    <option value="true">Accepting work</option>
                   </select>
                 </div>
 
-                {/* Availability */}
-                <div className="mb-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={filters.accepting_work === 'true'}
-                      onChange={(e) => updateFilter('accepting_work', e.target.checked ? 'true' : '')}
-                      className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
-                    />
-                    <span className="text-sm font-medium text-slate-700">Accepting work</span>
-                  </label>
-                </div>
+                {/* Clear All Filters */}
+                {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work) && (
+                  <button
+                    onClick={() => setFilters({
+                      q: '',
+                      credential_type: '',
+                      state: '',
+                      specialization: '',
+                      accepting_work: ''
+                    })}
+                    className="w-full px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50"
+                  >
+                    Clear All Filters
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -264,7 +353,7 @@ export default function SearchPage() {
                 {profiles.map((profile, index) => {
                   // Debug: log profile data to see slug issues
                   console.log('Profile data:', { id: profile.id, slug: profile.slug, name: `${profile.first_name} ${profile.last_name}` });
-                  
+                   
                   return (
                     <motion.div
                       key={profile.id}
@@ -297,7 +386,7 @@ export default function SearchPage() {
                         
                         <div className="flex flex-wrap gap-2 mb-3">
                           {safeMap(profile.specializations, spec => {
-                            const specLabel = specializations.find(s => s.slug === spec)?.label || spec;
+                            const specLabel = specializationGroups.flatMap(group => group.items).find(s => s.slug === spec)?.label || spec;
                             return (
                               <span
                                 key={spec}
@@ -316,7 +405,7 @@ export default function SearchPage() {
                           </span>
                         </div>
                       </div>
-                      
+                       
                       <div className="flex flex-col gap-2 ml-4">
                         <Link
                           href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}

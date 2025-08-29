@@ -275,8 +275,9 @@ export default function AdminProfilesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
                           <Link
-                            href={`/p/${profile.slug}`}
+                            href={`/p/${profile.slug}?admin=true`}
                             className="text-blue-600 hover:text-blue-900"
+                            onClick={() => console.log('Viewing profile:', profile.id, profile.slug)}
                           >
                             View
                           </Link>

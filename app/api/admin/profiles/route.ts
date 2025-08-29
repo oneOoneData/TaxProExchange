@@ -67,11 +67,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log('🔍 Raw profiles from database:', profiles);
+
     // Add a placeholder email since we don't have the users table
-    const profilesWithEmail = profiles?.map(profile => ({
-      ...profile,
-      email: 'email@example.com' // Placeholder - you can update this later
-    })) || [];
+    const profilesWithEmail = profiles?.map(profile => {
+      return {
+        ...profile,
+        email: 'email@example.com' // Placeholder - you can update this later
+      };
+    }) || [];
+
+    console.log('🔍 Processed profiles with email:', profilesWithEmail);
 
     return NextResponse.json({
       profiles: profilesWithEmail

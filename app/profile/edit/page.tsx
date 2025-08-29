@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { safeIncludes, safeMap } from '@/lib/safe';
 import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
+import { COUNTRIES, getCountryName } from '@/lib/constants/countries';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,10 +22,27 @@ interface ProfileForm {
   website_url: string;
   linkedin_url: string;
   accepting_work: boolean;
+  public_contact: boolean;
+  works_multistate: boolean;
+  works_international: boolean;
+  countries: string[];
   specializations: string[];
   states: string[];
   software: string[];
   other_software: string[];
+}
+
+interface Specialization {
+  id: string;
+  slug: string;
+  label: string;
+  group_key: string;
+}
+
+interface SpecializationGroup {
+  key: string;
+  label: string;
+  items: Specialization[];
 }
 
 const credentialTypes = [
@@ -32,19 +50,6 @@ const credentialTypes = [
   { value: 'EA', label: 'EA (Enrolled Agent)' },
   { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
   { value: 'Other', label: 'Other Tax Professional' }
-];
-
-const specializations = [
-  { slug: 's_corp', label: 'S-Corporation' },
-  { slug: 'multi_state', label: 'Multi-State' },
-  { slug: 'real_estate', label: 'Real Estate' },
-  { slug: 'crypto', label: 'Cryptocurrency' },
-  { slug: 'irs_rep', label: 'IRS Representation' },
-  { slug: '1040', label: 'Individual Returns' },
-  { slug: 'business', label: 'Business Returns' },
-  { slug: 'partnership', label: 'Partnership Returns' },
-  { slug: 'estate_tax', label: 'Estate & Gift Tax' },
-  { slug: 'international', label: 'International Tax' }
 ];
 
 const states = [
@@ -145,11 +150,17 @@ export default function EditProfilePage() {
     website_url: '',
     linkedin_url: '',
     accepting_work: true,
+    public_contact: false,
+    works_multistate: false,
+    works_international: false,
+    countries: [],
     specializations: [],
     states: [],
     software: [],
     other_software: []
   });
+  const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Redirect unauthenticated users to home
   useEffect(() => {
@@ -179,6 +190,10 @@ export default function EditProfilePage() {
               website_url: p.website_url || '',
               linkedin_url: p.linkedin_url || '',
               accepting_work: p.accepting_work ?? true,
+              public_contact: p.public_contact ?? false,
+              works_multistate: p.works_multistate ?? false,
+              works_international: p.works_international ?? false,
+              countries: p.countries || [],
               specializations: p.specializations || [],
               states:     p.states     || [],
               software:   p.software   || [],
@@ -267,6 +282,33 @@ export default function EditProfilePage() {
     }));
   };
 
+  const clearGroupSpecializations = (groupKey: string) => {
+    const groupSpecs = specializationGroups
+      .find(g => g.key === groupKey)
+      ?.items.map(s => s.slug) || [];
+    
+    setProfileForm(prev => ({
+      ...prev,
+      specializations: prev.specializations.filter(s => !groupSpecs.includes(s))
+    }));
+  };
+
+  const clearAllSpecializations = () => {
+    setProfileForm(prev => ({
+      ...prev,
+      specializations: []
+    }));
+  };
+
+  // Filter specializations based on search term
+  const filteredGroups = specializationGroups.map(group => ({
+    ...group,
+    items: group.items.filter(spec => 
+      spec.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      spec.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  })).filter(group => group.items.length > 0);
+
   const toggleState = (state: string) => {
     setProfileForm(prev => ({
       ...prev,
@@ -282,6 +324,15 @@ export default function EditProfilePage() {
       software: prev.software.includes(softwareSlug)
         ? prev.software.filter(s => s !== softwareSlug)
         : [...prev.software, softwareSlug]
+    }));
+  };
+
+  const toggleCountry = (countryCode: string) => {
+    setProfileForm(prev => ({
+      ...prev,
+      countries: prev.countries.includes(countryCode)
+        ? prev.countries.filter(c => c !== countryCode)
+        : [...prev.countries, countryCode]
     }));
   };
 
@@ -326,6 +377,101 @@ export default function EditProfilePage() {
       default: return '';
     }
   };
+
+  const fetchSpecializations = async () => {
+    try {
+      const response = await fetch('/api/specializations');
+      if (response.ok) {
+        const data = await response.json();
+        setSpecializationGroups(data);
+      }
+    } catch (error) {
+      console.error('Error fetching specializations:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSpecializations();
+  }, []);
+
+  const renderSpecializationsStep = () => (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Tax Specializations & Areas of Expertise</h2>
+        <p className="text-slate-600">Select all the areas where you have expertise and experience</p>
+      </div>
+
+      {/* Search Box */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search specializations..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <div className="absolute right-3 top-3">
+          <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Global Clear All Button */}
+      {profileForm.specializations.length > 0 && (
+        <div className="text-center">
+          <button
+            onClick={clearAllSpecializations}
+            className="text-sm text-red-600 hover:text-red-700 font-medium"
+          >
+            Clear All Specializations
+          </button>
+        </div>
+      )}
+
+      {/* Grouped Specializations */}
+      <div className="space-y-6">
+        {filteredGroups.map((group) => (
+          <div key={group.key} className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">{group.label}</h3>
+              {profileForm.specializations.some(s => 
+                group.items.some(item => item.slug === s)
+              ) && (
+                <button
+                  onClick={() => clearGroupSpecializations(group.key)}
+                  className="text-sm text-slate-500 hover:text-slate-700"
+                >
+                  Clear Group
+                </button>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {group.items.map((spec) => (
+                <button
+                  key={spec.slug}
+                  onClick={() => toggleSpecialization(spec.slug)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    profileForm.specializations.includes(spec.slug)
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                      : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
+                  }`}
+                >
+                  {spec.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Selected Count */}
+      <div className="text-center text-sm text-slate-600">
+        {profileForm.specializations.length} specialization{profileForm.specializations.length !== 1 ? 's' : ''} selected
+      </div>
+    </div>
+  );
 
   if (!isLoaded) {
     return (
@@ -531,36 +677,28 @@ export default function EditProfilePage() {
                   I am currently accepting new work and collaborations
                 </label>
               </div>
+
+              {/* Public Contact Info */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="public_contact"
+                  checked={profileForm.public_contact}
+                  onChange={(e) => updateForm('public_contact', e.target.checked)}
+                  className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                />
+                <label htmlFor="public_contact" className="text-sm font-medium text-slate-700">
+                  Make my contact information publicly visible to everyone
+                </label>
+              </div>
+              <p className="text-xs text-slate-500 ml-6">
+                When enabled, your email, phone, and LinkedIn will be visible to all visitors. When disabled, only signed-in users can see your contact information.
+              </p>
             </div>
           )}
 
           {currentStep === 2 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Tax Specializations & Areas of Expertise
-                </label>
-                <p className="text-xs text-slate-500 mb-3">
-                  Select the types of tax work you specialize in and want to do.
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {specializations.map((spec) => (
-                    <button
-                      key={spec.slug}
-                      type="button"
-                      onClick={() => toggleSpecialization(spec.slug)}
-                      className={`p-2 rounded-lg text-xs border transition-colors ${
-                        safeIncludes(profileForm.specializations, spec.slug)
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
-                      }`}
-                    >
-                      {spec.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            renderSpecializationsStep()
           )}
 
           {currentStep === 3 && (
@@ -612,6 +750,93 @@ export default function EditProfilePage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Multi-State and International Toggles */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="works_multistate"
+                    checked={profileForm.works_multistate}
+                    onChange={(e) => updateForm('works_multistate', e.target.checked)}
+                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                  />
+                  <label htmlFor="works_multistate" className="text-sm font-medium text-slate-700">
+                    I work in all U.S. states (Multi-State)
+                  </label>
+                </div>
+                <p className="text-xs text-slate-500 ml-6">
+                  When enabled, you'll appear in searches for any U.S. state, regardless of individual state selections above.
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="works_international"
+                    checked={profileForm.works_international}
+                    onChange={(e) => updateForm('works_international', e.target.checked)}
+                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                  />
+                  <label htmlFor="works_international" className="text-sm font-medium text-slate-700">
+                    I work with international clients
+                  </label>
+                </div>
+                <p className="text-xs text-slate-500 ml-6">
+                  When enabled, you'll appear in international searches and can select specific countries below.
+                </p>
+
+                {/* Country Selection */}
+                {profileForm.works_international && (
+                  <div className="ml-6 space-y-3">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Select Countries Where You Work
+                    </label>
+                    <p className="text-xs text-slate-500">
+                      Choose the countries where you can provide tax services to international clients.
+                    </p>
+                    <div className="relative">
+                      <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
+                        {profileForm.countries.length === 0 && (
+                          <span className="text-slate-400 text-sm">Select countries...</span>
+                        )}
+                        {profileForm.countries.map((countryCode) => (
+                          <span
+                            key={countryCode}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-lg border border-blue-200"
+                          >
+                            {getCountryName(countryCode)}
+                            <button
+                              type="button"
+                              onClick={() => toggleCountry(countryCode)}
+                              className="ml-1 text-blue-400 hover:text-blue-600"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-4 max-h-64 overflow-y-auto bg-white border border-slate-300 rounded-xl p-4">
+                        <div className="grid grid-cols-2 gap-2">
+                          {COUNTRIES.map((country) => (
+                            <button
+                              key={country.code}
+                              type="button"
+                              onClick={() => toggleCountry(country.code)}
+                              className={`p-2 text-xs rounded-lg border transition-colors ${
+                                profileForm.countries.includes(country.code)
+                                  ? 'bg-blue-900 text-white border-blue-900'
+                                  : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                              }`}
+                            >
+                              {country.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

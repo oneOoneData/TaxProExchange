@@ -85,6 +85,10 @@ export async function PUT(request: Request) {
       states, 
       software, 
       other_software,
+      public_contact,
+      works_multistate,
+      works_international,
+      countries,
       ...profileData 
     } = body;
 
@@ -127,6 +131,10 @@ export async function PUT(request: Request) {
         .from('profiles')
         .update({
           ...profileData,
+          public_contact: public_contact ?? false,
+          works_multistate: works_multistate ?? false,
+          works_international: works_international ?? false,
+          countries: countries || [],
           other_software: other_software || [],
           onboarding_complete: true,
           updated_at: new Date().toISOString(),
@@ -144,6 +152,10 @@ export async function PUT(request: Request) {
         .insert({
           clerk_id,
           ...profileData,
+          public_contact: public_contact ?? false,
+          works_multistate: works_multistate ?? false,
+          works_international: works_international ?? false,
+          countries: countries || [],
           other_software: other_software || [],
           onboarding_complete: true,
           updated_at: new Date().toISOString(),
@@ -161,7 +173,11 @@ export async function PUT(request: Request) {
       
       // Save specializations
       if (specializations && specializations.length > 0) {
-        console.log('Saving specializations:', specializations);
+        console.log('🔍 SAVING SPECIALIZATIONS:', {
+          profileId,
+          specializations,
+          count: specializations.length
+        });
         
         // Delete existing specializations
         const { error: deleteError } = await supabase
@@ -169,7 +185,11 @@ export async function PUT(request: Request) {
           .delete()
           .eq('profile_id', profileId);
         
-        if (deleteError) console.log('Delete specializations error:', deleteError);
+        if (deleteError) {
+          console.log('❌ Delete specializations error:', deleteError);
+        } else {
+          console.log('✅ Existing specializations deleted successfully');
+        }
         
         // Insert new specializations
         const specializationData = specializations.map((slug: string) => ({
@@ -177,12 +197,19 @@ export async function PUT(request: Request) {
           specialization_slug: slug
         }));
         
+        console.log('🔍 Inserting specialization data:', specializationData);
+        
         const { error: insertError } = await supabase
           .from('profile_specializations')
           .insert(specializationData);
         
-        if (insertError) console.log('Insert specializations error:', insertError);
-        else console.log('Specializations saved successfully');
+        if (insertError) {
+          console.log('❌ Insert specializations error:', insertError);
+        } else {
+          console.log('✅ Specializations saved successfully');
+        }
+      } else {
+        console.log('🔍 No specializations to save:', { specializations });
       }
       
       // Save states (locations)
