@@ -174,9 +174,13 @@ export default function EditProfilePage() {
     const run = async () => {
       if (isLoaded && isSignedIn && user) {
         try {
+          console.log('🔍 Fetching profile for user:', user.id);
           const res = await fetch(`/api/profile?clerk_id=${user.id}`);
+          console.log('🔍 Profile API response status:', res.status);
+          
           if (res.ok) {
             const p = await res.json();
+            console.log('🔍 Profile data received:', p);
             
             // Check if user needs to accept updated legal documents
             if (p.tos_version || p.privacy_version) {
@@ -212,8 +216,13 @@ export default function EditProfilePage() {
               software:   p.software   || [],
               other_software: p.other_software || []
             }));
+          } else {
+            console.error('🔍 Profile API error:', res.status, res.statusText);
+            const errorText = await res.text();
+            console.error('🔍 Profile API error details:', errorText);
           }
         } catch (e) {
+          console.error('🔍 Profile fetch error:', e);
           // best-effort fallback
           setProfileForm(prev => ({
             ...prev,
@@ -393,13 +402,21 @@ export default function EditProfilePage() {
 
   const fetchSpecializations = async () => {
     try {
+      console.log('🔍 Fetching specializations...');
       const response = await fetch('/api/specializations');
+      console.log('🔍 Specializations API response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 Specializations data received:', data);
         setSpecializationGroups(data);
+      } else {
+        console.error('🔍 Specializations API error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('🔍 Specializations API error details:', errorText);
       }
     } catch (error) {
-      console.error('Error fetching specializations:', error);
+      console.error('🔍 Error fetching specializations:', error);
     }
   };
 
