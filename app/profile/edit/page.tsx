@@ -7,6 +7,7 @@ import { safeIncludes, safeMap } from '@/lib/safe';
 import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
 import { COUNTRIES, getCountryName } from '@/lib/constants/countries';
+import SpecializationPicker from '@/components/SpecializationPicker';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,8 @@ const credentialTypes = [
   { value: 'CPA', label: 'CPA (Certified Public Accountant)' },
   { value: 'EA', label: 'EA (Enrolled Agent)' },
   { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
+  { value: 'Tax Lawyer (JD)', label: 'Tax Lawyer (JD)' },
+  { value: 'PTIN Only', label: 'PTIN Only' },
   { value: 'Other', label: 'Other Tax Professional' }
 ];
 
@@ -161,6 +164,8 @@ export default function EditProfilePage() {
   });
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [stateSearchTerm, setStateSearchTerm] = useState('');
+  const [showWrapUp, setShowWrapUp] = useState(false);
 
   // Redirect unauthenticated users to home
   useEffect(() => {
@@ -297,9 +302,9 @@ export default function EditProfilePage() {
         const result = await response.json();
         console.log('Profile update successful:', result);
         
-        // Mark onboarding as complete and redirect
+        // Mark onboarding as complete and show wrap-up screen
         await fetch('/api/mark-onboarding-complete', { method: 'POST' });
-        router.push('/');
+        setShowWrapUp(true);
       } else {
         let msg = `Failed (${response.status})`;
         try { 
@@ -371,6 +376,11 @@ export default function EditProfilePage() {
       spec.slug.toLowerCase().includes(searchTerm.toLowerCase())
     )
   })).filter(group => group.items.length > 0);
+
+  // Filter states based on search term
+  const filteredStates = states.filter(state => 
+    state.toLowerCase().includes(stateSearchTerm.toLowerCase())
+  );
 
   const toggleState = (state: string) => {
     setProfileForm(prev => ({
@@ -466,80 +476,13 @@ export default function EditProfilePage() {
 
   const renderSpecializationsStep = () => (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Tax Specializations & Areas of Expertise</h2>
-        <p className="text-slate-600">Select all the areas where you have expertise and experience</p>
-      </div>
-
-      {/* Search Box */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search specializations..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-        <div className="absolute right-3 top-3">
-          <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Global Clear All Button */}
-      {profileForm.specializations.length > 0 && (
-        <div className="text-center">
-          <button
-            onClick={clearAllSpecializations}
-            className="text-sm text-red-600 hover:text-red-700 font-medium"
-          >
-            Clear All Specializations
-          </button>
-        </div>
-      )}
-
-      {/* Grouped Specializations */}
-      <div className="space-y-6">
-        {filteredGroups.map((group) => (
-          <div key={group.key} className="bg-white rounded-xl border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">{group.label}</h3>
-              {profileForm.specializations.some(s => 
-                group.items.some(item => item.slug === s)
-              ) && (
-                <button
-                  onClick={() => clearGroupSpecializations(group.key)}
-                  className="text-sm text-slate-500 hover:text-slate-700"
-                >
-                  Clear Group
-                </button>
-              )}
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              {group.items.map((spec) => (
-                <button
-                  key={spec.slug}
-                  onClick={() => toggleSpecialization(spec.slug)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    profileForm.specializations.includes(spec.slug)
-                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                      : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
-                  }`}
-                >
-                  {spec.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Selected Count */}
-      <div className="text-center text-sm text-slate-600">
-        {profileForm.specializations.length} specialization{profileForm.specializations.length !== 1 ? 's' : ''} selected
-      </div>
+      <SpecializationPicker
+        selected={profileForm.specializations}
+        onToggle={toggleSpecialization}
+        onClear={clearAllSpecializations}
+        title="Tax Specializations & Areas of Expertise"
+        subtitle="Select all the areas where you have expertise and experience"
+      />
     </div>
   );
 
@@ -780,6 +723,17 @@ export default function EditProfilePage() {
                 <p className="text-xs text-slate-500 mb-3">
                   Select the states where you're licensed to practice or can handle tax work.
                 </p>
+                
+                {/* State Search */}
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Search states..."
+                    value={stateSearchTerm}
+                    onChange={(e) => setStateSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-300 focus:border-transparent"
+                  />
+                </div>
                 <div className="relative">
                   <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-slate-300 rounded-xl bg-white">
                     {profileForm.states.length === 0 && (
@@ -802,8 +756,16 @@ export default function EditProfilePage() {
                     ))}
                   </div>
                   <div className="mt-4 max-h-64 overflow-y-auto bg-white border border-slate-300 rounded-xl p-4">
+                    <div className="mb-3">
+                      <label className="block text-sm font-medium text-slate-700">
+                        Available States
+                      </label>
+                      <p className="text-xs text-slate-500">
+                        Click to select/deselect states where you work
+                      </p>
+                    </div>
                     <div className="grid grid-cols-3 gap-2">
-                      {states.map((state) => (
+                      {filteredStates.map((state) => (
                         <button
                           key={state}
                           type="button"
@@ -952,6 +914,70 @@ export default function EditProfilePage() {
                       updateForm('other_software', otherSoftware);
                     }}
                   />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Wrap-up Screen */}
+          {showWrapUp && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-3xl p-8 max-w-2xl mx-4 text-center">
+                <div className="mb-8">
+                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="text-3xl font-semibold text-slate-900 mb-4">
+                    Profile Complete! 🎉
+                  </h2>
+                  <p className="text-slate-600">
+                    Your professional profile has been saved successfully. Here's what happens next:
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-6 mb-8 text-left">
+                  <h3 className="font-medium text-slate-900 mb-3">Next Steps:</h3>
+                  <ul className="space-y-3 text-sm text-slate-600">
+                    <li className="flex items-start gap-3">
+                      <span className="text-blue-500 mt-1">1.</span>
+                      <span><strong>Wait for Verification:</strong> Your profile will be reviewed by our team (usually within 24-48 hours)</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-blue-500 mt-1">2.</span>
+                      <span><strong>Explore Other Profiles:</strong> Search and connect with other tax professionals on the platform</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-blue-500 mt-1">3.</span>
+                      <span><strong>Check Out Jobs:</strong> Browse available opportunities in the job board</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-blue-500 mt-1">4.</span>
+                      <span><strong>Get Notified:</strong> You'll receive an email when your profile is verified and goes live</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={() => router.push('/search')}
+                    className="px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors"
+                  >
+                    Explore Profiles
+                  </button>
+                  <button
+                    onClick={() => router.push('/jobs')}
+                    className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    Browse Jobs
+                  </button>
+                  <button
+                    onClick={() => router.push('/')}
+                    className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    Go Home
+                  </button>
                 </div>
               </div>
             </div>

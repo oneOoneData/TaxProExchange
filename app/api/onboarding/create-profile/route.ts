@@ -33,13 +33,36 @@ export async function POST(req: Request) {
 
     // Create new profile with legal acceptance
     const now = new Date().toISOString();
+    
+    // Generate a unique slug
+    const baseSlug = 'new-user';
+    const shortId = userId.substring(0, 8);
+    const slug = `${baseSlug}-${shortId}`;
+    
     const { error } = await supabase
       .from('profiles')
       .insert({
         clerk_id: userId,
         first_name: 'Unknown',
         last_name: 'User',
-        credential_type: 'Other', // Default value to satisfy constraint
+        headline: 'New Tax Professional',
+        bio: 'Profile created automatically',
+        credential_type: 'Other',
+        firm_name: '',
+        public_email: '',
+        phone: '',
+        website_url: '',
+        linkedin_url: '',
+        accepting_work: true,
+        public_contact: false,
+        works_multistate: false,
+        works_international: false,
+        countries: [],
+        specializations: [],
+        states: [],
+        software: [],
+        other_software: [],
+        slug: slug,
         tos_version: LEGAL_VERSIONS.TOS,
         tos_accepted_at: now,
         privacy_version: LEGAL_VERSIONS.PRIVACY,
