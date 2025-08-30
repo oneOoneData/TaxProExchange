@@ -174,17 +174,13 @@ export default function EditProfilePage() {
     const run = async () => {
       if (isLoaded && isSignedIn && user) {
         try {
-          console.log('🔍 Fetching profile for user:', user.id);
           const res = await fetch(`/api/profile?clerk_id=${user.id}`);
-          console.log('🔍 Profile API response status:', res.status);
           
           if (res.ok) {
             const p = await res.json();
-            console.log('🔍 Profile data received:', p);
             
             // Check if profile data is empty or missing
             if (!p || Object.keys(p).length === 0 || !p.id) {
-              console.log('🔍 No profile found, attempting to create basic profile...');
               try {
                 const createResponse = await fetch('/api/profile', {
                   method: 'PUT',
@@ -216,15 +212,14 @@ export default function EditProfilePage() {
                 });
                 
                 if (createResponse.ok) {
-                  console.log('🔍 Basic profile created successfully');
                   // Refresh the page to load the new profile
                   window.location.reload();
                   return;
                 } else {
-                  console.error('🔍 Failed to create basic profile:', createResponse.status);
+                  console.error('Failed to create basic profile:', createResponse.status);
                 }
               } catch (createError) {
-                console.error('🔍 Error creating basic profile:', createError);
+                console.error('Error creating basic profile:', createError);
               }
             }
             
@@ -263,12 +258,12 @@ export default function EditProfilePage() {
               other_software: p.other_software || []
             }));
           } else {
-            console.error('🔍 Profile API error:', res.status, res.statusText);
+            console.error('Profile API error:', res.status, res.statusText);
             const errorText = await res.text();
-            console.error('🔍 Profile API error details:', errorText);
+            console.error('Profile API error details:', errorText);
           }
         } catch (e) {
-          console.error('🔍 Profile fetch error:', e);
+          console.error('Profile fetch error:', e);
           // best-effort fallback
           setProfileForm(prev => ({
             ...prev,
@@ -414,21 +409,7 @@ export default function EditProfilePage() {
     }
   };
 
-  const debugDatabase = async () => {
-    try {
-      console.log('🔍 Debugging database...');
-      const response = await fetch(`/api/debug/profiles?clerk_id=${user?.id}`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('🔍 Database debug info:', data);
-        alert(`Database Debug Info:\n${JSON.stringify(data, null, 2)}`);
-      } else {
-        console.error('🔍 Debug API error:', response.status);
-      }
-    } catch (error) {
-      console.error('🔍 Debug error:', error);
-    }
-  };
+
 
   const nextStep = () => {
     if (currentStep < 4) {
@@ -464,21 +445,18 @@ export default function EditProfilePage() {
 
   const fetchSpecializations = async () => {
     try {
-      console.log('🔍 Fetching specializations...');
       const response = await fetch('/api/specializations');
-      console.log('🔍 Specializations API response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 Specializations data received:', data);
         setSpecializationGroups(data);
       } else {
-        console.error('🔍 Specializations API error:', response.status, response.statusText);
+        console.error('Specializations API error:', response.status, response.statusText);
         const errorText = await response.text();
-        console.error('🔍 Specializations API error details:', errorText);
+        console.error('Specializations API error details:', errorText);
       }
     } catch (error) {
-      console.error('🔍 Error fetching specializations:', error);
+      console.error('Error fetching specializations:', error);
     }
   };
 
@@ -582,12 +560,6 @@ export default function EditProfilePage() {
           <Logo />
                       <div className="flex items-center gap-4">
               <span className="text-sm text-slate-600">Edit Profile</span>
-              <button
-                onClick={debugDatabase}
-                className="text-sm text-red-600 hover:text-red-700 cursor-pointer"
-              >
-                Debug DB
-              </button>
               <button
                 onClick={handleBackToHome}
                 className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
