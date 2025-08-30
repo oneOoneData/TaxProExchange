@@ -182,6 +182,52 @@ export default function EditProfilePage() {
             const p = await res.json();
             console.log('🔍 Profile data received:', p);
             
+            // Check if profile data is empty or missing
+            if (!p || Object.keys(p).length === 0 || !p.id) {
+              console.log('🔍 No profile found, attempting to create basic profile...');
+              try {
+                const createResponse = await fetch('/api/profile', {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    clerk_id: user.id,
+                    first_name: user.firstName || 'New',
+                    last_name: user.lastName || 'User',
+                    headline: `${user.firstName || 'New'} ${user.lastName || 'User'}`,
+                    bio: 'Profile created automatically',
+                    credential_type: 'Other',
+                    firm_name: '',
+                    public_email: user.emailAddresses[0]?.emailAddress || '',
+                    phone: '',
+                    website_url: '',
+                    linkedin_url: '',
+                    accepting_work: true,
+                    public_contact: false,
+                    works_multistate: false,
+                    works_international: false,
+                    countries: [],
+                    specializations: [],
+                    states: [],
+                    software: [],
+                    other_software: []
+                  }),
+                });
+                
+                if (createResponse.ok) {
+                  console.log('🔍 Basic profile created successfully');
+                  // Refresh the page to load the new profile
+                  window.location.reload();
+                  return;
+                } else {
+                  console.error('🔍 Failed to create basic profile:', createResponse.status);
+                }
+              } catch (createError) {
+                console.error('🔍 Error creating basic profile:', createError);
+              }
+            }
+            
             // Check if user needs to accept updated legal documents
             if (p.tos_version || p.privacy_version) {
               const { LEGAL_VERSIONS } = await import('@/lib/legal');
@@ -220,51 +266,6 @@ export default function EditProfilePage() {
             console.error('🔍 Profile API error:', res.status, res.statusText);
             const errorText = await res.text();
             console.error('🔍 Profile API error details:', errorText);
-            
-            // If no profile exists, try to create one with basic info
-            if (res.status === 200 && errorText === '{}') {
-              console.log('🔍 No profile found, attempting to create basic profile...');
-              try {
-                const createResponse = await fetch('/api/profile', {
-                  method: 'PUT',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    clerk_id: user.id,
-                    first_name: user.firstName || 'New',
-                    last_name: user.lastName || 'User',
-                    headline: `${user.firstName || 'New'} ${user.lastName || 'User'}`,
-                    bio: 'Profile created automatically',
-                    credential_type: 'Other',
-                    firm_name: '',
-                    public_email: user.emailAddresses[0]?.emailAddress || '',
-                    phone: '',
-                    website_url: '',
-                    linkedin_url: '',
-                    accepting_work: true,
-                    public_contact: false,
-                    works_multistate: false,
-                    works_international: false,
-                    countries: [],
-                    specializations: [],
-                    states: [],
-                    software: [],
-                    other_software: []
-                  }),
-                });
-                
-                if (createResponse.ok) {
-                  console.log('🔍 Basic profile created successfully');
-                  // Refresh the page to load the new profile
-                  window.location.reload();
-                } else {
-                  console.error('🔍 Failed to create basic profile:', createResponse.status);
-                }
-              } catch (createError) {
-                console.error('🔍 Error creating basic profile:', createError);
-              }
-            }
           }
         } catch (e) {
           console.error('🔍 Profile fetch error:', e);
