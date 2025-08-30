@@ -11,6 +11,44 @@ function supabaseService() {
   );
 }
 
+// Generate a unique slug that checks for conflicts
+async function generateUniqueSlug(userId: string, supabase: any): Promise<string> {
+  // Start with a base slug
+  const baseSlug = 'new-user';
+  const shortId = userId.substring(0, 8);
+  let slug = `${baseSlug}-${shortId}`;
+  
+  // Check if slug exists and append counter if needed
+  let counter = 1;
+  let finalSlug = slug;
+  
+  while (true) {
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('slug', finalSlug)
+      .single();
+    
+    if (!existingProfile) {
+      break; // Slug is unique
+    }
+    
+    // Slug exists, try with counter
+    finalSlug = `${slug}-${counter}`;
+    counter++;
+    
+    // Prevent infinite loop
+    if (counter > 100) {
+      // Fallback to timestamp-based slug
+      const timestamp = Date.now().toString(36);
+      finalSlug = `${baseSlug}-${timestamp}`;
+      break;
+    }
+  }
+  
+  return finalSlug;
+}
+
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
@@ -20,12 +58,61 @@ export async function POST(req: Request) {
 
     const supabase = supabaseService();
     
-    // Check if profile already exists
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('clerk_id', userId)
-      .single();
+    // First, try to get the user's email from Clerk
+    let userEmail: string | null = null;
+    try {
+      const response = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.primary_email_address_id && userData.email_addresses) {
+          const primaryEmail = userData.email_addresses.find((e: any) => e.id === userData.primary_email_address_id);
+          if (primaryEmail) {
+            userEmail = primaryEmail.email_address;
+          }
+        } else if (userData.email_addresses && userData.email_addresses.length > 0) {
+          userEmail = userData.email_addresses[0].email_address;
+        }
+      }
+    } catch (error) {
+      console.log('🔍 Could not fetch email from Clerk, will use clerk_id lookup:', error);
+    }
+    
+    console.log('🔍 User email from Clerk:', userEmail);
+    
+    // Check if profile already exists by email first, then by clerk_id
+    let existingProfile = null;
+    
+    if (userEmail) {
+      console.log('🔍 Searching for profile by email:', userEmail);
+      const { data: emailProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('public_email', userEmail)
+        .single();
+      
+      if (emailProfile) {
+        console.log('🔍 Profile found by email:', emailProfile.id);
+        existingProfile = emailProfile;
+      }
+    }
+    
+    // If no profile found by email, try by clerk_id
+    if (!existingProfile) {
+      console.log('🔍 Searching for profile by clerk_id:', userId);
+      const { data: clerkProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('clerk_id', userId)
+        .single();
+
+      existingProfile = clerkProfile;
+    }
 
     if (existingProfile) {
       return new Response('Profile already exists', { status: 400 });
@@ -35,9 +122,7 @@ export async function POST(req: Request) {
     const now = new Date().toISOString();
     
     // Generate a unique slug
-    const baseSlug = 'new-user';
-    const shortId = userId.substring(0, 8);
-    const slug = `${baseSlug}-${shortId}`;
+    const slug = await generateUniqueSlug(userId, supabase);
     
     const { error } = await supabase
       .from('profiles')

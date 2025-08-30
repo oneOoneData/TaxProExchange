@@ -22,11 +22,65 @@ export async function POST(
     const supabase = supabaseService();
 
     // Check if user can apply (verified preparer)
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, visibility_state')
-      .eq('clerk_id', userId)
-      .single();
+    // First, try to get the user's email from Clerk
+    let userEmail: string | null = null;
+    try {
+      const response = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.primary_email_address_id && userData.email_addresses) {
+          const primaryEmail = userData.email_addresses.find((e: any) => e.id === userData.primary_email_address_id);
+          if (primaryEmail) {
+            userEmail = primaryEmail.email_address;
+          }
+        } else if (userData.email_addresses && userData.email_addresses.length > 0) {
+          userEmail = userData.email_addresses[0].email_address;
+        }
+      }
+    } catch (error) {
+      console.log('🔍 Could not fetch email from Clerk, will use clerk_id lookup:', error);
+    }
+    
+    console.log('🔍 User email from Clerk:', userEmail);
+    
+    // Try to find profile by email first (more reliable across environments)
+    let profile = null;
+    let profileError = null;
+    
+    if (userEmail) {
+      console.log('🔍 Searching for profile by email:', userEmail);
+      const { data: emailProfile, error: emailError } = await supabase
+        .from('profiles')
+        .select('id, visibility_state, first_name, last_name, headline')
+        .eq('public_email', userEmail)
+        .single();
+      
+      if (emailProfile) {
+        console.log('🔍 Profile found by email:', emailProfile.id);
+        profile = emailProfile;
+      } else if (emailError && emailError.code !== 'PGRST116') {
+        console.error('🔍 Error searching by email:', emailError);
+      }
+    }
+    
+    // If no profile found by email, try by clerk_id
+    if (!profile) {
+      console.log('🔍 Searching for profile by clerk_id:', userId);
+      const { data: clerkProfile, error: clerkError } = await supabase
+        .from('profiles')
+        .select('id, visibility_state, first_name, last_name, headline')
+        .eq('clerk_id', userId)
+        .single();
+      
+      profile = clerkProfile;
+      profileError = clerkError;
+    }
 
     if (profileError || !profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
@@ -39,7 +93,7 @@ export async function POST(
     // Check if job exists and is open
     const { data: job, error: jobError } = await supabase
       .from('jobs')
-      .select('id, status, created_by')
+      .select('id, status, created_by, title')
       .eq('id', jobId)
       .single();
 
@@ -92,6 +146,30 @@ export async function POST(
     if (applicationError) {
       console.error('Application creation error:', applicationError);
       return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
+    }
+
+    // Send notification email to job poster about new application
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-application-received`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Secret': process.env.WEBHOOK_SECRET || '',
+        },
+        body: JSON.stringify({
+          job_id: jobId,
+          application_id: application.id,
+          job_title: job.title,
+          applicant_name: `${profile.first_name} ${profile.last_name}`,
+          applicant_headline: profile.headline || 'Tax Professional',
+          cover_note: cover_note || '',
+          proposed_rate: proposed_rate || null,
+          proposed_timeline: proposed_timeline || null
+        }),
+      });
+    } catch (emailError) {
+      console.error('Failed to send application notification:', emailError);
+      // Don't fail the request if email fails
     }
 
     return NextResponse.json({ application }, { status: 201 });

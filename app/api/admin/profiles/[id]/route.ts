@@ -14,6 +14,43 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+// Function to get user email from Clerk
+async function getUserEmailFromClerk(clerkId: string): Promise<string | null> {
+  try {
+    const response = await fetch(`https://api.clerk.com/v1/users/${clerkId}`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch user ${clerkId} from Clerk:`, response.status);
+      return null;
+    }
+
+    const userData = await response.json();
+    
+    // Extract email from the user data
+    if (userData.primary_email_address_id && userData.email_addresses) {
+      const primaryEmail = userData.email_addresses.find((e: any) => e.id === userData.primary_email_address_id);
+      if (primaryEmail) {
+        return primaryEmail.email_address;
+      }
+    }
+    
+    // Fallback to first email address
+    if (userData.email_addresses && userData.email_addresses.length > 0) {
+      return userData.email_addresses[0].email_address;
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Error fetching user ${clerkId} from Clerk:`, error);
+    return null;
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -32,14 +69,13 @@ export async function GET(
     // TODO: Add admin role check here
     // For now, allow access to anyone (we'll secure this later)
 
-    // Fetch the profile
+    // Fetch the profile - include clerk_id to fetch email
     const { data: profile, error } = await supabase
       .from('profiles')
       .select(`
         id,
         first_name,
         last_name,
-        email,
         credential_type,
         headline,
         bio,
@@ -50,7 +86,8 @@ export async function GET(
         is_deleted,
         deleted_at,
         created_at,
-        updated_at
+        updated_at,
+        clerk_id
       `)
       .eq('id', profileId)
       .single();
@@ -62,7 +99,22 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ profile });
+    // Fetch real email from Clerk
+    let email = 'No email available';
+    if (profile.clerk_id) {
+      const realEmail = await getUserEmailFromClerk(profile.clerk_id);
+      if (realEmail) {
+        email = realEmail;
+      }
+    }
+
+    // Add email to the profile data
+    const profileWithEmail = {
+      ...profile,
+      email
+    };
+
+    return NextResponse.json({ profile: profileWithEmail });
 
   } catch (error) {
     console.error('Profile fetch error:', error);

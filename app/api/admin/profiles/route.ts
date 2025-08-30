@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     // TODO: Add admin role check here
     // For now, allow access to anyone (we'll secure this later)
 
-    // Build the query - no users table join since we're using Clerk
+    // Build the query - include public_email from the database
     let query = supabase
       .from('profiles')
       .select(`
@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
         is_listed,
         is_deleted,
         deleted_at,
-        created_at
+        created_at,
+        public_email
       `)
       .order('created_at', { ascending: false });
 
@@ -69,18 +70,16 @@ export async function GET(request: NextRequest) {
 
     console.log('🔍 Raw profiles from database:', profiles);
 
-    // Add a placeholder email since we don't have the users table
-    const profilesWithEmail = profiles?.map(profile => {
-      return {
-        ...profile,
-        email: 'email@example.com' // Placeholder - you can update this later
-      };
-    }) || [];
+    // Process profiles to include email field
+    const profilesWithEmails = (profiles || []).map((profile) => ({
+      ...profile,
+      email: profile.public_email || 'No email available'
+    }));
 
-    console.log('🔍 Processed profiles with email:', profilesWithEmail);
+    console.log('🔍 Processed profiles with emails:', profilesWithEmails);
 
     return NextResponse.json({
-      profiles: profilesWithEmail
+      profiles: profilesWithEmails
     });
 
   } catch (error) {

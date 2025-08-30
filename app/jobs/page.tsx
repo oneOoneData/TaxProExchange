@@ -31,6 +31,7 @@ interface Job {
   location_countries: string[];
   remote_ok: boolean;
   created_at: string;
+  created_by: string;
   firm: {
     name: string;
     verified: boolean;
@@ -203,7 +204,11 @@ export default function JobsPage() {
             ) : (
               <div className="space-y-4">
                 {jobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard 
+                  key={job.id} 
+                  job={job} 
+                  isOwner={user?.id === job.created_by}
+                />
                 ))}
               </div>
             )}

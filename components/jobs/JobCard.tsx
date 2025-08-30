@@ -34,9 +34,10 @@ interface Job {
 
 interface JobCardProps {
   job: Job;
+  isOwner?: boolean;
 }
 
-export function JobCard({ job }: JobCardProps) {
+export function JobCard({ job, isOwner = false }: JobCardProps) {
   const formatPayout = () => {
     if (job.payout_type === 'fixed') {
       return `$${job.payout_fixed?.toLocaleString()}`;
@@ -184,12 +185,22 @@ export function JobCard({ job }: JobCardProps) {
             )}
           </div>
           
-          <Link
-            href={`/jobs/${job.id}`}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-          >
-            View Details
-          </Link>
+          <div className="flex items-center gap-2">
+            {isOwner && (
+              <Link
+                href={`/jobs/${job.id}/applications`}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200"
+              >
+                View Applications
+              </Link>
+            )}
+            <Link
+              href={`/jobs/${job.id}`}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+            >
+              View Details
+            </Link>
+          </div>
         </div>
       </div>
     </div>

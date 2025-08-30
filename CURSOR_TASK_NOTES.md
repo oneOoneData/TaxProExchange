@@ -735,3 +735,119 @@
 - [ ] No console errors or TypeScript issues
 - [ ] Mobile responsive design works
 - [ ] Keyboard navigation accessible
+
+---
+
+### 2025-01-XX: Enhanced Job Application System with Notifications and Status Management ✅
+
+**Goal**: Implement comprehensive job application management system including status updates, email notifications, and application tracking dashboards for both job posters and applicants.
+
+**Changes Made**:
+
+#### 1. Application Status Management
+- **NEW**: `/app/api/jobs/[id]/applications/[applicationId]/route.ts` - Manage individual applications
+- **Features**:
+  - Update application status (applied, shortlisted, hired, rejected, completed, withdrawn)
+  - Add notes to applications
+  - Withdraw applications (applicants only)
+  - Proper authorization checks
+
+#### 2. Email Notifications System
+- **NEW**: `/app/api/notify/application-status-changed/route.ts` - Notify applicants of status changes
+- **NEW**: `/app/api/notify/job-application-received/route.ts` - Notify job posters of new applications
+- **Features**:
+  - Professional email templates with HTML and text versions
+  - Status change notifications with custom notes
+  - New application alerts with applicant details
+  - Webhook security with secret verification
+
+#### 3. Job Poster Application Dashboard
+- **NEW**: `/app/jobs/[id]/applications/page.tsx` - Manage all applications for a specific job
+- **NEW**: `/components/jobs/ApplicationCard.tsx` - Individual application management component
+- **Features**:
+  - View all applications with filtering by status
+  - Update application status and add notes
+  - Statistics dashboard (counts by status)
+  - Direct links to applicant profiles
+  - Responsive design with status color coding
+
+#### 4. Applicant Application Tracking
+- **NEW**: `/app/profile/applications/page.tsx` - Personal application dashboard
+- **NEW**: `/app/api/profile/applications/route.ts` - API for user's applications
+- **Features**:
+  - View all personal applications with status tracking
+  - Filter applications by status
+  - View employer notes and feedback
+  - Withdraw applications when appropriate
+  - Statistics dashboard for personal applications
+
+#### 5. Enhanced Job Cards
+- **Modified**: `/components/jobs/JobCard.tsx` - Added "View Applications" button for job owners
+- **Modified**: `/app/jobs/page.tsx` - Added owner detection for application management
+- **Features**:
+  - Job owners see "View Applications" button
+  - Proper authorization checks
+  - Seamless navigation to application management
+
+#### 6. User Menu Integration
+- **Modified**: `/components/UserMenu.tsx` - Added "My Applications" link
+- **Features**:
+  - Quick access to personal application dashboard
+  - Consistent navigation experience
+
+**Database Changes**:
+- **NEW**: `database/add_application_notes_field.sql` - Add notes and updated_at fields
+- **Features**:
+  - `notes` field for application feedback
+  - `updated_at` field with automatic triggers
+  - Proper indexing for performance
+
+**Files Modified**: 6 files, ~300 lines changed
+**Files Created**: 8 new files, ~800 lines added
+
+**Technical Details**:
+- **Email System**: Uses existing email infrastructure with professional templates
+- **Security**: Webhook secret verification for all notification endpoints
+- **Authorization**: Proper RLS and user ownership checks
+- **Performance**: Optimized database queries with proper indexing
+- **UI/UX**: Consistent design language with status color coding
+- **Responsive**: Mobile-friendly dashboards and components
+
+**User Experience Flow**:
+
+#### For Job Posters:
+1. Receive email notification when someone applies
+2. Click "View Applications" button on job cards
+3. Manage applications with status updates and notes
+4. Send status change notifications to applicants
+
+#### For Applicants:
+1. Submit applications with cover notes and proposed terms
+2. Receive email notifications for status changes
+3. Track all applications in personal dashboard
+4. View employer feedback and notes
+5. Withdraw applications when appropriate
+
+**Testing Checklist**:
+- [ ] Job posters receive email notifications for new applications
+- [ ] Applicants receive email notifications for status changes
+- [ ] Application status updates work correctly
+- [ ] Notes can be added and viewed
+- [ ] Job owners can access application dashboard
+- [ ] Applicants can view their application history
+- [ ] Status filtering works on both dashboards
+- [ ] Application withdrawal works for applicants
+- [ ] "View Applications" button appears for job owners
+- [ ] "My Applications" link appears in user menu
+- [ ] All authorization checks work properly
+- [ ] Email templates render correctly
+- [ ] Mobile responsiveness works on all new pages
+
+**Database Migration Required**:
+Run `database/add_application_notes_field.sql` in Supabase SQL Editor to add application notes and tracking fields.
+
+**Environment Variables Required**:
+- `WEBHOOK_SECRET` - For securing notification webhooks
+- `NEXT_PUBLIC_APP_URL` - For email links and navigation
+
+**Result**: Complete job application lifecycle management with professional communication, status tracking, and user-friendly dashboards for both parties involved in the hiring process.

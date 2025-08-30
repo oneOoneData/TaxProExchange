@@ -46,13 +46,65 @@ export async function GET(request: Request) {
     const supabase = supabaseService();
     console.log('🔍 Supabase client created successfully');
     
-    // Get basic profile
-    console.log('🔍 Querying profiles table for clerk_id:', clerkId);
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('clerk_id', clerkId)
-      .single();
+    // First, try to get the user's email from Clerk
+    let userEmail: string | null = null;
+    try {
+      const response = await fetch(`https://api.clerk.com/v1/users/${clerkId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.primary_email_address_id && userData.email_addresses) {
+          const primaryEmail = userData.email_addresses.find((e: any) => e.id === userData.primary_email_address_id);
+          if (primaryEmail) {
+            userEmail = primaryEmail.email_address;
+          }
+        } else if (userData.email_addresses && userData.email_addresses.length > 0) {
+          userEmail = userData.email_addresses[0].email_address;
+        }
+      }
+    } catch (error) {
+      console.log('🔍 Could not fetch email from Clerk, will use clerk_id lookup:', error);
+    }
+    
+    console.log('🔍 User email from Clerk:', userEmail);
+    
+    // Try to find profile by email first (more reliable across environments)
+    let profile = null;
+    let profileError = null;
+    
+    if (userEmail) {
+      console.log('🔍 Searching for profile by email:', userEmail);
+      const { data: emailProfile, error: emailError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('public_email', userEmail)
+        .single();
+      
+      if (emailProfile) {
+        console.log('🔍 Profile found by email:', emailProfile.id);
+        profile = emailProfile;
+      } else if (emailError && emailError.code !== 'PGRST116') {
+        console.error('🔍 Error searching by email:', emailError);
+      }
+    }
+    
+    // If no profile found by email, try by clerk_id
+    if (!profile) {
+      console.log('🔍 Searching for profile by clerk_id:', clerkId);
+      const { data: clerkProfile, error: clerkError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('clerk_id', clerkId)
+        .single();
+      
+      profile = clerkProfile;
+      profileError = clerkError;
+    }
 
     console.log('🔍 Profile query result:', { profile, profileError });
 
@@ -62,7 +114,20 @@ export async function GET(request: Request) {
     }
 
     if (!profile) {
-      console.log('🔍 No profile found for clerk_id:', clerkId);
+      console.log('🔍 No profile found for clerk_id:', clerkId, 'or email:', userEmail);
+      
+      // Let's check what profiles exist to debug this
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from('profiles')
+        .select('id, clerk_id, first_name, last_name, slug, public_email')
+        .limit(10);
+      
+      if (allProfilesError) {
+        console.error('🔍 Error fetching all profiles:', allProfilesError);
+      } else {
+        console.log('🔍 Sample of existing profiles:', allProfiles);
+      }
+      
       console.log('🔍 Returning empty object');
       return NextResponse.json({});
     }
@@ -152,19 +217,68 @@ export async function PUT(request: Request) {
 
     const supabase = supabaseService();
     
-    // First, check if a profile already exists
-    const { data: existingProfiles, error: checkError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('clerk_id', clerk_id);
-
-    if (checkError) {
-      console.error('Profile check error:', checkError);
-      return NextResponse.json({ error: 'Database error: ' + checkError.message }, { status: 500 });
+    // First, try to get the user's email from Clerk
+    let userEmail: string | null = null;
+    try {
+      const response = await fetch(`https://api.clerk.com/v1/users/${clerk_id}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.primary_email_address_id && userData.email_addresses) {
+          const primaryEmail = userData.email_addresses.find((e: any) => e.id === userData.primary_email_address_id);
+          if (primaryEmail) {
+            userEmail = primaryEmail.email_address;
+          }
+        } else if (userData.email_addresses && userData.email_addresses.length > 0) {
+          userEmail = userData.email_addresses[0].email_address;
+        }
+      }
+    } catch (error) {
+      console.log('🔍 Could not fetch email from Clerk, will use clerk_id lookup:', error);
     }
+    
+    console.log('🔍 User email from Clerk:', userEmail);
+    
+    // Try to find profile by email first (more reliable across environments)
+    let existingProfile = null;
+    
+    if (userEmail) {
+      console.log('🔍 Searching for profile by email:', userEmail);
+      const { data: emailProfile, error: emailError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('public_email', userEmail)
+        .single();
+      
+      if (emailProfile) {
+        console.log('🔍 Profile found by email:', emailProfile.id);
+        existingProfile = emailProfile;
+      } else if (emailError && emailError.code !== 'PGRST116') {
+        console.error('🔍 Error searching by email:', emailError);
+      }
+    }
+    
+    // If no profile found by email, try by clerk_id
+    if (!existingProfile) {
+      console.log('🔍 Searching for profile by clerk_id:', clerk_id);
+      const { data: clerkProfiles, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('clerk_id', clerk_id);
 
-    // If there are multiple profiles (shouldn't happen after constraint fix), use the first one
-    const existingProfile = existingProfiles?.[0];
+      if (checkError) {
+        console.error('Profile check error:', checkError);
+        return NextResponse.json({ error: 'Database error: ' + checkError.message }, { status: 500 });
+      }
+
+      // If there are multiple profiles (shouldn't happen after constraint fix), use the first one
+      existingProfile = clerkProfiles?.[0];
+    }
 
     let profile;
     let profileError;

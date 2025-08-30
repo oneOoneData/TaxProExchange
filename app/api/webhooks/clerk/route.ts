@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Generate a clean, URL-friendly slug from name and ID
-function generateSlug(firstName: string | null, lastName: string | null, userId: string): string {
+async function generateUniqueSlug(firstName: string | null, lastName: string | null, userId: string, supabase: any): Promise<string> {
   // Create base slug from name
   let baseSlug = '';
   if (firstName && lastName) {
@@ -29,8 +29,37 @@ function generateSlug(firstName: string | null, lastName: string | null, userId:
   
   // Add a short unique identifier to prevent conflicts
   const shortId = userId.substring(0, 8);
+  let slug = `${baseSlug}-${shortId}`;
   
-  return `${baseSlug}-${shortId}`;
+  // Check if slug exists and append counter if needed
+  let counter = 1;
+  let finalSlug = slug;
+  
+  while (true) {
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('slug', finalSlug)
+      .single();
+    
+    if (!existingProfile) {
+      break; // Slug is unique
+    }
+    
+    // Slug exists, try with counter
+    finalSlug = `${slug}-${counter}`;
+    counter++;
+    
+    // Prevent infinite loop
+    if (counter > 100) {
+      // Fallback to timestamp-based slug
+      const timestamp = Date.now().toString(36);
+      finalSlug = `${baseSlug}-${timestamp}`;
+      break;
+    }
+  }
+  
+  return finalSlug;
 }
 
 export async function POST(request: Request) {
@@ -122,7 +151,7 @@ export async function POST(request: Request) {
         accepting_work: false,
         // visibility_state will use database default ('hidden')
         is_listed: false,
-        slug: generateSlug(u.first_name, u.last_name, u.id),
+        slug: await generateUniqueSlug(u.first_name, u.last_name, u.id, supabase),
         image_url: u.image_url ?? null,
       };
       
