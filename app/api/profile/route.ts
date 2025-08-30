@@ -36,19 +36,25 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const clerkId = searchParams.get('clerk_id') ?? null;
   
+  console.log('🔍 Profile API called with clerk_id:', clerkId);
+  
   if (!clerkId) {
     return NextResponse.json({ error: 'clerk_id is required' }, { status: 400 });
   }
 
   try {
     const supabase = supabaseService();
+    console.log('🔍 Supabase client created successfully');
     
     // Get basic profile
+    console.log('🔍 Querying profiles table for clerk_id:', clerkId);
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
       .eq('clerk_id', clerkId)
       .single();
+
+    console.log('🔍 Profile query result:', { profile, profileError });
 
     if (profileError && profileError.code !== 'PGRST116') {
       console.error('Profile fetch error:', profileError);
@@ -56,8 +62,13 @@ export async function GET(request: Request) {
     }
 
     if (!profile) {
+      console.log('🔍 No profile found for clerk_id:', clerkId);
+      console.log('🔍 Returning empty object');
       return NextResponse.json({});
     }
+
+    console.log('🔍 Profile found:', profile);
+    console.log('🔍 Profile ID:', profile.id);
 
     // Fetch related data
     const [specializationsResult, statesResult, softwareResult] = await Promise.all([
@@ -74,6 +85,12 @@ export async function GET(request: Request) {
         .select('software_slug')
         .eq('profile_id', profile.id)
     ]);
+
+    console.log('🔍 Related data results:', {
+      specializations: specializationsResult,
+      states: statesResult,
+      software: softwareResult
+    });
 
     // Debug logging
     console.log('Profile data being returned:', {

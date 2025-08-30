@@ -220,6 +220,51 @@ export default function EditProfilePage() {
             console.error('🔍 Profile API error:', res.status, res.statusText);
             const errorText = await res.text();
             console.error('🔍 Profile API error details:', errorText);
+            
+            // If no profile exists, try to create one with basic info
+            if (res.status === 200 && errorText === '{}') {
+              console.log('🔍 No profile found, attempting to create basic profile...');
+              try {
+                const createResponse = await fetch('/api/profile', {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    clerk_id: user.id,
+                    first_name: user.firstName || 'New',
+                    last_name: user.lastName || 'User',
+                    headline: `${user.firstName || 'New'} ${user.lastName || 'User'}`,
+                    bio: 'Profile created automatically',
+                    credential_type: 'Other',
+                    firm_name: '',
+                    public_email: user.emailAddresses[0]?.emailAddress || '',
+                    phone: '',
+                    website_url: '',
+                    linkedin_url: '',
+                    accepting_work: true,
+                    public_contact: false,
+                    works_multistate: false,
+                    works_international: false,
+                    countries: [],
+                    specializations: [],
+                    states: [],
+                    software: [],
+                    other_software: []
+                  }),
+                });
+                
+                if (createResponse.ok) {
+                  console.log('🔍 Basic profile created successfully');
+                  // Refresh the page to load the new profile
+                  window.location.reload();
+                } else {
+                  console.error('🔍 Failed to create basic profile:', createResponse.status);
+                }
+              } catch (createError) {
+                console.error('🔍 Error creating basic profile:', createError);
+              }
+            }
           }
         } catch (e) {
           console.error('🔍 Profile fetch error:', e);
@@ -365,6 +410,22 @@ export default function EditProfilePage() {
     } catch (error) {
       console.error('Failed to mark onboarding complete:', error);
       router.push('/');
+    }
+  };
+
+  const debugDatabase = async () => {
+    try {
+      console.log('🔍 Debugging database...');
+      const response = await fetch(`/api/debug/profiles?clerk_id=${user?.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔍 Database debug info:', data);
+        alert(`Database Debug Info:\n${JSON.stringify(data, null, 2)}`);
+      } else {
+        console.error('🔍 Debug API error:', response.status);
+      }
+    } catch (error) {
+      console.error('🔍 Debug error:', error);
     }
   };
 
@@ -518,14 +579,20 @@ export default function EditProfilePage() {
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
           <Logo />
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-600">Edit Profile</span>
-            <button
-              onClick={handleBackToHome}
-              className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
-            >
-              Back to Home
-            </button>
+                      <div className="flex items-center gap-4">
+              <span className="text-sm text-slate-600">Edit Profile</span>
+              <button
+                onClick={debugDatabase}
+                className="text-sm text-red-600 hover:text-red-700 cursor-pointer"
+              >
+                Debug DB
+              </button>
+              <button
+                onClick={handleBackToHome}
+                className="text-sm text-slate-600 hover:text-slate-900 cursor-pointer"
+              >
+                Back to Home
+              </button>
             <UserMenu 
               userName={user?.fullName || undefined}
               userEmail={user?.primaryEmailAddress?.emailAddress}
