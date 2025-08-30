@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
     const specialization = searchParams.get('specialization') || '';
     const state = searchParams.get('state') || '';
     const accepting_work = searchParams.get('accepting_work') || '';
+    const verified_only = searchParams.get('verified_only') || 'false';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
@@ -54,8 +55,12 @@ export async function GET(request: NextRequest) {
         countries,
         created_at
       `, { count: 'exact' })
-      .eq('visibility_state', 'verified')
       .eq('is_listed', true);
+
+    // Apply verified filter if requested
+    if (verified_only === 'true') {
+      supabaseQuery = supabaseQuery.eq('visibility_state', 'verified');
+    }
 
     // Apply text search
     if (query) {

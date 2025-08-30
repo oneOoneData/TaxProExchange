@@ -12,6 +12,7 @@ interface UserMenuProps {
 export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const { signOut } = useClerk();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -96,6 +97,17 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
               </Link>
 
               <Link
+                href="/jobs"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                </svg>
+                Job Board
+              </Link>
+
+              <Link
                 href="/feedback"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
@@ -108,16 +120,64 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
               <div className="border-t border-slate-100 my-1"></div>
 
-              <Link
-                href="/admin"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Admin Panel
-              </Link>
+              {/* Admin Section */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsAdminOpen(!isAdminOpen)}
+                  className="flex items-center justify-between w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Admin Panel
+                  </div>
+                  <svg 
+                    className={`w-4 h-4 text-slate-400 transition-transform ${isAdminOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Admin Submenu */}
+                <AnimatePresence>
+                  {isAdminOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-8">
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Dashboard
+                        </Link>
+                        <Link
+                          href="/admin/jobs"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                          </svg>
+                          Manage Jobs
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <div className="border-t border-slate-100 my-1"></div>
 

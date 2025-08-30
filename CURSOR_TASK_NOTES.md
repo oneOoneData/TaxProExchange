@@ -58,6 +58,533 @@
 
 ---
 
+### 2025-01-XX: Added Header and Footer to Job Pages ✅
+
+**Goal**: Add consistent header and footer to all job-related pages to match the main site design and improve navigation.
+
+**Root Cause**: 
+- Job pages (`/jobs`, `/jobs/[id]`, `/jobs/new`) were missing the header and footer components
+- Users reported that job pages appeared incomplete without navigation elements
+- Inconsistent user experience compared to other pages on the site
+
+**Solution Applied**:
+- **Added Header**: Imported and added `Logo` and `UserMenu` components to all job pages
+- **Added Navigation**: Consistent navigation menu with Home, Search, Jobs, and Join links
+- **Added Footer**: Standard footer with TaxProExchange branding and links
+- **Fixed TypeScript Error**: Corrected `searchProfiles` function call in search page
+
+**Files Modified**:
+- `app/jobs/page.tsx` - Added header and footer to main jobs listing page
+- `app/jobs/[id]/page.tsx` - Added header and footer to individual job detail page  
+- `app/jobs/new/page.tsx` - Added header and footer to job creation page
+- `app/search/page.tsx` - Fixed TypeScript error with function call
+
+**Header Features**:
+- Sticky navigation with backdrop blur effect
+- Logo and navigation links (Home, Search, Jobs, Join)
+- User menu for authenticated users
+- Sign In button for unauthenticated users
+- Responsive design (mobile-friendly)
+
+**Footer Features**:
+- TaxProExchange branding with TX logo
+- Copyright information
+- Links to Privacy, Terms, and Join pages
+- Responsive layout
+
+**Testing**:
+- ✅ Build passes successfully
+- ✅ All job pages now have consistent header/footer
+- ✅ Navigation works correctly between pages
+- ✅ User authentication state handled properly
+
+---
+
+### 2025-01-XX: Added Global Footer to All Pages ✅
+
+**Goal**: Ensure the footer from the home page is applied to all pages across the site, with permission-based hiding logic.
+
+**Root Cause**: 
+- Footer was only present on some pages (home page, jobs page) but missing from others (search page, profile pages, etc.)
+- Inconsistent user experience with some pages appearing incomplete
+- Footer content was duplicated across multiple pages instead of being centralized
+
+**Solution Applied**:
+- **Created Footer Component**: New `components/Footer.tsx` with permission-based hiding logic
+- **Updated Root Layout**: Added Footer component to `app/layout.tsx` so it appears on all pages
+- **Removed Duplicate Footers**: Cleaned up duplicate footer code from home page and jobs page
+- **Permission Logic**: Footer hides if user authentication is not loaded (permission issues)
+
+**Files Modified**:
+- `components/Footer.tsx` - New reusable footer component
+- `app/layout.tsx` - Added Footer to root layout
+- `app/page.tsx` - Removed duplicate footer
+- `app/jobs/page.tsx` - Removed duplicate footer
+
+**Footer Features**:
+- TaxProExchange branding with TX logo
+- Copyright information with dynamic year
+- Links to Privacy, Terms, and Join pages
+- Permission-based visibility (hides if auth not loaded)
+- Responsive design for mobile and desktop
+- Consistent styling across all pages
+
+**Technical Details**:
+- Footer component uses `useUser` hook for permission checking
+- Hides if `isLoaded` is false (prevents showing during auth issues)
+- Added to root layout so appears on every page automatically
+- Removed duplicate footer code to maintain DRY principle
+
+**Testing Checklist**:
+- [ ] Footer appears on home page
+- [ ] Footer appears on search page
+- [ ] Footer appears on jobs page
+- [ ] Footer appears on profile pages
+- [ ] Footer appears on join/sign-in pages
+- [ ] Footer hides appropriately during permission issues
+- [ ] Footer styling is consistent across all pages
+- [ ] Footer links work correctly
+
+---
+
+### 2025-01-XX: Fixed Header Navigation Consistency Across Pages ✅
+
+**Goal**: Ensure all main pages have consistent header navigation with Home, Search, Jobs, and Join links, and standardize the authentication button text.
+
+**Root Cause**: 
+- Search page was missing the full navigation (only had Home and Search)
+- Job pages had "Sign In" instead of "Join Now" for unauthenticated users
+- Inconsistent navigation experience across different pages
+
+**Solution Applied**:
+- **Updated Search Page Header**: Added missing Jobs and Join navigation links
+- **Standardized Authentication Buttons**: Changed "Sign In" to "Join Now" on job pages for consistency
+- **Maintained Context-Appropriate Headers**: Profile pages and focused workflow pages keep their specialized navigation
+
+**Files Modified**:
+- `app/search/page.tsx` - Added full navigation (Home, Search, Jobs, Join)
+- `app/jobs/page.tsx` - Changed "Sign In" to "Join Now" for consistency
+- `app/jobs/[id]/page.tsx` - Changed "Sign In" to "Join Now" for consistency
+- `app/jobs/new/page.tsx` - Changed "Sign In" to "Join Now" for consistency
+
+**Navigation Structure**:
+- **Main Pages** (Home, Search, Jobs): Full navigation with Home, Search, Jobs, Join
+- **Profile Pages** (Edit, Verify): Focused navigation for workflow context
+- **Job Pages**: Full navigation with Jobs highlighted as current page
+- **Join/Sign-in Pages**: Minimal navigation appropriate for authentication flow
+
+**Authentication Button Consistency**:
+- **Unauthenticated Users**: "Join Now" button (consistent across all main pages)
+- **Authenticated Users**: UserMenu dropdown with profile and admin options
+
+**Testing Checklist**:
+- [ ] Search page shows full navigation (Home, Search, Jobs, Join)
+- [ ] Jobs page shows full navigation with Jobs highlighted
+- [ ] Job detail page shows full navigation with Jobs highlighted
+- [ ] Job creation page shows full navigation with Jobs highlighted
+- [ ] All job pages show "Join Now" for unauthenticated users
+- [ ] Profile pages maintain their focused navigation
+- [ ] Join/sign-in pages maintain their minimal navigation
+- [ ] Navigation links work correctly on all pages
+- [ ] Current page is properly highlighted in navigation
+
+---
+
+### 2025-01-27: Added Terms of Use and Privacy Policy with Legal Acceptance Flow ✅
+
+**Goal**: Implement comprehensive legal pages with acceptance tracking for both Terms of Use and Privacy Policy, including versioning and consent gates.
+
+**Root Cause**: 
+- No legal pages existed for the platform
+- No mechanism to track user acceptance of legal documents
+- Missing compliance infrastructure for professional networking platform
+
+**Solution Applied**:
+
+1. **Legal Constants** (`lib/legal.ts`)
+   - Created version constants for Terms and Privacy Policy
+   - Centralized legal version management
+
+2. **Database Migration** (`database/add_legal_acceptance.sql`)
+   - Added `tos_version`, `tos_accepted_at`, `privacy_version`, `privacy_accepted_at` to profiles table
+   - Added indexes and documentation for legal acceptance fields
+
+3. **Legal Acceptance API** (`app/api/legal/accept/route.ts`)
+   - POST endpoint to record user acceptance of legal documents
+   - Updates both Terms and Privacy acceptance in single call
+   - Requires authenticated user (protected route)
+
+4. **Terms of Use Page** (`app/legal/terms/page.tsx`)
+   - Comprehensive terms with BETA notice
+   - SEO metadata and canonical URLs
+   - Professional networking platform specific terms
+   - Last updated date tracking
+
+5. **Privacy Policy Page** (`app/legal/privacy/page.tsx`)
+   - Detailed privacy policy reflecting current tech stack
+   - CCPA/CPRA compliance for California residents
+   - Service provider transparency (Vercel, Supabase, Clerk, Resend)
+   - SEO metadata and canonical URLs
+
+6. **Legal Consent Page** (`app/legal/consent/page.tsx`)
+   - Gate for users who need to accept updated legal documents
+   - Checkboxes for both Terms and Privacy Policy
+   - Links to full legal documents
+   - Error handling and loading states
+
+7. **Updated Join Page** (`app/join/page.tsx`)
+   - Added required checkboxes for legal acceptance
+   - Age verification (18+ requirement)
+   - Links to legal documents
+   - Form validation
+
+8. **Updated Onboarding Flow** (`app/onboarding/page.tsx`)
+   - Checks for current legal acceptance versions
+   - Redirects to consent page if versions don't match
+   - Automatically accepts current versions for new users
+   - Version enforcement
+
+9. **Updated Middleware** (`middleware.ts`)
+   - Added `/legal(.*)` to public routes
+   - Legal pages accessible without authentication
+   - API endpoints remain protected
+
+10. **Updated Footer Links**
+    - All pages now link to `/legal/terms` and `/legal/privacy`
+    - Consistent navigation across the platform
+
+**Technical Details**:
+- Legal versioning system for future updates
+- Automatic acceptance tracking for new users
+- Version enforcement for existing users
+- Clerk publicMetadata mirroring (ready for implementation)
+- Responsive design with Framer Motion animations
+- SEO optimization with metadata and canonical URLs
+
+**Files Modified**: 11 files, ~400 lines added
+
+**Testing Checklist**:
+- [ ] Legal pages render correctly with BETA notices
+- [ ] Footer links work and point to correct URLs
+- [ ] Join page requires legal acceptance checkboxes
+- [ ] Onboarding checks legal acceptance versions
+- [ ] Consent page handles acceptance flow
+- [ ] API endpoint records acceptance correctly
+- [ ] Middleware allows public access to legal routes
+- [ ] SEO metadata is properly set
+
+**Next Steps**:
+- Run database migration to add legal acceptance fields
+- Test legal acceptance flow end-to-end
+- Verify middleware allows public access to legal pages
+- Consider implementing Clerk publicMetadata mirroring
+- Test version enforcement when legal documents are updated
+
+**Bug Fixes Applied**:
+- Fixed Framer Motion server component error by converting legal pages to client components
+- Added useEffect hooks for proper page title management
+- Created legal layout for metadata handling
+
+**Legal Acceptance Flow Improvements**:
+- Connected join page checkboxes to actually prevent signup until checked
+- Created explicit consent screen during onboarding instead of automatic acceptance
+- Added legal version checks to profile editing to ensure users accept updated terms
+- Created proper consent flow that shows terms before acceptance
+- Added redirect handling to return users to their original page after consent
+- Created separate profile creation flow after legal acceptance
+
+**Result**: Job pages now have a complete, professional appearance with consistent navigation and branding that matches the rest of the site.
+
+---
+
+### 2025-01-XX: Fixed Jobs API Database Error ✅
+
+**Goal**: Resolve the "Database error" that was preventing the jobs page from loading after the "Harden & Ship" features were deleted.
+
+**Root Cause**: 
+- The jobs API (`/api/jobs`) was trying to use a foreign key relationship `profiles!jobs_created_by_fkey` that doesn't exist in the database
+- This relationship was part of the "Harden & Ship" features that were deleted
+- The API was also trying to call a notification webhook endpoint that no longer exists
+
+**Solution Applied**:
+- **Removed Foreign Key Join**: Changed from `select('*, profiles!jobs_created_by_fkey(...)')` to `select('*')`
+- **Manual Profile Lookup**: Added manual profile lookup for each job using `clerk_id` to get firm information
+- **Removed Notification Webhook**: Removed the call to `/api/notify/job-created` endpoint that was deleted
+- **Maintained Functionality**: Kept all filtering, validation, and job creation features intact
+
+**Files Modified**:
+- `app/api/jobs/route.ts` - Fixed GET and POST methods to work without deleted features
+
+**Technical Details**:
+- Jobs are fetched with basic `select('*')` query
+- Firm information is retrieved manually for each job using `Promise.all()`
+- Profile lookup uses `clerk_id` to match `created_by` field
+- Verification filtering is maintained to only show jobs from verified firms
+- All existing filters (specialization, state, payout, etc.) continue to work
+
+**Testing**:
+- ✅ Jobs page loads without database errors
+- ✅ Job listing displays correctly with firm information
+- ✅ Job creation still works for verified firms
+- ✅ All filters continue to function properly
+- ✅ Build passes successfully
+
+**Result**: The jobs functionality is now fully restored and working without the deleted "Harden & Ship" features.
+
+---
+
+### 2025-01-XX: Added Jobs Menu to Navigation ✅
+
+**Goal**: Add the "Jobs" link to the main navigation menu so users can easily access the job board from anywhere on the site.
+
+**Root Cause**: 
+- The main page header was missing the "Jobs" link in the navigation menu
+- The UserMenu dropdown was also missing a link to the job board
+- Users couldn't easily discover or access the job board functionality
+
+**Solution Applied**:
+- **Added Jobs Link to Main Header**: Added `<a href="/jobs">Jobs</a>` to the main page navigation
+- **Added Job Board to UserMenu**: Added "Job Board" link to the UserMenu dropdown with appropriate icon
+- **Consistent Navigation**: Ensured jobs are accessible from both the main header and user dropdown menu
+
+**Files Modified**:
+- `app/page.tsx` - Added Jobs link to main navigation header
+- `components/UserMenu.tsx` - Added Job Board link to user dropdown menu
+
+**Navigation Structure**:
+- **Main Header**: Features, How it works, FAQ, Search, Jobs, Join
+- **UserMenu Dropdown**: Edit Profile, Verification Status, Job Board, Submit idea/bug, Admin Panel, Sign Out
+
+**Testing**:
+- ✅ Jobs link appears in main navigation header
+- ✅ Job Board link appears in UserMenu dropdown
+- ✅ Links navigate correctly to `/jobs` page
+- ✅ Consistent styling with other navigation elements
+
+**Result**: Users can now easily discover and access the job board from the main navigation and user menu, improving discoverability and user experience.
+
+---
+
+### 2025-01-XX: Fixed Onboarding Error and Hydration Mismatch ✅
+
+**Goal**: Resolve the onboarding database error and fix hydration mismatches in the job filters.
+
+**Root Cause**: 
+- **Onboarding Error**: `COALESCE types uuid and integer cannot be matched` - Type mismatch in database upsert operation
+- **Hydration Mismatch**: Browser extensions adding `fdprocessedid` attributes to form elements causing server/client HTML mismatch
+
+**Solution Applied**:
+
+#### **1. Fixed Onboarding Database Error**
+- **Replaced upsert with insert**: Changed from `.upsert()` to `.insert()` to avoid type conflicts
+- **Added profile existence check**: Check if profile already exists before attempting to create
+- **Simplified field mapping**: Use only essential fields (`clerk_id`, `first_name`, `last_name`, `credential_type`) to avoid schema mismatches
+- **Added fallback values**: Provide default values for required fields
+
+#### **2. Fixed Hydration Mismatch**
+- **Added suppressHydrationWarning**: Applied to all form elements in JobFilters component
+- **Covered all interactive elements**: Button, select dropdowns, and number input
+- **Prevents browser extension interference**: Silences warnings from browser extensions that modify HTML
+
+**Files Modified**:
+- `app/onboarding/page.tsx` - Fixed database type mismatch error
+- `components/jobs/JobFilters.tsx` - Added suppressHydrationWarning to all form elements
+
+**Technical Details**:
+- **Onboarding**: Uses simple insert instead of complex upsert to avoid PostgreSQL type conflicts
+- **Hydration**: `suppressHydrationWarning` prevents React from complaining about browser extension modifications
+- **Error Handling**: Graceful fallback to home page if onboarding fails
+
+**Testing**:
+- ✅ Onboarding no longer shows database type mismatch error
+- ✅ Job filters no longer show hydration mismatch warnings
+- ✅ Form elements work correctly without console errors
+- ✅ Profile creation still works for new users
+
+**Result**: Both the onboarding database error and hydration mismatch issues are resolved, providing a smoother user experience.
+
+---
+
+### 2025-01-XX: Restored Job Creation Form Improvements ✅
+
+**Goal**: Restore the improved job creation form with aligned requirements, concise layout, and simplified location options.
+
+**Root Cause**: 
+- The job creation form was reverted and lost the improvements we had made
+- Requirements section needed to align with profile fields
+- Location section was overly complex and needed simplification
+
+**Solution Applied**:
+
+#### **1. Enhanced Requirements Section**
+- **Aligned with Profile Fields**: Updated specializations, credentials, and software to match exactly what users can select in their profiles
+- **Added Missing Options**: 
+  - **Credentials**: Added "Tax Lawyer (JD)" and "PTIN Only" 
+  - **Software**: Added TaxDome, Canopy, QuickBooks, Xero, FreshBooks
+  - **Specializations**: Added 13+ new specializations including education credits, energy credits, state-specific, etc.
+- **Made More Concise**: Added scrollable containers (`max-h-32 overflow-y-auto`) to keep form compact
+
+#### **2. Simplified Location Section**
+- **Removed Complex Logic**: Eliminated the "US Only" toggle and conditional rendering
+- **Direct State Selection**: Always show state selection dropdown with clear label "States Where Work/Returns Are Located (Optional)"
+- **International Work**: Simple checkbox for "International work allowed"
+- **Insurance Requirement**: Moved insurance checkbox to location section for better organization
+
+#### **3. Improved Organization**
+- **Consolidated Insurance**: Moved insurance requirement from "Additional Details" to "Location & Work Arrangement"
+- **Better Grouping**: Related options are now logically grouped together
+- **Cleaner Layout**: Reduced form complexity while maintaining all functionality
+
+**Files Modified**:
+- `components/jobs/JobForm.tsx` - Updated requirements arrays, simplified location section, improved organization
+
+**Technical Details**:
+- **Requirements Alignment**: All arrays now use `{ value: string, label: string }` structure for consistency
+- **Scrollable Lists**: Added `max-h-32 overflow-y-auto` to prevent form from becoming too long
+- **Simplified Logic**: Removed conditional rendering in location section
+- **Better UX**: Clearer labels and more intuitive organization
+
+**Testing**:
+- ✅ Job creation form loads without errors
+- ✅ All requirement options display correctly
+- ✅ State selection works with multiple selection
+- ✅ International work checkbox functions properly
+- ✅ Insurance requirement is properly positioned
+- ✅ Form submission works with new field structure
+
+**Result**: Job creation form is now more user-friendly, aligned with profile fields, and has a cleaner, more concise layout.
+
+---
+
+### 2025-01-XX: Fixed Job Creation Redirect 404 Error ✅
+
+**Goal**: Resolve the 404 error that occurs when redirecting to a newly created job's detail page.
+
+**Root Cause**: 
+- **Response Structure Mismatch**: Job creation API was returning `{ job }` but form expected `{ job: job }`
+- **Foreign Key Reference**: Job detail API was trying to use non-existent foreign key `profiles!jobs_created_by_fkey`
+- **Database Schema Mismatch**: The foreign key relationship was removed when fixing previous database errors
+
+**Solution Applied**:
+
+#### **1. Fixed Job Creation Response Structure**
+- **Standardized Response**: Changed job creation API to return `{ job: job }` for consistency
+- **Form Compatibility**: Ensures `data.job.id` access works correctly in JobForm
+
+#### **2. Fixed Job Detail API Foreign Key Issue**
+- **Removed Foreign Key Join**: Changed from `select('*, profiles!jobs_created_by_fkey(...)')` to `select('*')`
+- **Manual Profile Lookup**: Added manual profile lookup using `clerk_id` to get firm information
+- **Maintained Functionality**: Keeps all verification checks and firm data intact
+
+**Files Modified**:
+- `app/api/jobs/route.ts` - Fixed job creation response structure
+- `app/api/jobs/[id]/route.ts` - Removed foreign key reference, added manual profile lookup
+
+**Technical Details**:
+- **Response Consistency**: All job APIs now return `{ job: jobData }` structure
+- **Manual Joins**: Profile data is fetched separately using `clerk_id` matching
+- **Verification Logic**: Maintains existing verification checks for job visibility
+- **Error Handling**: Proper 404 responses for non-existent or unverified jobs
+
+**Testing**:
+- ✅ Job creation works without errors
+- ✅ Redirect to job detail page works correctly
+- ✅ Job detail page loads with firm information
+- ✅ Verification checks still function properly
+- ✅ No more 404 errors after job creation
+
+**Result**: Job creation flow now works end-to-end: users can create jobs and be properly redirected to view them without encountering 404 errors.
+
+---
+
+### 2025-01-XX: Implemented Full Admin Control Over Jobs ✅
+
+**Goal**: Enable admins to have complete control over all jobs on the platform, including editing, deleting, and managing job statuses.
+
+**Root Cause**: 
+- Admins could only manage jobs they created themselves
+- No admin-specific job management interface existed
+- Limited admin capabilities for platform moderation
+
+**Solution Applied**:
+
+#### **1. Enhanced Job Detail API Permissions**
+- **Admin Override**: Admins can now edit and delete ANY job (regardless of creator)
+- **Role-Based Access**: Uses existing `is_admin` boolean field from profiles table
+- **Field Restrictions**: Regular users cannot modify `created_by` or `status` fields
+- **Admin Flexibility**: Admins can modify any field including restricted ones
+
+#### **2. Advanced Job Management Features**
+- **Status Management**: Admins can change job status to open, closed, cancelled, or archived
+- **Hard Delete**: Admins can permanently delete jobs (bypassing soft delete)
+- **Soft Delete**: Regular users can only cancel jobs (set status to cancelled)
+- **Admin Metadata**: Job detail API includes admin-specific information when requested
+
+#### **3. Admin Jobs Management Interface**
+- **New Admin Page**: Created `/admin/jobs` page for comprehensive job management
+- **Job Listing**: Shows all jobs with firm information and verification status
+- **Inline Editing**: Edit job title, description, and status directly in the interface
+- **Bulk Actions**: Cancel, delete, or change status of multiple jobs
+- **Real-time Updates**: Interface refreshes after each action
+
+#### **4. Enhanced API Endpoints**
+- **PATCH /api/jobs/[id]**: Now supports admin override for editing
+- **DELETE /api/jobs/[id]**: Supports both soft delete and hard delete for admins
+- **GET /api/jobs/[id]**: Includes admin metadata when `?admin=true` parameter is used
+
+**Files Modified**:
+- `app/api/jobs/[id]/route.ts` - Enhanced with admin permissions and advanced features
+- `app/admin/jobs/page.tsx` - New admin jobs management interface
+- `components/UserMenu.tsx` - Added "Manage Jobs" link to admin section and created collapsible admin submenu
+
+**Technical Details**:
+- **Admin Detection**: Uses existing `is_admin` boolean field from profiles table
+- **Permission Logic**: `isAdmin || job.created_by === userId` for access control
+- **Status Management**: Support for open, closed, cancelled, archived job statuses
+- **Hard Delete**: Permanent removal from database (admin only)
+- **Soft Delete**: Status change to cancelled (available to all users)
+
+**Admin Capabilities**:
+- ✅ **Edit any job** (title, description, status, all fields)
+- ✅ **Delete any job** (soft delete or hard delete)
+- ✅ **Change job status** (open, closed, cancelled, archived)
+- ✅ **View all jobs** (including cancelled/deleted ones)
+- ✅ **Manage job metadata** (created_by, timestamps, etc.)
+
+**UI Improvements**:
+- ✅ **Collapsible Admin Submenu**: "Manage Jobs" now folds under "Admin Panel"
+- ✅ **Smooth Animations**: Framer Motion transitions for submenu expand/collapse
+- ✅ **Visual Hierarchy**: Indented submenu items with proper spacing
+- ✅ **Interactive Elements**: Chevron icon rotates to indicate submenu state
+
+**Regular User Restrictions**:
+- ❌ **Cannot edit** jobs they didn't create
+- ❌ **Cannot delete** jobs they didn't create
+- ❌ **Cannot modify** restricted fields (created_by, status)
+- ✅ **Can cancel** their own jobs (soft delete)
+
+**Testing Checklist**:
+- [ ] Admin can edit any job regardless of creator
+- [ ] Admin can delete any job (soft or hard delete)
+- [ ] Admin can change job status to any value
+- [ ] Regular users still restricted to their own jobs
+- [ ] Admin jobs page loads and displays all jobs
+- [ ] Inline editing works for job management
+- [ ] Status changes are properly applied
+- [ ] Hard delete permanently removes jobs
+- [ ] Admin metadata is included in API responses
+
+**Next Steps**:
+- Test admin job management functionality end-to-end
+- Verify permission checks work correctly
+- Test edge cases (deleted jobs, status transitions)
+- Consider adding job audit logging for admin actions
+- Test with different admin user accounts
+
+**Result**: Admins now have complete control over all jobs on the platform, enabling effective platform moderation and job management while maintaining security for regular users.
+
+---
+
 ### 2025-01-XX: Implemented Grouped Taxonomy for Tax Specializations ✅
 
 **Goal**: Replace flat "Tax Specializations" with a grouped taxonomy for better organization and user experience.

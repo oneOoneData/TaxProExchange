@@ -5,6 +5,33 @@ import { supabaseService } from '@/lib/supabaseService';
 
 export const dynamic = 'force-dynamic';
 
+// Generate a clean, URL-friendly slug from name and ID
+function generateSlug(firstName: string | null, lastName: string | null, userId: string): string {
+  // Create base slug from name
+  let baseSlug = '';
+  if (firstName && lastName) {
+    baseSlug = `${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
+  } else if (firstName) {
+    baseSlug = firstName.toLowerCase();
+  } else if (lastName) {
+    baseSlug = lastName.toLowerCase();
+  } else {
+    baseSlug = 'user';
+  }
+  
+  // Clean the slug: remove special chars, replace spaces with hyphens
+  baseSlug = baseSlug
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim();
+  
+  // Add a short unique identifier to prevent conflicts
+  const shortId = userId.substring(0, 8);
+  
+  return `${baseSlug}-${shortId}`;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const clerkId = searchParams.get('clerk_id') ?? null;
@@ -152,6 +179,7 @@ export async function PUT(request: Request) {
         .insert({
           clerk_id,
           ...profileData,
+          slug: generateSlug(profileData.first_name, profileData.last_name, clerk_id),
           public_contact: public_contact ?? false,
           works_multistate: works_multistate ?? false,
           works_international: works_international ?? false,

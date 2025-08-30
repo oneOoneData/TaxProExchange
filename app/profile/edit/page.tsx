@@ -177,6 +177,19 @@ export default function EditProfilePage() {
           const res = await fetch(`/api/profile?clerk_id=${user.id}`);
           if (res.ok) {
             const p = await res.json();
+            
+            // Check if user needs to accept updated legal documents
+            if (p.tos_version || p.privacy_version) {
+              const { LEGAL_VERSIONS } = await import('@/lib/legal');
+              
+              if (p.tos_version !== LEGAL_VERSIONS.TOS || 
+                  p.privacy_version !== LEGAL_VERSIONS.PRIVACY) {
+                // Redirect to legal consent if versions don't match
+                router.push('/legal/consent?redirect=' + encodeURIComponent('/profile/edit'));
+                return;
+              }
+            }
+            
             setProfileForm(prev => ({
               ...prev,
               first_name: p.first_name || user.firstName || '',
@@ -212,7 +225,7 @@ export default function EditProfilePage() {
       }
     };
     run();
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

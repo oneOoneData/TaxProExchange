@@ -12,11 +12,14 @@
     "@auth/supabase-adapter": "^1.10.0",
     "@clerk/nextjs": "^6.31.6",
     "@supabase/supabase-js": "^2.56.0",
+    "date-fns": "^2.30.0",
     "framer-motion": "^10.16.16",
     "next": "^15.5.2",
     "react": "^18",
     "react-dom": "^18",
-    "svix": "^1.75.0"
+    "resend": "^3.5.0",
+    "svix": "^1.75.0",
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -6,6 +6,33 @@ import { supabaseService } from "@/lib/supabaseService";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Generate a clean, URL-friendly slug from name and ID
+function generateSlug(firstName: string | null, lastName: string | null, userId: string): string {
+  // Create base slug from name
+  let baseSlug = '';
+  if (firstName && lastName) {
+    baseSlug = `${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
+  } else if (firstName) {
+    baseSlug = firstName.toLowerCase();
+  } else if (lastName) {
+    baseSlug = lastName.toLowerCase();
+  } else {
+    baseSlug = 'user';
+  }
+  
+  // Clean the slug: remove special chars, replace spaces with hyphens
+  baseSlug = baseSlug
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim();
+  
+  // Add a short unique identifier to prevent conflicts
+  const shortId = userId.substring(0, 8);
+  
+  return `${baseSlug}-${shortId}`;
+}
+
 export async function POST(req: Request) {
   try {
     console.log('=== WEBHOOK REQUEST RECEIVED ===');
@@ -93,7 +120,7 @@ export async function POST(req: Request) {
           accepting_work: false,
           // visibility_state will use database default ('hidden')
           is_listed: false,
-          slug: `${u.id}-${Date.now()}`,
+          slug: generateSlug(u.first_name, u.last_name, u.id),
           image_url: u.image_url ?? null,
         }, { onConflict: "clerk_id" });
         

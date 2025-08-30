@@ -16,23 +16,29 @@ export default async function Onboarding() {
   const user = await currentUser();
   if (!user) redirect('/sign-in');
 
-  const email = user.emailAddresses?.[0]?.emailAddress ?? null;
-  const first = user.firstName ?? null;
-  const last = user.lastName ?? null;
-  const image = user.imageUrl ?? null;
-
   const supabase = supabaseService();
-  const { error } = await supabase
+  
+  // Check if profile already exists
+  const { data: existingProfile } = await supabase
     .from('profiles')
-    .upsert(
-      { clerk_id: user.id, email, first_name: first, last_name: last, image_url: image },
-      { onConflict: 'clerk_id' }
-    );
+    .select('id, tos_version, privacy_version')
+    .eq('clerk_id', user.id)
+    .single();
 
-  if (error) {
-    console.error('onboarding upsert error:', error);
-    redirect('/'); // do not block session if upsert fails
+  if (existingProfile) {
+    // Check if user has accepted current legal versions
+    const { LEGAL_VERSIONS } = await import('@/lib/legal');
+    
+    if (existingProfile.tos_version !== LEGAL_VERSIONS.TOS || 
+        existingProfile.privacy_version !== LEGAL_VERSIONS.PRIVACY) {
+      // Redirect to legal consent if versions don't match
+      redirect('/legal/consent');
+    }
+    
+    // Profile exists and legal versions are current, redirect to edit
+    redirect('/profile/edit');
   }
 
-  redirect('/profile/edit');
+  // New user - redirect to consent page first
+  redirect('/onboarding/consent');
 }

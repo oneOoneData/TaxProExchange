@@ -1,0 +1,128 @@
+import { Resend } from 'resend';
+
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export interface JobCreatedEmailData {
+  title: string;
+  payout: string;
+  deadline: string;
+  badges: string[];
+  link: string;
+  recipientEmail: string;
+  recipientName: string;
+}
+
+export interface EmailTemplate {
+  subject: string;
+  html: string;
+  text: string;
+}
+
+// Email templates
+export const emailTemplates = {
+  jobCreated: (data: JobCreatedEmailData): EmailTemplate => ({
+    subject: `New TaxProExchange Job: ${data.title}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Job Opportunity</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">New Job Opportunity</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">${data.title}</h2>
+            
+            <div style="margin: 20px 0;">
+              <strong>Compensation:</strong> ${data.payout}<br>
+              <strong>Deadline:</strong> ${data.deadline}
+            </div>
+            
+            ${data.badges.length > 0 ? `
+              <div style="margin: 20px 0;">
+                <strong>Requirements:</strong><br>
+                ${data.badges.map(badge => `<span style="display: inline-block; background: #e2e8f0; color: #4a5568; padding: 4px 8px; border-radius: 4px; margin: 2px; font-size: 12px;">${badge}</span>`).join('')}
+              </div>
+            ` : ''}
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.link}" style="background: #4299e1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Job Details</a>
+          </div>
+          
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
+            <p>You're receiving this because your notification preferences match this job's requirements.</p>
+            <p>TaxProExchange - Connecting verified tax professionals</p>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+New TaxProExchange Job: ${data.title}
+
+Compensation: ${data.payout}
+Deadline: ${data.deadline}
+${data.badges.length > 0 ? `Requirements: ${data.badges.join(', ')}` : ''}
+
+View Job Details: ${data.link}
+
+You're receiving this because your notification preferences match this job's requirements.
+
+TaxProExchange - Connecting verified tax professionals
+    `
+  })
+};
+
+// Send email function
+export async function sendEmail(to: string, template: EmailTemplate) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'TaxProExchange <jobs@taxproexchange.com>',
+      to: [to],
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+
+    if (error) {
+      console.error('Resend email error:', error);
+      throw new Error(`Failed to send email: ${error.message}`);
+    }
+
+    console.log('Email sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Email service error:', error);
+    throw error;
+  }
+}
+
+// Send job created notification
+export async function sendJobCreatedNotification(data: JobCreatedEmailData) {
+  const template = emailTemplates.jobCreated(data);
+  return sendEmail(data.recipientEmail, template);
+}
+
+// Batch send job notifications
+export async function sendBatchJobNotifications(notifications: JobCreatedEmailData[]) {
+  const results = [];
+  
+  for (const notification of notifications) {
+    try {
+      const result = await sendJobCreatedNotification(notification);
+      results.push({ success: true, email: notification.recipientEmail, result });
+    } catch (error) {
+      console.error(`Failed to send notification to ${notification.recipientEmail}:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      results.push({ success: false, email: notification.recipientEmail, error: errorMessage });
+    }
+  }
+  
+  return results;
+}

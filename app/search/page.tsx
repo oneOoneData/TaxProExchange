@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { safeMap, safeLength } from '@/lib/safe';
@@ -34,6 +34,7 @@ interface SearchFilters {
   state: string;
   specialization: string;
   accepting_work: string;
+  verified_only: boolean;
 }
 
 interface Specialization {
@@ -55,12 +56,14 @@ export default function SearchPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     credential_type: '',
     state: '',
     specialization: '',
-    accepting_work: ''
+    accepting_work: '',
+    verified_only: false
   });
 
   const states = [
@@ -84,6 +87,8 @@ export default function SearchPage() {
     }
   }, [isLoaded, user, router]);
 
+  // Remove automatic search trigger to prevent infinite loops
+
   const fetchSpecializations = async () => {
     try {
       const response = await fetch('/api/specializations');
@@ -96,12 +101,20 @@ export default function SearchPage() {
     }
   };
 
-  const searchProfiles = async () => {
+  const searchProfiles = async (customFilters?: SearchFilters) => {
     setLoading(true);
     try {
+      const filtersToUse = customFilters || filters;
       const params = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.append(key, value);
+      Object.entries(filtersToUse).forEach(([key, value]) => {
+        if (value !== '' && value !== null && value !== undefined) {
+          // Handle boolean values properly
+          if (typeof value === 'boolean') {
+            params.append(key, value.toString());
+          } else {
+            params.append(key, value.toString());
+          }
+        }
       });
 
       const response = await fetch(`/api/search?${params}`);
@@ -119,13 +132,17 @@ export default function SearchPage() {
   };
 
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       q: '',
       credential_type: '',
       state: '',
       specialization: '',
-      accepting_work: ''
-    });
+      accepting_work: '',
+      verified_only: false
+    };
+    setFilters(clearedFilters);
+    // Search with cleared filters
+    setTimeout(() => searchProfiles(clearedFilters), 100);
   };
 
   const renderSpecializationFilters = () => (
@@ -134,13 +151,19 @@ export default function SearchPage() {
       
       {/* Specialization Search */}
       <div className="relative">
-        <input
-          type="text"
-          placeholder="Search specializations..."
-          value={filters.specialization}
-          onChange={(e) => setFilters(prev => ({ ...prev, specialization: e.target.value }))}
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-        />
+                              <input
+                        type="text"
+                        placeholder="Search specializations..."
+                        value={filters.specialization}
+                                                 onChange={(e) => {
+                           const newFilters = { ...filters, specialization: e.target.value };
+                           setFilters(newFilters);
+                           // Auto-search when this filter changes (debounced)
+                           if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                           searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters), 500);
+                         }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
         {filters.specialization && (
           <button
             onClick={() => setFilters(prev => ({ ...prev, specialization: '' }))}
@@ -161,7 +184,11 @@ export default function SearchPage() {
             return (
               <button
                 key={specSlug}
-                onClick={() => setFilters(prev => ({ ...prev, specialization: specSlug }))}
+                                 onClick={() => {
+                   const newFilters = { ...filters, specialization: specSlug };
+                   setFilters(newFilters);
+                   setTimeout(() => searchProfiles(newFilters), 100);
+                 }}
                 className={`px-2 py-1 text-xs rounded border transition-colors ${
                   filters.specialization === specSlug
                     ? 'bg-blue-100 text-blue-700 border-blue-200'
@@ -193,7 +220,11 @@ export default function SearchPage() {
                       name="specialization"
                       value={spec.slug}
                       checked={filters.specialization === spec.slug}
-                      onChange={(e) => setFilters(prev => ({ ...prev, specialization: e.target.value }))}
+                                             onChange={(e) => {
+                         const newFilters = { ...filters, specialization: e.target.value };
+                         setFilters(newFilters);
+                         setTimeout(() => searchProfiles(newFilters), 100);
+                       }}
                       className="text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-slate-700">{spec.label}</span>
@@ -225,16 +256,27 @@ export default function SearchPage() {
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
           <Logo />
-          <nav className="flex items-center gap-6 text-sm text-slate-600">
+          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/search" className="hover:text-slate-900 font-medium">Search</Link>
+            <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
+            {!user && (
+              <Link href="/join" className="hover:text-slate-900">Join</Link>
+            )}
           </nav>
           <div className="flex items-center gap-4">
-            {user && (
+            {user ? (
               <UserMenu 
                 userName={user.fullName || undefined}
                 userEmail={user.primaryEmailAddress?.emailAddress}
               />
+            ) : (
+              <Link
+                href="/join"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800"
+              >
+                Join Now
+              </Link>
             )}
           </div>
         </div>
@@ -253,6 +295,35 @@ export default function SearchPage() {
               <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
                 <h2 className="text-xl font-semibold text-slate-900">Filters</h2>
                 
+                {/* Verified Only Switch - Prominently placed at top */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <label className="flex items-center justify-between cursor-pointer">
+                    <div>
+                      <span className="text-sm font-medium text-blue-900">Verified Pros Only</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={filters.verified_only}
+                        onChange={(e) => {
+                          const newFilters = { ...filters, verified_only: e.target.checked };
+                          setFilters(newFilters);
+                          // Auto-search when this filter changes
+                          setTimeout(() => searchProfiles(newFilters), 100);
+                        }}
+                        className="sr-only"
+                      />
+                      <div className={`w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${
+                        filters.verified_only ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}>
+                        <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 ease-in-out ${
+                          filters.verified_only ? 'translate-x-5' : 'translate-x-0'
+                        }`} />
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
                 {/* Search Query */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Search</label>
@@ -260,7 +331,13 @@ export default function SearchPage() {
                     type="text"
                     placeholder="Name, firm, or keywords..."
                     value={filters.q}
-                    onChange={(e) => setFilters(prev => ({ ...prev, q: e.target.value }))}
+                                         onChange={(e) => {
+                       const newFilters = { ...filters, q: e.target.value };
+                       setFilters(newFilters);
+                       // Auto-search when text changes (debounced)
+                       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                       searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters), 500);
+                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -270,7 +347,12 @@ export default function SearchPage() {
                   <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type</label>
                   <select
                     value={filters.credential_type}
-                    onChange={(e) => setFilters(prev => ({ ...prev, credential_type: e.target.value }))}
+                                         onChange={(e) => {
+                       const newFilters = { ...filters, credential_type: e.target.value };
+                       setFilters(newFilters);
+                       // Auto-search when this filter changes
+                       setTimeout(() => searchProfiles(newFilters), 100);
+                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All credentials</option>
@@ -286,7 +368,12 @@ export default function SearchPage() {
                   <label className="block text-sm font-medium text-slate-700 mb-2">State</label>
                   <select
                     value={filters.state}
-                    onChange={(e) => setFilters(prev => ({ ...prev, state: e.target.value }))}
+                                         onChange={(e) => {
+                       const newFilters = { ...filters, state: e.target.value };
+                       setFilters(newFilters);
+                       // Auto-search when this filter changes
+                       setTimeout(() => searchProfiles(newFilters), 100);
+                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All states</option>
@@ -304,7 +391,12 @@ export default function SearchPage() {
                   <label className="block text-sm font-medium text-slate-700 mb-2">Availability</label>
                   <select
                     value={filters.accepting_work}
-                    onChange={(e) => setFilters(prev => ({ ...prev, accepting_work: e.target.value }))}
+                                         onChange={(e) => {
+                       const newFilters = { ...filters, accepting_work: e.target.value };
+                       setFilters(newFilters);
+                       // Auto-search when this filter changes
+                       setTimeout(() => searchProfiles(newFilters), 100);
+                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All profiles</option>
@@ -312,16 +404,31 @@ export default function SearchPage() {
                   </select>
                 </div>
 
+
+
+                {/* Search Button */}
+                <button
+                  onClick={() => searchProfiles()}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Search
+                </button>
+
                 {/* Clear All Filters */}
-                {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work) && (
+                {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work || filters.verified_only) && (
                   <button
-                    onClick={() => setFilters({
-                      q: '',
-                      credential_type: '',
-                      state: '',
-                      specialization: '',
-                      accepting_work: ''
-                    })}
+                                       onClick={() => {
+                     const clearedFilters = {
+                       q: '',
+                       credential_type: '',
+                       state: '',
+                       specialization: '',
+                       accepting_work: '',
+                       verified_only: false
+                     };
+                     setFilters(clearedFilters);
+                     setTimeout(() => searchProfiles(clearedFilters), 100);
+                   }}
                     className="w-full px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50"
                   >
                     Clear All Filters

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { SignUpButton } from '@clerk/nextjs';
 import Link from 'next/link';
@@ -11,6 +12,9 @@ const isBuildTime = typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_C
 export const dynamic = 'force-dynamic';
 
 export default function JoinPage() {
+  const [acceptLegal, setAcceptLegal] = useState(false);
+  const [acceptAge, setAcceptAge] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
@@ -41,8 +45,15 @@ export default function JoinPage() {
           
           <div className="space-y-4">
             {!isBuildTime ? (
-              <SignUpButton mode="modal" forceRedirectUrl="/onboarding" fallbackRedirectUrl="/">
-                <button className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 px-6 py-3 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              <SignUpButton 
+                mode="modal" 
+                forceRedirectUrl="/onboarding" 
+                fallbackRedirectUrl="/"
+              >
+                <button 
+                  className="w-full flex items-center justify-center gap-3 rounded-xl border border-slate-300 px-6 py-3 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={!acceptLegal || !acceptAge}
+                >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 12z"/>
@@ -65,9 +76,54 @@ export default function JoinPage() {
             )}
           </div>
           
-          <p className="mt-6 text-xs text-slate-500">
-            By continuing, you agree to our <Link href="/terms" className="text-slate-600 hover:text-slate-800 underline">Terms of Service</Link> and <Link href="/privacy" className="text-slate-600 hover:text-slate-800 underline">Privacy Policy</Link>
-          </p>
+          <div className="mt-6 space-y-4">
+            {/* Legal Acceptance Checkbox */}
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="acceptLegal"
+                checked={acceptLegal}
+                onChange={(e) => setAcceptLegal(e.target.checked)}
+                className="mt-1 h-4 w-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
+                required
+              />
+              <div className="flex-1">
+                <label htmlFor="acceptLegal" className="text-sm text-slate-700">
+                  I agree to the{' '}
+                  <Link href="/legal/terms" className="text-slate-600 hover:text-slate-800 underline">
+                    Terms of Use
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/legal/privacy" className="text-slate-600 hover:text-slate-800 underline">
+                    Privacy Policy
+                  </Link>
+                </label>
+                <p className="text-xs text-slate-500 mt-1">
+                  You must accept our legal documents to continue.
+                </p>
+              </div>
+            </div>
+
+            {/* Age Verification */}
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="ageVerification"
+                checked={acceptAge}
+                onChange={(e) => setAcceptAge(e.target.checked)}
+                className="mt-1 h-4 w-4 text-slate-900 border-slate-300 rounded focus:ring-slate-500"
+                required
+              />
+              <div className="flex-1">
+                <label htmlFor="ageVerification" className="text-sm text-slate-700">
+                  I confirm that I am at least 18 years old
+                </label>
+                <p className="text-xs text-slate-500 mt-1">
+                  You must be 18 or older to use this service.
+                </p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

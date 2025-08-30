@@ -109,6 +109,20 @@ export async function PATCH(
       );
     }
 
+    // Auto-update visibility_state when listing a profile
+    if (body.is_listed === true && body.visibility_state === undefined) {
+      // If admin is setting is_listed to true, automatically change hidden -> pending_verification
+      const { data: currentProfile } = await supabase
+        .from('profiles')
+        .select('visibility_state')
+        .eq('id', profileId)
+        .single();
+      
+      if (currentProfile?.visibility_state === 'hidden') {
+        updateData.visibility_state = 'pending_verification';
+      }
+    }
+
     // Add updated_at timestamp
     updateData.updated_at = new Date().toISOString();
 
