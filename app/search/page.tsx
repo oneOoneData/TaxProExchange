@@ -8,6 +8,7 @@ import { useUser } from '@clerk/nextjs';
 import UserMenu from '@/components/UserMenu';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
+import MobileNav from '@/components/MobileNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,7 @@ export default function SearchPage() {
   const [connectionStates, setConnectionStates] = useState<Record<string, { status: string; connectionId?: string; isRequester?: boolean }>>({});
   const [forceUpdate, setForceUpdate] = useState(0); // Force re-render trigger
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     credential_type: '',
@@ -377,6 +379,16 @@ export default function SearchPage() {
                 Join Now
               </Link>
             )}
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -687,6 +699,8 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
+      {/* Mobile Navigation */}
+      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { JobCard } from '@/components/jobs/JobCard';
 import { JobFilters } from '@/components/jobs/JobFilters';
 import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
+import MobileNav from '@/components/MobileNav';
 
 interface Job {
   id: string;
@@ -52,6 +53,7 @@ export default function JobsPage() {
   const { user, isSignedIn } = useUser();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [filters, setFilters] = useState<JobFilters>({
     specialization: '',
     state: '',
@@ -134,6 +136,16 @@ export default function JobsPage() {
                 Join Now
               </Link>
             )}
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -241,8 +253,8 @@ export default function JobsPage() {
           </div>
         )}
       </div>
-
-
+      {/* Mobile Navigation */}
+      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
     </div>
   );
 }
