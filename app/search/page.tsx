@@ -286,7 +286,12 @@ export default function SearchPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900 mb-2">Find Tax Professionals</h1>
           <p className="text-slate-600">Search for verified CPAs, EAs, and CTEC preparers by credential, location, and specialization.</p>
-          <p className="text-sm text-slate-500 mt-1">Only verified and listed professionals are shown to ensure quality and accessibility.</p>
+          <p className="text-sm text-slate-500 mt-1">
+            {filters.verified_only 
+              ? "Only verified and listed professionals are shown to ensure quality and accessibility."
+              : "Showing all profiles. Unverified profiles are visible but cannot be viewed until verification is complete."
+            }
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
@@ -514,13 +519,23 @@ export default function SearchPage() {
                         </div>
                       </div>
                        
-                      <div className="flex flex-col gap-2 ml-4">
-                        <Link
-                          href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}
-                          className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
-                        >
-                          View Profile
-                        </Link>
+                                             <div className="flex flex-col gap-2 ml-4">
+                         {profile.verified ? (
+                           <Link
+                             href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}
+                             className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
+                           >
+                             View Profile
+                           </Link>
+                         ) : (
+                           <button
+                             disabled
+                             className="inline-flex items-center justify-center rounded-xl bg-slate-300 text-slate-500 px-4 py-2 text-sm font-medium cursor-not-allowed"
+                             title="Profile not yet verified - cannot be viewed"
+                           >
+                             Pending Verification
+                           </button>
+                         )}
                         {profile.accepting_work && (
                           <button className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-50 transition-colors">
                             Connect

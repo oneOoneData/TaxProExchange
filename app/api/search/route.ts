@@ -57,14 +57,12 @@ export async function GET(request: NextRequest) {
       `, { count: 'exact' })
       .eq('is_listed', true);
 
-    // Apply verified filter - default to showing only verified profiles for non-admin users
+    // Apply verified filter based on user preference
     if (verified_only === 'true') {
       supabaseQuery = supabaseQuery.eq('visibility_state', 'verified');
-    } else {
-      // For non-admin users, only show verified profiles by default
-      // This prevents showing profiles that can't be viewed
-      supabaseQuery = supabaseQuery.eq('visibility_state', 'verified');
     }
+    // When verified_only is false, show all profiles (both verified and unverified)
+    // Users can still only view verified profiles due to profile API restrictions
 
     // Apply text search
     if (query) {
