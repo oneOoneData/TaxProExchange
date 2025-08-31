@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { safeMap, safeLength } from '@/lib/safe';
 import { getCountryName } from '@/lib/constants/countries';
+import MobileNav from '@/components/MobileNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +58,7 @@ export default function ProfilePage() {
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
   const [isAdminView, setIsAdminView] = useState(false);
   const [connectionState, setConnectionState] = useState<{ status: string; connectionId?: string; isRequester?: boolean } | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   useEffect(() => {
     if (params.slug) {
@@ -219,9 +221,9 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <Logo />
-          <nav className="flex items-center gap-6 text-sm text-slate-600">
+          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/search" className="hover:text-slate-900">Search</Link>
             {isAdminView && (
@@ -231,57 +233,69 @@ export default function ProfilePage() {
               </>
             )}
           </nav>
+          <div className="flex items-center gap-4">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl border border-slate-200 p-8 mb-8"
+          className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 mb-8"
         >
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
             {/* Avatar */}
             <div className="flex-shrink-0">
-              <div className="w-24 h-24 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl font-semibold text-slate-600">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-100 flex items-center justify-center text-xl sm:text-2xl font-semibold text-slate-600">
                 {profile.first_name[0]}{profile.last_name[0]}
               </div>
             </div>
 
             {/* Profile Info */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h1 className="text-3xl font-semibold text-slate-900">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">
                   {profile.first_name} {profile.last_name}
                 </h1>
                 {profile.verified && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-emerald-100 text-emerald-700">
                     ✓ Verified
                   </span>
                 )}
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-700">
+                <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-slate-100 text-slate-700">
                   {profile.credential_type}
                 </span>
                 {profile.works_multistate && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-700">
                     Multi-State
                   </span>
                 )}
                 {profile.works_international && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-purple-100 text-purple-700">
                     International
                   </span>
                 )}
               </div>
 
-              <p className="text-xl text-slate-600 font-medium mb-2">{profile.headline}</p>
+              <p className="text-lg sm:text-xl text-slate-600 font-medium mb-2">{profile.headline}</p>
               
               {profile.firm_name && (
                 <p className="text-slate-500 mb-3">{profile.firm_name}</p>
               )}
 
-              <div className="flex items-center gap-4 text-sm text-slate-500 mb-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-sm text-slate-500 mb-6">
                 <span>
                   States: {profile.states && profile.states.length > 0 ? (
                     `${profile.states.length} state${profile.states.length !== 1 ? 's' : ''}`
@@ -293,35 +307,35 @@ export default function ProfilePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-start">
                 {profile.accepting_work && isSignedIn && (
                   <>
                     {/* Connect/Accept Button */}
                     {connectionState?.status === 'pending' && connectionState?.isRequester ? (
                       <button 
                         disabled
-                        className="inline-flex items-center justify-center rounded-xl bg-yellow-100 text-yellow-700 border-yellow-200 px-6 py-3 text-sm font-medium cursor-default"
+                        className="inline-flex items-center justify-center rounded-xl bg-yellow-100 text-yellow-700 border-yellow-200 px-4 sm:px-6 py-3 text-sm font-medium cursor-default"
                       >
                         Request Sent
                       </button>
                     ) : connectionState?.status === 'pending' && !connectionState?.isRequester ? (
                       <button 
                         onClick={() => handleAcceptConnection(connectionState.connectionId!)}
-                        className="inline-flex items-center justify-center rounded-xl bg-green-600 text-white px-6 py-3 text-sm font-medium hover:bg-green-700 transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl bg-green-600 text-white px-4 sm:px-6 py-3 text-sm font-medium hover:bg-green-700 transition-colors"
                       >
                         Accept Request
                       </button>
                     ) : connectionState?.status === 'accepted' ? (
                       <button 
                         disabled
-                        className="inline-flex items-center justify-center rounded-xl bg-green-100 text-green-700 border-green-200 px-6 py-3 text-sm font-medium cursor-default"
+                        className="inline-flex items-center justify-center rounded-xl bg-green-100 text-green-700 border-green-200 px-4 sm:px-6 py-3 text-sm font-medium cursor-default"
                       >
                         Connected
                       </button>
                     ) : (
                       <button 
                         onClick={() => handleConnect(profile.id)}
-                        className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 sm:px-6 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
                       >
                         Connect
                       </button>
@@ -331,7 +345,7 @@ export default function ProfilePage() {
                     {connectionState?.status === 'accepted' && (
                       <Link
                         href={`/messages/${connectionState.connectionId}`}
-                        className="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-6 py-3 text-sm font-medium hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-4 sm:px-6 py-3 text-sm font-medium hover:bg-blue-700 transition-colors"
                       >
                         Message
                       </Link>
@@ -341,7 +355,7 @@ export default function ProfilePage() {
                 
                 <Link
                   href="/search"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 px-4 sm:px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
                 >
                   Find Similar
                 </Link>
@@ -350,7 +364,7 @@ export default function ProfilePage() {
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Bio */}
@@ -358,9 +372,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl border border-slate-200 p-6"
+              className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
             >
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">About</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">About</h2>
               <p className="text-slate-600 leading-relaxed">{profile.bio}</p>
             </motion.div>
 
@@ -369,9 +383,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl border border-slate-200 p-6"
+              className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
             >
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">Specializations</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Specializations</h2>
               {getGroupedProfileSpecializations().length > 0 ? (
                 <div className="space-y-4">
                   {getGroupedProfileSpecializations().map((group) => (
@@ -403,9 +417,9 @@ export default function ProfilePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
-                className="bg-white rounded-2xl border border-slate-200 p-6"
+                className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
               >
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Software & Tools</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Software & Tools</h2>
                 <div className="flex flex-wrap gap-2">
                   {safeMap(profile.software, softwareSlug => (
                     <span
@@ -425,9 +439,9 @@ export default function ProfilePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl border border-slate-200 p-6"
+                className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
               >
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">International Work</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">International Work</h2>
                 <div className="flex flex-wrap gap-2">
                   {safeMap(profile.countries, countryCode => (
                     <span
@@ -449,9 +463,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border border-slate-200 p-6"
+              className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
             >
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Contact</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">Contact</h3>
               {shouldShowContactInfo() ? (
                 <div className="space-y-3">
                   {profile.public_email && (
@@ -532,9 +546,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl border border-slate-200 p-6"
+              className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
             >
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Verification</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">Verification</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -553,6 +567,8 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      {/* Mobile Navigation */}
+      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
     </div>
   );
 }
