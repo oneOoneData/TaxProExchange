@@ -152,20 +152,14 @@ export default function AdminProfilesPage() {
     }
   };
 
-  const sendGeneralEmail = async (profileId: string, email: string, name: string) => {
-    const subject = prompt('Email subject:', 'TaxProExchange - Important Information');
-    if (!subject) return;
-    
-    const message = prompt('Email message:', 'Hello,\n\nThis is a message from the TaxProExchange team.\n\nBest regards,\nTaxProExchange Team');
-    if (!message) return;
-
-    if (!confirm(`Send email to ${name} (${email})?\n\nSubject: ${subject}\n\nMessage: ${message}`)) {
+  const requestProfileUpdate = async (profileId: string, email: string, name: string) => {
+    if (!confirm(`Send a profile update request to ${name} (${email})?`)) {
       return;
     }
 
     setDeleting(profileId);
     try {
-      const response = await fetch('/api/admin/send-general-email', {
+      const response = await fetch('/api/admin/request-profile-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,21 +167,19 @@ export default function AdminProfilesPage() {
         body: JSON.stringify({
           profileId,
           email,
-          name,
-          subject,
-          message
+          name
         })
       });
 
       if (response.ok) {
-        alert('Email sent successfully!');
+        alert('Profile update request sent successfully!');
       } else {
         const error = await response.json();
         alert(`Error sending email: ${error.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Error sending email');
+      console.error('Error sending profile update request:', error);
+      alert('Error sending profile update request');
     } finally {
       setDeleting(null);
     }
@@ -346,109 +338,114 @@ export default function AdminProfilesPage() {
                           {new Date(profile.deleted_at).toLocaleDateString()}
                         </td>
                       )}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/p/${profile.slug}?admin=true`}
-                            className="text-blue-600 hover:text-blue-900"
-                            onClick={() => console.log('Viewing profile:', profile.id, profile.slug)}
-                          >
-                            View
-                          </Link>
-                          <Link
-                            href={`/admin/profiles/${profile.id}/edit`}
-                            className="text-emerald-600 hover:text-emerald-900"
-                          >
-                            Edit
-                          </Link>
-                          
-                                                     {/* Quick Status Actions */}
-                           {!profile.is_deleted && (
-                             <>
-                               {/* General Email Button - Show for all profiles */}
+                                             <td className="px-6 py-4 text-sm font-medium">
+                         <div className="space-y-2">
+                           {/* Row 1: View, Edit, Email Actions */}
+                           <div className="flex gap-2 flex-wrap">
+                             <Link
+                               href={`/p/${profile.slug}?admin=true`}
+                               className="text-blue-600 hover:text-blue-900 whitespace-nowrap"
+                               onClick={() => console.log('Viewing profile:', profile.id, profile.slug)}
+                             >
+                               View
+                             </Link>
+                             <Link
+                               href={`/admin/profiles/${profile.id}/edit`}
+                               className="text-emerald-600 hover:text-emerald-900 whitespace-nowrap"
+                             >
+                               Edit
+                             </Link>
+                             
+                             {/* Request Profile Update Button - Show for all profiles */}
+                             {!profile.is_deleted && (
                                <button
-                                 onClick={() => sendGeneralEmail(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
+                                 onClick={() => requestProfileUpdate(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
                                  disabled={deleting === profile.id}
-                                 className="text-purple-600 hover:text-purple-900 disabled:opacity-50"
-                                 title="Send Email"
+                                 className="text-purple-600 hover:text-purple-900 disabled:opacity-50 whitespace-nowrap"
+                                 title="Request Profile Update"
                                >
-                                   📧 Send Email
+                                 📝 Request Update
                                </button>
-                               
-                               {/* Request More Info Button - Show for unverified profiles */}
+                             )}
+                             
+                             {/* Request More Info Button - Show for unverified profiles */}
+                             {!profile.is_deleted && profile.visibility_state !== 'verified' && (
+                               <button
+                                 onClick={() => requestMoreInfo(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
+                                 disabled={deleting === profile.id}
+                                 className="text-blue-600 hover:text-blue-900 disabled:opacity-50 whitespace-nowrap"
+                                 title="Request More Information"
+                               >
+                                 📧 Request Info
+                               </button>
+                             )}
+                           </div>
+                           
+                           {/* Row 2: Status Management */}
+                           {!profile.is_deleted && (
+                             <div className="flex gap-2 flex-wrap">
                                {profile.visibility_state !== 'verified' && (
                                  <button
-                                   onClick={() => requestMoreInfo(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
+                                   onClick={() => quickUpdateProfile(profile.id, 'visibility_state', 'verified')}
                                    disabled={deleting === profile.id}
-                                   className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
-                                   title="Request More Information"
+                                   className="text-emerald-600 hover:text-emerald-900 disabled:opacity-50 whitespace-nowrap"
+                                   title="Mark as Verified"
                                  >
-                                   📧 Request Info
+                                   ✓ Verify
                                  </button>
                                )}
-                              
-                              {profile.visibility_state !== 'verified' && (
-                                <button
-                                  onClick={() => quickUpdateProfile(profile.id, 'visibility_state', 'verified')}
-                                  disabled={deleting === profile.id}
-                                  className="text-emerald-600 hover:text-emerald-900 disabled:opacity-50"
-                                  title="Mark as Verified"
-                                >
-                                  ✓ Verify
-                                </button>
-                              )}
-                              
-                              {!profile.is_listed && (
-                                <button
-                                  onClick={() => quickUpdateProfile(profile.id, 'is_listed', true)}
-                                  disabled={deleting === profile.id}
-                                  className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
-                                  title="List in Search"
-                                >
-                                  📋 List
-                                </button>
-                              )}
-                              
-                              {profile.is_listed && (
-                                <button
-                                  onClick={() => quickUpdateProfile(profile.id, 'is_listed', false)}
-                                  disabled={deleting === profile.id}
-                                  className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
-                                  title="Hide from Search"
-                                >
-                                  🚫 Hide
-                                </button>
-                              )}
-                            </>
-                          )}
-                          
-                          {!profile.is_deleted ? (
-                            <button
-                              onClick={() => softDeleteProfile(profile.id)}
-                              disabled={deleting === profile.id}
-                              className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
-                            >
-                              {deleting === profile.id ? 'Deleting...' : 'Soft Delete'}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => restoreProfile(profile.id)}
-                              disabled={deleting === profile.id}
-                              className="text-emerald-600 hover:text-emerald-900 disabled:opacity-50"
-                            >
-                              {deleting === profile.id ? 'Restoring...' : 'Restore'}
-                            </button>
-                          )}
-                          
-                          <button
-                            onClick={() => hardDeleteProfile(profile.id)}
-                            disabled={deleting === profile.id}
-                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                          >
-                            {deleting === profile.id ? 'Processing...' : 'Hard Delete'}
-                          </button>
-                        </div>
-                      </td>
+                               
+                               {!profile.is_listed && (
+                                 <button
+                                   onClick={() => quickUpdateProfile(profile.id, 'is_listed', true)}
+                                   disabled={deleting === profile.id}
+                                   className="text-blue-600 hover:text-blue-900 disabled:opacity-50 whitespace-nowrap"
+                                   title="List in Search"
+                                 >
+                                   📋 List
+                                 </button>
+                               )}
+                               
+                               {profile.is_listed && (
+                                 <button
+                                   onClick={() => quickUpdateProfile(profile.id, 'is_listed', false)}
+                                   disabled={deleting === profile.id}
+                                   className="text-orange-600 hover:text-orange-900 disabled:opacity-50 whitespace-nowrap"
+                                   title="Hide from Search"
+                                 >
+                                   🚫 Hide
+                                 </button>
+                               )}
+                               
+                               {!profile.is_deleted ? (
+                                 <button
+                                   onClick={() => softDeleteProfile(profile.id)}
+                                   disabled={deleting === profile.id}
+                                   className="text-orange-600 hover:text-orange-900 disabled:opacity-50 whitespace-nowrap"
+                                 >
+                                   {deleting === profile.id ? 'Deleting...' : 'Soft Delete'}
+                                 </button>
+                               ) : (
+                                 <button
+                                   onClick={() => restoreProfile(profile.id)}
+                                   disabled={deleting === profile.id}
+                                   className="text-emerald-600 hover:text-emerald-900 disabled:opacity-50 whitespace-nowrap"
+                                 >
+                                   {deleting === profile.id ? 'Restoring...' : 'Restore'}
+                                 </button>
+                               )}
+                               
+                               <button
+                                 onClick={() => hardDeleteProfile(profile.id)}
+                                 disabled={deleting === profile.id}
+                                 className="text-red-600 hover:text-red-900 disabled:opacity-50 whitespace-nowrap"
+                               >
+                                 {deleting === profile.id ? 'Processing...' : 'Hard Delete'}
+                               </button>
+                             </div>
+                           )}
+                         </div>
+                       </td>
                     </motion.tr>
                   ))}
                 </tbody>
