@@ -8,6 +8,7 @@ import { JoinButton } from '@/components/JoinButton';
 import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
 import BuyMeACoffee from '@/components/BuyMeACoffee';
+import MobileNav from '@/components/MobileNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,7 @@ export default function Page() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Check onboarding status and redirect only if incomplete
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function Page() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Nav */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="#features" className="hover:text-slate-900">Features</a>
@@ -89,14 +91,24 @@ export default function Page() {
             ) : (
               <JoinButton />
             )}
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 pt-16 pb-10 md:pt-24 md:pb-16">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 pb-10 md:pt-24 md:pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900">
                 Where Tax Professionals
@@ -109,11 +121,11 @@ export default function Page() {
               </p>
                               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                   {!user && (
-                    <a href="/join" className="rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">
+                    <a href="/join" className="rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">
                       Join Now
                     </a>
                   )}
-                  <a href="#features" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-5 py-3 text-sm font-medium hover:bg-slate-50">
+                  <a href="#features" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-4 py-3 sm:px-5 text-sm font-medium hover:bg-slate-50">
                     See how it works
                   </a>
                 </div>
@@ -154,8 +166,8 @@ export default function Page() {
 
       {/* Logos / social proof (optional placeholders) */}
       <section className="py-6">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-500">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 text-center text-sm text-slate-500">
             Built by tax pros, for tax pros. Join now to create your professional profile.
           </div>
         </div>
@@ -163,8 +175,8 @@ export default function Page() {
 
       {/* Features */}
       <section id="features" className="py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="grid md:grid-cols-3 gap-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-slate-900">{f.title}</h3>
@@ -177,10 +189,10 @@ export default function Page() {
 
       {/* How it works */}
       <section id="how" className="py-8">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
-            <div className="mt-6 grid md:grid-cols-3 gap-6">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {steps.map((s, i) => (
                 <div key={i} className="rounded-2xl border p-6">
                   <div className="text-slate-400 text-sm">Step {s.n}</div>
@@ -190,7 +202,7 @@ export default function Page() {
               ))}
             </div>
             <div className="mt-6">
-              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-5 py-3 text-sm font-medium shadow hover:shadow-md">Join Now</a>
+              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">Join Now</a>
             </div>
           </div>
         </div>
@@ -198,7 +210,7 @@ export default function Page() {
 
       {/* Join CTA Section */}
       <section className="py-16 bg-slate-50">
-        <div className="mx-auto max-w-4xl px-4 text-center">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -218,7 +230,7 @@ export default function Page() {
             Join TaxProExchange today and start building your professional network. 
             Create your profile, get verified, and connect with other tax professionals.
           </motion.p>
-          <motion.div 
+                      <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -227,13 +239,13 @@ export default function Page() {
           >
             <a
               href="/join"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all"
+              className="inline-flex items-center px-6 py-3 sm:px-8 border border-transparent text-base font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all"
             >
               Join Now
             </a>
             <a
               href="#features"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
+              className="inline-flex items-center px-6 py-3 sm:px-8 border border-transparent text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
             >
               Learn More
             </a>
@@ -243,10 +255,10 @@ export default function Page() {
 
       {/* FAQ */}
       <section id="faq" className="py-8">
-        <div className="mx-auto max-w-5xl px-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
-            <div className="mt-6 grid md:grid-cols-2 gap-6">
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-medium text-slate-900">Do you process payments or hold funds?</h4>
                 <p className="mt-2 text-sm text-slate-600">No. TaxProExchange is a connection-only platform. Professionals handle contracts and payments off-platform.</p>
@@ -274,6 +286,8 @@ export default function Page() {
         </div>
       </section>
 
+      {/* Mobile Navigation */}
+      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
 
     </div>
   );

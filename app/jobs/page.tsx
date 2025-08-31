@@ -110,7 +110,7 @@ export default function JobsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="/" className="hover:text-slate-900">Home</a>
@@ -169,7 +169,7 @@ export default function JobsPage() {
         {/* Filters and Jobs */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 order-2 lg:order-1">
             <JobFilters
               filters={filters}
               onFilterChange={handleFilterChange}
@@ -178,7 +178,7 @@ export default function JobsPage() {
           </div>
 
           {/* Jobs List */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 order-1 lg:order-2">
             {loading ? (
               <div className="space-y-4">
                 {[...Array(6)].map((_, i) => (
