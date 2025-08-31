@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import 'stream-chat-react/dist/css/v2/index.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import Footer from '@/components/Footer';
 

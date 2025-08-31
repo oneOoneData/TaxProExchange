@@ -136,14 +136,14 @@ export async function GET(request: Request) {
     console.log('🔍 Profile ID:', profile.id);
 
     // Fetch related data
-    const [specializationsResult, statesResult, softwareResult] = await Promise.all([
+    const [specializationsResult, locationsResult, softwareResult] = await Promise.all([
       supabase
         .from('profile_specializations')
         .select('specialization_slug')
         .eq('profile_id', profile.id),
       supabase
         .from('profile_locations')
-        .select('state')
+        .select('state, city')
         .eq('profile_id', profile.id),
       supabase
         .from('profile_software')
@@ -153,7 +153,7 @@ export async function GET(request: Request) {
 
     console.log('🔍 Related data results:', {
       specializations: specializationsResult,
-      states: statesResult,
+      locations: locationsResult,
       software: softwareResult
     });
 
@@ -161,7 +161,7 @@ export async function GET(request: Request) {
     console.log('Profile data being returned:', {
       profile: profile,
       specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
-      states: statesResult.data?.map(s => s.state) || [],
+      locations: locationsResult.data?.map(l => ({ state: l.state, city: l.city })) || [],
       software: softwareResult.data?.map(s => s.software_slug) || [],
       other_software: profile.other_software || []
     });
@@ -170,7 +170,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       ...profile,
       specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
-      states: statesResult.data?.map(s => s.state) || [],
+      locations: locationsResult.data?.map(l => ({ state: l.state, city: l.city })) || [],
       software: softwareResult.data?.map(s => s.software_slug) || [],
       other_software: profile.other_software || []
     });
@@ -191,13 +191,16 @@ export async function PUT(request: Request) {
     const { 
       clerk_id, 
       specializations, 
-      states, 
+      locations, 
       software, 
       other_software,
       public_contact,
       works_multistate,
       works_international,
       countries,
+      email_preferences,
+      primary_location,
+      location_radius,
       ...profileData 
     } = body;
 
@@ -205,9 +208,10 @@ export async function PUT(request: Request) {
     console.log('Received profile data:', {
       clerk_id,
       specializations,
-      states,
+      locations,
       software,
       other_software,
+      email_preferences,
       profileData
     });
 
@@ -294,6 +298,9 @@ export async function PUT(request: Request) {
           works_international: works_international ?? false,
           countries: countries || [],
           other_software: other_software || [],
+          email_preferences: email_preferences || null,
+          primary_location: primary_location || null,
+          location_radius: location_radius || 50,
           onboarding_complete: true,
           updated_at: new Date().toISOString(),
         })
@@ -316,6 +323,9 @@ export async function PUT(request: Request) {
           works_international: works_international ?? false,
           countries: countries || [],
           other_software: other_software || [],
+          email_preferences: email_preferences || null,
+          primary_location: primary_location || null,
+          location_radius: location_radius || 50,
           onboarding_complete: true,
           updated_at: new Date().toISOString(),
         })
@@ -371,23 +381,24 @@ export async function PUT(request: Request) {
         console.log('🔍 No specializations to save:', { specializations });
       }
       
-      // Save states (locations)
-      if (states && states.length > 0) {
+      // Save locations
+      if (locations && locations.length > 0) {
         // Delete existing locations
         await supabase
           .from('profile_locations')
           .delete()
           .eq('profile_id', profileId);
         
-        // Insert new states
-        const stateData = states.map((state: string) => ({
+        // Insert new locations
+        const locationData = locations.map((location: { state: string; city?: string }) => ({
           profile_id: profileId,
-          state: state
+          state: location.state,
+          city: location.city || null
         }));
         
         await supabase
           .from('profile_locations')
-          .insert(stateData);
+          .insert(locationData);
       }
       
       // Save software
@@ -424,6 +435,31 @@ export async function PUT(request: Request) {
       }
       
       return NextResponse.json({ error: errorMessage }, { status: 500 });
+    }
+
+    // Send notification email to admin when profile is completed
+    if (profile && profile.onboarding_complete) {
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/profile-completed`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            profile_id: profile.id,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: profile.public_email || userEmail || 'No email available',
+            credential_type: profile.credential_type,
+            headline: profile.headline,
+            firm_name: profile.firm_name
+          }),
+        });
+        console.log('Profile completion notification sent to admin');
+      } catch (emailError) {
+        console.error('Failed to send profile completion notification:', emailError);
+        // Don't fail the request if email fails
+      }
     }
 
     console.log('Profile saved successfully:', profile);

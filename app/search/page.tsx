@@ -56,6 +56,8 @@ export default function SearchPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
+  const [connectionStates, setConnectionStates] = useState<Record<string, { status: string; connectionId?: string; isRequester?: boolean }>>({});
+  const [forceUpdate, setForceUpdate] = useState(0); // Force re-render trigger
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
@@ -118,13 +120,21 @@ export default function SearchPage() {
       });
 
       const response = await fetch(`/api/search?${params}`);
-      const data = await response.json();
-      setProfiles(data.profiles);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setLoading(false);
-    }
+             const data = await response.json();
+       setProfiles(data.profiles || []);
+       
+       // Check connection status for each profile
+       if (data.profiles) {
+         data.profiles.forEach((profile: Profile) => {
+           checkConnectionStatus(profile.id);
+         });
+       }
+     } catch (error) {
+       console.error('Search error:', error);
+       setProfiles([]); // Ensure profiles is always an array even on error
+     } finally {
+       setLoading(false);
+     }
   };
 
   const updateFilter = (key: keyof SearchFilters, value: string) => {
@@ -143,6 +153,95 @@ export default function SearchPage() {
     setFilters(clearedFilters);
     // Search with cleared filters
     setTimeout(() => searchProfiles(clearedFilters), 100);
+  };
+
+  const handleConnect = async (profileId: string) => {
+    console.log('🔄 Connect button clicked for profile:', profileId);
+    
+    try {
+      console.log('📡 Sending connection request...');
+      const response = await fetch('/api/connections/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipientProfileId: profileId })
+      });
+
+      console.log('📥 Response received:', response.status, response.statusText);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Connection created successfully:', data);
+        // Get the real connection status from the API
+        await checkConnectionStatus(profileId);
+        console.log('🔄 Connection state updated');
+      } else {
+        const error = await response.json();
+        console.log('❌ Connection failed with error:', error);
+        if (error.error === 'Connection already exists') {
+          // Update with existing connection status
+          setConnectionStates(prev => ({
+            ...prev,
+            [profileId]: { 
+              status: error.connection.status, 
+              connectionId: error.connection.id,
+              isRequester: error.connection.requester_profile_id === profileId
+            }
+          }));
+          console.log('🔄 Updated with existing connection status');
+        } else {
+          console.error('Connection failed:', error);
+        }
+      }
+    } catch (error) {
+      console.error('💥 Connection error:', error);
+    }
+  };
+
+  const checkConnectionStatus = async (profileId: string) => {
+    try {
+      console.log('🔍 Checking connection status for profile:', profileId);
+      const response = await fetch(`/api/connections/status?otherProfileId=${profileId}`);
+      console.log('📥 Status response:', response.status, response.statusText);
+      
+             if (response.ok) {
+         const data = await response.json();
+         console.log('✅ Connection status received:', data);
+         setConnectionStates(prev => ({
+           ...prev,
+           [profileId]: data
+         }));
+         // Force re-render after state update
+         setForceUpdate(prev => prev + 1);
+         console.log('🔄 Force re-render triggered');
+       } else {
+        console.log('❌ Status check failed:', response.status);
+      }
+    } catch (error) {
+      console.error('💥 Status check error:', error);
+    }
+  };
+
+  const handleAcceptConnection = async (connectionId: string) => {
+    try {
+      const response = await fetch(`/api/connect/${connectionId}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: 'accepted' })
+      });
+
+      if (response.ok) {
+        // Refresh connection status for all profiles
+        if (profiles) {
+          profiles.forEach((profile: Profile) => {
+            checkConnectionStatus(profile.id);
+          });
+        }
+      } else {
+        console.error('Failed to accept connection');
+      }
+    } catch (error) {
+      console.error('Accept connection error:', error);
+    }
   };
 
   const renderSpecializationFilters = () => (
@@ -413,12 +512,42 @@ export default function SearchPage() {
 
 
                 {/* Search Button */}
-                <button
-                  onClick={() => searchProfiles()}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Search
-                </button>
+                                 <button
+                   onClick={() => searchProfiles()}
+                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                 >
+                   Search
+                 </button>
+                 
+                 {/* Temporary debug button to refresh connection status */}
+                 <button
+                   onClick={() => {
+                     console.log('🔄 Manual refresh clicked!');
+                     console.log('📊 Current connection states:', connectionStates);
+                     if (profiles) {
+                       profiles.forEach((profile: Profile) => {
+                         console.log(`🔄 Refreshing status for profile: ${profile.id} (${profile.first_name} ${profile.last_name})`);
+                         checkConnectionStatus(profile.id);
+                       });
+                     }
+                   }}
+                   className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                 >
+                   Refresh Connection Status
+                 </button>
+                 
+                 {/* Force clear all connection states */}
+                 <button
+                   onClick={() => {
+                     console.log('🗑️ Clearing all connection states!');
+                     setConnectionStates({});
+                     setForceUpdate(prev => prev + 1); // Force re-render
+                     console.log('✅ Connection states cleared and re-render triggered');
+                   }}
+                   className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                 >
+                   Clear Connection States
+                 </button>
 
                 {/* Clear All Filters */}
                 {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work || filters.verified_only) && (
@@ -451,7 +580,7 @@ export default function SearchPage() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
                 <p className="mt-2 text-slate-600">Searching...</p>
               </div>
-            ) : profiles.length === 0 ? (
+            ) : !profiles || profiles.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-slate-600">No professionals found matching your criteria.</p>
                 <button
@@ -463,7 +592,7 @@ export default function SearchPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {profiles.map((profile, index) => {
+                {(profiles || []).map((profile, index) => {
                   // Debug: log profile data to see slug issues
                   console.log('Profile data:', { id: profile.id, slug: profile.slug, name: `${profile.first_name} ${profile.last_name}` });
                    
@@ -518,28 +647,65 @@ export default function SearchPage() {
                           </span>
                         </div>
                       </div>
-                       
-                                             <div className="flex flex-col gap-2 ml-4">
-                         {profile.verified ? (
-                           <Link
-                             href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}
-                             className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
+                      
+                      <div className="flex flex-col gap-2 ml-4">
+                        {profile.verified ? (
+                          <Link
+                            href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}
+                            className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
+                          >
+                            View Profile
+                          </Link>
+                        ) : (
+                          <button
+                            disabled
+                            className="inline-flex items-center justify-center rounded-xl bg-slate-300 text-slate-500 px-4 py-2 text-sm font-medium cursor-not-allowed"
+                            title="Profile not yet verified - cannot be viewed"
+                          >
+                            Pending Verification
+                          </button>
+                        )}
+                        
+                                                 {profile.accepting_work && (
+                           <button 
+                             onClick={() => {
+                               if (connectionStates[profile.id]?.status === 'pending' && !connectionStates[profile.id]?.isRequester) {
+                                 // Accept connection
+                                 handleAcceptConnection(connectionStates[profile.id]?.connectionId!);
+                               } else {
+                                 // Send connection request
+                                 console.log('🖱️ Button clicked for profile:', profile.id);
+                                 handleConnect(profile.id);
+                               }
+                             }}
+                             disabled={connectionStates[profile.id]?.status === 'accepted'}
+                             className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                               connectionStates[profile.id]?.status === 'accepted'
+                                 ? 'bg-green-100 text-green-700 border-green-200 cursor-default'
+                                 : connectionStates[profile.id]?.status === 'pending'
+                                 ? connectionStates[profile.id]?.isRequester ? 'bg-yellow-100 text-yellow-700 border-yellow-200 cursor-default' : 'bg-green-600 text-white hover:bg-green-700'
+                                 : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+                             }`}
                            >
-                             View Profile
-                           </Link>
-                         ) : (
-                           <button
-                             disabled
-                             className="inline-flex items-center justify-center rounded-xl bg-slate-300 text-slate-500 px-4 py-2 text-sm font-medium cursor-not-allowed"
-                             title="Profile not yet verified - cannot be viewed"
-                           >
-                             Pending Verification
+                             {connectionStates[profile.id]?.status === 'accepted'
+                               ? 'Connected'
+                               : connectionStates[profile.id]?.status === 'pending'
+                               ? connectionStates[profile.id]?.isRequester ? 'Request Sent' : 'Accept Request'
+                               : 'Connect'
+                             }
                            </button>
                          )}
-                        {profile.accepting_work && (
-                          <button className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 px-4 py-2 text-sm font-medium hover:bg-slate-50 transition-colors">
-                            Connect
-                          </button>
+                        
+
+                        
+                        {/* Show Message button for connected users */}
+                        {profile.accepting_work && connectionStates[profile.id]?.status === 'accepted' && (
+                          <Link
+                            href={`/messages/${connectionStates[profile.id]?.connectionId}`}
+                            className="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors mt-2"
+                          >
+                            Message
+                          </Link>
                         )}
                       </div>
                     </div>

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { JoinButton } from '@/components/JoinButton';
 import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
+import BuyMeACoffee from '@/components/BuyMeACoffee';
 
 export const dynamic = 'force-dynamic';
 
@@ -256,11 +257,17 @@ export default function Page() {
               </div>
               <div>
                 <h4 className="font-medium text-slate-900">Is it free?</h4>
-                <p className="mt-2 text-sm text-slate-600">Yes during beta. Later we may offer featured listings and optional subscriptions.</p>
+                <p className="mt-2 text-sm text-slate-600">Yes, for as long as we can keep it free. Costs will run up at some point but our goal is to create value not become the next TaxFyle.</p>
+                <p className="mt-2 text-sm text-slate-600">Having said that, we can always use more coffee so we can keep coding.</p>
+                <BuyMeACoffee />
               </div>
               <div>
                 <h4 className="font-medium text-slate-900">Can clients use this?</h4>
                 <p className="mt-2 text-sm text-slate-600">This is built for professionals only: CPAs, EAs, and registered preparers who need collaboration and referrals.</p>
+              </div>
+              <div>
+                <h4 className="font-medium text-slate-900">Why did you start this web app?</h4>
+                <p className="mt-2 text-sm text-slate-600"><a href="https://www.taxproexchange.com/reddit" className="text-blue-600 hover:text-blue-800 underline">This</a> explains it best.</p>
               </div>
             </div>
           </div>

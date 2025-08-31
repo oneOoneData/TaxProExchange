@@ -2,6 +2,166 @@
 
 ## Completed Tasks
 
+### 2025-01-XX: Admin Notification System for Profile Completion ✅
+
+**Goal**: Implement automatic email notifications to admin (koen@cardifftax.com) when users complete their profiles, with direct links to review and verify them.
+
+**Implementation Details**:
+
+1. **Email Template System**
+   - Added `ProfileCompletionEmailData` interface to `lib/email.ts`
+   - Created professional email template with profile details and action button
+   - Email includes: name, email, credential type, headline, firm name
+   - Direct "Review & Verify Profile" button linking to admin panel
+
+2. **Notification API Endpoint**
+   - Created `/api/notify/profile-completed` endpoint
+   - Triggers when profiles are marked as `onboarding_complete: true`
+   - Sends notification to admin email (configurable via `ADMIN_EMAIL` env var)
+   - Includes direct link to `/admin/profiles/[id]` for review
+
+3. **Integration with Profile Completion**
+   - Updated `app/api/profile/route.ts` to trigger notification
+   - Notification sent after successful profile save
+   - Non-blocking - profile save succeeds even if email fails
+   - Only triggers when `onboarding_complete` is set to true
+
+4. **Environment Configuration**
+   - Added `ADMIN_EMAIL` to `env.example` (defaults to koen@cardifftax.com)
+   - Configurable admin email address for notifications
+
+**Files Created/Modified**: 3 files, ~50 lines added
+
+**New Files Created**:
+- `app/api/notify/profile-completed/route.ts` - Profile completion notification API
+
+**Files Updated**:
+- `lib/email.ts` - Added profile completion email template and function
+- `app/api/profile/route.ts` - Added notification trigger on profile completion
+- `env.example` - Added ADMIN_EMAIL configuration
+
+**Email Features**:
+- **Professional Design**: Green gradient header with clear call-to-action
+- **Profile Summary**: Key information at a glance
+- **Direct Action**: Button links directly to admin profile review page
+- **Mobile Responsive**: Optimized for all device types
+- **Clear Instructions**: Action required notice with amber highlight box
+
+**Admin Workflow**:
+1. User completes profile setup
+2. Admin receives email with profile details
+3. Click "Review & Verify Profile" button
+4. Redirected to admin panel for that specific profile
+5. Review credentials and approve/reject verification
+
+**Testing Checklist**:
+- [ ] Set `ADMIN_EMAIL` environment variable
+- [ ] Complete a user profile (set `onboarding_complete: true`)
+- [ ] Check admin email for notification
+- [ ] Verify email contains correct profile information
+- [ ] Test "Review & Verify Profile" button link
+- [ ] Confirm link goes to correct admin profile page
+- [ ] Test email rendering on different email clients
+
+**Environment Variables Required**:
+```
+ADMIN_EMAIL=koen@cardifftax.com  # Optional, defaults to this value
+```
+
+**Result**: Admin now receives immediate notifications when users complete their profiles, with direct access to review and verify them, streamlining the verification workflow.
+
+---
+
+### 2025-01-XX: Implemented Stream Chat 1:1 Messaging System ✅
+
+**Goal**: Add 1:1 messaging using Stream Chat (free tier) with an inbox at /messages and per-connection threads at /messages/[id].
+
+**Implementation Details**:
+
+1. **Dependencies Installed**
+   - `stream-chat`, `stream-chat-react`, `@stream-io/stream-chat-css`
+   - Added Stream CSS import to app/layout.tsx
+
+2. **Database Schema**
+   - Created `database/add_connections_table.sql` migration
+   - Added `connections` table with `stream_channel_id` field
+   - Implemented RLS policies for security
+   - Added proper indexes for performance
+
+3. **Stream Chat Service**
+   - Created `lib/stream.ts` with server-side client initialization
+   - Handles environment variable validation
+
+4. **API Routes Created**
+   - `POST /api/connect/[id]/decision` - Handle connection accept/decline and create Stream channels
+   - `GET /api/stream/token` - Generate user tokens for Stream Chat
+   - `GET /api/stream/connection/[id]` - Fetch connection details for messaging
+   - `GET /api/connections/accepted` - List user's accepted connections
+
+5. **UI Components**
+   - `/messages` - Inbox page listing accepted connections
+   - `/messages/[connectionId]` - Individual chat thread using Stream Chat React components
+   - Clean, minimal Tailwind design
+   - Mobile-responsive layout
+
+6. **Security & Authorization**
+   - Only participants of accepted connections can access threads
+   - Clerk authentication required for all routes
+   - RLS policies enforce connection ownership
+   - Server-side validation of user participation
+
+**Files Created/Modified**: 8 files, ~300 lines added
+
+**New Files Created**:
+- `lib/stream.ts` - Stream Chat service library
+- `database/add_connections_table.sql` - Database migration
+- `app/api/stream/token/route.ts` - Token generation API
+- `app/api/stream/connection/[id]/route.ts` - Connection details API
+- `app/api/connect/[id]/decision/route.ts` - Connection decision API
+- `app/api/connections/accepted/route.ts` - Accepted connections API
+- `app/messages/page.tsx` - Messages inbox page
+- `app/messages/[connectionId]/page.tsx` - Individual chat thread
+
+**Files Updated**:
+- `app/layout.tsx` - Added Stream Chat CSS import
+- `env.example` - Added Stream Chat environment variables
+- `package.json` - Added Stream Chat dependencies
+
+**Environment Variables Required**:
+```
+STREAM_KEY=your_stream_key
+STREAM_SECRET=your_stream_secret
+STREAM_APP_ID=your_stream_app_id
+```
+
+**Technical Architecture**:
+- **Stream Chat**: Free tier with 1:1 messaging channels
+- **Channel Creation**: Automatic when connections are accepted
+- **User Management**: Clerk user IDs mapped to Stream users
+- **Real-time**: Live messaging with Stream's infrastructure
+- **Security**: RLS + server-side validation + Clerk auth
+
+**Testing Checklist**:
+- [ ] Run database migration to create connections table
+- [ ] Set Stream Chat environment variables
+- [ ] Accept a connection between two users
+- [ ] Visit /messages to see accepted connections
+- [ ] Open chat thread at /messages/[connectionId]
+- [ ] Send and receive messages in real-time
+- [ ] Verify unauthorized users get 403 errors
+- [ ] Test mobile responsiveness
+- [ ] No console errors in dev/prod
+
+**Next Steps**:
+- Test complete messaging flow with real users
+- Consider adding message notifications
+- Monitor Stream Chat usage and limits
+- Add message persistence/audit if needed
+
+**Result**: Users with accepted connections can now exchange real-time messages through a clean, secure messaging interface.
+
+---
+
 ### 2025-01-XX: Fixed Onboarding Issues and Improved Specialization Picker ✅
 
 **Goal**: Fix multiple onboarding issues: missing credential types, confusing specializations UI, state search functionality, consent screen flow, and add wrap-up screen.
@@ -851,3 +1011,273 @@ Run `database/add_application_notes_field.sql` in Supabase SQL Editor to add app
 - `NEXT_PUBLIC_APP_URL` - For email links and navigation
 
 **Result**: Complete job application lifecycle management with professional communication, status tracking, and user-friendly dashboards for both parties involved in the hiring process.
+
+---
+
+### 2025-01-XX: Fixed Admin Menu Security and Website URL Issues ✅
+
+**Goal**: 
+1. Secure admin menu so non-admin users cannot see admin options
+2. Fix website URL links on profile pages that were redirecting to wrong domains
+
+**Root Cause**: 
+1. **Admin Menu Security**: The UserMenu component was showing admin options to all users without checking admin privileges
+2. **Website URL Issues**: Profile website URLs without proper protocols (http:// or https://) were being treated as relative URLs, causing browsers to prepend the current domain
+
+**Changes Made**:
+
+#### 1. Admin Menu Security Fix
+- **NEW**: `lib/hooks/useAdminStatus.ts` - Custom hook to check user admin status from database
+- **NEW**: `app/api/profile/check-admin/route.ts` - API endpoint to verify admin privileges
+- **NEW**: `components/AdminRouteGuard.tsx` - Component to protect admin routes
+- **Modified**: `components/UserMenu.tsx` - Added admin role check to conditionally show admin menu
+
+**Technical Details**:
+- Admin status is checked via database query to `profiles.is_admin` field
+- Admin menu only appears for users with `is_admin = true`
+- Loading states prevent menu flickering during admin check
+- Admin routes are protected with redirects for non-admin users
+
+#### 2. Website URL Fix
+- **Modified**: `app/p/[slug]/page.tsx` - Fixed website link href to handle missing protocols
+
+**Technical Details**:
+- Website URLs are now checked for proper protocol (http:// or https://)
+- URLs without protocols automatically get `https://` prefix
+- Prevents relative URL issues that caused wrong domain redirects
+
+**Files Modified**: 2 files, ~15 lines changed
+**Files Created**: 3 new files, ~80 lines added
+
+**Testing Checklist**:
+- [ ] Non-admin users cannot see admin menu items
+- [ ] Admin users can see and access admin menu
+- [ ] Website links on profile pages work correctly
+- [ ] URLs without protocols get proper https:// prefix
+- [ ] Admin route protection works for direct URL access
+- [ ] No console errors during admin status checks
+- [ ] Menu loading states work smoothly
+
+**Security Impact**: 
+- **BEFORE**: All authenticated users could see admin menu options
+- **AFTER**: Only users with `is_admin = true` can see admin menu
+- **ROUTE PROTECTION**: Admin pages now redirect non-admin users
+
+**Result**: Admin functionality is now properly secured and website links work correctly across all profile pages.
+
+---
+
+### 2025-01-XX: Resend Email Testing Setup (2025-01-XX)
+
+Created a comprehensive testing setup for Resend email functionality:
+
+**New Files:**
+- `app/api/test/resend/route.ts` - API endpoint for testing Resend emails
+- `app/test-email/page.tsx` - UI page for testing email functionality
+
+**Testing Methods:**
+
+1. **Web UI Testing:**
+   - Navigate to `/test-email` in your browser
+   - Sign in with your test user account
+   - Click "Check Profile" to verify email configuration
+   - Click "Send Test Email" to send a test email
+
+2. **API Testing (curl):**
+   ```bash
+   # First, get your auth token from Clerk or use the web UI
+   
+   # Check profile info
+   curl -X GET "http://localhost:3000/api/test/resend" \
+     -H "Authorization: Bearer YOUR_CLERK_TOKEN"
+   
+   # Send test email
+   curl -X POST "http://localhost:3000/api/test/resend" \
+     -H "Authorization: Bearer YOUR_CLERK_TOKEN" \
+     -H "Content-Type: application/json"
+   ```
+
+**Prerequisites:**
+- `RESEND_API_KEY` environment variable must be set
+- User must have completed onboarding and have a profile with `public_email`
+- User must be authenticated via Clerk
+
+**What the Test Does:**
+- Sends a beautifully formatted HTML email with test details
+- Includes recipient info, timestamp, and environment details
+- Provides clear success/failure feedback
+- Logs all operations for debugging
+
+**Next Steps:**
+- Set up `RESEND_API_KEY` in your environment
+- Complete user onboarding to create a profile
+- Test the email functionality using the web UI or API
+
+---
+
+### 2025-01-XX: Email Preferences & Menu Reorganization
+
+**Problem:** Users need control over email notifications to prevent spam, and Messages should be moved to user menu.
+
+**Solution:** Created comprehensive email preference system and reorganized navigation.
+
+**New Files:**
+- `database/add_email_preferences.sql` - Database schema for email preferences
+- `app/settings/page.tsx` - Settings page with email preferences UI
+- Updated `components/UserMenu.tsx` - Added Settings and Messages to user menu
+
+**Changes Made:**
+
+1. **Email Preferences System:**
+   - Added `email_preferences` JSONB field to profiles table
+   - Granular control over 5 email types (job notifications, application updates, etc.)
+   - Frequency control (immediate, daily, weekly, never)
+   - Critical vs. non-critical email distinction
+
+2. **Menu Reorganization:**
+   - Moved Messages from main navigation to user menu
+   - Added Settings menu item under user icon
+   - Cleaner main navigation (Home, Search, Jobs)
+
+3. **Settings Page Features:**
+   - Beautiful, organized email preference controls
+   - Clear explanations of each email type
+   - Real-time preference saving
+   - Links to other account settings
+
+4. **Anti-Spam Features:**
+   - `shouldSendEmail()` utility function
+   - Respects user preferences before sending
+   - Critical emails (verification, applications) always respect preferences
+   - Marketing emails can be completely disabled
+
+**Database Changes:**
+```sql
+ALTER TABLE profiles ADD COLUMN email_preferences JSONB DEFAULT '{"job_notifications": true, ...}';
+ALTER TABLE profiles ADD COLUMN email_frequency TEXT DEFAULT 'immediate';
+ALTER TABLE profiles ADD COLUMN last_email_sent TIMESTAMPTZ;
+```
+
+**User Experience:**
+- Users can now control exactly what emails they receive
+- Clear, organized settings page
+- Messages accessible from user menu (more logical placement)
+- No more unwanted email spam
+
+**Commands to Run:**
+```bash
+# Run the SQL script in Supabase
+# Navigate to /settings to configure email preferences
+```
+
+**Test Steps:**
+1. Run `add_email_preferences.sql` in Supabase
+2. Navigate to `/settings` page
+3. Configure email preferences
+4. Test that emails respect preferences
+5. Verify Messages is now in user menu
+
+---
+
+### 2025-01-XX: Location System Enhancement
+
+**Problem:** Location information is crucial for professional networking but current system lacks city-level detail and clear service area display.
+
+**Solution:** Enhanced location system with cities, primary locations, service radius, and prominent display components.
+
+**New Files:**
+- `database/enhance_locations.sql` - Enhanced location schema
+- `components/LocationDisplay.tsx` - Prominent location display component
+
+**Changes Made:**
+
+1. **Enhanced Database Schema:**
+   - Added `city` column to `profile_locations` table
+   - Added `primary_location` JSONB field for main location display
+   - Added `location_radius` for service area coverage (miles)
+   - Created indexes for location-based searches
+   - Created `profile_locations_view` for easier queries
+
+2. **LocationDisplay Component:**
+   - Prominent location information with map icon
+   - Smart location text (city, state, multi-state, international)
+   - Service area descriptions (radius, coverage)
+   - Expandable additional locations
+   - Status badges (Multi-State, International, Local)
+   - Clean, professional design
+
+3. **API Updates:**
+   - Profile API now returns enhanced location data
+   - Supports city-level locations
+   - Handles primary location and service radius
+   - Backward compatible with existing state-only data
+
+**Key Features:**
+- **City-level precision**: More accurate location targeting
+- **Primary location**: Main location for display purposes
+- **Service radius**: How far professionals travel for clients
+- **Multi-state/International flags**: Clear service area indicators
+- **Location badges**: Visual indicators for service type
+- **Expandable locations**: Show additional service areas
+
+**Benefits for Users:**
+- **Better discovery**: Find professionals in specific cities
+- **Service area clarity**: Understand coverage areas
+- **Professional matching**: Location-based client matching
+- **Trust building**: Transparent service area information
+
+**Database Changes:**
+```sql
+ALTER TABLE profile_locations ADD COLUMN city TEXT;
+ALTER TABLE profiles ADD COLUMN primary_location JSONB DEFAULT '{"country": "US", "state": null, "city": null}';
+ALTER TABLE profiles ADD COLUMN location_radius INTEGER DEFAULT 50;
+CREATE INDEX idx_profile_locations_state_city ON profile_locations(state, city);
+```
+
+**Next Steps:**
+1. Run `enhance_locations.sql` in Supabase
+2. Integrate `LocationDisplay` component into profile views
+3. Update profile forms to include city and radius inputs
+4. Test location-based search and filtering
+5. Verify location display in search results and profiles
+
+---
+
+### 2025-01-XX: Enhanced Buy Me a Coffee Button Implementation ✅
+
+**Goal**: Fix Buy Me a Coffee button rendering issues by implementing a simple, reliable image-based approach.
+
+**Implementation Details**:
+
+1. **Simplified BuyMeACoffee Component**
+   - Updated `components/BuyMeACoffee.tsx` with direct image link approach
+   - Removed complex script injection in favor of simple, reliable image button
+   - Added hover effects and proper accessibility attributes
+
+2. **Image-Based Button**
+   - Uses official BMC button image: `https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png`
+   - Proper dimensions: 217px × 60px
+   - Hover opacity effect for better UX
+   - Opens in new tab with proper security attributes
+
+3. **Positioning**
+   - Button properly positioned under "Is it free?" FAQ answer
+   - Follows the coffee-related text: "Having said that, we can always use more coffee so we can keep coding."
+
+**Files Modified**: 1 file, ~15 lines updated
+
+**Technical Improvements**:
+- **Reliability**: No external scripts or complex injection logic
+- **Performance**: Direct image loading, no JavaScript dependencies
+- **Accessibility**: Proper alt text and link attributes
+- **Maintenance**: Simple, easy-to-update component
+
+**Testing Checklist**:
+- [ ] Button appears under FAQ answer
+- [ ] Image loads correctly
+- [ ] Button click opens BMC page in new tab
+- [ ] Hover effect works
+- [ ] No console errors
+- [ ] Mobile responsive
+
+**Result**: Simple, reliable Buy Me a Coffee button that always renders and provides consistent user experience.

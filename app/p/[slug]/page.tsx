@@ -56,6 +56,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
   const [isAdminView, setIsAdminView] = useState(false);
+  const [connectionState, setConnectionState] = useState<{ status: string; connectionId?: string; isRequester?: boolean } | null>(null);
 
   useEffect(() => {
     if (params.slug) {
@@ -98,6 +99,11 @@ export default function ProfilePage() {
       if (response.ok) {
         const profileData = await response.json();
         setProfile(profileData);
+        
+        // Check connection status if user is signed in
+        if (isSignedIn && user) {
+          checkConnectionStatus(profileData.id);
+        }
       } else {
         console.error('Profile not found');
         setProfile(null);
@@ -107,6 +113,67 @@ export default function ProfilePage() {
       setProfile(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkConnectionStatus = async (profileId: string) => {
+    try {
+      const response = await fetch(`/api/connections/status?otherProfileId=${profileId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setConnectionState(data);
+      }
+    } catch (error) {
+      console.error('Status check error:', error);
+    }
+  };
+
+  const handleConnect = async (profileId: string) => {
+    try {
+      const response = await fetch('/api/connections/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipientProfileId: profileId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setConnectionState({ status: 'pending', connectionId: data.connection.id, isRequester: true });
+      } else {
+        const error = await response.json();
+        if (error.error === 'Connection already exists') {
+          setConnectionState({ 
+            status: error.connection.status, 
+            connectionId: error.connection.id,
+            isRequester: error.connection.requester_profile_id === profileId
+          });
+        } else {
+          console.error('Connection failed:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Connection error:', error);
+    }
+  };
+
+  const handleAcceptConnection = async (connectionId: string) => {
+    try {
+      const response = await fetch(`/api/connect/${connectionId}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision: 'accepted' })
+      });
+
+      if (response.ok) {
+        // Refresh connection status
+        if (profile) {
+          checkConnectionStatus(profile.id);
+        }
+      } else {
+        console.error('Failed to accept connection');
+      }
+    } catch (error) {
+      console.error('Accept connection error:', error);
     }
   };
 
@@ -227,11 +294,51 @@ export default function ProfilePage() {
 
               {/* Action Buttons */}
               <div className="flex gap-3">
-                {profile.accepting_work && (
-                  <button className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium hover:bg-slate-800 transition-colors">
-                    Connect
-                  </button>
+                {profile.accepting_work && isSignedIn && (
+                  <>
+                    {/* Connect/Accept Button */}
+                    {connectionState?.status === 'pending' && connectionState?.isRequester ? (
+                      <button 
+                        disabled
+                        className="inline-flex items-center justify-center rounded-xl bg-yellow-100 text-yellow-700 border-yellow-200 px-6 py-3 text-sm font-medium cursor-default"
+                      >
+                        Request Sent
+                      </button>
+                    ) : connectionState?.status === 'pending' && !connectionState?.isRequester ? (
+                      <button 
+                        onClick={() => handleAcceptConnection(connectionState.connectionId!)}
+                        className="inline-flex items-center justify-center rounded-xl bg-green-600 text-white px-6 py-3 text-sm font-medium hover:bg-green-700 transition-colors"
+                      >
+                        Accept Request
+                      </button>
+                    ) : connectionState?.status === 'accepted' ? (
+                      <button 
+                        disabled
+                        className="inline-flex items-center justify-center rounded-xl bg-green-100 text-green-700 border-green-200 px-6 py-3 text-sm font-medium cursor-default"
+                      >
+                        Connected
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleConnect(profile.id)}
+                        className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium hover:bg-slate-800 transition-colors"
+                      >
+                        Connect
+                      </button>
+                    )}
+
+                    {/* Message Button for Connected Users */}
+                    {connectionState?.status === 'accepted' && (
+                      <Link
+                        href={`/messages/${connectionState.connectionId}`}
+                        className="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-6 py-3 text-sm font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Message
+                      </Link>
+                    )}
+                  </>
                 )}
+                
                 <Link
                   href="/search"
                   className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
@@ -375,7 +482,7 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm text-slate-500 mb-1">Website</p>
                       <a
-                        href={profile.website_url}
+                        href={profile.website_url.startsWith('http') ? profile.website_url : `https://${profile.website_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-slate-900 hover:text-slate-700 break-all"
