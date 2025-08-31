@@ -28,6 +28,7 @@ export interface EmailTemplate {
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string;
 }
 
 // Email preference types
@@ -158,13 +159,20 @@ export const emailTemplates = {
 // Send email function
 export async function sendEmail(to: string, template: EmailTemplate) {
   try {
-    const { data, error } = await resend.emails.send({
+    const emailData: any = {
       from: 'TaxProExchange <noreply@taxproexchange.com>', // Use your verified domain
       to: [to],
       subject: template.subject,
       html: template.html,
       text: template.text,
-    });
+    };
+
+    // Add reply-to if specified
+    if (template.replyTo) {
+      emailData.reply_to = template.replyTo;
+    }
+
+    const { data, error } = await resend.emails.send(emailData);
 
     if (error) {
       console.error('Resend email error:', error);
