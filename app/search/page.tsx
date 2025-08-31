@@ -63,7 +63,7 @@ export default function SearchPage() {
     state: '',
     specialization: '',
     accepting_work: '',
-    verified_only: false
+    verified_only: true
   });
 
   const states = [
@@ -286,6 +286,7 @@ export default function SearchPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900 mb-2">Find Tax Professionals</h1>
           <p className="text-slate-600">Search for verified CPAs, EAs, and CTEC preparers by credential, location, and specialization.</p>
+          <p className="text-sm text-slate-500 mt-1">Only verified and listed professionals are shown to ensure quality and accessibility.</p>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
@@ -424,7 +425,7 @@ export default function SearchPage() {
                        state: '',
                        specialization: '',
                        accepting_work: '',
-                       verified_only: false
+                       verified_only: true
                      };
                      setFilters(clearedFilters);
                      setTimeout(() => searchProfiles(clearedFilters), 100);
