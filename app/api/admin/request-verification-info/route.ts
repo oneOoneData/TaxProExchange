@@ -58,17 +58,17 @@ Dear ${profile.first_name} ${profile.last_name},
 
 Thank you for joining TaxProExchange! We're reviewing your profile and need some additional information to complete your verification.
 
-**What we need from you:**
+What we need from you:
 
-1. **Professional Credentials**: Please provide documentation of your ${profile.credential_type} credentials
-2. **Business Information**: If you have a firm website, LinkedIn profile, or other professional presence, please share those links
-3. **Experience Details**: Any additional information about your tax preparation experience and specializations
+1. Professional Credentials: Please provide documentation of your ${profile.credential_type} credentials
+2. Business Information: If you have a firm website, LinkedIn profile, or other professional presence, please share those links
+3. Experience Details: Any additional information about your tax preparation experience and specializations
 
-**How to provide this information:**
+How to provide this information:
 - Reply to this email with the requested information
 - Or update your profile at: https://taxproexchange.com/profile/edit
 
-**Your Current Profile:**
+Your Current Profile:
 - Name: ${profile.first_name} ${profile.last_name}
 - Credential: ${profile.credential_type}
 - Firm: ${profile.firm_name || 'Not specified'}
@@ -76,7 +76,7 @@ Thank you for joining TaxProExchange! We're reviewing your profile and need some
 
 Once we receive this information, we'll review it and verify your profile within 24-48 hours.
 
-If you have any questions, please don't hesitate to reply to this email.
+If you have any questions, please don't hesitate to reply to this email or contact us directly at koen@cardifftax.com.
 
 Best regards,
 The TaxProExchange Team
@@ -84,23 +84,26 @@ The TaxProExchange Team
 ---
 TaxProExchange - Connecting Tax Professionals
 https://taxproexchange.com
+
+To manage your email preferences, visit: https://taxproexchange.com/settings
     `;
 
-    // Send email using the existing email service
-    try {
-      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-        body: JSON.stringify({
-          to: email,
-          subject: emailSubject,
-          html: emailBody.replace(/\n/g, '<br>'),
-          text: emailBody,
-        }),
-      });
+         // Send email using the existing email service
+     try {
+       const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-email`, {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+         },
+         body: JSON.stringify({
+           to: email,
+           subject: emailSubject,
+           html: emailBody.replace(/\n/g, '<br>'),
+           text: emailBody,
+           replyTo: 'koen@cardifftax.com',
+         }),
+       });
 
       if (!emailResponse.ok) {
         console.error('❌ Email service error:', emailResponse.status, emailResponse.statusText);

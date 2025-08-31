@@ -59,29 +59,28 @@ Dear ${profile.first_name} ${profile.last_name},
 
 We hope this message finds you well. We're reaching out regarding your TaxProExchange profile to request some additional information that will help us better showcase your expertise to potential clients.
 
-**What we'd like you to update:**
+What we'd like you to update:
 
-1. **Professional Information**: Please ensure your credentials, experience, and specializations are up to date
-2. **Business Details**: Add or update your firm website, LinkedIn profile, or other professional presence
-3. **Service Areas**: Verify your geographic service areas and multi-state capabilities
-4. **Specializations**: Add any additional tax specialties or areas of expertise
-5. **Profile Photo**: Consider adding a professional headshot to build trust with clients
+1. Professional Information: Please ensure your credentials, experience, and specializations are up to date
+2. Business Details: Add or update your firm website, LinkedIn profile, or other professional presence
+3. Service Areas: Verify your geographic service areas and multi-state capabilities
+4. Specializations: Add any additional tax specialties or areas of expertise
 
-**How to update your profile:**
+How to update your profile:
 - Visit: https://taxproexchange.com/profile/edit
 - Log in with your existing credentials
 - Review and update each section as needed
 
-**Why this matters:**
+Why this matters:
 Complete and up-to-date profiles receive more client inquiries and appear higher in search results. This helps you connect with more potential clients who need your expertise.
 
-**Your Current Profile:**
+Your Current Profile:
 - Name: ${profile.first_name} ${profile.last_name}
 - Credential: ${profile.credential_type}
 - Firm: ${profile.firm_name || 'Not specified'}
 - Headline: ${profile.headline || 'Not specified'}
 
-If you have any questions or need assistance updating your profile, please don't hesitate to reply to this email.
+If you have any questions or need assistance updating your profile, please don't hesitate to reply to this email or contact us directly at koen@cardifftax.com.
 
 Thank you for being part of the TaxProExchange community!
 
@@ -91,15 +90,18 @@ The TaxProExchange Team
 ---
 TaxProExchange - Connecting Tax Professionals
 https://taxproexchange.com
+
+To manage your email preferences, visit: https://taxproexchange.com/settings
     `;
 
-    // Send email using the local email service
-    try {
-      await sendEmail(email, {
-        subject: emailSubject,
-        html: emailBody.replace(/\n/g, '<br>'),
-        text: emailBody,
-      });
+         // Send email using the local email service
+     try {
+       await sendEmail(email, {
+         subject: emailSubject,
+         html: emailBody.replace(/\n/g, '<br>'),
+         text: emailBody,
+         replyTo: 'koen@cardifftax.com',
+       });
 
       console.log('✅ Profile update request email sent successfully to:', email);
 
