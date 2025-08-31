@@ -28,11 +28,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get full profile data
+    // Get full profile data (check both main clerk_id and additional_clerk_ids)
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('clerk_id', userId)
+      .or(`clerk_id.eq.${userId},additional_clerk_ids.cs.{${userId}}`)
       .single();
 
     if (error) {
