@@ -31,6 +31,12 @@ interface ProfileForm {
   states: string[];
   software: string[];
   other_software: string[];
+  primary_location: {
+    country: string;
+    state: string | null;
+    city: string | null;
+    display_name: string | null;
+  };
 }
 
 interface Specialization {
@@ -161,7 +167,13 @@ export default function EditProfilePage() {
     specializations: [],
     states: [],
     software: [],
-    other_software: []
+    other_software: [],
+    primary_location: {
+      country: 'US',
+      state: null,
+      city: null,
+      display_name: null
+    }
   });
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -261,7 +273,13 @@ export default function EditProfilePage() {
               specializations: p.specializations || [],
               states:     p.states     || [],
               software:   p.software   || [],
-              other_software: p.other_software || []
+              other_software: p.other_software || [],
+              primary_location: p.primary_location || {
+                country: 'US',
+                state: null,
+                city: null,
+                display_name: null
+              }
             }));
           } else {
             console.error('Profile API error:', res.status, res.statusText);
@@ -675,6 +693,60 @@ export default function EditProfilePage() {
                     placeholder="https://linkedin.com/in/yourprofile"
                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                   />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Primary Location *</label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Where are you primarily located? This helps clients find professionals in their area.
+                </p>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Country *</label>
+                    <select
+                      required
+                      value={profileForm.primary_location.country}
+                      onChange={(e) => updateForm('primary_location', {
+                        ...profileForm.primary_location,
+                        country: e.target.value
+                      })}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    >
+                      {COUNTRIES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">State/Province</label>
+                    <input
+                      type="text"
+                      value={profileForm.primary_location.state || ''}
+                      onChange={(e) => updateForm('primary_location', {
+                        ...profileForm.primary_location,
+                        state: e.target.value || null
+                      })}
+                      placeholder="CA, NY, TX, etc."
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">City</label>
+                    <input
+                      type="text"
+                      value={profileForm.primary_location.city || ''}
+                      onChange={(e) => updateForm('primary_location', {
+                        ...profileForm.primary_location,
+                        city: e.target.value || null
+                      })}
+                      placeholder="San Diego, New York, etc."
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    />
+                  </div>
                 </div>
               </div>
 
