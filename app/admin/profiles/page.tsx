@@ -119,6 +119,39 @@ export default function AdminProfilesPage() {
     }
   };
 
+  const requestMoreInfo = async (profileId: string, email: string, name: string) => {
+    if (!confirm(`Send a verification request email to ${name} (${email})?`)) {
+      return;
+    }
+
+    setDeleting(profileId);
+    try {
+      const response = await fetch('/api/admin/request-verification-info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileId,
+          email,
+          name
+        })
+      });
+
+      if (response.ok) {
+        alert('Verification request email sent successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error sending email: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error sending verification request:', error);
+      alert('Error sending verification request email');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const hardDeleteProfile = async (profileId: string) => {
     if (!confirm('⚠️ WARNING: This will PERMANENTLY delete this profile and all associated data. This action cannot be undone. Are you absolutely sure?')) {
       return;
@@ -291,6 +324,18 @@ export default function AdminProfilesPage() {
                           {/* Quick Status Actions */}
                           {!profile.is_deleted && (
                             <>
+                              {/* Request More Info Button - Show for unverified profiles */}
+                              {profile.visibility_state !== 'verified' && (
+                                <button
+                                  onClick={() => requestMoreInfo(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
+                                  disabled={deleting === profile.id}
+                                  className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
+                                  title="Request More Information"
+                                >
+                                  📧 Request Info
+                                </button>
+                              )}
+                              
                               {profile.visibility_state !== 'verified' && (
                                 <button
                                   onClick={() => quickUpdateProfile(profile.id, 'visibility_state', 'verified')}

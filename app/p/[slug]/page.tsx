@@ -35,6 +35,12 @@ interface Profile {
   states: string[];
   software: string[];
   avatar_url: string | null;
+  primary_location?: {
+    country: string;
+    state: string | null;
+    city: string | null;
+    display_name: string | null;
+  };
 }
 
 interface Specialization {
@@ -296,10 +302,32 @@ export default function ProfilePage() {
               )}
 
               <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-sm text-slate-500 mb-6">
+                {/* Primary Location */}
+                {profile.primary_location && (
+                  <span>
+                    📍 {profile.primary_location.city && profile.primary_location.state ? (
+                      `${profile.primary_location.city}, ${profile.primary_location.state}`
+                    ) : profile.primary_location.state ? (
+                      profile.primary_location.state
+                    ) : profile.primary_location.city ? (
+                      profile.primary_location.city
+                    ) : (
+                      getCountryName(profile.primary_location.country)
+                    )}
+                  </span>
+                )}
                 <span>
-                  States: {profile.states && profile.states.length > 0 ? (
-                    `${profile.states.length} state${profile.states.length !== 1 ? 's' : ''}`
-                  ) : 'Not specified'}
+                  {profile.works_multistate ? (
+                    profile.states && profile.states.length > 0 ? (
+                      `Multi-state (${profile.states.length} state${profile.states.length !== 1 ? 's' : ''})`
+                    ) : (
+                      'Multi-state'
+                    )
+                  ) : (
+                    profile.states && profile.states.length > 0 ? (
+                      `${profile.states.length} state${profile.states.length !== 1 ? 's' : ''}`
+                    ) : 'Not specified'
+                  )}
                 </span>
                 <span className={profile.accepting_work ? 'text-emerald-600' : 'text-slate-400'}>
                   {profile.accepting_work ? 'Accepting work' : 'Not accepting work'}

@@ -74,6 +74,11 @@ export async function GET(
         works_multistate,
         works_international,
         countries,
+        specializations,
+        states,
+        software,
+        avatar_url,
+        primary_location,
         created_at
       `)
       .eq('slug', slug);

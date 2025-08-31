@@ -357,7 +357,16 @@ export default function EditProfilePage() {
   };
 
   const updateForm = (field: keyof ProfileForm, value: any) => {
-    setProfileForm(prev => ({ ...prev, [field]: value }));
+    setProfileForm(prev => {
+      const updated = { ...prev, [field]: value };
+      
+      // Special handling for works_multistate: auto-select all states when enabled
+      if (field === 'works_multistate' && value === true) {
+        updated.states = [...states]; // Select all states
+      }
+      
+      return updated;
+    });
   };
 
   const toggleSpecialization = (specSlug: string) => {
@@ -872,7 +881,7 @@ export default function EditProfilePage() {
                   </label>
                 </div>
                 <p className="text-xs text-slate-500 ml-6">
-                  When enabled, you'll appear in searches for any U.S. state, regardless of individual state selections above.
+                  When enabled, you'll appear in searches for any U.S. state and all states will be automatically selected above.
                 </p>
 
                 <div className="flex items-center gap-3">

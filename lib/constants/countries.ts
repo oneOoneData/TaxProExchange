@@ -1,5 +1,6 @@
 // ISO-3166-1 alpha-2 country codes and names for international work
 export const COUNTRIES = [
+  { code: 'US', name: 'United States' },
   { code: 'CA', name: 'Canada' },
   { code: 'MX', name: 'Mexico' },
   { code: 'GB', name: 'United Kingdom' },
@@ -171,9 +172,7 @@ export const COUNTRIES = [
   { code: 'HM', name: 'Heard and McDonald Islands' },
   { code: 'CC', name: 'Cocos (Keeling) Islands' },
   { code: 'CX', name: 'Christmas Island' },
-  { code: 'NF', name: 'Norfolk Island' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'NZ', name: 'New Zealand' }
+  { code: 'NF', name: 'Norfolk Island' }
 ];
 
 // Helper function to find country name by code
