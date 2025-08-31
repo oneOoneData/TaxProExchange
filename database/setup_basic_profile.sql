@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     last_name TEXT NOT NULL,
     headline TEXT,
     bio TEXT,
-    credential_type TEXT NOT NULL CHECK (credential_type IN ('CPA', 'EA', 'CTEC', 'Other')),
+    credential_type TEXT NOT NULL CHECK (credential_type IN ('CPA', 'EA', 'CTEC', 'Student', 'Tax Lawyer (JD)', 'PTIN Only', 'Other')),
     firm_name TEXT,
     public_email TEXT,
     phone TEXT,

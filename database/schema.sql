@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     last_name TEXT NOT NULL,
     headline TEXT,
     bio TEXT,
-    credential_type TEXT NOT NULL CHECK (credential_type IN ('CPA', 'EA', 'CTEC', 'Other')),
+    credential_type TEXT NOT NULL CHECK (credential_type IN ('CPA', 'EA', 'CTEC', 'Student', 'Tax Lawyer (JD)', 'PTIN Only', 'Other')),
     ptin TEXT,
     website_url TEXT,
     linkedin_url TEXT,
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS licenses (
 CREATE TABLE IF NOT EXISTS waitlist (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email TEXT UNIQUE NOT NULL,
-    role_interest TEXT CHECK (role_interest IN ('CPA', 'EA', 'CTEC')),
+    role_interest TEXT CHECK (role_interest IN ('CPA', 'EA', 'CTEC', 'Student')),
     notes TEXT,
     source TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -476,6 +476,7 @@ export default function SearchPage() {
                     <option value="CPA">CPA</option>
                     <option value="EA">EA</option>
                     <option value="CTEC">CTEC</option>
+                    <option value="Student">Student</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>

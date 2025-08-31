@@ -50,6 +50,7 @@ const credentialTypes = [
   { value: 'CPA', label: 'CPA (Certified Public Accountant)' },
   { value: 'EA', label: 'EA (Enrolled Agent)' },
   { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
+  { value: 'Student', label: 'Student (Currently in school or recently graduated)' },
   { value: 'Tax Lawyer (JD)', label: 'Tax Lawyer (JD)' },
   { value: 'PTIN Only', label: 'PTIN Only' },
   { value: 'Other', label: 'Other Tax Professional' }
