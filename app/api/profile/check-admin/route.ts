@@ -36,11 +36,11 @@ export async function GET(request: NextRequest) {
     // Check if user has admin role
     console.log('🔍 Checking admin status for userId:', userId);
     
-    // Check for admin user with matching Clerk ID (either main clerk_id or in additional_clerk_ids)
+    // Check for admin user with matching Clerk ID
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('is_admin, clerk_id, additional_clerk_ids, first_name, last_name')
-      .or(`clerk_id.eq.${userId},additional_clerk_ids.cs.{${userId}}`)
+      .select('is_admin, clerk_id, first_name, last_name')
+      .eq('clerk_id', userId)
       .eq('is_admin', true)
       .single();
 
