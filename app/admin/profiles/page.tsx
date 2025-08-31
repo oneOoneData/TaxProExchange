@@ -152,6 +152,47 @@ export default function AdminProfilesPage() {
     }
   };
 
+  const sendGeneralEmail = async (profileId: string, email: string, name: string) => {
+    const subject = prompt('Email subject:', 'TaxProExchange - Important Information');
+    if (!subject) return;
+    
+    const message = prompt('Email message:', 'Hello,\n\nThis is a message from the TaxProExchange team.\n\nBest regards,\nTaxProExchange Team');
+    if (!message) return;
+
+    if (!confirm(`Send email to ${name} (${email})?\n\nSubject: ${subject}\n\nMessage: ${message}`)) {
+      return;
+    }
+
+    setDeleting(profileId);
+    try {
+      const response = await fetch('/api/admin/send-general-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileId,
+          email,
+          name,
+          subject,
+          message
+        })
+      });
+
+      if (response.ok) {
+        alert('Email sent successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error sending email: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Error sending email');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const hardDeleteProfile = async (profileId: string) => {
     if (!confirm('⚠️ WARNING: This will PERMANENTLY delete this profile and all associated data. This action cannot be undone. Are you absolutely sure?')) {
       return;
@@ -321,20 +362,30 @@ export default function AdminProfilesPage() {
                             Edit
                           </Link>
                           
-                          {/* Quick Status Actions */}
-                          {!profile.is_deleted && (
-                            <>
-                              {/* Request More Info Button - Show for unverified profiles */}
-                              {profile.visibility_state !== 'verified' && (
-                                <button
-                                  onClick={() => requestMoreInfo(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
-                                  disabled={deleting === profile.id}
-                                  className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
-                                  title="Request More Information"
-                                >
-                                  📧 Request Info
-                                </button>
-                              )}
+                                                     {/* Quick Status Actions */}
+                           {!profile.is_deleted && (
+                             <>
+                               {/* General Email Button - Show for all profiles */}
+                               <button
+                                 onClick={() => sendGeneralEmail(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
+                                 disabled={deleting === profile.id}
+                                 className="text-purple-600 hover:text-purple-900 disabled:opacity-50"
+                                 title="Send Email"
+                               >
+                                   📧 Send Email
+                               </button>
+                               
+                               {/* Request More Info Button - Show for unverified profiles */}
+                               {profile.visibility_state !== 'verified' && (
+                                 <button
+                                   onClick={() => requestMoreInfo(profile.id, profile.email, `${profile.first_name} ${profile.last_name}`)}
+                                   disabled={deleting === profile.id}
+                                   className="text-blue-600 hover:text-blue-900 disabled:opacity-50"
+                                   title="Request More Information"
+                                 >
+                                   📧 Request Info
+                                 </button>
+                               )}
                               
                               {profile.visibility_state !== 'verified' && (
                                 <button
