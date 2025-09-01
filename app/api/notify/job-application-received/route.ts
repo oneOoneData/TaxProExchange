@@ -181,7 +181,8 @@ This is an automated notification from TaxProExchange. Please do not reply to th
 
     // Send email
     try {
-      await sendEmail(jobPosterEmail, {
+      await sendEmail({
+        to: jobPosterEmail,
         subject,
         html: htmlContent,
         text: textContent

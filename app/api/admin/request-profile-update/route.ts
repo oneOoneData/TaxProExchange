@@ -105,7 +105,8 @@ To manage your email preferences, visit: https://taxproexchange.com/settings
 
          // Send email using the local email service
      try {
-       await sendEmail(email, {
+       await sendEmail({
+         to: email,
          subject: emailSubject,
          html: emailBody.replace(/\n/g, '<br>'),
          text: emailBody,

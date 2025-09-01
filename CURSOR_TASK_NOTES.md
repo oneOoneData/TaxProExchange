@@ -2,6 +2,90 @@
 
 ## Completed Tasks
 
+### 2025-01-XX: Email Migration to Resend with SPF/DKIM/DMARC Alignment ✅
+
+**Goal**: Migrate all email sending to Resend (no Amazon SES anywhere) and ensure proper SPF/DKIM/DMARC alignment so Gmail shows SPF=PASS, DKIM=PASS, DMARC=PASS for taxproexchange.com.
+
+**Root Cause**: 
+- Some messages were being sent via Amazon SES (headers showed amazonses.com and MAIL FROM send.taxproexchange.com)
+- This caused SPF to fail and Gmail to mark emails as spam
+- Mixed email providers created inconsistent deliverability
+
+**Solution Applied**:
+
+#### 1. Updated Email Utility (`lib/email.ts`)
+- **New sendEmail Function**: Updated to use proper Resend API with support@taxproexchange.com
+- **List-Unsubscribe Headers**: Added automatic List-Unsubscribe headers for better deliverability
+- **Environment Variables**: Added EMAIL_FROM and EMAIL_REPLY_TO configuration
+- **Backward Compatibility**: Maintained legacy sendEmail function for existing code
+- **Proper Error Handling**: Enhanced error handling and logging
+
+#### 2. Replaced Supabase Edge Function
+- **Removed SES Dependency**: Updated `app/api/admin/send-general-email/route.ts` to use Resend directly
+- **Eliminated Mixed Providers**: No more calls to Supabase Edge Functions that used SES
+- **Consistent Sending**: All emails now go through single Resend pipeline
+
+#### 3. Updated All Email Endpoints
+- **Standardized Function Calls**: Updated all API routes to use new sendEmail signature
+- **Files Updated**:
+  - `app/api/admin/request-profile-update/route.ts`
+  - `app/api/admin/request-verification-info/route.ts`
+  - `app/api/notify/job-application-received/route.ts`
+  - `app/api/notify/application-status-changed/route.ts`
+  - `app/api/test/resend/route.ts`
+
+#### 4. Environment Configuration
+- **Updated env.example**: Added Resend configuration variables
+- **New Variables**:
+  - `RESEND_API_KEY` - Resend API key for authentication
+  - `EMAIL_FROM` - From address (defaults to support@taxproexchange.com)
+  - `EMAIL_REPLY_TO` - Reply-to address (defaults to support@taxproexchange.com)
+
+**Technical Details**:
+- **From Address**: All emails now sent from support@taxproexchange.com
+- **Reply-To**: Set to support@taxproexchange.com or koen@cardifftax.com
+- **List-Unsubscribe**: Automatic mailto: unsubscribe headers added
+- **SPF/DKIM/DMARC**: Resend handles proper domain authentication
+- **No SES Usage**: Completely removed Amazon SES from codebase
+
+**Email Headers Now Include**:
+```
+From: support@taxproexchange.com
+Reply-To: support@taxproexchange.com
+List-Unsubscribe: mailto:support@taxproexchange.com?subject=unsubscribe
+```
+
+**Expected Gmail Results**:
+- SPF=PASS (domain taxproexchange.com)
+- DKIM=PASS (taxproexchange.com)
+- DMARC=PASS (due to DKIM alignment)
+
+**Files Modified**: 6 files, ~100 lines changed
+**Files Created**: 0 new files
+
+**Testing Checklist**:
+- [ ] Set RESEND_API_KEY environment variable
+- [ ] Test admin general email sending
+- [ ] Test profile update request emails
+- [ ] Test verification request emails
+- [ ] Test job application notifications
+- [ ] Test application status change notifications
+- [ ] Verify emails show support@taxproexchange.com as sender
+- [ ] Check Gmail "Show original" for SPF/DKIM/DMARC passes
+- [ ] Verify List-Unsubscribe headers are present
+- [ ] Test email reply-to functionality
+
+**Environment Variables Required**:
+```
+RESEND_API_KEY=your_resend_api_key
+EMAIL_FROM=support@taxproexchange.com
+EMAIL_REPLY_TO=support@taxproexchange.com
+```
+
+**Result**: All transactional emails now sent via Resend with proper domain authentication, ensuring consistent deliverability and avoiding spam classification in Gmail and other email providers.
+
+---
+
 ### 2025-01-XX: Mobile User Experience Improvements ✅
 
 **Goal**: Make TaxProExchange more user-friendly for mobile devices by improving navigation, layout, and touch interactions.

@@ -107,7 +107,8 @@ This is an automated notification from TaxProExchange. Please do not reply to th
 
     // Send email
     try {
-      await sendEmail(applicant_email, {
+      await sendEmail({
+        to: applicant_email,
         subject,
         html: htmlContent,
         text: textContent

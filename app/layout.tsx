@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import 'stream-chat-react/dist/css/v2/index.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import Footer from '@/components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
+
+// Google Analytics Measurement ID
+const GA_MEASUREMENT_ID = 'G-KP6ZHRKKS5';
 
 export const metadata: Metadata = {
   title: 'TaxProExchange - Where Tax Professionals Connect and Collaborate',
@@ -63,6 +67,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}', {
+              page_path: window.location.pathname,
+              send_page_view: true
+            });
+          `}
+        </Script>
+      </head>
       <body className={inter.className}>
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
           {children}

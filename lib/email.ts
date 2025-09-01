@@ -156,41 +156,68 @@ export const emailTemplates = {
   })
 };
 
+type SendEmailArgs = {
+  to: string | string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  replyTo?: string;
+  listUnsubscribe?: string; // mailto:… or https://…
+};
+
 // Send email function
-export async function sendEmail(to: string, template: EmailTemplate) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+  replyTo = process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
+  listUnsubscribe = `mailto:${process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com'}?subject=unsubscribe`,
+}: SendEmailArgs) {
   try {
-    const emailData: any = {
-      from: 'TaxProExchange <noreply@taxproexchange.com>', // Use your verified domain
-      to: [to],
-      subject: template.subject,
-      html: template.html,
-      text: template.text,
+    const from = process.env.EMAIL_FROM || 'support@taxproexchange.com';
+    const headers: Record<string, string> = {
+      'List-Unsubscribe': listUnsubscribe,
     };
 
-    // Add reply-to if specified
-    if (template.replyTo) {
-      emailData.reply_to = template.replyTo;
+    const result = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html,
+      text,
+      reply_to: replyTo,
+      headers,
+    } as any);
+
+    if (result.error) {
+      console.error('Resend email error:', result.error);
+      throw new Error(`Resend error: ${result.error.message}`);
     }
 
-    const { data, error } = await resend.emails.send(emailData);
-
-    if (error) {
-      console.error('Resend email error:', error);
-      throw new Error(`Failed to send email: ${error.message}`);
-    }
-
-    console.log('Email sent successfully:', data);
-    return data;
+    console.log('Email sent successfully:', result);
+    return result;
   } catch (error) {
     console.error('Email service error:', error);
     throw error;
   }
 }
 
+// Legacy sendEmail function for backward compatibility
+export async function sendEmailLegacy(to: string, template: EmailTemplate) {
+  return sendEmail({
+    to,
+    subject: template.subject,
+    html: template.html,
+    text: template.text,
+    replyTo: template.replyTo,
+  });
+}
+
 // Send job created notification
 export async function sendJobCreatedNotification(data: JobCreatedEmailData) {
   const template = emailTemplates.jobCreated(data);
-  return sendEmail(data.recipientEmail, template);
+  return sendEmailLegacy(data.recipientEmail, template);
 }
 
 // Batch send job notifications
@@ -215,5 +242,5 @@ export async function sendBatchJobNotifications(notifications: JobCreatedEmailDa
 export async function sendProfileCompletionNotification(data: ProfileCompletionEmailData) {
   const adminEmail = process.env.ADMIN_EMAIL || 'koen@cardifftax.com';
   const template = emailTemplates.profileCompletion(data);
-  return sendEmail(adminEmail, template);
+  return sendEmailLegacy(adminEmail, template);
 }

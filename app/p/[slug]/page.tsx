@@ -41,6 +41,7 @@ interface Profile {
     city: string | null;
     display_name: string | null;
   };
+  visibility_state: 'hidden' | 'pending_verification' | 'verified' | 'rejected';
 }
 
 interface Specialization {
@@ -579,18 +580,56 @@ export default function ProfilePage() {
               <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">Verification</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-sm text-slate-600">Credential verified</span>
+                  {profile.visibility_state === 'verified' ? (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  ) : (
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                  <span className={`text-sm ${profile.visibility_state === 'verified' ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Credential verified
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-sm text-slate-600">Background checked</span>
+                  {profile.visibility_state === 'verified' ? (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  ) : (
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                  <span className={`text-sm ${profile.visibility_state === 'verified' ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Background checked
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span className="text-sm text-slate-600">Professional verified</span>
+                  {profile.visibility_state === 'verified' ? (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  ) : (
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                  <span className={`text-sm ${profile.visibility_state === 'verified' ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Professional verified
+                  </span>
                 </div>
               </div>
+              
+              {/* Status message for non-verified users */}
+              {profile.visibility_state !== 'verified' && (
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    {profile.visibility_state === 'pending_verification' 
+                      ? 'Verification in progress - this profile is under review'
+                      : profile.visibility_state === 'rejected'
+                      ? 'Verification was rejected - this profile needs to be resubmitted'
+                      : 'This profile has not been verified yet'
+                    }
+                  </p>
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

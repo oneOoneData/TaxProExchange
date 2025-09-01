@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -62,29 +63,15 @@ TaxProExchange - Connecting Tax Professionals
 https://taxproexchange.com
     `;
 
-    // Send email using the existing email service
+    // Send email using the new Resend-based email service
     try {
-      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-        body: JSON.stringify({
-          to: email,
-          subject: subject,
-          html: emailBody.replace(/\n/g, '<br>'),
-          text: emailBody,
-        }),
+      await sendEmail({
+        to: email,
+        subject: subject,
+        html: emailBody.replace(/\n/g, '<br>'),
+        text: emailBody,
+        replyTo: 'support@taxproexchange.com',
       });
-
-      if (!emailResponse.ok) {
-        console.error('❌ Email service error:', emailResponse.status, emailResponse.statusText);
-        return NextResponse.json(
-          { error: 'Failed to send email' },
-          { status: 500 }
-        );
-      }
 
       console.log('✅ General email sent successfully to:', email);
 

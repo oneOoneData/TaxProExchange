@@ -102,7 +102,12 @@ This is a test email from TaxProExchange. Please do not reply to this email.
     };
 
     // Send the test email
-    const result = await sendEmail(profile.public_email, testEmailTemplate);
+    const result = await sendEmail({
+      to: profile.public_email,
+      subject: testEmailTemplate.subject,
+      html: testEmailTemplate.html,
+      text: testEmailTemplate.text
+    });
     
     console.log('Test email sent successfully:', result);
 
