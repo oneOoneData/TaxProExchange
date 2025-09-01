@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -88,32 +89,16 @@ https://taxproexchange.com
 To manage your email preferences, visit: https://taxproexchange.com/settings
     `;
 
-         // Send email using the existing email service
+              // Send email using the local email service
      try {
-       const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-email`, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-           'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-         },
-         body: JSON.stringify({
-           to: email,
-           subject: emailSubject,
-           html: emailBody.replace(/\n/g, '<br>'),
-           text: emailBody,
-           replyTo: 'koen@cardifftax.com',
-         }),
+       await sendEmail(email, {
+         subject: emailSubject,
+         html: emailBody.replace(/\n/g, '<br>'),
+         text: emailBody,
+         replyTo: 'koen@cardifftax.com',
        });
 
-      if (!emailResponse.ok) {
-        console.error('❌ Email service error:', emailResponse.status, emailResponse.statusText);
-        return NextResponse.json(
-          { error: 'Failed to send email' },
-          { status: 500 }
-        );
-      }
-
-      console.log('✅ Verification request email sent successfully to:', email);
+       console.log('✅ Verification request email sent successfully to:', email);
 
       // Update profile to mark that verification was requested
       const { error: updateError } = await supabase
