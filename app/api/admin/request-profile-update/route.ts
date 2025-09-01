@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendEmail } from '@/lib/email';
+import { sendEmail, shouldSendEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     // Get profile details for the email
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('first_name, last_name, credential_type, firm_name, headline')
+      .select('first_name, last_name, credential_type, firm_name, headline, email_preferences')
       .eq('id', profileId)
       .single();
 
@@ -50,6 +50,15 @@ export async function POST(request: NextRequest) {
         { error: 'Profile not found' },
         { status: 404 }
       );
+    }
+
+    // Check if user has opted out of verification emails
+    if (!shouldSendEmail(profile.email_preferences, 'verification_emails', true)) {
+      console.log('📧 User has opted out of verification emails:', email);
+      return NextResponse.json({
+        success: false,
+        message: 'User has opted out of verification emails'
+      });
     }
 
     // Create email content
