@@ -8,6 +8,7 @@ import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
 import { COUNTRIES, getCountryName } from '@/lib/constants/countries';
 import SpecializationPicker from '@/components/SpecializationPicker';
+import CredentialSection from '@/components/forms/CredentialSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,9 @@ interface ProfileForm {
   last_name: string;
   headline: string;
   bio: string;
+  opportunities: string;
   credential_type: string;
+  licenses: any[];
   firm_name: string;
   public_email: string;
   phone: string;
@@ -52,15 +55,7 @@ interface SpecializationGroup {
   items: Specialization[];
 }
 
-const credentialTypes = [
-  { value: 'CPA', label: 'CPA (Certified Public Accountant)' },
-  { value: 'EA', label: 'EA (Enrolled Agent)' },
-  { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
-  { value: 'Student', label: 'Student (Currently in school or recently graduated)' },
-  { value: 'Tax Lawyer (JD)', label: 'Tax Lawyer (JD)' },
-  { value: 'PTIN Only', label: 'PTIN Only' },
-  { value: 'Other', label: 'Other Tax Professional' }
-];
+
 
 const states = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
@@ -153,7 +148,9 @@ export default function EditProfilePage() {
     last_name: '',
     headline: '',
     bio: '',
+    opportunities: '',
     credential_type: '',
+    licenses: [],
     firm_name: '',
     public_email: '',
     phone: '',
@@ -196,6 +193,7 @@ export default function EditProfilePage() {
           
           if (res.ok) {
             const p = await res.json();
+            console.log('Profile data loaded:', p);
             
             // Check if profile data is empty or missing
             if (!p || Object.keys(p).length === 0 || !p.id) {
@@ -259,7 +257,9 @@ export default function EditProfilePage() {
               last_name:  p.last_name  || user.lastName  || '',
               headline:   p.headline   || '',
               bio:        p.bio        || '',
+              opportunities: p.opportunities || '',
               credential_type: p.credential_type || '',
+              licenses: p.licenses || [],
               firm_name:  p.firm_name  || '',
               public_email: p.public_email || user.emailAddresses[0]?.emailAddress || '',
               phone:      p.phone      || '',
@@ -281,6 +281,7 @@ export default function EditProfilePage() {
                 display_name: null
               }
             }));
+            console.log('Profile form set with credential_type:', p.credential_type);
           } else {
             console.error('Profile API error:', res.status, res.statusText);
             const errorText = await res.text();
@@ -626,22 +627,34 @@ export default function EditProfilePage() {
                 />
               </div>
 
-              {/* Credential Type */}
+              {/* Opportunities */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type *</label>
-                <select
-                  required
-                  value={profileForm.credential_type}
-                  onChange={(e) => updateForm('credential_type', e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-                >
-                  <option value="">Select your credential</option>
-                  {credentialTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Opportunities & Expertise Goals</label>
+                <textarea
+                  value={profileForm.opportunities}
+                  onChange={(e) => updateForm('opportunities', e.target.value)}
+                  placeholder="What opportunities are you open for? What expertise are you hoping to gain? (e.g., 'Looking for partnership opportunities', 'Want to learn international tax', 'Open to consulting projects')"
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Help others understand what you're looking for and what you can offer
+                </p>
+              </div>
+
+              {/* Credentials Section */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Professional Credentials</label>
+                <CredentialSection
+                  value={{
+                    credential_type: profileForm.credential_type as any,
+                    licenses: profileForm.licenses
+                  }}
+                  onChange={(credentialData) => {
+                    updateForm('credential_type', credentialData.credential_type);
+                    updateForm('licenses', credentialData.licenses);
+                  }}
+                />
               </div>
 
               {/* Firm Name */}

@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch specializations and locations for each profile
+    // Fetch specializations, locations, and licenses for each profile
     const profilesWithDetails = await Promise.all(
       filteredProfiles.map(async (profile) => {
         // Get specializations
@@ -166,10 +166,17 @@ export async function GET(request: NextRequest) {
           .select('location_id')
           .eq('profile_id', profile.id);
 
+        // Get licenses using the public view (never includes license_number)
+        const { data: licenses } = await supabase
+          .from('licenses_public_view')
+          .select('*')
+          .eq('profile_id', profile.id);
+
         return {
           ...profile,
           specializations: specializations?.map(s => s.specialization_id) || [],
           states: locations?.map(l => l.location_id) || [],
+          licenses: licenses || [],
           verified: profile.visibility_state === 'verified',
           works_multistate: profile.works_multistate || false,
           works_international: profile.works_international || false,

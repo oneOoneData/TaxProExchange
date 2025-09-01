@@ -21,9 +21,11 @@ export default async function Onboarding() {
   // Check if profile already exists
   const { data: existingProfile } = await supabase
     .from('profiles')
-    .select('id, tos_version, privacy_version')
+    .select('id, tos_version, privacy_version, credential_type')
     .eq('clerk_id', user.id)
     .single();
+
+  console.log('[onboarding] existingProfile:', existingProfile);
 
   if (existingProfile) {
     // Check if user has accepted current legal versions
@@ -31,11 +33,13 @@ export default async function Onboarding() {
     
     if (existingProfile.tos_version !== LEGAL_VERSIONS.TOS || 
         existingProfile.privacy_version !== LEGAL_VERSIONS.PRIVACY) {
+      console.log('[onboarding] redirecting to legal consent');
       // Redirect to legal consent if versions don't match
       redirect('/legal/consent');
     }
     
-    // Profile exists and legal versions are current, redirect to edit
+    // User has completed onboarding, redirect to profile edit
+    console.log('[onboarding] redirecting to profile edit');
     redirect('/profile/edit');
   }
 

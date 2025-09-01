@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
+import { ProfileUpdateSchema } from '@/lib/validations/zodSchemas';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,7 +137,7 @@ export async function GET(request: Request) {
     console.log('🔍 Profile ID:', profile.id);
 
     // Fetch related data
-    const [specializationsResult, locationsResult, softwareResult] = await Promise.all([
+    const [specializationsResult, locationsResult, softwareResult, licensesResult] = await Promise.all([
       supabase
         .from('profile_specializations')
         .select('specialization_slug')
@@ -148,14 +149,22 @@ export async function GET(request: Request) {
       supabase
         .from('profile_software')
         .select('software_slug')
+        .eq('profile_id', profile.id),
+      supabase
+        .from('licenses')
+        .select('id, license_kind, issuing_authority, state, expires_on, board_profile_url, status')
         .eq('profile_id', profile.id)
     ]);
 
     console.log('🔍 Related data results:', {
       specializations: specializationsResult,
       locations: locationsResult,
-      software: softwareResult
+      software: softwareResult,
+      licenses: licensesResult
     });
+
+    // Process licenses (never include full license_number)
+    const processedLicenses = licensesResult.data || [];
 
     // Debug logging
     console.log('Profile data being returned:', {
@@ -163,16 +172,18 @@ export async function GET(request: Request) {
       specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
       locations: locationsResult.data?.map(l => ({ state: l.state, city: l.city })) || [],
       software: softwareResult.data?.map(s => s.software_slug) || [],
-      other_software: profile.other_software || []
+      other_software: profile.other_software || [],
+      licenses: processedLicenses
     });
 
-    // Return profile with actual relationship data
+    // Return profile with actual relationship data (never include license_number)
     return NextResponse.json({
       ...profile,
       specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
       locations: locationsResult.data?.map(l => ({ state: l.state, city: l.city })) || [],
       software: softwareResult.data?.map(s => s.software_slug) || [],
-      other_software: profile.other_software || []
+      other_software: profile.other_software || [],
+      licenses: processedLicenses
     });
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -188,21 +199,86 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { 
-      clerk_id, 
-      specializations, 
-      locations, 
-      software, 
-      other_software,
-      public_contact,
-      works_multistate,
-      works_international,
-      countries,
-      email_preferences,
-      primary_location,
-      location_radius,
-      ...profileData 
-    } = body;
+    
+    // Debug logging
+    console.log('Profile PUT request body:', JSON.stringify(body, null, 2));
+    
+    // Check if this is a credential-only update
+    // If the request only contains credential fields and clerk_id, it's credential-only
+    const requestKeys = Object.keys(body);
+    const isCredentialUpdate = requestKeys.length <= 3 && 
+                              requestKeys.includes('clerk_id') &&
+                              requestKeys.includes('credential_type') &&
+                              requestKeys.includes('licenses');
+    
+    let validationResult;
+    if (isCredentialUpdate) {
+      console.log('Detected credential-only update');
+      // Use credential-specific validation
+      const { CredentialUpdateSchema } = await import('@/lib/validations/zodSchemas');
+      validationResult = CredentialUpdateSchema.safeParse(body);
+    } else {
+      console.log('Detected full profile update');
+      // Use full profile validation
+      validationResult = ProfileUpdateSchema.safeParse(body);
+    }
+    
+    if (!validationResult.success) {
+      console.log('Validation failed:', validationResult.error.flatten());
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: validationResult.error.flatten() 
+      }, { status: 400 });
+    }
+    
+    const validatedData = validationResult.data;
+    
+    // Handle different update types
+    let specializations, locations, software, other_software, public_contact, 
+        works_multistate, works_international, countries, email_preferences, 
+        primary_location, location_radius, credential_type, licenses, profileData;
+    
+    if (isCredentialUpdate) {
+      // For credential-only updates
+      const credentialData = validatedData as any;
+      credential_type = credentialData.credential_type;
+      licenses = credentialData.licenses;
+      // Set defaults for other fields
+      specializations = [];
+      locations = [];
+      software = [];
+      other_software = [];
+      public_contact = false;
+      works_multistate = false;
+      works_international = false;
+      countries = [];
+      email_preferences = undefined;
+      primary_location = undefined;
+      location_radius = 50;
+      profileData = {};
+    } else {
+      // For full profile updates
+      const fullProfileData = validatedData as any;
+      ({ 
+        specializations, 
+        locations, 
+        software, 
+        other_software,
+        public_contact,
+        works_multistate,
+        works_international,
+        countries,
+        email_preferences,
+        primary_location,
+        location_radius,
+        credential_type,
+        licenses,
+        ...profileData 
+      } = fullProfileData);
+    }
+    
+    // Extract clerk_id from the original body since it's not in the validated schema
+    const { clerk_id } = body;
 
     // Debug logging
     console.log('Received profile data:', {
@@ -289,9 +365,20 @@ export async function PUT(request: Request) {
 
     if (existingProfile) {
       // Update existing profile
-      const { data: updatedProfile, error: updateError } = await supabase
-        .from('profiles')
-        .update({
+      let updateData: any = {
+        updated_at: new Date().toISOString(),
+      };
+      
+      if (isCredentialUpdate) {
+        // For credential-only updates, only update credential fields
+        updateData = {
+          ...updateData,
+          credential_type,
+        };
+      } else {
+        // For full profile updates, update all fields
+        updateData = {
+          ...updateData,
           ...profileData,
           public_contact: public_contact ?? false,
           works_multistate: works_multistate ?? false,
@@ -302,8 +389,13 @@ export async function PUT(request: Request) {
           primary_location: primary_location || null,
           location_radius: location_radius || 50,
           onboarding_complete: true,
-          updated_at: new Date().toISOString(),
-        })
+          credential_type,
+        };
+      }
+      
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from('profiles')
+        .update(updateData)
         .eq('clerk_id', clerk_id)
         .select()
         .single();
@@ -418,6 +510,59 @@ export async function PUT(request: Request) {
         await supabase
           .from('profile_software')
           .insert(softwareData);
+      }
+      
+      // Handle licenses with privacy protection
+      if (credential_type && credential_type !== "Student" && licenses && licenses.length > 0) {
+        console.log('🔍 SAVING LICENSES:', {
+          profileId,
+          credential_type,
+          licenses: licenses.length
+        });
+        
+        // Delete existing licenses
+        const { error: deleteError } = await supabase
+          .from('licenses')
+          .delete()
+          .eq('profile_id', profileId);
+        
+        if (deleteError) {
+          console.log('❌ Delete licenses error:', deleteError);
+        } else {
+          console.log('✅ Existing licenses deleted successfully');
+        }
+        
+        // Insert new licenses (license_number is private, never returned)
+        const licenseData = licenses.map((license: any) => ({
+          profile_id: profileId,
+          license_kind: license.license_kind,
+          license_number: license.license_number, // Private field
+          issuing_authority: license.issuing_authority,
+          state: license.state || null,
+          expires_on: license.expires_on || null,
+          board_profile_url: license.board_profile_url || null,
+          status: 'pending'
+        }));
+        
+        console.log('🔍 Inserting license data (without license numbers):', 
+          licenseData.map((l: any) => ({ ...l, license_number: '[PRIVATE]' })));
+        
+        const { error: insertError } = await supabase
+          .from('licenses')
+          .insert(licenseData);
+        
+        if (insertError) {
+          console.log('❌ Insert licenses error:', insertError);
+        } else {
+          console.log('✅ Licenses saved successfully');
+        }
+      } else if (credential_type === "Student") {
+        // Students don't have licenses - remove any existing ones
+        console.log('🔍 Removing licenses for student profile');
+        await supabase
+          .from('licenses')
+          .delete()
+          .eq('profile_id', profileId);
       }
     }
 

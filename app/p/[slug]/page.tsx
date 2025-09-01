@@ -12,6 +12,16 @@ import MobileNav from '@/components/MobileNav';
 
 export const dynamic = 'force-dynamic';
 
+interface License {
+  id: string;
+  license_kind: string;
+  issuing_authority: string;
+  state?: string;
+  expires_on?: string;
+  board_profile_url?: string;
+  status: string;
+}
+
 interface Profile {
   id: string;
   slug: string;
@@ -34,6 +44,7 @@ interface Profile {
   specializations: string[];
   states: string[];
   software: string[];
+  licenses?: License[];
   avatar_url: string | null;
   primary_location?: {
     country: string;
@@ -42,6 +53,8 @@ interface Profile {
     display_name: string | null;
   };
   visibility_state: 'hidden' | 'pending_verification' | 'verified' | 'rejected';
+  is_listed?: boolean;
+  created_at?: string;
 }
 
 interface Specialization {
@@ -66,6 +79,13 @@ export default function ProfilePage() {
   const [isAdminView, setIsAdminView] = useState(false);
   const [connectionState, setConnectionState] = useState<{ status: string; connectionId?: string; isRequester?: boolean } | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // Helper function to format date as MM/YYYY
+  const formatMMYYYY = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+  };
 
   useEffect(() => {
     if (params.slug) {
@@ -256,6 +276,43 @@ export default function ProfilePage() {
       </header>
 
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* Admin Banner */}
+        {isAdminView && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-blue-900">Admin View Mode</h3>
+                  <p className="text-sm text-blue-700">You are viewing this profile as an administrator</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Link
+                  href={`/admin/profiles/${profile.id}/edit`}
+                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
+                >
+                  Edit Profile
+                </Link>
+                <Link
+                  href="/admin/profiles"
+                  className="inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                >
+                  Back to Profiles
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Profile Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -284,6 +341,45 @@ export default function ProfilePage() {
                 <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-slate-100 text-slate-700">
                   {profile.credential_type}
                 </span>
+                {/* License Information */}
+                {profile.licenses && profile.licenses.length > 0 && profile.credential_type !== 'Student' && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-600">
+                    {profile.licenses
+                      .filter(license => license.status === 'verified')
+                      .map((license, index) => (
+                        <span key={license.id} className="flex items-center gap-1">
+                          {index > 0 && <span>•</span>}
+                          <span>
+                            {license.license_kind === 'CPA_STATE_LICENSE' ? 'CPA' :
+                             license.license_kind === 'EA_ENROLLMENT' ? 'EA' :
+                             license.license_kind === 'CTEC_REG' ? 'CTEC' : 'Licensed'}
+                            {license.state && ` (${license.state})`}
+                          </span>
+                          <span>•</span>
+                          <span>Verified by {license.issuing_authority}</span>
+                          {license.expires_on && (
+                            <>
+                              <span>•</span>
+                              <span>Expires {formatMMYYYY(license.expires_on)}</span>
+                            </>
+                          )}
+                          {license.board_profile_url && (
+                            <>
+                              <span>•</span>
+                              <a 
+                                href={license.board_profile_url} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="underline hover:text-slate-800"
+                              >
+                                View on board
+                              </a>
+                            </>
+                          )}
+                        </span>
+                      ))}
+                  </div>
+                )}
                 {profile.works_multistate && (
                   <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-700">
                     Multi-State
@@ -569,6 +665,49 @@ export default function ProfilePage() {
                 </div>
               )}
             </motion.div>
+
+            {/* Admin Information */}
+            {isAdminView && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-6 mb-6"
+              >
+                <h3 className="text-base sm:text-lg font-semibold text-amber-900 mb-4">Admin Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-amber-800">Profile ID:</span>
+                    <span className="ml-2 text-amber-700 font-mono">{profile.id}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-amber-800">Visibility State:</span>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                      profile.visibility_state === 'verified' ? 'bg-emerald-100 text-emerald-700' :
+                      profile.visibility_state === 'pending_verification' ? 'bg-amber-100 text-amber-700' :
+                      profile.visibility_state === 'rejected' ? 'bg-red-100 text-red-700' :
+                      'bg-slate-100 text-slate-700'
+                    }`}>
+                      {profile.visibility_state}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-amber-800">Listed in Search:</span>
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                      profile.is_listed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {profile.is_listed ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-amber-800">Created:</span>
+                    <span className="ml-2 text-amber-700">
+                      {profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Unknown'}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Verification Status */}
             <motion.div

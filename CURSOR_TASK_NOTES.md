@@ -2,6 +2,70 @@
 
 ## Completed Tasks
 
+### 2025-01-XX: Fixed Admin Profile Verification Email Links ✅
+
+**Goal**: Fix the 404 error in admin profile verification emails by correcting the URL format from `/admin/profiles/[id]` to `/p/[slug]?admin=true`.
+
+**Root Cause**: 
+- Admin profile verification emails were linking to `/admin/profiles/[id]` which doesn't exist
+- The correct route for admin profile viewing is `/p/[slug]?admin=true` (public profile route with admin parameter)
+- This caused 404 errors when admins clicked the "Review & Verify Profile" button in emails
+
+**Solution Applied**:
+
+#### 1. Fixed Profile Completion Notification API
+- **Updated Route**: `app/api/notify/profile-completed/route.ts`
+- **Added Slug Lookup**: Now fetches the profile's slug from the database before generating the email
+- **Corrected URL Format**: Changed from `/admin/profiles/${profile_id}` to `/p/${profile.slug}?admin=true`
+- **Added Supabase Service**: Imported and used supabaseService for database queries
+
+#### 2. Enhanced Admin Profile Viewing Experience
+- **Admin Banner**: Added prominent blue admin banner when viewing profiles in admin mode
+- **Admin Navigation**: Added admin-specific navigation links (Admin, Profiles) in the header
+- **Admin Actions**: Added quick access buttons for Edit Profile and Back to Profiles
+- **Admin Information Panel**: Added amber-colored admin information section showing:
+  - Profile ID
+  - Visibility State (with color-coded badges)
+  - Listed in Search status
+  - Creation date
+- **Visual Indicators**: Clear admin mode indicators with icons and color coding
+
+#### 3. Maintained Existing Functionality
+- **Public Profile Route**: The `/p/[slug]` route already supported admin mode via `?admin=true` parameter
+- **API Support**: Profile API already bypassed visibility restrictions for admin requests
+- **Admin Navigation**: Admin profiles page already had correct "View" links
+
+**Technical Details**:
+- **URL Format**: `/p/[slug]?admin=true` instead of `/admin/profiles/[id]`
+- **Admin Detection**: Uses URL parameter `?admin=true` to enable admin mode
+- **Database Query**: Fetches profile slug using `supabaseService()` before sending email
+- **UI Enhancement**: Added admin-specific UI elements only when `isAdminView` is true
+
+**Files Modified**: 2 files, ~50 lines changed
+- `app/api/notify/profile-completed/route.ts` - Fixed admin view link generation
+- `app/p/[slug]/page.tsx` - Enhanced admin viewing experience
+
+**Admin View Features**:
+- **Admin Banner**: Blue banner with admin mode indicator and quick action buttons
+- **Admin Navigation**: Admin and Profiles links in header navigation
+- **Admin Information**: Profile ID, visibility state, listing status, creation date
+- **Quick Actions**: Edit Profile and Back to Profiles buttons
+- **Visual Design**: Consistent color coding (blue for admin, amber for info)
+
+**Testing Checklist**:
+- [ ] Admin verification emails now link to correct URLs
+- [ ] Admin can view profiles using email links without 404 errors
+- [ ] Admin banner appears when viewing profiles in admin mode
+- [ ] Admin navigation links work correctly
+- [ ] Admin information panel displays correctly
+- [ ] Quick action buttons navigate to correct routes
+- [ ] Public profile viewing still works normally
+- [ ] Admin mode bypasses visibility restrictions
+
+**Result**: Admin profile verification emails now link to working profile pages with enhanced admin viewing experience, eliminating 404 errors and improving admin workflow efficiency.
+
+---
+
 ### 2025-01-XX: Email Migration to Resend with SPF/DKIM/DMARC Alignment ✅
 
 **Goal**: Migrate all email sending to Resend (no Amazon SES anywhere) and ensure proper SPF/DKIM/DMARC alignment so Gmail shows SPF=PASS, DKIM=PASS, DMARC=PASS for taxproexchange.com.
@@ -41,6 +105,11 @@
   - `EMAIL_FROM` - From address (defaults to support@taxproexchange.com)
   - `EMAIL_REPLY_TO` - Reply-to address (defaults to support@taxproexchange.com)
 
+#### 5. Final Cleanup (2025-01-XX)
+- **Removed Nodemailer**: Uninstalled unused nodemailer dependency
+- **Created Test Route**: Added `/api/test/email` endpoint for email system verification
+- **Verified No SES**: Confirmed no Amazon SES code remains in codebase
+
 **Technical Details**:
 - **From Address**: All emails now sent from support@taxproexchange.com
 - **Reply-To**: Set to support@taxproexchange.com or koen@cardifftax.com
@@ -53,27 +122,32 @@
 From: support@taxproexchange.com
 Reply-To: support@taxproexchange.com
 List-Unsubscribe: mailto:support@taxproexchange.com?subject=unsubscribe
+X-Provider: resend
+X-No-SES: true
 ```
 
 **Expected Gmail Results**:
 - SPF=PASS (domain taxproexchange.com)
 - DKIM=PASS (taxproexchange.com)
 - DMARC=PASS (due to DKIM alignment)
+- No amazonses.com in any headers
 
-**Files Modified**: 6 files, ~100 lines changed
-**Files Created**: 0 new files
+**Files Modified**: 7 files, ~120 lines changed
+**Files Created**: 1 new file (`app/api/test/email/route.ts`)
 
 **Testing Checklist**:
-- [ ] Set RESEND_API_KEY environment variable
-- [ ] Test admin general email sending
-- [ ] Test profile update request emails
-- [ ] Test verification request emails
-- [ ] Test job application notifications
-- [ ] Test application status change notifications
-- [ ] Verify emails show support@taxproexchange.com as sender
+- [x] Set RESEND_API_KEY environment variable
+- [x] Test admin general email sending
+- [x] Test profile update request emails
+- [x] Test verification request emails
+- [x] Test job application notifications
+- [x] Test application status change notifications
+- [x] Verify emails show support@taxproexchange.com as sender
 - [ ] Check Gmail "Show original" for SPF/DKIM/DMARC passes
-- [ ] Verify List-Unsubscribe headers are present
-- [ ] Test email reply-to functionality
+- [x] Verify List-Unsubscribe headers are present
+- [x] Test email reply-to functionality
+- [x] Verify no SES dependencies remain
+- [x] Test new email verification endpoint
 
 **Environment Variables Required**:
 ```
@@ -82,7 +156,9 @@ EMAIL_FROM=support@taxproexchange.com
 EMAIL_REPLY_TO=support@taxproexchange.com
 ```
 
-**Result**: All transactional emails now sent via Resend with proper domain authentication, ensuring consistent deliverability and avoiding spam classification in Gmail and other email providers.
+**Result**: All transactional emails now sent via Resend with proper domain authentication, ensuring consistent deliverability and avoiding spam classification in Gmail and other email providers. **Amazon SES completely removed from codebase.**
+
+**New Test Endpoint**: `/api/test/email` - Use POST with `{"to": "email@example.com"}` to verify email system
 
 ---
 

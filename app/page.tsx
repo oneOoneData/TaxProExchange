@@ -21,16 +21,32 @@ export default function Page() {
   // Check onboarding status and redirect only if incomplete
   useEffect(() => {
     if (user && isLoaded) {
-      // Check if onboarding is complete via cookie
-      const onboardingComplete = document.cookie.includes('onboarding_complete=1');
-      
-      if (!onboardingComplete) {
-        console.log('[trace] router.push → /profile/edit (onboarding incomplete)');
-        router.push('/profile/edit');
-      } else {
-        console.log('[trace] onboarding complete, staying on home page');
-      }
-      setIsCheckingOnboarding(false);
+      // Check if user has completed onboarding by checking if they have a credential_type
+      // This is a simple check - if they have a credential_type, they've completed onboarding
+      fetch(`/api/profile?clerk_id=${user.id}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log('[home] profile data:', data);
+          if (data.error) {
+            // User doesn't have a profile yet, redirect to onboarding
+            console.log('[trace] router.push → /onboarding (no profile)');
+            router.push('/onboarding');
+          } else if (data.credential_type) {
+            // User has completed onboarding, stay on home page
+            console.log('[trace] onboarding complete, staying on home page');
+            setIsCheckingOnboarding(false);
+          } else {
+            // User hasn't completed onboarding, redirect to onboarding flow
+            console.log('[trace] router.push → /onboarding (onboarding incomplete)');
+            router.push('/onboarding');
+          }
+        })
+        .catch(error => {
+          console.error('Error checking onboarding status:', error);
+          console.log('[home] API call failed, redirecting to onboarding');
+          // On error, redirect to onboarding to be safe
+          router.push('/onboarding');
+        });
     } else if (isLoaded) {
       setIsCheckingOnboarding(false);
     }

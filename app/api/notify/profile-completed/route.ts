@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendProfileCompletionNotification } from '@/lib/email';
+import { supabaseService } from '@/lib/supabaseService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,8 +22,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create admin view link
-    const adminViewLink = `${process.env.NEXT_PUBLIC_APP_URL}/admin/profiles/${profile_id}`;
+    // Get profile slug for the admin view link
+    const supabase = supabaseService();
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('slug')
+      .eq('id', profile_id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Failed to get profile slug:', profileError);
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
+
+    // Create admin view link using the public profile route with admin parameter
+    const adminViewLink = `${process.env.NEXT_PUBLIC_APP_URL}/p/${profile.slug}?admin=true`;
 
     // Send notification email to admin
     try {

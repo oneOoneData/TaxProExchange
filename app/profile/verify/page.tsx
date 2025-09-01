@@ -211,6 +211,24 @@ export default function VerifyPage() {
               </p>
             </div>
 
+            {/* Privacy Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-medium text-blue-900 mb-1">Privacy & Verification</h3>
+                  <p className="text-sm text-blue-800">
+                    <strong>This information is not made public.</strong> We only use it to verify your credentials against official registries. 
+                    Your public profile will show verification badges and credential types only.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Licenses */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -252,14 +270,17 @@ export default function VerifyPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">License Number</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">License Number * (Private)</label>
                       <input
                         type="text"
                         value={license.license_number}
                         onChange={(e) => updateLicense(index, 'license_number', e.target.value)}
-                        placeholder="e.g., 12345"
+                        placeholder="Enter your license number"
                         className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                       />
+                      <p className="text-xs text-slate-500 mt-1">
+                        This will never be shown publicly
+                      </p>
                     </div>
 
                     <div>

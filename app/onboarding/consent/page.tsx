@@ -51,6 +51,9 @@ export default function OnboardingConsentPage() {
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
           <Logo />
+          <div className="flex items-center gap-2 text-sm text-slate-600">
+            <span className="px-2 py-1 bg-slate-100 rounded-full">Step 1 of 2</span>
+          </div>
         </div>
       </header>
 
