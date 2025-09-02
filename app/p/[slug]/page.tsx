@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 interface License {
   id: string;
   license_kind: string;
+  license_number: string;
   issuing_authority: string;
   state?: string;
   expires_on?: string;
@@ -79,12 +80,41 @@ export default function ProfilePage() {
   const [isAdminView, setIsAdminView] = useState(false);
   const [connectionState, setConnectionState] = useState<{ status: string; connectionId?: string; isRequester?: boolean } | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Helper function to format date as MM/YYYY
   const formatMMYYYY = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
+  };
+
+  // Handle verification actions
+  const handleVerification = async (action: 'approve' | 'reject') => {
+    if (!profile || !isAdminView) return;
+    
+    setIsVerifying(true);
+    try {
+      const response = await fetch(`/api/admin/verifications/${profile.id}/${action}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Refresh the profile data to show updated status
+        window.location.reload();
+      } else {
+        console.error('Verification failed:', response.statusText);
+        alert('Verification failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during verification:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   useEffect(() => {
@@ -127,6 +157,9 @@ export default function ProfilePage() {
       const response = await fetch(`/api/profile/${slug}${adminParam}`);
       if (response.ok) {
         const profileData = await response.json();
+        console.log('Profile data loaded:', profileData);
+        console.log('Admin view:', isAdmin);
+        console.log('Licenses in profile data:', profileData.licenses);
         setProfile(profileData);
         
         // Check connection status if user is signed in
@@ -308,6 +341,171 @@ export default function ProfilePage() {
                 >
                   Back to Profiles
                 </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Admin License Section */}
+        {isAdminView && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-yellow-50 border-2 border-yellow-200 rounded-3xl p-6 sm:p-8 mb-8"
+          >
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span className="text-xs font-semibold text-yellow-800 uppercase tracking-wide">Admin Only</span>
+              </div>
+              <h2 className="text-xl font-semibold text-slate-900 mb-2">License Information (Admin View)</h2>
+              <p className="text-sm text-slate-600">Private license details for verification purposes - NOT visible to public users</p>
+            </div>
+            
+            <div className="space-y-4">
+              {profile.licenses && profile.licenses.length > 0 ? (
+                profile.licenses.map((license, index) => (
+                <div key={index} className="border border-slate-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-medium text-slate-900">License {index + 1}</h3>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      license.status === 'verified' 
+                        ? 'bg-green-100 text-green-800' 
+                        : license.status === 'pending_verification'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {license.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-slate-700">License Number:</span>
+                      <p className="text-slate-900 font-mono bg-slate-50 px-2 py-1 rounded mt-1">
+                        {license.license_number}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-700">License Type:</span>
+                      <p className="text-slate-900 mt-1">{license.license_kind}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-700">Issuing Authority:</span>
+                      <p className="text-slate-900 mt-1">{license.issuing_authority}</p>
+                    </div>
+                    {license.state && (
+                      <div>
+                        <span className="font-medium text-slate-700">State:</span>
+                        <p className="text-slate-900 mt-1">{license.state}</p>
+                      </div>
+                    )}
+                    {license.expires_on && (
+                      <div>
+                        <span className="font-medium text-slate-700">Expires:</span>
+                        <p className="text-slate-900 mt-1">{formatMMYYYY(license.expires_on)}</p>
+                      </div>
+                    )}
+                    {license.board_profile_url && (
+                      <div className="md:col-span-2">
+                        <span className="font-medium text-slate-700">Board Profile:</span>
+                        <a 
+                          href={license.board_profile_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline ml-2"
+                        >
+                          View on Board
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-slate-400 mb-2">
+                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-slate-900 mb-1">No Licenses Found</h3>
+                  <p className="text-sm text-slate-600">
+                    This profile doesn't have any license information yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Admin Verification Controls */}
+        {isAdminView && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 mb-8"
+          >
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-slate-900 mb-2">Profile Management</h2>
+              <p className="text-sm text-slate-600">Admin controls for profile verification and listing</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-slate-900">Verification Status</h3>
+                    <p className="text-sm text-slate-600">Current: {profile.visibility_state}</p>
+                  </div>
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                    profile.visibility_state === 'verified' 
+                      ? 'bg-green-100 text-green-800' 
+                      : profile.visibility_state === 'pending_verification'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {profile.visibility_state}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-slate-900">Listing Status</h3>
+                    <p className="text-sm text-slate-600">Profile visibility</p>
+                  </div>
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                    profile.is_listed 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {profile.is_listed ? 'Listed' : 'Hidden'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleVerification('approve')}
+                  disabled={isVerifying}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {isVerifying ? 'Processing...' : 'Approve & List Profile'}
+                </button>
+                
+                <button
+                  onClick={() => handleVerification('reject')}
+                  disabled={isVerifying}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  {isVerifying ? 'Processing...' : 'Reject Profile'}
+                </button>
               </div>
             </div>
           </motion.div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { auth } from '@clerk/nextjs/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,30 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Helper function to verify admin status
+async function verifyAdminStatus(): Promise<boolean> {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId || !supabase) {
+      return false;
+    }
+
+    // Check if user has admin role in the database
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('clerk_id', userId)
+      .eq('is_admin', true)
+      .single();
+
+    return !error && profile?.is_admin === true;
+  } catch (error) {
+    console.error('Admin verification error:', error);
+    return false;
+  }
+}
 
 export async function GET(
   request: NextRequest,
@@ -34,21 +59,18 @@ export async function GET(
     console.log('🔍 Request URL:', request.url);
 
     // Check if this is an admin request
-    const referer = request.headers.get('referer');
-    const isAdminRequest = referer && referer.includes('/admin');
     const { searchParams } = new URL(request.url);
     const adminParam = searchParams.get('admin');
     
-    const isAdmin = isAdminRequest || adminParam === 'true';
+    // Only allow admin access if both the URL parameter is present AND the user is actually an admin
+    const userIsAdmin = await verifyAdminStatus();
+    const isAdmin = adminParam === 'true' && userIsAdmin;
 
     console.log('🔍 Admin check details:');
     console.log('  - Request URL:', request.url);
-    console.log('  - Search params:', Object.fromEntries(searchParams.entries()));
     console.log('  - Admin param:', adminParam);
-    console.log('  - Admin param type:', typeof adminParam);
     console.log('  - Admin param === "true":', adminParam === 'true');
-    console.log('  - Referer:', referer);
-    console.log('  - Is admin request (referer):', isAdminRequest);
+    console.log('  - User is verified admin:', userIsAdmin);
     console.log('  - Final isAdmin:', isAdmin);
 
     // Build the query
@@ -155,8 +177,8 @@ export async function GET(
 
     console.log('🔍 Software query result:', { software, softError, profileId: profile.id });
 
-    // Fetch licenses
-    const { data: licenses } = await supabase
+    // Fetch licenses (all for admin, only verified for public)
+    let licenseQuery = supabase
       .from('licenses')
       .select(`
         license_kind,
@@ -166,8 +188,21 @@ export async function GET(
         expires_on,
         status
       `)
-      .eq('profile_id', profile.id)
-      .eq('status', 'verified');
+      .eq('profile_id', profile.id);
+    
+    // Only show verified licenses for non-admin users
+    if (!isAdmin) {
+      licenseQuery = licenseQuery.eq('status', 'verified');
+    }
+    
+    const { data: licenses } = await licenseQuery;
+    
+    console.log('🔍 License query result:', { 
+      isAdmin, 
+      licenses, 
+      profileId: profile.id,
+      licenseCount: licenses?.length || 0 
+    });
 
     const profileWithDetails = {
       ...profile,
