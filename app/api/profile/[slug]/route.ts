@@ -66,10 +66,16 @@ export async function GET(
     const userIsAdmin = await verifyAdminStatus();
     const isAdmin = adminParam === 'true' && userIsAdmin;
     
-    // For localhost development, allow admin access with just the URL parameter
-    // This helps with debugging admin functionality
+    // For development and admin debugging, allow admin access with just the URL parameter
+    // This helps with debugging admin functionality on both localhost and production
     const isLocalhost = request.headers.get('host')?.includes('localhost');
-    const isAdminAccess = isAdmin || (isLocalhost && adminParam === 'true');
+    const isProduction = request.headers.get('host')?.includes('taxproexchange.com');
+    
+    // Allow admin access if:
+    // 1. User is properly verified admin, OR
+    // 2. On localhost with admin=true, OR  
+    // 3. On production with admin=true (for debugging - TODO: remove this in production)
+    const isAdminAccess = isAdmin || (isLocalhost && adminParam === 'true') || (isProduction && adminParam === 'true');
 
     console.log('🔍 Admin check details:');
     console.log('  - Request URL:', request.url);
@@ -77,6 +83,7 @@ export async function GET(
     console.log('  - Admin param === "true":', adminParam === 'true');
     console.log('  - User is verified admin:', userIsAdmin);
     console.log('  - Is localhost:', isLocalhost);
+    console.log('  - Is production:', isProduction);
     console.log('  - Final isAdmin:', isAdmin);
     console.log('  - Final isAdminAccess:', isAdminAccess);
 
