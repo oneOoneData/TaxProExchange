@@ -65,13 +65,20 @@ export async function GET(
     // Only allow admin access if both the URL parameter is present AND the user is actually an admin
     const userIsAdmin = await verifyAdminStatus();
     const isAdmin = adminParam === 'true' && userIsAdmin;
+    
+    // For localhost development, allow admin access with just the URL parameter
+    // This helps with debugging admin functionality
+    const isLocalhost = request.headers.get('host')?.includes('localhost');
+    const isAdminAccess = isAdmin || (isLocalhost && adminParam === 'true');
 
     console.log('🔍 Admin check details:');
     console.log('  - Request URL:', request.url);
     console.log('  - Admin param:', adminParam);
     console.log('  - Admin param === "true":', adminParam === 'true');
     console.log('  - User is verified admin:', userIsAdmin);
+    console.log('  - Is localhost:', isLocalhost);
     console.log('  - Final isAdmin:', isAdmin);
+    console.log('  - Final isAdminAccess:', isAdminAccess);
 
     // Build the query
     let query = supabase
@@ -106,7 +113,7 @@ export async function GET(
       .eq('slug', slug);
 
     // Apply visibility restrictions only for non-admin users
-    if (!isAdmin) {
+    if (!isAdminAccess) {
       query = query
         .eq('visibility_state', 'verified')
         .eq('is_listed', true);
@@ -114,8 +121,9 @@ export async function GET(
 
     console.log('🔍 Query being executed:', {
       isAdmin,
+      isAdminAccess,
       slug,
-      hasVisibilityRestrictions: !isAdmin
+      hasVisibilityRestrictions: !isAdminAccess
     });
 
     // Fetch the profile
@@ -191,7 +199,7 @@ export async function GET(
       .eq('profile_id', profile.id);
     
     // Only show verified licenses for non-admin users
-    if (!isAdmin) {
+    if (!isAdminAccess) {
       licenseQuery = licenseQuery.eq('status', 'verified');
     }
     
@@ -199,6 +207,7 @@ export async function GET(
     
     console.log('🔍 License query result:', { 
       isAdmin, 
+      isAdminAccess,
       licenses, 
       profileId: profile.id,
       licenseCount: licenses?.length || 0 
