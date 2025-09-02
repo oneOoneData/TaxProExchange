@@ -545,7 +545,7 @@ export default function ProfilePage() {
                     {profile.licenses
                       .filter(license => license.status === 'verified')
                       .map((license, index) => (
-                        <span key={license.id} className="flex items-center gap-1">
+                        <span key={`${license.license_kind}-${license.state}-${index}`} className="flex items-center gap-1">
                           {index > 0 && <span>•</span>}
                           <span>
                             {license.license_kind === 'CPA_STATE_LICENSE' ? 'CPA' :
