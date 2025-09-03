@@ -101,8 +101,15 @@ export const ProfileUpdateSchema = z.object({
     state: z.string(),
     city: z.string().optional()
   })).default([]),
-  software: z.array(z.string()).default([])
+  software: z.array(z.string()).default([]),
+  years_experience: z.enum(['1-2', '3-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+']).optional(),
+  entity_revenue_range: z.enum(['< $1M', '$1M - $10M', '$10M - $50M', '$50M - $100M', '$100M - $500M', '$500M - $1B', '> $1B']).optional()
 }).merge(ProfileCredentialSchema);
+
+// Onboarding schema (extends profile update with mandatory experience)
+export const OnboardingSchema = ProfileUpdateSchema.extend({
+  years_experience: z.enum(['1-2', '3-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+']), // Required for new users
+});
 
 // Credential-only update schema (for partial updates)
 export const CredentialUpdateSchema = z.object({

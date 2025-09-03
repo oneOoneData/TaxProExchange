@@ -45,8 +45,12 @@ interface Profile {
   specializations: string[];
   states: string[];
   software: string[];
+  other_software: string[];
+  opportunities: string;
   licenses?: License[];
   avatar_url: string | null;
+  years_experience?: string;
+  entity_revenue_range?: string;
   primary_location?: {
     country: string;
     state: string | null;
@@ -130,6 +134,17 @@ export default function ProfilePage() {
       fetchSpecializations();
     }
   }, [params.slug]);
+
+  // Debug when both profile and specializations are loaded
+  useEffect(() => {
+    if (profile && specializationGroups.length > 0) {
+      console.log('🔍 Both profile and specializations loaded:', {
+        profileSpecializations: profile.specializations,
+        specializationGroupsCount: specializationGroups.length,
+        firstGroup: specializationGroups[0]
+      });
+    }
+  }, [profile, specializationGroups]);
 
   const fetchSpecializations = async () => {
     try {
@@ -239,14 +254,51 @@ export default function ProfilePage() {
     }
   };
 
+  // Create a mapping from display labels to database slugs
+  const createLabelToSlugMap = () => {
+    const labelToSlugMap: { [key: string]: string } = {};
+    specializationGroups.forEach(group => {
+      group.items.forEach(item => {
+        labelToSlugMap[item.label] = item.slug;
+      });
+    });
+    return labelToSlugMap;
+  };
+
   // Group profile specializations by their groups
   const getGroupedProfileSpecializations = () => {
-    if (!profile || !specializationGroups.length) return [];
+    if (!profile || !specializationGroups.length) {
+      console.log('🔍 Missing data:', { 
+        hasProfile: !!profile, 
+        hasSpecializationGroups: !!specializationGroups.length,
+        profileSpecializations: profile?.specializations 
+      });
+      return [];
+    }
     
-    return specializationGroups.map(group => ({
+    console.log('🔍 Profile specializations:', profile.specializations);
+    console.log('🔍 Specialization groups:', specializationGroups);
+    
+    // Create mapping from labels to slugs
+    const labelToSlugMap = createLabelToSlugMap();
+    console.log('🔍 Label to slug mapping:', labelToSlugMap);
+    
+    // Convert profile specializations from labels to slugs
+    const profileSlugs = profile.specializations.map(label => labelToSlugMap[label]).filter(Boolean);
+    console.log('🔍 Converted profile slugs:', profileSlugs);
+    
+    // Debug: Check what slugs are available in each group
+    specializationGroups.forEach((group, index) => {
+      console.log(`🔍 Group ${index} (${group.label}):`, group.items.map(item => item.slug));
+    });
+    
+    const grouped = specializationGroups.map(group => ({
       ...group,
-      items: group.items.filter(spec => profile.specializations.includes(spec.slug))
+      items: group.items.filter(spec => profileSlugs.includes(spec.slug))
     })).filter(group => group.items.length > 0);
+    
+    console.log('🔍 Grouped specializations:', grouped);
+    return grouped;
   };
 
   if (loading) {
@@ -699,6 +751,48 @@ export default function ProfilePage() {
             >
               <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">About</h2>
               <p className="text-slate-600 leading-relaxed">{profile.bio}</p>
+              {profile.opportunities && (
+                <div className="mt-4 pt-4 border-t border-slate-200">
+                  <h3 className="text-sm font-medium text-slate-700 mb-2">Opportunities & Goals</h3>
+                  <p className="text-slate-600 text-sm">{profile.opportunities}</p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Experience & Expertise */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
+            >
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Experience & Expertise</h2>
+              <div className="space-y-3">
+                {profile.years_experience ? (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Years of Tax Experience</p>
+                    <p className="text-slate-900 font-medium">
+                      {profile.years_experience === '31+' ? '31+ years' : `${profile.years_experience} years`}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Years of Tax Experience</p>
+                    <p className="text-slate-400 italic">Not specified</p>
+                  </div>
+                )}
+                {profile.entity_revenue_range ? (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Typical Entity Client Size</p>
+                    <p className="text-slate-900 font-medium">{profile.entity_revenue_range}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Typical Entity Client Size</p>
+                    <p className="text-slate-400 italic">Not specified</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
 
             {/* Specializations */}
@@ -735,7 +829,7 @@ export default function ProfilePage() {
             </motion.div>
 
             {/* Software & Tools */}
-            {profile.software && profile.software.length > 0 && (
+            {((profile.software && profile.software.length > 0) || (profile.other_software && profile.other_software.length > 0)) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -743,15 +837,37 @@ export default function ProfilePage() {
                 className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
               >
                 <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Software & Tools</h2>
-                <div className="flex flex-wrap gap-2">
-                  {safeMap(profile.software, softwareSlug => (
-                    <span
-                      key={softwareSlug}
-                      className="inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium bg-green-100 text-green-700"
-                    >
-                      {softwareSlug.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </span>
-                  ))}
+                <div className="space-y-3">
+                  {profile.software && profile.software.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-600 mb-2">Standard Software</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {safeMap(profile.software, softwareSlug => (
+                          <span
+                            key={softwareSlug}
+                            className="inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium bg-green-100 text-green-700"
+                          >
+                            {softwareSlug.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {profile.other_software && profile.other_software.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-slate-600 mb-2">Other Tools</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {safeMap(profile.other_software, tool => (
+                          <span
+                            key={tool}
+                            className="inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium bg-slate-100 text-slate-700"
+                          >
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -792,7 +908,7 @@ export default function ProfilePage() {
               {shouldShowContactInfo() ? (
                 <div className="space-y-3">
                   {profile.public_email && (
-                    <div>
+                    <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                       <p className="text-sm text-slate-500 mb-1">Email</p>
                       <a
                         href={`mailto:${profile.public_email}`}
@@ -804,7 +920,7 @@ export default function ProfilePage() {
                   )}
                   
                   {profile.phone && (
-                    <div>
+                    <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                       <p className="text-sm text-slate-500 mb-1">Phone</p>
                       <a
                         href={`tel:${profile.phone}`}
@@ -816,29 +932,35 @@ export default function ProfilePage() {
                   )}
 
                   {profile.website_url && (
-                    <div>
+                    <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                       <p className="text-sm text-slate-500 mb-1">Website</p>
                       <a
                         href={profile.website_url.startsWith('http') ? profile.website_url : `https://${profile.website_url}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-900 hover:text-slate-700 break-all"
+                        className="text-slate-900 hover:text-slate-700 break-all flex items-center gap-1"
                       >
                         {profile.website_url.replace(/^https?:\/\//, '')}
+                        <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                       </a>
                     </div>
                   )}
 
                   {profile.linkedin_url && (
-                    <div>
+                    <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                       <p className="text-sm text-slate-500 mb-1">LinkedIn</p>
                       <a
                         href={profile.linkedin_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-900 hover:text-slate-700"
+                        className="text-slate-900 hover:text-slate-700 flex items-center gap-1"
                       >
                         View Profile
+                        <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                       </a>
                     </div>
                   )}

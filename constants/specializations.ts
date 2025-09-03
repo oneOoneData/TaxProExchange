@@ -120,6 +120,9 @@ export const CATEGORIES: SpecCategory[] = [
       { value: "Foreign Earned Income (2555)", label: "Foreign Earned Income (2555)", synonyms: ["2555", "fei", "housing exclusion"] },
       { value: "Foreign Partnership (8865)", label: "Foreign Partnership (8865)", synonyms: ["8865"] },
       { value: "Foreign Tax Credit (1116)", label: "Foreign Tax Credit (1116)", synonyms: ["1116", "ftc"] },
+      { value: "Foreign Tax Credits (Form 1118)", label: "Foreign Tax Credits (Form 1118)", synonyms: ["1118", "ftc", "foreign tax credit"] },
+      { value: "Transfer Pricing", label: "Transfer Pricing", synonyms: ["transfer pricing", "arm's length", "intercompany"] },
+      { value: "Pillar 2", label: "Pillar 2", synonyms: ["pillar 2", "global minimum tax", "gloBE"] },
       { value: "Foreign-Owned US Corp (5472)", label: "Foreign-Owned US Corp (5472)", synonyms: ["5472"] },
       { value: "ITIN Processing", label: "ITIN Processing", synonyms: ["itin", "acceptance agent"] },
       { value: "Treaty Positions", label: "Treaty Positions", synonyms: ["treaty", "article"] },
@@ -199,6 +202,8 @@ export const CATEGORIES: SpecCategory[] = [
       { value: "Retirement Plans (SEP/Solo 401k)", label: "Retirement Plans (SEP/Solo 401k)", synonyms: ["sep", "solo 401k"] },
       { value: "S-Election (2553)", label: "S-Election (2553)", synonyms: ["s election", "2553"] },
       { value: "SALT Cap Workaround (PTET)", label: "SALT Cap Workaround (PTET)", synonyms: ["ptet", "salt cap"] },
+      { value: "Accounting Periods and Methods", label: "Accounting Periods and Methods", synonyms: ["accounting periods", "accounting methods", "481a", "change in method"] },
+      { value: "ASC 740", label: "ASC 740", synonyms: ["asc 740", "income tax provision", "tax provision", "fin 48"] },
     ],
   },
 ];

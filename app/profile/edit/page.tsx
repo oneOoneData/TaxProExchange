@@ -34,6 +34,8 @@ interface ProfileForm {
   states: string[];
   software: string[];
   other_software: string[];
+  years_experience?: string;
+  entity_revenue_range?: string;
   primary_location: {
     country: string;
     state: string | null;
@@ -505,6 +507,53 @@ export default function EditProfilePage() {
 
   const renderSpecializationsStep = () => (
     <div className="space-y-6">
+      {/* Years of Experience */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Years of Tax Experience <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={profileForm.years_experience || ''}
+          onChange={(e) => updateForm('years_experience', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          required
+        >
+          <option value="">Select years of experience</option>
+          <option value="1-2">1-2 years</option>
+          <option value="3-5">3-5 years</option>
+          <option value="6-10">6-10 years</option>
+          <option value="11-15">11-15 years</option>
+          <option value="16-20">16-20 years</option>
+          <option value="21-25">21-25 years</option>
+          <option value="26-30">26-30 years</option>
+          <option value="31+">31+ years</option>
+        </select>
+      </div>
+
+      {/* Entity Revenue Range */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Average Annual Revenue of Entity Clients (Optional)
+        </label>
+        <select
+          value={profileForm.entity_revenue_range || ''}
+          onChange={(e) => updateForm('entity_revenue_range', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Select revenue range (optional)</option>
+          <option value="< $1M">Less than $1M</option>
+          <option value="$1M - $10M">$1M - $10M</option>
+          <option value="$10M - $50M">$10M - $50M</option>
+          <option value="$50M - $100M">$50M - $100M</option>
+          <option value="$100M - $500M">$100M - $500M</option>
+          <option value="$500M - $1B">$500M - $1B</option>
+          <option value="> $1B">Greater than $1B</option>
+        </select>
+        <p className="mt-1 text-sm text-gray-500">
+          This helps clients understand the size of entities you typically work with
+        </p>
+      </div>
+
       <SpecializationPicker
         selected={profileForm.specializations}
         onToggle={toggleSpecialization}

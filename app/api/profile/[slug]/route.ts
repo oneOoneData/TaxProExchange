@@ -113,6 +113,10 @@ export async function GET(
         specializations,
         states,
         software,
+        other_software,
+        opportunities,
+        years_experience,
+        entity_revenue_range,
         avatar_url,
         primary_location,
         created_at

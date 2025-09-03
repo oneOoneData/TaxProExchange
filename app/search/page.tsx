@@ -27,6 +27,7 @@ interface Profile {
   specializations: string[];
   states: string[];
   avatar_url: string | null;
+  years_experience?: string;
 }
 
 interface SearchFilters {
@@ -36,6 +37,14 @@ interface SearchFilters {
   specialization: string;
   accepting_work: string;
   verified_only: boolean;
+  years_experience: string;
+}
+
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 interface Specialization {
@@ -61,13 +70,20 @@ export default function SearchPage() {
   const [forceUpdate, setForceUpdate] = useState(0); // Force re-render trigger
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0
+  });
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     credential_type: '',
     state: '',
     specialization: '',
     accepting_work: '',
-    verified_only: true
+    verified_only: true,
+    years_experience: ''
   });
 
   const states = [
@@ -76,6 +92,18 @@ export default function SearchPage() {
     'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
     'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
     'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+  ];
+
+  const yearsExperienceOptions = [
+    { value: '', label: 'All experience levels' },
+    { value: '1-2', label: '1-2 years' },
+    { value: '3-5', label: '3-5 years' },
+    { value: '6-10', label: '6-10 years' },
+    { value: '11-15', label: '11-15 years' },
+    { value: '16-20', label: '16-20 years' },
+    { value: '21-25', label: '21-25 years' },
+    { value: '26-30', label: '26-30 years' },
+    { value: '31+', label: '31+ years' }
   ];
 
   useEffect(() => {
@@ -87,7 +115,7 @@ export default function SearchPage() {
     
     if (user) {
       fetchSpecializations();
-      searchProfiles();
+      searchProfiles(filters, 1);
     }
   }, [isLoaded, user, router]);
 
@@ -105,7 +133,7 @@ export default function SearchPage() {
     }
   };
 
-  const searchProfiles = async (customFilters?: SearchFilters) => {
+  const searchProfiles = async (customFilters?: SearchFilters, page: number = 1) => {
     setLoading(true);
     try {
       const filtersToUse = customFilters || filters;
@@ -121,22 +149,33 @@ export default function SearchPage() {
         }
       });
 
+      // Add pagination parameters
+      params.append('page', page.toString());
+      params.append('limit', pagination.limit.toString());
+
       const response = await fetch(`/api/search?${params}`);
-             const data = await response.json();
-       setProfiles(data.profiles || []);
-       
-       // Check connection status for each profile
-       if (data.profiles) {
-         data.profiles.forEach((profile: Profile) => {
-           checkConnectionStatus(profile.id);
-         });
-       }
-     } catch (error) {
-       console.error('Search error:', error);
-       setProfiles([]); // Ensure profiles is always an array even on error
-     } finally {
-       setLoading(false);
-     }
+      const data = await response.json();
+      console.log('🔍 Search API Response:', data);
+      setProfiles(data.profiles || []);
+      
+      // Update pagination info
+      if (data.pagination) {
+        console.log('🔍 Pagination data received:', data.pagination);
+        setPagination(data.pagination);
+      }
+      
+      // Check connection status for each profile
+      if (data.profiles) {
+        data.profiles.forEach((profile: Profile) => {
+          checkConnectionStatus(profile.id);
+        });
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setProfiles([]); // Ensure profiles is always an array even on error
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateFilter = (key: keyof SearchFilters, value: string) => {
@@ -150,11 +189,23 @@ export default function SearchPage() {
       state: '',
       specialization: '',
       accepting_work: '',
-      verified_only: false
+      verified_only: false,
+      years_experience: ''
     };
     setFilters(clearedFilters);
-    // Search with cleared filters
-    setTimeout(() => searchProfiles(clearedFilters), 100);
+    // Search with cleared filters and reset to page 1
+    setTimeout(() => searchProfiles(clearedFilters, 1), 100);
+  };
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= pagination.totalPages) {
+      searchProfiles(filters, page);
+    }
+  };
+
+  const changePageSize = (newLimit: number) => {
+    setPagination(prev => ({ ...prev, limit: newLimit }));
+    searchProfiles(filters, 1); // Reset to page 1 when changing page size
   };
 
   const handleConnect = async (profileId: string) => {
@@ -256,13 +307,13 @@ export default function SearchPage() {
                         type="text"
                         placeholder="Search specializations..."
                         value={filters.specialization}
-                                                 onChange={(e) => {
-                           const newFilters = { ...filters, specialization: e.target.value };
-                           setFilters(newFilters);
-                           // Auto-search when this filter changes (debounced)
-                           if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                           searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters), 500);
-                         }}
+                                                                         onChange={(e) => {
+                          const newFilters = { ...filters, specialization: e.target.value };
+                          setFilters(newFilters);
+                          // Auto-search when this filter changes (debounced)
+                          if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                          searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
+                        }}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       />
         {filters.specialization && (
@@ -285,11 +336,11 @@ export default function SearchPage() {
             return (
               <button
                 key={specSlug}
-                                 onClick={() => {
-                   const newFilters = { ...filters, specialization: specSlug };
-                   setFilters(newFilters);
-                   setTimeout(() => searchProfiles(newFilters), 100);
-                 }}
+                                                 onClick={() => {
+                  const newFilters = { ...filters, specialization: specSlug };
+                  setFilters(newFilters);
+                  setTimeout(() => searchProfiles(newFilters, 1), 100);
+                }}
                 className={`px-2 py-1 text-xs rounded border transition-colors ${
                   filters.specialization === specSlug
                     ? 'bg-blue-100 text-blue-700 border-blue-200'
@@ -321,11 +372,11 @@ export default function SearchPage() {
                       name="specialization"
                       value={spec.slug}
                       checked={filters.specialization === spec.slug}
-                                             onChange={(e) => {
-                         const newFilters = { ...filters, specialization: e.target.value };
-                         setFilters(newFilters);
-                         setTimeout(() => searchProfiles(newFilters), 100);
-                       }}
+                                                                   onChange={(e) => {
+                        const newFilters = { ...filters, specialization: e.target.value };
+                        setFilters(newFilters);
+                        setTimeout(() => searchProfiles(newFilters, 1), 100);
+                      }}
                       className="text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-slate-700">{spec.label}</span>
@@ -426,7 +477,7 @@ export default function SearchPage() {
                           const newFilters = { ...filters, verified_only: e.target.checked };
                           setFilters(newFilters);
                           // Auto-search when this filter changes
-                          setTimeout(() => searchProfiles(newFilters), 100);
+                          setTimeout(() => searchProfiles(newFilters, 1), 100);
                         }}
                         className="sr-only"
                       />
@@ -453,7 +504,7 @@ export default function SearchPage() {
                        setFilters(newFilters);
                        // Auto-search when text changes (debounced)
                        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                       searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters), 500);
+                       searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
                      }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -468,7 +519,7 @@ export default function SearchPage() {
                        const newFilters = { ...filters, credential_type: e.target.value };
                        setFilters(newFilters);
                        // Auto-search when this filter changes
-                       setTimeout(() => searchProfiles(newFilters), 100);
+                       setTimeout(() => searchProfiles(newFilters, 1), 100);
                      }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -490,13 +541,32 @@ export default function SearchPage() {
                        const newFilters = { ...filters, state: e.target.value };
                        setFilters(newFilters);
                        // Auto-search when this filter changes
-                       setTimeout(() => searchProfiles(newFilters), 100);
+                       setTimeout(() => searchProfiles(newFilters, 1), 100);
                      }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">All states</option>
                     {states.map(state => (
                       <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Years of Experience */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Years of Experience</label>
+                  <select
+                    value={filters.years_experience}
+                    onChange={(e) => {
+                      const newFilters = { ...filters, years_experience: e.target.value };
+                      setFilters(newFilters);
+                      // Auto-search when this filter changes
+                      setTimeout(() => searchProfiles(newFilters, 1), 100);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {yearsExperienceOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
                   </select>
                 </div>
@@ -513,7 +583,7 @@ export default function SearchPage() {
                        const newFilters = { ...filters, accepting_work: e.target.value };
                        setFilters(newFilters);
                        // Auto-search when this filter changes
-                       setTimeout(() => searchProfiles(newFilters), 100);
+                       setTimeout(() => searchProfiles(newFilters, 1), 100);
                      }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -526,14 +596,14 @@ export default function SearchPage() {
 
                 {/* Search Button */}
                                  <button
-                   onClick={() => searchProfiles()}
+                   onClick={() => searchProfiles(filters, 1)}
                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                  >
                    Search
                  </button>
 
                 {/* Clear All Filters */}
-                {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work || filters.verified_only) && (
+                {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work || filters.verified_only || filters.years_experience) && (
                   <button
                                        onClick={() => {
                      const clearedFilters = {
@@ -542,7 +612,8 @@ export default function SearchPage() {
                        state: '',
                        specialization: '',
                        accepting_work: '',
-                       verified_only: true
+                       verified_only: true,
+                       years_experience: ''
                      };
                      setFilters(clearedFilters);
                      setTimeout(() => searchProfiles(clearedFilters), 100);
@@ -625,6 +696,9 @@ export default function SearchPage() {
                         
                         <div className="flex items-center gap-4 text-sm text-slate-500">
                           <span>States: {profile.states ? profile.states.join(', ') : 'Not specified'}</span>
+                          {profile.years_experience && (
+                            <span>Experience: {profile.years_experience === '31+' ? '31+ years' : `${profile.years_experience} years`}</span>
+                          )}
                           <span className={profile.accepting_work ? 'text-emerald-600' : 'text-slate-400'}>
                             {profile.accepting_work ? 'Accepting work' : 'Not accepting work'}
                           </span>
@@ -695,6 +769,88 @@ export default function SearchPage() {
                   </motion.div>
                 );
                 })}
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {(() => {
+              console.log('🔍 Pagination check - loading:', loading, 'profiles length:', profiles?.length, 'totalPages:', pagination.totalPages, 'total:', pagination.total);
+              return !loading && profiles && profiles.length > 0;
+            })() && (
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Results info */}
+                <div className="text-sm text-slate-600">
+                  Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+                  {pagination.totalPages <= 1 && <span className="ml-2 text-blue-600">(Single page)</span>}
+                </div>
+
+                {/* Page size selector */}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-slate-600">Show:</label>
+                  <select
+                    value={pagination.limit}
+                    onChange={(e) => changePageSize(parseInt(e.target.value))}
+                    className="px-2 py-1 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </select>
+                  <span className="text-sm text-slate-600">per page</span>
+                </div>
+
+                {/* Pagination buttons - only show if multiple pages */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => goToPage(pagination.page - 1)}
+                      disabled={pagination.page <= 1}
+                      className="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (pagination.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (pagination.page <= 3) {
+                          pageNum = i + 1;
+                        } else if (pagination.page >= pagination.totalPages - 2) {
+                          pageNum = pagination.totalPages - 4 + i;
+                        } else {
+                          pageNum = pagination.page - 2 + i;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => goToPage(pageNum)}
+                            className={`px-3 py-1 text-sm border rounded ${
+                              pageNum === pagination.page
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={() => goToPage(pagination.page + 1)}
+                      disabled={pagination.page >= pagination.totalPages}
+                      className="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

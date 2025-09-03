@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state') || '';
     const accepting_work = searchParams.get('accepting_work') || '';
     const verified_only = searchParams.get('verified_only') || 'false';
+    const years_experience = searchParams.get('years_experience') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
         works_multistate,
         works_international,
         countries,
+        years_experience,
         created_at
       `, { count: 'exact' })
       .eq('is_listed', true);
@@ -79,8 +81,68 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('accepting_work', true);
     }
 
-    // Execute the base query first
-    const { data: profiles, error, count } = await supabaseQuery
+    // Apply years of experience filter
+    if (years_experience) {
+      supabaseQuery = supabaseQuery.eq('years_experience', years_experience);
+    }
+
+    // Apply specialization filter if specified
+    if (specialization) {
+      const { data: specData } = await supabase
+        .from('specializations')
+        .select('id')
+        .eq('slug', specialization)
+        .single();
+      
+      if (specData) {
+        const { data: profileSpecs } = await supabase
+          .from('profile_specializations')
+          .select('profile_id')
+          .eq('specialization_id', specData.id);
+        
+        if (profileSpecs && profileSpecs.length > 0) {
+          const profileIds = profileSpecs.map(ps => ps.profile_id);
+          supabaseQuery = supabaseQuery.in('id', profileIds);
+        } else {
+          // No profiles with this specialization, return empty result
+          return NextResponse.json({
+            profiles: [],
+            pagination: {
+              page,
+              limit,
+              total: 0,
+              totalPages: 0
+            }
+          });
+        }
+      }
+    }
+
+    // Apply state filter if specified
+    if (state) {
+      // This is complex because we need to check both direct state matches and multi-state profiles
+      // For now, we'll get all profiles and filter in memory for state
+      // TODO: Optimize this with a proper join
+    }
+
+    // Apply international filter if specified
+    const international = searchParams.get('international') || '';
+    if (international === 'true') {
+      supabaseQuery = supabaseQuery.eq('works_international', true);
+    }
+
+    // Apply country filter if specified
+    const country = searchParams.get('country') || '';
+    if (country) {
+      supabaseQuery = supabaseQuery.eq('works_international', true);
+      // Note: Country filtering within the countries array would need a more complex query
+    }
+
+    // Get total count first
+    const { count: totalCount } = await supabaseQuery;
+
+    // Execute the query with pagination
+    const { data: profiles, error } = await supabaseQuery
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -103,48 +165,29 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Filter by specialization if specified
-    let filteredProfiles = profiles;
-    if (specialization) {
-      const { data: profileSpecs } = await supabase
-        .from('profile_specializations')
-        .select('profile_id')
-        .eq('specialization_id', (await supabase
-          .from('specializations')
-          .select('id')
-          .eq('slug', specialization)
-          .single()).data?.id);
-      
-      if (profileSpecs) {
-        const profileIds = profileSpecs.map(ps => ps.profile_id);
-        filteredProfiles = profiles.filter(p => profileIds.includes(p.id));
-      }
-    }
+    // Apply remaining filters that can't be done in SQL
+    let filteredProfiles = profiles || [];
 
-    // Filter by state if specified
+    // Filter by state if specified (complex filtering)
     if (state) {
-      // Get profiles that either work in this specific state OR are multi-state
+      // Get profiles that work in this specific state
       const { data: stateProfiles } = await supabase
-        .from('profiles')
-        .select('id')
-        .or(`works_multistate.eq.true,id.in.(${filteredProfiles.map(p => `'${p.id}'`).join(',')})`);
+        .from('profile_locations')
+        .select('profile_id')
+        .eq('location_id', state);
       
       if (stateProfiles) {
-        // Filter to only include profiles that are either multi-state or have this specific state
+        const stateProfileIds = stateProfiles.map(sp => sp.profile_id);
         filteredProfiles = filteredProfiles.filter(p => 
-          p.works_multistate || stateProfiles.some(sp => sp.id === p.id)
+          p.works_multistate || stateProfileIds.includes(p.id)
         );
+      } else {
+        // No profiles in this state, only show multi-state profiles
+        filteredProfiles = filteredProfiles.filter(p => p.works_multistate);
       }
-    }
-
-    // Filter by international if specified
-    const international = searchParams.get('international') || '';
-    if (international === 'true') {
-      filteredProfiles = filteredProfiles.filter(p => p.works_international);
     }
 
     // Filter by specific country if specified
-    const country = searchParams.get('country') || '';
     if (country) {
       filteredProfiles = filteredProfiles.filter(p => 
         p.works_international && p.countries && p.countries.includes(country)
@@ -190,8 +233,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: filteredProfiles.length,
-        totalPages: Math.ceil(filteredProfiles.length / limit)
+        total: totalCount || 0,
+        totalPages: Math.ceil((totalCount || 0) / limit)
       }
     });
 

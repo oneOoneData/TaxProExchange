@@ -147,6 +147,8 @@ export async function POST(req: Request) {
         states: [],
         software: [],
         other_software: [],
+        years_experience: null,
+        entity_revenue_range: null,
         slug: slug,
         tos_version: LEGAL_VERSIONS.TOS,
         tos_accepted_at: now,

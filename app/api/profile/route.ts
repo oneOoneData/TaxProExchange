@@ -236,7 +236,8 @@ export async function PUT(request: Request) {
     // Handle different update types
     let specializations, locations, software, other_software, public_contact, 
         works_multistate, works_international, countries, email_preferences, 
-        primary_location, location_radius, credential_type, licenses, profileData;
+        primary_location, location_radius, credential_type, licenses, 
+        years_experience, entity_revenue_range, profileData;
     
     if (isCredentialUpdate) {
       // For credential-only updates
@@ -255,14 +256,16 @@ export async function PUT(request: Request) {
       email_preferences = undefined;
       primary_location = undefined;
       location_radius = 50;
+      years_experience = undefined;
+      entity_revenue_range = undefined;
       profileData = {};
-    } else {
+        } else {
       // For full profile updates
       const fullProfileData = validatedData as any;
-      ({ 
-        specializations, 
-        locations, 
-        software, 
+      ({
+        specializations,
+        locations,
+        software,
         other_software,
         public_contact,
         works_multistate,
@@ -273,8 +276,12 @@ export async function PUT(request: Request) {
         location_radius,
         credential_type,
         licenses,
+        years_experience,
+        entity_revenue_range,
         ...profileData 
       } = fullProfileData);
+      
+      console.log('🔍 Experience fields being saved:', { years_experience, entity_revenue_range });
     }
     
     // Extract clerk_id from the original body since it's not in the validated schema
@@ -288,6 +295,8 @@ export async function PUT(request: Request) {
       software,
       other_software,
       email_preferences,
+      years_experience,
+      entity_revenue_range,
       profileData
     });
 
@@ -388,6 +397,8 @@ export async function PUT(request: Request) {
           email_preferences: email_preferences || null,
           primary_location: primary_location || null,
           location_radius: location_radius || 50,
+          years_experience: years_experience || null,
+          entity_revenue_range: entity_revenue_range || null,
           onboarding_complete: true,
           credential_type,
         };
@@ -418,6 +429,8 @@ export async function PUT(request: Request) {
           email_preferences: email_preferences || null,
           primary_location: primary_location || null,
           location_radius: location_radius || 50,
+          years_experience: years_experience || null,
+          entity_revenue_range: entity_revenue_range || null,
           onboarding_complete: true,
           updated_at: new Date().toISOString(),
         })
