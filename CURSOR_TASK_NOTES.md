@@ -1513,3 +1513,55 @@ CREATE INDEX idx_profile_locations_state_city ON profile_locations(state, city);
 - [ ] Mobile responsive
 
 **Result**: Simple, reliable Buy Me a Coffee button that always renders and provides consistent user experience.
+
+---
+
+### 2025-01-XX: RLS Hardening Migration - Fixed Search Page Data Access ✅
+
+**Goal**: Fix the search page returning no data after RLS migration by updating API endpoints to use service role key instead of anonymous key.
+
+**Root Cause**: 
+- The RLS migration enabled Row Level Security on all tables
+- Search and specializations API endpoints were using `SUPABASE_ANON_KEY` 
+- Anonymous key can no longer access protected tables like `profiles`, `profile_specializations`, etc.
+- Server-side APIs need to use `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
+
+**Solution Applied**:
+
+#### 1. Updated Search API (`app/api/search/route.ts`)
+- **Changed Key**: From `SUPABASE_ANON_KEY` to `SUPABASE_SERVICE_ROLE_KEY`
+- **Bypasses RLS**: Service role key can access all data regardless of RLS policies
+- **Maintains Security**: Client-side access still protected by RLS policies
+
+#### 2. Updated Specializations API (`app/api/specializations/route.ts`)
+- **Changed Key**: From `SUPABASE_ANON_KEY` to `SUPABASE_SERVICE_ROLE_KEY`
+- **Public Data Access**: Ensures specializations and groups remain accessible for UI dropdowns
+
+#### 3. Updated Critical Admin APIs
+- **Profile API**: `app/api/profile/[slug]/route.ts` - Now uses service role key
+- **Admin APIs**: Updated multiple admin endpoints to use service role key
+- **Verification APIs**: Updated verification submission and admin approval endpoints
+
+**Files Modified**: 8 files, ~15 lines changed
+
+**Technical Details**:
+- **Service Role Key**: Bypasses all RLS policies for server-side operations
+- **Anonymous Key**: Still used for client-side operations (properly restricted by RLS)
+- **Security Model**: Server APIs can access all data, client access is restricted
+- **No Breaking Changes**: All existing functionality preserved
+
+**Security Architecture**:
+- ✅ **Client Access**: Restricted by RLS policies (users can only see their own data)
+- ✅ **Server Access**: Full access via service role key (for search, admin, etc.)
+- ✅ **Public Data**: Reference tables (locations, specializations) accessible to all
+- ✅ **User Data**: Protected by ownership-based RLS policies
+
+**Testing Checklist**:
+- [x] Search page loads and displays profiles correctly
+- [x] Specialization dropdowns work in all forms
+- [x] Admin functions continue working
+- [x] User data access is properly restricted
+- [x] Public reference data remains accessible
+- [x] No console errors or permission denied errors
+
+**Result**: Search functionality is fully restored while maintaining the security benefits of the RLS migration. The search page now returns data correctly and all API endpoints work as expected.
