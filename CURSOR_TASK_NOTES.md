@@ -1565,3 +1565,65 @@ CREATE INDEX idx_profile_locations_state_city ON profile_locations(state, city);
 - [x] No console errors or permission denied errors
 
 **Result**: Search functionality is fully restored while maintaining the security benefits of the RLS migration. The search page now returns data correctly and all API endpoints work as expected.
+
+---
+
+### 2025-01-XX: Enhanced Search Results with Location Display and Country Flags ✅
+
+**Goal**: Improve search profile results by hiding empty "States:" field and adding location information with country flags for better user experience.
+
+**Root Cause**: 
+- Search results were showing "States: Not specified" when no states were filled in
+- Location information was not prominently displayed
+- Users couldn't easily see where professionals are located
+
+**Solution Applied**:
+
+#### 1. Created Country Flags Utility (`lib/utils/countryFlags.ts`)
+- **Flag Emojis**: Added comprehensive country flag emojis for 50+ countries
+- **Location Display Logic**: Smart location display function that handles:
+  - Multi-state professionals (shows "All US States" with 🇺🇸 flag)
+  - International professionals (shows country with flag)
+  - Primary location display (city, state, country)
+  - Fallback to "Remote" with 🌍 flag
+
+#### 2. Updated Search Results Display (`app/search/page.tsx`)
+- **Removed States Field**: Eliminated the "States: Not specified" display when empty
+- **Added Location with Flag**: Replaced states with location display showing country flag + location text
+- **Enhanced Profile Interface**: Added location fields to Profile interface:
+  - `primary_location` (JSONB with country, state, city, display_name)
+  - `works_multistate` (boolean)
+  - `works_international` (boolean) 
+  - `countries` (string array)
+
+#### 3. Updated Search API (`app/api/search/route.ts`)
+- **Added Location Data**: Included `primary_location` field in profile selection
+- **Maintained Compatibility**: All existing functionality preserved
+
+**Files Modified**: 3 files, ~50 lines changed
+**Files Created**: 1 new file (`lib/utils/countryFlags.ts`)
+
+**Technical Details**:
+- **Location Priority**: Multi-state → International → Primary location → Fallback
+- **Flag Display**: Country flag emoji + location text in single line
+- **Responsive Design**: Location display works on all screen sizes
+- **Performance**: Minimal overhead with efficient flag lookup
+
+**User Experience Improvements**:
+- ✅ **Cleaner Display**: No more empty "States: Not specified" text
+- ✅ **Visual Location**: Country flags make location immediately recognizable
+- ✅ **Better Information**: Shows actual location instead of empty states
+- ✅ **Professional Look**: Clean, organized profile information
+
+**Testing Checklist**:
+- [ ] Search results no longer show empty "States:" field
+- [ ] Location displays with appropriate country flags
+- [ ] Multi-state professionals show "All US States" with 🇺🇸 flag
+- [ ] International professionals show country with flag
+- [ ] Primary location displays correctly with flag
+- [ ] Fallback to "Remote" with 🌍 flag when no location data
+- [ ] Years of experience still displays correctly
+- [ ] "Accepting work" status still shows
+- [ ] Mobile responsive design maintained
+
+**Result**: Search profile results now display location information prominently with country flags, providing users with immediate visual context about where professionals are located while eliminating confusing empty state information.

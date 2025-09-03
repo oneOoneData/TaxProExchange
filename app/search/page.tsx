@@ -9,6 +9,7 @@ import UserMenu from '@/components/UserMenu';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
 import MobileNav from '@/components/MobileNav';
+import { getLocationDisplay } from '@/lib/utils/countryFlags';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,10 @@ interface Profile {
   states: string[];
   avatar_url: string | null;
   years_experience?: string;
+  primary_location?: { country?: string; state?: string; city?: string; display_name?: string } | null;
+  works_multistate?: boolean;
+  works_international?: boolean;
+  countries?: string[];
 }
 
 interface SearchFilters {
@@ -153,6 +158,9 @@ export default function SearchPage() {
       params.append('page', page.toString());
       params.append('limit', pagination.limit.toString());
 
+      console.log('🔍 Search API Request URL:', `/api/search?${params}`);
+      console.log('🔍 Search API Request params:', Object.fromEntries(params));
+      
       const response = await fetch(`/api/search?${params}`);
       const data = await response.json();
       console.log('🔍 Search API Response:', data);
@@ -456,9 +464,103 @@ export default function SearchPage() {
           </p>
         </div>
 
+        {/* Mobile Filters - Top */}
+        <div className="lg:hidden mb-6">
+          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900">Quick Filters</h2>
+            
+            {/* Mobile Search */}
+            <div>
+              <input
+                type="text"
+                placeholder="Search professionals..."
+                value={filters.q}
+                onChange={(e) => {
+                  const searchValue = e.target.value;
+                  const newFilters = { ...filters, q: searchValue };
+                  
+                  // Check if the search value is a state code
+                  const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase());
+                  if (stateCode) {
+                    // If it's a state code, set the location filter and clear the search query
+                    newFilters.state = stateCode;
+                    newFilters.q = '';
+                  }
+                  
+                  setFilters(newFilters);
+                  if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                  searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
+                }}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Mobile Filter Row */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Credential Type */}
+              <select
+                value={filters.credential_type}
+                onChange={(e) => {
+                  const newFilters = { ...filters, credential_type: e.target.value };
+                  setFilters(newFilters);
+                  setTimeout(() => searchProfiles(newFilters, 1), 100);
+                }}
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="">All credentials</option>
+                <option value="CPA">CPA</option>
+                <option value="EA">EA</option>
+                <option value="CTEC">CTEC</option>
+                <option value="Student">Student</option>
+                <option value="Other">Other</option>
+              </select>
+
+              {/* Location */}
+              <select
+                value={filters.state}
+                onChange={(e) => {
+                  const newFilters = { ...filters, state: e.target.value };
+                  setFilters(newFilters);
+                  setTimeout(() => searchProfiles(newFilters, 1), 100);
+                }}
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              >
+                <option value="">All locations</option>
+                {states.map(state => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Mobile Verified Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-700">Verified Only</span>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={filters.verified_only}
+                  onChange={(e) => {
+                    const newFilters = { ...filters, verified_only: e.target.checked };
+                    setFilters(newFilters);
+                    setTimeout(() => searchProfiles(newFilters, 1), 100);
+                  }}
+                  className="sr-only"
+                />
+                <div className={`w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${
+                  filters.verified_only ? 'bg-blue-600' : 'bg-gray-300'
+                }`}>
+                  <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 ease-in-out ${
+                    filters.verified_only ? 'translate-x-5' : 'translate-x-0'
+                  }`} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1 order-2 lg:order-1">
+          {/* Desktop Filters Sidebar */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="lg:sticky lg:top-24">
               <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 space-y-6">
                 <h2 className="text-xl font-semibold text-slate-900">Filters</h2>
@@ -499,13 +601,23 @@ export default function SearchPage() {
                     type="text"
                     placeholder="Name, firm, or keywords..."
                     value={filters.q}
-                                         onChange={(e) => {
-                       const newFilters = { ...filters, q: e.target.value };
-                       setFilters(newFilters);
-                       // Auto-search when text changes (debounced)
-                       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                       searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
-                     }}
+                    onChange={(e) => {
+                      const searchValue = e.target.value;
+                      const newFilters = { ...filters, q: searchValue };
+                      
+                      // Check if the search value is a state code
+                      const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase());
+                      if (stateCode) {
+                        // If it's a state code, set the location filter and clear the search query
+                        newFilters.state = stateCode;
+                        newFilters.q = '';
+                      }
+                      
+                      setFilters(newFilters);
+                      // Auto-search when text changes (debounced)
+                      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                      searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
+                    }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -532,20 +644,20 @@ export default function SearchPage() {
                   </select>
                 </div>
 
-                {/* State */}
+                {/* Location */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">State</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Location</label>
                   <select
                     value={filters.state}
-                                         onChange={(e) => {
-                       const newFilters = { ...filters, state: e.target.value };
-                       setFilters(newFilters);
-                       // Auto-search when this filter changes
-                       setTimeout(() => searchProfiles(newFilters, 1), 100);
-                     }}
+                    onChange={(e) => {
+                      const newFilters = { ...filters, state: e.target.value };
+                      setFilters(newFilters);
+                      // Auto-search when this filter changes
+                      setTimeout(() => searchProfiles(newFilters, 1), 100);
+                    }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">All states</option>
+                    <option value="">All locations</option>
                     {states.map(state => (
                       <option key={state} value={state}>{state}</option>
                     ))}
@@ -628,7 +740,7 @@ export default function SearchPage() {
           </div>
 
           {/* Results */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
+          <div className="lg:col-span-3">
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
@@ -695,7 +807,15 @@ export default function SearchPage() {
                         </div>
                         
                         <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span>States: {profile.states ? profile.states.join(', ') : 'Not specified'}</span>
+                          {(() => {
+                            const location = getLocationDisplay(profile);
+                            return (
+                              <span className="flex items-center gap-1">
+                                <span>{location.flag}</span>
+                                <span>{location.text}</span>
+                              </span>
+                            );
+                          })()}
                           {profile.years_experience && (
                             <span>Experience: {profile.years_experience === '31+' ? '31+ years' : `${profile.years_experience} years`}</span>
                           )}

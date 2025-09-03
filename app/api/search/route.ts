@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     const state = searchParams.get('state') || '';
     const accepting_work = searchParams.get('accepting_work') || '';
     const verified_only = searchParams.get('verified_only') || 'false';
+    console.log('🔍 Verified only parameter:', verified_only, 'type:', typeof verified_only);
     const years_experience = searchParams.get('years_experience') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
         works_multistate,
         works_international,
         countries,
+        primary_location,
         years_experience,
         created_at
       `, { count: 'exact' })
@@ -62,12 +64,32 @@ export async function GET(request: NextRequest) {
     // Apply verified filter based on user preference
     if (verified_only === 'true') {
       supabaseQuery = supabaseQuery.eq('visibility_state', 'verified');
+      console.log('🔍 Verified filter applied: visibility_state = verified');
+    } else {
+      console.log('🔍 No verified filter applied - showing all profiles');
     }
+    
+    // Debug: Log the final query being executed
+    console.log('🔍 Final Supabase query conditions:', {
+      is_listed: true,
+      visibility_state: verified_only === 'true' ? 'verified' : 'any',
+      state_filter: state || 'none'
+    });
+    
+    // Debug: Log the final query being executed
+    console.log('🔍 Final Supabase query conditions:', {
+      is_listed: true,
+      visibility_state: verified_only === 'true' ? 'verified' : 'any',
+      state_filter: state || 'none',
+      page: page,
+      limit: limit,
+      offset: (page - 1) * limit
+    });
     // When verified_only is false, show all profiles (both verified and unverified)
     // Users can still only view verified profiles due to profile API restrictions
 
-    // Apply text search
-    if (query) {
+    // Apply text search (only if it's not a state code)
+    if (query && !state) {
       supabaseQuery = supabaseQuery.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%,firm_name.ilike.%${query}%`);
     }
 
@@ -118,12 +140,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Apply state filter if specified
-    if (state) {
-      // This is complex because we need to check both direct state matches and multi-state profiles
-      // For now, we'll get all profiles and filter in memory for state
-      // TODO: Optimize this with a proper join
-    }
+    // State filtering is handled after the main query due to complex location logic
 
     // Apply international filter if specified
     const international = searchParams.get('international') || '';
@@ -142,7 +159,9 @@ export async function GET(request: NextRequest) {
     const { count: totalCount } = await supabaseQuery;
 
     // Execute the query with pagination
+    // Order by verified status first, then by created_at
     const { data: profiles, error } = await supabaseQuery
+      .order('visibility_state', { ascending: false }) // 'verified' comes before 'pending_verification'
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -155,36 +174,66 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🔍 Search API - Raw profiles found:', profiles?.length || 0);
+    
+    // Debug: Check if Alvin Choy is in the main query results
+    if (profiles && profiles.length > 0) {
+      const alvinChoy = profiles.find(p => p.first_name === 'Alvin' && p.last_name === 'Choy');
+      if (alvinChoy) {
+        console.log('🔍 Alvin Choy found in main query results:', {
+          name: `${alvinChoy.first_name} ${alvinChoy.last_name}`,
+          visibility_state: alvinChoy.visibility_state,
+          is_listed: alvinChoy.is_listed,
+          primary_location: alvinChoy.primary_location
+        });
+      } else {
+        console.log('🔍 Alvin Choy NOT found in main query results');
+      }
+    } else {
+      console.log('🔍 No profiles found in main query results');
+    }
+    
     if (profiles && profiles.length > 0) {
       console.log('🔍 First profile sample:', {
         id: profiles[0].id,
         name: `${profiles[0].first_name} ${profiles[0].last_name}`,
         slug: profiles[0].slug,
         visibility_state: profiles[0].visibility_state,
-        is_listed: profiles[0].is_listed
+        is_listed: profiles[0].is_listed,
+        primary_location: profiles[0].primary_location
       });
+      
+      // Log all profiles and their verification status
+      profiles.forEach((profile, index) => {
+        console.log(`🔍 Profile ${index + 1}:`, {
+          name: `${profile.first_name} ${profile.last_name}`,
+          visibility_state: profile.visibility_state,
+          is_listed: profile.is_listed,
+          primary_location: profile.primary_location,
+          state: state,
+          verified_only: verified_only
+        });
+      });
+    } else {
+      console.log('🔍 No profiles found after database query');
     }
 
     // Apply remaining filters that can't be done in SQL
     let filteredProfiles = profiles || [];
 
-    // Filter by state if specified (complex filtering)
+    // Filter by professional's location if specified
     if (state) {
-      // Get profiles that work in this specific state
-      const { data: stateProfiles } = await supabase
-        .from('profile_locations')
-        .select('profile_id')
-        .eq('location_id', state);
+      console.log('🔍 Filtering by professional location:', state);
       
-      if (stateProfiles) {
-        const stateProfileIds = stateProfiles.map(sp => sp.profile_id);
-        filteredProfiles = filteredProfiles.filter(p => 
-          p.works_multistate || stateProfileIds.includes(p.id)
-        );
-      } else {
-        // No profiles in this state, only show multi-state profiles
-        filteredProfiles = filteredProfiles.filter(p => p.works_multistate);
-      }
+      // Filter by primary_location state (where the professional is located)
+      // This matches the location display logic
+      filteredProfiles = filteredProfiles.filter(p => {
+        const primaryState = p.primary_location?.state;
+        const isMatch = primaryState === state;
+        console.log('🔍 Profile', p.first_name, p.last_name, 'primary_location state:', primaryState, 'matches', state, ':', isMatch);
+        return isMatch;
+      });
+      
+      console.log('🔍 Filtered profiles count by location:', filteredProfiles.length);
     }
 
     // Filter by specific country if specified
