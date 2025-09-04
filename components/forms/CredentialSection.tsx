@@ -84,7 +84,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
           license_kind: licenseKind as any,
           license_number: '',
           issuing_authority: issuingAuthority,
-          state: '',
+          state: credential_type === 'CPA' ? '' : undefined,
           expires_on: '',
           board_profile_url: ''
         };
@@ -95,7 +95,9 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
         const updatedLicenses = licenses.map(license => ({
           ...license,
           license_kind: licenseKind as any,
-          issuing_authority: issuingAuthority
+          issuing_authority: issuingAuthority,
+          // Clear state for non-CPA licenses
+          state: credential_type === 'CPA' ? license.state : undefined
         }));
         setLicenses(updatedLicenses);
         onChange({ credential_type, licenses: updatedLicenses });
@@ -118,7 +120,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
        license_kind: licenseKind as any,
        license_number: '',
        issuing_authority: issuingAuthority,
-       state: '',
+       state: value.credential_type === 'CPA' ? '' : undefined,
        expires_on: '',
        board_profile_url: ''
      };
@@ -218,7 +220,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                   </label>
                   <input
                     type="text"
-                    value={license.license_number}
+                    value={license.license_number || ''}
                     onChange={(e) => updateLicense(index, 'license_number', e.target.value)}
                     placeholder="Enter your license number"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -234,7 +236,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                   </label>
                   <input
                     type="text"
-                    value={license.issuing_authority}
+                    value={license.issuing_authority || ''}
                     onChange={(e) => updateLicense(index, 'issuing_authority', e.target.value)}
                     placeholder="e.g., CA Board of Accountancy, IRS, CTEC"
                     readOnly={['CTEC', 'EA', 'PTIN Only'].includes(value.credential_type)}

@@ -115,8 +115,10 @@ export default function JobsPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <a href="/" className="hover:text-slate-900">Home</a>
-            <a href="/search" className="hover:text-slate-900">Search</a>
+            <a href="/#features" className="hover:text-slate-900">Features</a>
+            <a href="/#how" className="hover:text-slate-900">How it works</a>
+            <a href="/#faq" className="hover:text-slate-900">FAQ</a>
+            <a href="/search" className="hover:text-slate-900">Directory</a>
             <a href="/jobs" className="hover:text-slate-900 font-medium text-slate-900">Jobs</a>
             {!isSignedIn && (
               <a href="/join" className="hover:text-slate-900">Join</a>

@@ -92,7 +92,7 @@ export default function Page() {
             <a href="#features" className="hover:text-slate-900">Features</a>
             <a href="#how" className="hover:text-slate-900">How it works</a>
             <a href="#faq" className="hover:text-slate-900">FAQ</a>
-            <a href="/search" className="hover:text-slate-900">Search</a>
+            <a href="/search" className="hover:text-slate-900">Directory</a>
             <a href="/jobs" className="hover:text-slate-900">Jobs</a>
             {!user && (
               <a href="/join" className="hover:text-slate-900">Join</a>

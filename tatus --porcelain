@@ -1,0 +1,8 @@
+app/api/connections/all/route.ts
+app/jobs/page.tsx
+app/page.tsx
+app/profile/edit/page.tsx
+app/search/page.tsx
+components/MobileNav.tsx
+components/forms/CredentialSection.tsx
+lib/validations/zodSchemas.ts

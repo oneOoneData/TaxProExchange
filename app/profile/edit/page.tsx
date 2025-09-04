@@ -34,6 +34,7 @@ interface ProfileForm {
   states: string[];
   software: string[];
   other_software: string[];
+  other_software_raw?: string;
   years_experience?: string;
   entity_revenue_range?: string;
   primary_location: {
@@ -316,7 +317,10 @@ export default function EditProfilePage() {
         },
         body: JSON.stringify({
           clerk_id: user?.id,
-          ...profileForm
+          ...(() => {
+            const { other_software_raw, ...formData } = profileForm;
+            return formData;
+          })()
         }),
       });
 
@@ -331,7 +335,16 @@ export default function EditProfilePage() {
         let msg = `Failed (${response.status})`;
         try { 
           const j = await response.json(); 
-          if (j?.error) msg = j.error; 
+          if (j?.error) {
+            msg = j.error;
+            // If there are detailed validation errors, show them
+            if (j.details && j.details.fieldErrors) {
+              const fieldErrors = Object.entries(j.details.fieldErrors)
+                .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+                .join('\n');
+              msg = `Validation failed:\n${fieldErrors}`;
+            }
+          }
         } catch { 
           try { 
             msg = await response.text(); 
@@ -353,7 +366,16 @@ export default function EditProfilePage() {
         }
       }
       
-      alert(errorMessage);
+      // Show validation errors in a more user-friendly way
+      if (errorMessage.includes('Validation failed:')) {
+        // For validation errors, show them in a more readable format
+        const lines = errorMessage.split('\n');
+        const mainError = lines[0];
+        const fieldErrors = lines.slice(1).join('\n');
+        alert(`${mainError}\n\nPlease check the following fields:\n${fieldErrors}`);
+      } else {
+        alert(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -1051,13 +1073,33 @@ export default function EditProfilePage() {
                   <input
                     type="text"
                     placeholder="e.g., Custom in-house tools, specialized software, etc."
-                    value={profileForm.other_software ? profileForm.other_software.join(', ') : ''}
+                    value={profileForm.other_software_raw !== undefined ? profileForm.other_software_raw : (profileForm.other_software ? profileForm.other_software.join(', ') : '')}
                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                     onChange={(e) => {
+                      // Store the raw input value temporarily
+                      setProfileForm(prev => ({ ...prev, other_software_raw: e.target.value }));
+                    }}
+                    onBlur={(e) => {
+                      // Process the input when user finishes typing
                       const otherSoftware = e.target.value.split(',').map(s => s.trim()).filter(s => s);
                       updateForm('other_software', otherSoftware);
+                      // Clear the raw input
+                      setProfileForm(prev => ({ ...prev, other_software_raw: undefined }));
+                    }}
+                    onKeyDown={(e) => {
+                      // Process on Enter key as well
+                      if (e.key === 'Enter') {
+                        const otherSoftware = e.currentTarget.value.split(',').map(s => s.trim()).filter(s => s);
+                        updateForm('other_software', otherSoftware);
+                        // Clear the raw input
+                        setProfileForm(prev => ({ ...prev, other_software_raw: undefined }));
+                        e.currentTarget.blur();
+                      }
                     }}
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Type software names separated by commas. Press Enter or click outside to save.
+                  </p>
                 </div>
               </div>
             </div>

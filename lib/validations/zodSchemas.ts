@@ -24,12 +24,14 @@ export const LicenseSchema = z.object({
   license_kind: LicenseKindEnum,
   license_number: z.string().min(2, "License number must be at least 2 characters"),
   issuing_authority: z.string().min(2, "Issuing authority is required"),
-  state: z.string().optional().refine((val) => !val || val.length === 2, {
+  state: z.string().nullable().optional().refine((val) => !val || val.length === 2, {
     message: "State must be 2 characters or empty"
   }),
-  expires_on: z.string().optional(),
-  board_profile_url: z.string().url("Must be a valid URL").optional().or(z.literal(""))
-});
+  expires_on: z.string().nullable().optional(),
+  board_profile_url: z.string().nullable().optional().refine((val) => !val || val === "" || z.string().url().safeParse(val).success, {
+    message: "Must be a valid URL or empty"
+  })
+}).passthrough(); // Allow additional fields like id, status
 
 // Profile credential schema with validation
 export const ProfileCredentialSchema = z.object({

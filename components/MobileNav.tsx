@@ -17,7 +17,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
     { href: '#features', label: 'Features' },
     { href: '#how', label: 'How it works' },
     { href: '#faq', label: 'FAQ' },
-    { href: '/search', label: 'Search' },
+    { href: '/search', label: 'Directory' },
     { href: '/jobs', label: 'Jobs' },
     ...(!user ? [{ href: '/join', label: 'Join' }] : []),
   ];
