@@ -117,7 +117,7 @@ export async function POST(req: Request) {
     console.error('Stream channel creation error:', error);
     return NextResponse.json({ 
       error: 'Failed to create Stream channel',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
