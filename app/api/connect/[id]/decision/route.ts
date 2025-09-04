@@ -72,14 +72,45 @@ export async function POST(
     // If accepted, create Stream Chat channel
     if (decision === 'accepted' && !updated.stream_channel_id) {
       try {
-        const streamClient = getServerStreamClient();
+        console.log('Creating Stream Chat channel for connection:', updated.id);
         
-        // Create a unique channel ID for this connection
-        const channelId = `conn_${updated.id}`;
+        // Check if Stream environment variables are set
+        if (!process.env.STREAM_KEY || !process.env.STREAM_SECRET) {
+          throw new Error('Stream Chat environment variables not set (STREAM_KEY, STREAM_SECRET)');
+        }
+        
+        const streamClient = getServerStreamClient();
+        console.log('Stream client created successfully');
         
         // Get both participant profile IDs
         const memberA = String(updated.requester_profile_id);
         const memberB = String(updated.recipient_profile_id);
+        
+        // Get profile information for both users
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, avatar_url')
+          .in('id', [memberA, memberB]);
+        
+        if (profilesError || !profiles || profiles.length !== 2) {
+          throw new Error('Failed to fetch profile information for Stream users');
+        }
+        
+        // Create/update user objects in Stream Chat
+        for (const profile of profiles) {
+          await streamClient.upsertUser({
+            id: profile.id,
+            name: `${profile.first_name} ${profile.last_name}`,
+            image: profile.avatar_url,
+          });
+        }
+        
+        console.log('Stream users created/updated for:', profiles.map(p => p.id));
+        
+        // Create a unique channel ID for this connection
+        const channelId = `conn_${updated.id}`;
+        
+        console.log('Creating channel with members:', { memberA, memberB, channelId });
         
         // Create the Stream channel
         const channel = streamClient.channel('messaging', channelId, {
@@ -88,6 +119,7 @@ export async function POST(
         });
         
         await channel.create();
+        console.log('Stream channel created successfully:', channel.id);
         
         // Update connection with Stream channel ID
         const { data: saved, error: saveError } = await supabase
@@ -101,11 +133,21 @@ export async function POST(
           console.error('Failed to save Stream channel ID:', saveError);
           // Don't fail the whole request, just log the error
         } else {
+          console.log('Stream channel ID saved to database:', channel.id);
           updated.stream_channel_id = channel.id;
         }
         
       } catch (streamError) {
         console.error('Stream Chat channel creation error:', streamError);
+        console.error('Error details:', {
+          message: streamError instanceof Error ? streamError.message : 'Unknown error',
+          stack: streamError instanceof Error ? streamError.stack : undefined,
+          envVars: {
+            hasStreamKey: !!process.env.STREAM_KEY,
+            hasStreamSecret: !!process.env.STREAM_SECRET,
+            hasStreamAppId: !!process.env.STREAM_APP_ID
+          }
+        });
         // Don't fail the whole request, just log the error
       }
     }

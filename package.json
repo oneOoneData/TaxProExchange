@@ -19,8 +19,8 @@
     "react": "^18",
     "react-dom": "^18",
     "resend": "^3.5.0",
-    "stream-chat": "^9.18.1",
-    "stream-chat-react": "^13.6.0",
+    "stream-chat": "^9.19.0",
+    "stream-chat-react": "^13.6.1",
     "svix": "^1.75.0",
     "zod": "^4.1.5"
   },

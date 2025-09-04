@@ -16,10 +16,22 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
   const supabase = createClient(supabaseUrl, supabaseKey);
   
-  // Get connection details
+  // Get connection details with profiles
   const { data: conn, error } = await supabase
     .from('connections')
-    .select('id, status, requester_profile_id, recipient_profile_id, stream_channel_id')
+    .select(`
+      id, 
+      status, 
+      requester_profile_id, 
+      recipient_profile_id, 
+      stream_channel_id,
+      requester_profile:profiles!requester_profile_id(
+        id, first_name, last_name, headline, firm_name, public_email, avatar_url
+      ),
+      recipient_profile:profiles!recipient_profile_id(
+        id, first_name, last_name, headline, firm_name, public_email, avatar_url
+      )
+    `)
     .eq('id', id)
     .single();
 
@@ -30,15 +42,34 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id')
-    .eq('clerk_user_id', userId)
+    .eq('clerk_id', userId)
     .single();
 
-  if (profileError || !profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+  if (profileError || !profile) {
+    console.error('Profile lookup failed:', { userId, profileError });
+    return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+  }
+
+  console.log('Connection access check:', {
+    connectionId: id,
+    userId,
+    profileId: profile.id,
+    requesterId: conn.requester_profile_id,
+    recipientId: conn.recipient_profile_id
+  });
 
   // Check if current user is a participant
   if (profile.id !== conn.requester_profile_id && profile.id !== conn.recipient_profile_id) {
+    console.error('User not authorized for connection:', {
+      profileId: profile.id,
+      requesterId: conn.requester_profile_id,
+      recipientId: conn.recipient_profile_id
+    });
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
 
-  return NextResponse.json({ connection: conn });
+  return NextResponse.json({ 
+    connection: conn,
+    currentProfileId: profile.id
+  });
 }
