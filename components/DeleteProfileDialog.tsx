@@ -39,8 +39,9 @@ export default function DeleteProfileDialog({ isOpen, onClose, userName }: Delet
         throw new Error(data.error || 'Failed to delete profile');
       }
 
-      // Profile deleted successfully, sign out the user
-      await signOut();
+      // Profile and Clerk account deleted successfully
+      // The user will be automatically signed out when their Clerk account is deleted
+      // No need to manually sign out
       
     } catch (err) {
       console.error('Error deleting profile:', err);
@@ -88,10 +89,10 @@ export default function DeleteProfileDialog({ isOpen, onClose, userName }: Delet
                 </div>
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold text-slate-900">
-                    Delete Profile
+                    Delete Account
                   </h3>
                   <p className="text-sm text-slate-500">
-                    This action cannot be undone
+                    This will permanently delete your account
                   </p>
                 </div>
               </div>
@@ -99,7 +100,7 @@ export default function DeleteProfileDialog({ isOpen, onClose, userName }: Delet
               {/* Content */}
               <div className="mb-6">
                 <p className="text-slate-700 mb-4">
-                  Are you sure you want to delete your profile? This will:
+                  Are you sure you want to delete your account? This will:
                 </p>
                 <ul className="text-sm text-slate-600 space-y-2 mb-4">
                   <li className="flex items-start">
@@ -112,7 +113,11 @@ export default function DeleteProfileDialog({ isOpen, onClose, userName }: Delet
                   </li>
                   <li className="flex items-start">
                     <span className="text-red-500 mr-2">•</span>
-                    Sign you out of your account
+                    Permanently delete your account
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-red-500 mr-2">•</span>
+                    This action cannot be undone
                   </li>
                 </ul>
                 
@@ -161,7 +166,7 @@ export default function DeleteProfileDialog({ isOpen, onClose, userName }: Delet
                       Deleting...
                     </div>
                   ) : (
-                    'Delete Profile'
+                    'Delete Account'
                   )}
                 </button>
               </div>

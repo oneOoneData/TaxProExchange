@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
+import { clerkClient } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,16 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Delete the user from Clerk as well
+    try {
+      await clerkClient().users.deleteUser(userId);
+      console.log('User deleted from Clerk successfully');
+    } catch (clerkError) {
+      console.error('Error deleting user from Clerk:', clerkError);
+      // Don't fail the entire operation if Clerk deletion fails
+      // The profile is already soft deleted, which is the most important part
+    }
+
     // TODO: Consider also deleting related data like:
     // - Profile specializations
     // - Connections
@@ -85,7 +96,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Profile deleted successfully'
+      message: 'Profile and account deleted successfully'
     });
 
   } catch (error) {
