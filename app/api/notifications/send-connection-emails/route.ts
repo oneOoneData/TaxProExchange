@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Send emails to each recipient
-    for (const [recipientId, connections] of recipientConnections) {
+    for (const [recipientId, connections] of Array.from(recipientConnections.entries())) {
       try {
         const recipient = connections[0].recipient;
         
