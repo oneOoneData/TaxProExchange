@@ -197,7 +197,15 @@ export function JobForm() {
       } else {
         const errorData = await response.json();
         console.log('API error:', errorData);
-        setErrors({ submit: errorData.error || 'Failed to create job' });
+        
+        if (errorData.code === 'PROFILE_NOT_FOUND') {
+          setErrors({ 
+            submit: `${errorData.error} Please complete your profile setup first.`,
+            profileSetup: 'You need to create and verify your profile before posting jobs.'
+          });
+        } else {
+          setErrors({ submit: errorData.error || 'Failed to create job' });
+        }
       }
     } catch (error) {
       console.error('Error creating job:', error);
@@ -527,6 +535,17 @@ export function JobForm() {
       {errors.submit && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-600">{errors.submit}</p>
+          {errors.profileSetup && (
+            <div className="mt-3">
+              <p className="text-sm text-red-600 mb-2">{errors.profileSetup}</p>
+              <a 
+                href="/profile/edit" 
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+              >
+                Complete Profile Setup
+              </a>
+            </div>
+          )}
         </div>
       )}
 

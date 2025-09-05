@@ -177,7 +177,11 @@ export async function POST(request: Request) {
 
     if (profileError || !profile) {
       console.log('Profile not found, error:', profileError);
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+      return NextResponse.json({ 
+        error: 'Profile not found. Please complete your profile setup first.',
+        code: 'PROFILE_NOT_FOUND',
+        details: 'You need to create and verify your profile before posting jobs.'
+      }, { status: 404 });
     }
 
     if (profile.visibility_state !== 'verified') {
