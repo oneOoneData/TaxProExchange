@@ -26,11 +26,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const showDeleted = searchParams.get('showDeleted') === 'true';
+    const filterUnverified = searchParams.get('filterUnverified') === 'true';
 
     // TODO: Add admin role check here
     // For now, allow access to anyone (we'll secure this later)
 
-    // Build the query - include public_email from the database
+    // Build the query - include public_email and license information
     let query = supabase
       .from('profiles')
       .select(`
@@ -47,7 +48,20 @@ export async function GET(request: NextRequest) {
         is_deleted,
         deleted_at,
         created_at,
-        public_email
+        public_email,
+        ptin,
+        website_url,
+        linkedin_url,
+        phone,
+        licenses (
+          id,
+          license_kind,
+          license_number,
+          issuing_authority,
+          state,
+          expires_on,
+          status
+        )
       `)
       .order('created_at', { ascending: false });
 
@@ -56,6 +70,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('is_deleted', true);
     } else {
       query = query.eq('is_deleted', false);
+    }
+
+    // Filter for unverified/unlisted users if requested
+    if (filterUnverified) {
+      query = query.or('visibility_state.neq.verified,is_listed.eq.false');
     }
 
     const { data: profiles, error } = await query;

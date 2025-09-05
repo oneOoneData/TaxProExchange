@@ -5,6 +5,16 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 
+interface License {
+  id: string;
+  license_kind: string;
+  license_number: string;
+  issuing_authority: string;
+  state: string | null;
+  expires_on: string | null;
+  status: string;
+}
+
 interface Profile {
   id: string;
   first_name: string;
@@ -12,6 +22,7 @@ interface Profile {
   email: string;
   credential_type: string;
   headline: string;
+  bio: string;
   firm_name: string;
   slug: string;
   visibility_state: string;
@@ -19,6 +30,11 @@ interface Profile {
   is_deleted: boolean;
   deleted_at: string | null;
   created_at: string;
+  ptin: string | null;
+  website_url: string | null;
+  linkedin_url: string | null;
+  phone: string | null;
+  licenses: License[];
 }
 
 export default function AdminProfilesPage() {
@@ -26,14 +42,15 @@ export default function AdminProfilesPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [showDeleted, setShowDeleted] = useState(false);
+  const [filterUnverified, setFilterUnverified] = useState(true);
 
   useEffect(() => {
     loadProfiles();
-  }, [showDeleted]);
+  }, [showDeleted, filterUnverified]);
 
   const loadProfiles = async () => {
     try {
-      const response = await fetch(`/api/admin/profiles?showDeleted=${showDeleted}`);
+      const response = await fetch(`/api/admin/profiles?showDeleted=${showDeleted}&filterUnverified=${filterUnverified}`);
       if (response.ok) {
         const data = await response.json();
         setProfiles(data.profiles || []);
@@ -263,8 +280,17 @@ export default function AdminProfilesPage() {
           </p>
         </div>
 
-        {/* Toggle Deleted Profiles */}
-        <div className="mb-6">
+        {/* Filter Controls */}
+        <div className="mb-6 flex flex-wrap gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={filterUnverified}
+              onChange={(e) => setFilterUnverified(e.target.checked)}
+              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-slate-700">Show only unverified/unlisted users</span>
+          </label>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -297,7 +323,8 @@ export default function AdminProfilesPage() {
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Profile</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Profile & Contact</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">License Info</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
                     {showDeleted && (
@@ -315,15 +342,52 @@ export default function AdminProfilesPage() {
                       transition={{ delay: index * 0.05 }}
                       className={`hover:bg-slate-50 ${profile.is_deleted ? 'bg-red-50' : ''}`}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
                           <div className="text-sm font-medium text-slate-900">
                             {profile.first_name} {profile.last_name}
                           </div>
                           <div className="text-sm text-slate-500">{profile.email}</div>
                           <div className="text-sm text-slate-500">{profile.credential_type}</div>
                           {profile.headline && (
-                            <div className="text-sm text-slate-600 mt-1">{profile.headline}</div>
+                            <div className="text-sm text-slate-600">{profile.headline}</div>
+                          )}
+                          {profile.firm_name && (
+                            <div className="text-sm text-slate-500">🏢 {profile.firm_name}</div>
+                          )}
+                          {profile.phone && (
+                            <div className="text-sm text-slate-500">📞 {profile.phone}</div>
+                          )}
+                          {profile.ptin && (
+                            <div className="text-sm text-slate-500">🆔 PTIN: {profile.ptin}</div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          {profile.licenses && profile.licenses.length > 0 ? (
+                            profile.licenses.map((license) => (
+                              <div key={license.id} className="text-sm">
+                                <div className="font-medium text-slate-900">
+                                  {license.license_kind.replace('_', ' ')}
+                                </div>
+                                <div className="text-slate-500">
+                                  {license.license_number} ({license.state || 'N/A'})
+                                </div>
+                                <div className="text-slate-500 text-xs">
+                                  {license.issuing_authority}
+                                  {license.expires_on && ` • Expires: ${new Date(license.expires_on).toLocaleDateString()}`}
+                                </div>
+                                <div className={`text-xs font-medium ${
+                                  license.status === 'verified' ? 'text-green-600' :
+                                  license.status === 'rejected' ? 'text-red-600' : 'text-yellow-600'
+                                }`}>
+                                  {license.status.toUpperCase()}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-sm text-slate-400 italic">No licenses listed</div>
                           )}
                         </div>
                       </td>

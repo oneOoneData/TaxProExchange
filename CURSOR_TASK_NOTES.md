@@ -1627,3 +1627,126 @@ CREATE INDEX idx_profile_locations_state_city ON profile_locations(state, city);
 - [ ] Mobile responsive design maintained
 
 **Result**: Search profile results now display location information prominently with country flags, providing users with immediate visual context about where professionals are located while eliminating confusing empty state information.
+
+---
+
+### 2025-01-XX: Enhanced Admin Profiles Page for Faster User Approval ✅
+
+**Goal**: Improve the admin profiles page to filter out verified/listed users by default and show license information concisely for faster approval decisions.
+
+**Root Cause**: 
+- Admin was overwhelmed with too many users, including already verified and listed ones
+- No way to filter to see only users needing approval
+- License information wasn't displayed, making approval decisions slower
+- Profile information was scattered and not optimized for quick review
+
+**Solution Applied**:
+
+#### 1. Enhanced API with License Data (`app/api/admin/profiles/route.ts`)
+- **Added License Information**: Now fetches and returns license data for each profile
+- **Added Filtering Parameter**: New `filterUnverified` parameter to show only unverified/unlisted users
+- **Enhanced Profile Data**: Added PTIN, website, LinkedIn, phone, and other contact information
+- **License Details**: Includes license kind, number, issuing authority, state, expiration, and status
+
+#### 2. Improved Admin Interface (`app/admin/profiles/page.tsx`)
+- **Default Filter**: Shows only unverified/unlisted users by default (can be toggled off)
+- **Enhanced Table Structure**: 
+  - "Profile & Contact" column with name, email, credential type, headline, firm, phone, PTIN
+  - "License Info" column showing all licenses with status, number, authority, expiration
+  - "Status" column with color-coded badges
+- **Filter Controls**: Checkbox to toggle between all users and unverified only
+- **Concise Display**: Key information organized for quick scanning and approval decisions
+
+#### 3. License Information Display
+- **License Status**: Color-coded status (verified=green, rejected=red, pending=yellow)
+- **Complete Details**: License kind, number, state, issuing authority, expiration date
+- **Multiple Licenses**: Shows all licenses for each professional
+- **No Licenses**: Clear indication when no licenses are listed
+
+**Files Modified**: 2 files, ~80 lines changed
+
+**Technical Details**:
+- **API Enhancement**: Added license relationship query to Supabase
+- **Filtering Logic**: `visibility_state.neq.verified OR is_listed.eq.false` for unverified filter
+- **License Display**: Maps through all licenses with proper formatting and status colors
+- **Contact Info**: Shows PTIN, phone, firm name, and other key details for quick assessment
+
+**Admin Workflow Improvements**:
+- ✅ **Default View**: Shows only users needing approval (unverified/unlisted)
+- ✅ **License Visibility**: Can see all license information at a glance
+- ✅ **Contact Details**: Phone, PTIN, firm name for verification
+- ✅ **Status Clarity**: Clear color-coded status indicators
+- ✅ **Quick Actions**: All existing approve/verify/list actions still available
+- ✅ **Toggle Option**: Can switch to view all users when needed
+
+**Testing Checklist**:
+- [ ] Admin profiles page loads with unverified filter enabled by default
+- [ ] License information displays correctly for each profile
+- [ ] Filter toggle works to show all users vs unverified only
+- [ ] License status colors display correctly (green/red/yellow)
+- [ ] Contact information (phone, PTIN, firm) shows properly
+- [ ] All existing approval actions still work
+- [ ] Table layout is responsive and easy to scan
+- [ ] No console errors or performance issues
+
+**Result**: Admin can now quickly review and approve users with all necessary information displayed concisely, significantly improving the approval workflow efficiency.
+
+---
+
+### 2025-01-XX: Fixed URL Validation UX Issue ✅
+
+**Goal**: Fix the "invalid URL" error users were getting during setup when they didn't manually add "https://" to URLs.
+
+**Root Cause**: 
+- Users were getting "invalid URL" errors when entering URLs without protocol (e.g., "example.com")
+- Zod validation was rejecting URLs that didn't start with "http://" or "https://"
+- Poor UX requiring users to manually add protocol prefixes
+
+**Solution Applied**:
+
+#### 1. Created URL Normalization Utility (`lib/utils/url.ts`)
+- **normalizeUrl()**: Automatically adds "https://" to URLs missing protocol
+- **isValidUrl()**: Validates URLs after normalization
+- **Handles Edge Cases**: Empty strings, null values, URLs with "//" prefix
+- **Smart Detection**: Preserves existing protocols (http/https)
+
+#### 2. Updated Zod Schemas (`lib/validations/zodSchemas.ts`)
+- **URL Fields**: Updated `website_url`, `linkedin_url`, `avatar_url`, `board_profile_url`
+- **Transform Step**: Added `.transform()` to normalize URLs before validation
+- **Validation**: Uses custom `isValidUrl()` function instead of Zod's built-in URL validation
+- **Backward Compatible**: Maintains existing API structure
+
+#### 3. Enhanced UI Components
+- **CredentialSection**: Updated Board Profile URL input with better placeholder and hint text
+- **Profile Edit Form**: Updated Website and LinkedIn inputs with helpful placeholder text
+- **User Guidance**: Added hints like "https:// will be added automatically if missing"
+
+**Files Modified**: 4 files, ~50 lines changed
+**Files Created**: 1 new file (`lib/utils/url.ts`)
+
+**Technical Details**:
+- **URL Normalization**: `example.com` → `https://example.com`
+- **Protocol Preservation**: `http://example.com` → `http://example.com` (unchanged)
+- **Empty Handling**: `""` or `null` → `""` (empty string, not normalized)
+- **Double Slash**: `//example.com` → `https://example.com`
+- **Validation**: Only validates after normalization
+
+**User Experience Improvements**:
+- ✅ **No More Errors**: Users can enter "example.com" without getting validation errors
+- ✅ **Automatic Protocol**: "https://" is added automatically behind the scenes
+- ✅ **Clear Guidance**: UI hints explain that protocol will be added automatically
+- ✅ **Flexible Input**: Accepts both "example.com" and "https://example.com"
+- ✅ **Better Placeholders**: More helpful placeholder text in form fields
+
+**Testing Checklist**:
+- [ ] Users can enter "example.com" without validation errors
+- [ ] URLs are automatically normalized to include "https://"
+- [ ] Existing URLs with protocols are preserved unchanged
+- [ ] Empty URLs are handled correctly
+- [ ] UI hints explain the automatic protocol addition
+- [ ] All URL fields work consistently (website, LinkedIn, avatar, board profile)
+- [ ] No console errors or TypeScript issues
+
+**Result**: Users no longer need to manually add "https://" to URLs during setup. The system automatically normalizes URLs while providing clear guidance, eliminating the frustrating "invalid URL" error that was blocking user onboarding.
+
+---

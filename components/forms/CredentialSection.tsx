@@ -291,14 +291,14 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                     Board Profile URL
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     value={license.board_profile_url || ''}
                     onChange={(e) => updateLicense(index, 'board_profile_url', e.target.value)}
-                    placeholder="https://..."
+                    placeholder="example.com or https://example.com"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Link to official board lookup (optional)
+                    Link to official board lookup (optional) - https:// will be added automatically
                   </p>
                 </div>
               </div>

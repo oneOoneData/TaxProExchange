@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { addBusinessDays } from "@/lib/constants/working-expectations";
+import { normalizeUrl, isValidUrl } from '@/lib/utils/url';
 
 // Credential type enum
 export const CredentialTypeEnum = z.enum([
@@ -29,9 +30,11 @@ export const LicenseSchema = z.object({
     message: "State must be 2 characters or empty"
   }),
   expires_on: z.string().nullable().optional(),
-  board_profile_url: z.string().nullable().optional().refine((val) => !val || val === "" || z.string().url().safeParse(val).success, {
-    message: "Must be a valid URL or empty"
-  })
+  board_profile_url: z.string().nullable().optional()
+    .transform((val) => val ? normalizeUrl(val) : val)
+    .refine((val) => !val || val === "" || isValidUrl(val), {
+      message: "Must be a valid URL or empty"
+    })
 }).passthrough(); // Allow additional fields like id, status
 
 // Profile credential schema with validation
@@ -77,9 +80,21 @@ export const ProfileUpdateSchema = z.object({
   firm_name: z.string().optional(),
   public_email: z.string().email("Must be a valid email").optional().or(z.literal("")),
   phone: z.string().optional(),
-  website_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  linkedin_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  avatar_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  website_url: z.string().optional()
+    .transform((val) => val ? normalizeUrl(val) : val)
+    .refine((val) => !val || val === "" || isValidUrl(val), {
+      message: "Must be a valid URL or empty"
+    }),
+  linkedin_url: z.string().optional()
+    .transform((val) => val ? normalizeUrl(val) : val)
+    .refine((val) => !val || val === "" || isValidUrl(val), {
+      message: "Must be a valid URL or empty"
+    }),
+  avatar_url: z.string().optional()
+    .transform((val) => val ? normalizeUrl(val) : val)
+    .refine((val) => !val || val === "" || isValidUrl(val), {
+      message: "Must be a valid URL or empty"
+    }),
   accepting_work: z.boolean().default(true),
   public_contact: z.boolean().default(false),
   works_multistate: z.boolean().default(false),

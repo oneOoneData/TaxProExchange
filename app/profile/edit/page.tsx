@@ -770,22 +770,28 @@ export default function EditProfilePage() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Website</label>
                   <input
-                    type="url"
+                    type="text"
                     value={profileForm.website_url}
                     onChange={(e) => updateForm('website_url', e.target.value)}
-                    placeholder="https://yourwebsite.com"
+                    placeholder="yourwebsite.com or https://yourwebsite.com"
                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    https:// will be added automatically if missing
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">LinkedIn</label>
                   <input
-                    type="url"
+                    type="text"
                     value={profileForm.linkedin_url}
                     onChange={(e) => updateForm('linkedin_url', e.target.value)}
-                    placeholder="https://linkedin.com/in/yourprofile"
+                    placeholder="linkedin.com/in/yourprofile or https://linkedin.com/in/yourprofile"
                     className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    https:// will be added automatically if missing
+                  </p>
                 </div>
               </div>
 

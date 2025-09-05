@@ -132,7 +132,7 @@ export default function Page() {
               </h1>
               <p className="mt-4 text-slate-600 text-lg">
                 A trusted directory for CPAs, EAs, and CTEC preparers to find each other for
-                handoffs, overflow work, and representation. No payments or file exchange — just
+                handoffs, overflow work, and representation. No payments or file exchange - just
                 verified connections.
               </p>
                               <div className="mt-6 flex flex-col sm:flex-row gap-3">
@@ -157,9 +157,9 @@ export default function Page() {
                 <div className="rounded-xl border bg-slate-50 p-3 text-sm">CPA • California • S-Corp Reviews • Accepting work</div>
                 <ul className="mt-4 space-y-3">
                   {[
-                    { name: 'Jordan C., CPA', tag: 'S-Corp / Multi-State', state: 'CA', verified: true },
-                    { name: 'Maya R., EA', tag: 'IRS Representation', state: 'TX', verified: true },
-                    { name: 'Leo P., CTEC', tag: '1040 + Sched C', state: 'CA', verified: true },
+                    { name: 'Jordan C., CPA', tag: 'S-Corp / Multi-State', state: 'CA', software: 'Drake Tax', verified: true },
+                    { name: 'Maya R., EA', tag: 'IRS Representation', state: 'TX', software: 'ProConnect', verified: true },
+                    { name: 'Leo P., CTEC', tag: '1040 + Sched C', state: 'CA', software: 'TaxDome', verified: true },
                   ].map((p, i) => (
                     <li key={i} className="flex items-center justify-between rounded-xl border p-3">
                       <div>
@@ -167,7 +167,12 @@ export default function Page() {
                           {p.name}
                           {p.verified && <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Verified</span>}
                         </div>
-                        <div className="text-sm text-slate-500">{p.tag} • {p.state}</div>
+                        <div className="text-sm text-slate-500 flex items-center gap-2">
+                          <span>{p.tag} • {p.state}</span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-700">
+                            {p.software}
+                          </span>
+                        </div>
                       </div>
                       <button className="text-sm rounded-xl border px-3 py-2 hover:bg-slate-50">Connect</button>
                     </li>
