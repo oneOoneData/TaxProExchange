@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
-import { clerkClient } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,10 +79,25 @@ export async function DELETE(request: NextRequest) {
 
     // Delete the user from Clerk as well
     try {
-      await clerkClient().users.deleteUser(userId);
+      console.log('Attempting to delete user from Clerk:', userId);
+      
+      const response = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Clerk API error: ${response.status} - ${JSON.stringify(errorData)}`);
+      }
+
       console.log('User deleted from Clerk successfully');
     } catch (clerkError) {
       console.error('Error deleting user from Clerk:', clerkError);
+      console.error('Clerk error details:', JSON.stringify(clerkError, null, 2));
       // Don't fail the entire operation if Clerk deletion fails
       // The profile is already soft deleted, which is the most important part
     }
