@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useAdminStatus } from '@/lib/hooks/useAdminStatus';
+import DeleteProfileDialog from './DeleteProfileDialog';
 
 interface UserMenuProps {
   userName?: string;
@@ -14,6 +15,7 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const { signOut } = useClerk();
   const [isOpen, setIsOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAdmin, isLoading: isAdminLoading } = useAdminStatus();
 
@@ -32,6 +34,11 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
   const handleSignOut = () => {
     signOut();
+    setIsOpen(false);
+  };
+
+  const handleDeleteProfile = () => {
+    setIsDeleteDialogOpen(true);
     setIsOpen(false);
   };
 
@@ -223,6 +230,16 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
               <div className="border-t border-slate-100 my-1"></div>
 
               <button
+                onClick={handleDeleteProfile}
+                className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <svg className="w-4 h-4 mr-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete Profile
+              </button>
+
+              <button
                 onClick={handleSignOut}
                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
               >
@@ -235,6 +252,13 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Profile Dialog */}
+      <DeleteProfileDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        userName={userName}
+      />
     </div>
   );
 }
