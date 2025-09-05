@@ -16,6 +16,9 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // Function to get all users from Clerk
 async function getAllClerkUsers(): Promise<any[]> {
   try {
+    console.log('🔍 Fetching users from Clerk API...');
+    console.log('🔍 Using API key:', process.env.CLERK_SECRET_KEY ? 'SET' : 'NOT_SET');
+    
     const response = await fetch('https://api.clerk.com/v1/users?limit=500', {
       headers: {
         'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
@@ -23,11 +26,20 @@ async function getAllClerkUsers(): Promise<any[]> {
       },
     });
 
+    console.log('🔍 Clerk API response status:', response.status);
+    console.log('🔍 Clerk API response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`Clerk API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('🔍 Clerk API error response:', errorText);
+      throw new Error(`Clerk API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('🔍 Clerk API response data keys:', Object.keys(data));
+    console.log('🔍 Total users from Clerk:', data.total_count || 'unknown');
+    console.log('🔍 Users array length:', data.data?.length || 0);
+    
     return data.data || [];
   } catch (error) {
     console.error('Error fetching Clerk users:', error);
