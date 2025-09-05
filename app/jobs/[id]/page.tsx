@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ApplyDialog } from '@/components/jobs/ApplyDialog';
 import { SLAPreview } from '@/components/jobs/SLAPreview';
+import ReactMarkdown from 'react-markdown';
 import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
 
@@ -24,11 +25,15 @@ interface Job {
   credentials_required: string[];
   software_required: string[];
   specialization_keys: string[];
+  location_states: string[];
   volume_count: number;
+  working_expectations_md?: string;
+  draft_eta_date?: string;
+  final_review_buffer_days?: number;
+  pro_liability_required?: boolean;
   trial_ok: boolean;
   insurance_required: boolean;
   location_us_only: boolean;
-  location_states: string[];
   location_countries: string[];
   remote_ok: boolean;
   created_at: string;
@@ -98,6 +103,10 @@ export default function JobDetailPage() {
     if (diffDays <= 7) return `Due in ${diffDays} days`;
     if (diffDays <= 30) return `Due in ${Math.ceil(diffDays / 7)} weeks`;
     return `Due ${date.toLocaleDateString()}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   if (loading) {
@@ -327,6 +336,31 @@ export default function JobDetailPage() {
           </div>
         </div>
 
+        {/* Working Expectations */}
+        {job.working_expectations_md && (
+          <div className="bg-white rounded-lg shadow mb-6">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Working Expectations</h2>
+              <article className="prose max-w-none mb-4">
+                <ReactMarkdown>{job.working_expectations_md}</ReactMarkdown>
+              </article>
+              <div className="flex flex-wrap gap-2 text-xs">
+                {job.draft_eta_date && (
+                  <span className="rounded bg-gray-100 px-2 py-1">
+                    Draft ETA: {formatDate(job.draft_eta_date)}
+                  </span>
+                )}
+                <span className="rounded bg-gray-100 px-2 py-1">
+                  Review buffer: {job.final_review_buffer_days || 3} business days
+                </span>
+                <span className="rounded bg-gray-100 px-2 py-1">
+                  Liability: {job.pro_liability_required ? 'Required' : 'Not required'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* SLA Preview */}
         {hasValidSLA && (
           <div className="bg-white rounded-lg shadow mb-6">
@@ -359,8 +393,8 @@ export default function JobDetailPage() {
                 
                 <div>
                   <span className="text-sm font-medium text-gray-700">Insurance Required: </span>
-                  <span className={`font-medium ${job.insurance_required ? 'text-red-600' : 'text-green-600'}`}>
-                    {job.insurance_required ? 'Yes' : 'No'}
+                  <span className={`font-medium ${(job.pro_liability_required || job.insurance_required) ? 'text-red-600' : 'text-green-600'}`}>
+                    {(job.pro_liability_required || job.insurance_required) ? 'Yes' : 'No'}
                   </span>
                 </div>
               </div>

@@ -46,13 +46,21 @@ export async function POST(req: Request) {
       console.error('Stream Chat environment variables not set:', {
         hasStreamKey: !!process.env.STREAM_KEY,
         hasStreamSecret: !!process.env.STREAM_SECRET,
-        hasStreamAppId: !!process.env.STREAM_APP_ID
+        hasStreamAppId: !!process.env.STREAM_APP_ID,
+        environment: process.env.NODE_ENV
       });
       return NextResponse.json({ 
         error: 'Stream Chat environment variables not set (STREAM_KEY, STREAM_SECRET)',
         details: 'Please add STREAM_KEY and STREAM_SECRET to your environment variables'
       }, { status: 500 });
     }
+
+    console.log('Stream Chat environment check passed:', {
+      hasStreamKey: !!process.env.STREAM_KEY,
+      hasStreamSecret: !!process.env.STREAM_SECRET,
+      hasStreamAppId: !!process.env.STREAM_APP_ID,
+      environment: process.env.NODE_ENV
+    });
 
     const streamClient = getServerStreamClient();
     

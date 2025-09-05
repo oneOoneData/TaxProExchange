@@ -122,15 +122,20 @@ export async function POST(request: Request) {
       payout_min,
       payout_max,
       payment_terms,
-      sla,
       credentials_required,
       software_required,
       specialization_keys,
+      location_states,
       volume_count,
+      working_expectations_md,
+      draft_eta_date,
+      final_review_buffer_days,
+      pro_liability_required,
+      // Legacy fields for backward compatibility
+      sla,
       trial_ok,
       insurance_required,
       location_us_only,
-      location_states,
       location_countries,
       remote_ok
     } = body;
@@ -182,15 +187,20 @@ export async function POST(request: Request) {
         payout_min,
         payout_max,
         payment_terms,
-        sla: sla || {},
         credentials_required: credentials_required || [],
         software_required: software_required || [],
         specialization_keys: specialization_keys || [],
-        volume_count,
-        trial_ok: trial_ok || false,
-        insurance_required: insurance_required || false,
-        location_us_only: location_us_only !== false,
         location_states: location_states || [],
+        volume_count,
+        working_expectations_md,
+        draft_eta_date,
+        final_review_buffer_days: final_review_buffer_days || 3,
+        pro_liability_required: pro_liability_required || false,
+        // Legacy fields for backward compatibility
+        sla: sla || {},
+        trial_ok: trial_ok || false,
+        insurance_required: pro_liability_required || false, // Use new field value for legacy compatibility
+        location_us_only: location_us_only !== false,
         location_countries: location_countries || [],
         remote_ok: remote_ok !== false
       })

@@ -160,10 +160,11 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
           Professional Credential Type *
         </label>
         <select
-          value={value.credential_type}
+          value={value.credential_type || ''}
           onChange={(e) => updateCredentialType(e.target.value as CredentialType)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
+          <option value="">Please select your credential type</option>
           {CREDENTIAL_TYPES.map((type) => (
             <option key={type.value} value={type.value}>
               {type.label}

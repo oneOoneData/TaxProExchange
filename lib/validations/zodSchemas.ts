@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { addBusinessDays } from "@/lib/constants/working-expectations";
 
 // Credential type enum
 export const CredentialTypeEnum = z.enum([
@@ -35,7 +36,9 @@ export const LicenseSchema = z.object({
 
 // Profile credential schema with validation
 export const ProfileCredentialSchema = z.object({
-  credential_type: CredentialTypeEnum,
+  credential_type: z.union([CredentialTypeEnum, z.literal('')]).refine((val) => val !== '', {
+    message: "Please select your professional credential type"
+  }),
   licenses: z.array(LicenseSchema).default([])
 }).superRefine((val, ctx) => {
   // Students don't need licenses
@@ -116,7 +119,9 @@ export const OnboardingSchema = ProfileUpdateSchema.extend({
 // Credential-only update schema (for partial updates)
 export const CredentialUpdateSchema = z.object({
   clerk_id: z.string().optional(), // Not part of the profile data itself
-  credential_type: CredentialTypeEnum,
+  credential_type: z.union([CredentialTypeEnum, z.literal('')]).refine((val) => val !== '', {
+    message: "Please select your professional credential type"
+  }),
   licenses: z.array(LicenseSchema).default([])
 }).superRefine((val, ctx) => {
   if (val.credential_type === "Student") return;
@@ -139,6 +144,65 @@ export const CredentialUpdateSchema = z.object({
   }
 });
 
+// Job creation schema
+export const jobSchema = z.object({
+  title: z.string().min(3, "Job title must be at least 3 characters"),
+  description: z.string().min(20, "Job description must be at least 20 characters"),
+  deadline_date: z.coerce.date().optional(),
+  payout_type: z.enum(["fixed", "hourly", "per_return"]).default("fixed"),
+  payout_fixed: z.coerce.number().nonnegative().optional(),
+  payout_min: z.coerce.number().nonnegative().optional(),
+  payout_max: z.coerce.number().nonnegative().optional(),
+  payment_terms: z.string().optional(),
+
+  credentials_required: z.array(z.enum(["CPA", "EA", "CTEC", "Tax_Lawyer", "PTIN_ONLY"])).optional(),
+  software_required: z.array(z.string()).optional(),
+  specialization_keys: z.array(z.string()).optional(),
+  location_states: z.array(z.string()).optional(),
+  volume_count: z.coerce.number().int().nonnegative().optional(),
+
+  working_expectations_md: z.string().max(10000, "Working expectations must be less than 10,000 characters").optional(),
+  draft_eta_date: z.coerce.date().optional(),
+  final_review_buffer_days: z.coerce.number().int().min(0).max(30).default(3),
+  pro_liability_required: z.boolean().default(false),
+})
+.superRefine((data, ctx) => {
+  // Validate payout logic
+  if (data.payout_type === 'fixed' && !data.payout_fixed) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["payout_fixed"],
+      message: "Fixed payout requires payout_fixed amount",
+    });
+  }
+  if ((data.payout_type === 'hourly' || data.payout_type === 'per_return') && (!data.payout_min || !data.payout_max)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["payout_min"],
+      message: "Hourly/per_return payout requires min and max amounts",
+    });
+  }
+  if (data.payout_min && data.payout_max && data.payout_min > data.payout_max) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["payout_max"],
+      message: "Maximum amount must be greater than minimum amount",
+    });
+  }
+
+  // Validate deadline buffer: draft_eta_date + buffer_days <= deadline_date
+  if (data.deadline_date && data.draft_eta_date && data.final_review_buffer_days != null) {
+    const draftPlusBuffer = addBusinessDays(data.draft_eta_date, data.final_review_buffer_days);
+    if (draftPlusBuffer > data.deadline_date) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["draft_eta_date"],
+        message: "Draft ETA + review buffer exceeds the deadline. Adjust draft date or buffer.",
+      });
+    }
+  }
+});
+
 // Type exports
 export type CredentialType = z.infer<typeof CredentialTypeEnum>;
 export type LicenseKind = z.infer<typeof LicenseKindEnum>;
@@ -146,3 +210,4 @@ export type License = z.infer<typeof LicenseSchema>;
 export type ProfileCredential = z.infer<typeof ProfileCredentialSchema>;
 export type ProfileUpdate = z.infer<typeof ProfileUpdateSchema>;
 export type CredentialUpdate = z.infer<typeof CredentialUpdateSchema>;
+export type JobFormData = z.infer<typeof jobSchema>;

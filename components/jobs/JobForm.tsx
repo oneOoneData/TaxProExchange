@@ -2,38 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SLAPreview } from './SLAPreview';
+import { WorkingExpectationsEditor } from './WorkingExpectationsEditor';
+import { jobSchema, type JobFormData } from '@/lib/validations/zodSchemas';
 
-interface JobFormData {
-  title: string;
-  description: string;
-  deadline_date: string;
-  payout_type: 'fixed' | 'hourly' | 'per_return';
-  payout_fixed: string;
-  payout_min: string;
-  payout_max: string;
-  payment_terms: string;
-  credentials_required: string[];
-  software_required: string[];
-  specialization_keys: string[];
-  volume_count: string;
-  trial_ok: boolean;
-  insurance_required: boolean;
-  location_us_only: boolean;
-  location_states: string[];
-  location_countries: string[];
-  remote_ok: boolean;
-  sla: any;
-}
+// Remove the old interface - using the one from zodSchemas now
 
-const defaultSLA = {
-  response_time_hours: 24,
-  draft_turnaround_days: 5,
-  revision_rounds_included: 1,
-  data_exchange: "Portal-only (no email attachments)",
-  security: "No unmasked PII in chat; use platform storage",
-  dispute: "If scope creep, pause work and request change in writing"
-};
+// Remove defaultSLA - using working expectations now
 
 const specializations = [
   { value: 's_corp', label: 'S-Corporation' },
@@ -91,34 +65,49 @@ const states = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
+// Extended form data type that includes legacy fields
+type ExtendedJobFormData = Partial<JobFormData> & {
+  // Legacy fields for backward compatibility
+  trial_ok?: boolean;
+  insurance_required?: boolean;
+  location_us_only?: boolean;
+  location_countries?: string[];
+  remote_ok?: boolean;
+  sla?: any;
+};
+
 export function JobForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState<JobFormData>({
+  const [formData, setFormData] = useState<ExtendedJobFormData>({
     title: '',
     description: '',
-    deadline_date: '',
+    deadline_date: undefined,
     payout_type: 'fixed',
-    payout_fixed: '',
-    payout_min: '',
-    payout_max: '',
+    payout_fixed: undefined,
+    payout_min: undefined,
+    payout_max: undefined,
     payment_terms: '',
     credentials_required: [],
     software_required: [],
     specialization_keys: [],
-    volume_count: '',
+    location_states: [],
+    volume_count: undefined,
+    working_expectations_md: '',
+    draft_eta_date: undefined,
+    final_review_buffer_days: 3,
+    pro_liability_required: false,
+    // Legacy fields for backward compatibility
     trial_ok: false,
     insurance_required: false,
     location_us_only: true,
-    location_states: [],
     location_countries: [],
     remote_ok: true,
-    sla: defaultSLA
   });
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (field: keyof JobFormData, value: any) => {
+  const handleInputChange = (field: keyof ExtendedJobFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -126,71 +115,88 @@ export function JobForm() {
     }
   };
 
-  const handleArrayChange = (field: keyof JobFormData, value: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: checked
-        ? [...(prev[field] as string[]), value]
-        : (prev[field] as string[]).filter(item => item !== value)
-    }));
+  const handleArrayChange = (field: keyof ExtendedJobFormData, value: string, checked: boolean) => {
+    setFormData(prev => {
+      const currentArray = (prev[field] as string[]) || [];
+      return {
+        ...prev,
+        [field]: checked
+          ? [...currentArray, value]
+          : currentArray.filter(item => item !== value)
+      };
+    });
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = 'Job title is required';
+    try {
+      console.log('Validating form data:', formData);
+      
+      // Basic validation first
+      if (!formData.title || formData.title.trim().length < 3) {
+        setErrors({ title: 'Job title must be at least 3 characters' });
+        return false;
+      }
+      
+      if (!formData.description || formData.description.trim().length < 20) {
+        setErrors({ description: 'Job description must be at least 20 characters' });
+        return false;
+      }
+      
+      if (formData.payout_type === 'fixed' && !formData.payout_fixed) {
+        setErrors({ payout_fixed: 'Fixed amount is required for fixed payout type' });
+        return false;
+      }
+      
+      console.log('Basic validation passed');
+      setErrors({});
+      return true;
+    } catch (error: any) {
+      console.log('Validation failed:', error);
+      setErrors({ submit: 'Validation error occurred' });
+      return false;
     }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Job description is required';
-    }
-    if (!formData.payout_type) {
-      newErrors.payout_type = 'Payout type is required';
-    }
-    if (formData.payout_type === 'fixed' && !formData.payout_fixed) {
-      newErrors.payout_fixed = 'Fixed amount is required for fixed payout type';
-    }
-    if ((formData.payout_type === 'hourly' || formData.payout_type === 'per_return') && (!formData.payout_min || !formData.payout_max)) {
-      newErrors.payout_min = 'Min and max amounts are required for hourly/per-return payout types';
-      newErrors.payout_max = 'Min and max amounts are required for hourly/per-return payout types';
-    }
-    if (formData.payout_min && formData.payout_max && parseFloat(formData.payout_min) > parseFloat(formData.payout_max)) {
-      newErrors.payout_max = 'Maximum amount must be greater than minimum amount';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted');
+    alert('Form submitted! Check console for details.');
     
     if (!validateForm()) {
+      console.log('Form validation failed, not submitting');
       return;
     }
 
+    console.log('Form validation passed, submitting...');
     setLoading(true);
 
     try {
+      const submitData = {
+        ...formData,
+        // Convert dates to strings for API
+        deadline_date: formData.deadline_date ? new Date(formData.deadline_date).toISOString().split('T')[0] : undefined,
+        draft_eta_date: formData.draft_eta_date ? new Date(formData.draft_eta_date).toISOString().split('T')[0] : undefined,
+      };
+      
+      console.log('Submitting data:', submitData);
+      
       const response = await fetch('/api/jobs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          payout_fixed: formData.payout_fixed ? parseFloat(formData.payout_fixed) : null,
-          payout_min: formData.payout_min ? parseFloat(formData.payout_min) : null,
-          payout_max: formData.payout_max ? parseFloat(formData.payout_max) : null,
-          volume_count: formData.volume_count ? parseInt(formData.volume_count) : null,
-        }),
+        body: JSON.stringify(submitData),
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Job created successfully:', data);
         router.push(`/jobs/${data.job.id}`);
       } else {
         const errorData = await response.json();
+        console.log('API error:', errorData);
         setErrors({ submit: errorData.error || 'Failed to create job' });
       }
     } catch (error) {
@@ -245,8 +251,8 @@ export function JobForm() {
             </label>
             <input
               type="date"
-              value={formData.deadline_date}
-              onChange={(e) => handleInputChange('deadline_date', e.target.value)}
+              value={formData.deadline_date ? new Date(formData.deadline_date).toISOString().split('T')[0] : ''}
+              onChange={(e) => handleInputChange('deadline_date', e.target.value ? new Date(e.target.value) : undefined)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -284,8 +290,8 @@ export function JobForm() {
                 <span className="absolute left-3 top-2 text-gray-500">$</span>
                 <input
                   type="number"
-                  value={formData.payout_fixed}
-                  onChange={(e) => handleInputChange('payout_fixed', e.target.value)}
+                  value={formData.payout_fixed || ''}
+                  onChange={(e) => handleInputChange('payout_fixed', e.target.value ? parseFloat(e.target.value) : undefined)}
                   className={`w-full border rounded-md pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.payout_fixed ? 'border-red-300' : 'border-gray-300'
                   }`}
@@ -306,8 +312,8 @@ export function JobForm() {
                   <span className="absolute left-3 top-2 text-gray-500">$</span>
                   <input
                     type="number"
-                    value={formData.payout_min}
-                    onChange={(e) => handleInputChange('payout_min', e.target.value)}
+                    value={formData.payout_min || ''}
+                    onChange={(e) => handleInputChange('payout_min', e.target.value ? parseFloat(e.target.value) : undefined)}
                     className={`w-full border rounded-md pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.payout_min ? 'border-red-300' : 'border-gray-300'
                     }`}
@@ -326,8 +332,8 @@ export function JobForm() {
                   <span className="absolute left-3 top-2 text-gray-500">$</span>
                   <input
                     type="number"
-                    value={formData.payout_max}
-                    onChange={(e) => handleInputChange('payout_max', e.target.value)}
+                    value={formData.payout_max || ''}
+                    onChange={(e) => handleInputChange('payout_max', e.target.value ? parseFloat(e.target.value) : undefined)}
                     className={`w-full border rounded-md pl-8 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.payout_max ? 'border-red-300' : 'border-gray-300'
                     }`}
@@ -369,7 +375,7 @@ export function JobForm() {
                 <label key={cred.value} className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={formData.credentials_required.includes(cred.value)}
+                    checked={formData.credentials_required?.includes(cred.value as any) || false}
                     onChange={(e) => handleArrayChange('credentials_required', cred.value, e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
@@ -388,7 +394,7 @@ export function JobForm() {
                 <label key={soft.value} className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={formData.software_required.includes(soft.value)}
+                    checked={formData.software_required?.includes(soft.value) || false}
                     onChange={(e) => handleArrayChange('software_required', soft.value, e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
@@ -407,7 +413,7 @@ export function JobForm() {
                 <label key={spec.value} className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={formData.specialization_keys.includes(spec.value)}
+                    checked={formData.specialization_keys?.includes(spec.value) || false}
                     onChange={(e) => handleArrayChange('specialization_keys', spec.value, e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
@@ -429,8 +435,8 @@ export function JobForm() {
             </label>
             <input
               type="number"
-              value={formData.volume_count}
-              onChange={(e) => handleInputChange('volume_count', e.target.value)}
+              value={formData.volume_count || ''}
+              onChange={(e) => handleInputChange('volume_count', e.target.value ? parseInt(e.target.value) : undefined)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., 20"
               min="1"
@@ -455,7 +461,7 @@ export function JobForm() {
             </label>
             <select
               multiple
-              value={formData.location_states}
+              value={formData.location_states || []}
               onChange={(e) => {
                 const selected = Array.from(e.target.selectedOptions, option => option.value);
                 handleInputChange('location_states', selected);
@@ -481,28 +487,28 @@ export function JobForm() {
               <span className="ml-2 text-sm text-gray-700">International</span>
             </label>
 
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.insurance_required}
-                onChange={(e) => handleInputChange('insurance_required', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Professional liability insurance required</span>
-            </label>
+            {/* Professional liability insurance checkbox moved to Working expectations section */}
           </div>
         </div>
       </div>
 
-      {/* SLA */}
+      {/* Working Expectations */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Service Level Agreement (SLA)</h3>
-        <div className="bg-gray-50 rounded-lg p-4 mb-4">
-          <SLAPreview sla={formData.sla} />
-        </div>
-        <p className="text-sm text-gray-600">
-          The SLA above shows default terms. You can customize these during contract negotiation.
-        </p>
+        <WorkingExpectationsEditor
+          value={formData.working_expectations_md || ''}
+          onChange={(value) => handleInputChange('working_expectations_md', value)}
+          volume={formData.volume_count}
+          onDraftEtaChange={(date) => handleInputChange('draft_eta_date', date ? new Date(date) : undefined)}
+          onBufferDaysChange={(days) => handleInputChange('final_review_buffer_days', days)}
+          onLiabilityChange={(required) => handleInputChange('pro_liability_required', required)}
+          draftEtaDate={formData.draft_eta_date ? new Date(formData.draft_eta_date).toISOString().split('T')[0] : undefined}
+          bufferDays={formData.final_review_buffer_days || 3}
+          liabilityRequired={formData.pro_liability_required || false}
+          errors={{
+            draftEtaDate: errors.draft_eta_date,
+            bufferDays: errors.final_review_buffer_days,
+          }}
+        />
       </div>
 
       {/* Submit Error */}
