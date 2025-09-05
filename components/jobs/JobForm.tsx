@@ -511,6 +511,18 @@ export function JobForm() {
         />
       </div>
 
+      {/* Validation Errors */}
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <h4 className="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h4>
+          <ul className="text-sm text-red-600 space-y-1">
+            {Object.entries(errors).map(([field, message]) => (
+              <li key={field}>• {message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Submit Error */}
       {errors.submit && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
