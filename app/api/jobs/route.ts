@@ -158,6 +158,15 @@ export async function POST(request: Request) {
 
     // Check if user can post jobs (verified firm)
     console.log('Looking for profile with clerk_id:', userId);
+    
+    // First, let's check if there are any profiles at all
+    const { data: allProfiles, error: allProfilesError } = await supabase
+      .from('profiles')
+      .select('id, clerk_id, first_name, last_name')
+      .limit(5);
+    
+    console.log('Sample profiles in database:', allProfiles);
+    
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, visibility_state, firm_name, clerk_id')
