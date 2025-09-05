@@ -34,11 +34,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Find the user's profile by clerk_user_id
+    // Find the user's profile by clerk_id
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, clerk_user_id')
-      .eq('clerk_user_id', userId)
+      .select('id, first_name, last_name, clerk_id')
+      .eq('clerk_id', userId)
       .eq('is_deleted', false)
       .single();
 
@@ -51,7 +51,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verify the profile belongs to the authenticated user
-    if (profile.clerk_user_id !== userId) {
+    if (profile.clerk_id !== userId) {
       return NextResponse.json(
         { error: 'Unauthorized - profile does not belong to user' },
         { status: 403 }
