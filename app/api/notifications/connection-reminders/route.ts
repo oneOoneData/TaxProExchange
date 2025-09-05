@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         const pendingCount = connections.length;
         
         // Create list of requesters
-        const requesterList = connections.map(conn => {
+        const requesterList = connections.map((conn: any) => {
           const requester = conn.requester;
           const firmName = requester.firm_name ? ` at ${requester.firm_name}` : '';
           return `${requester.first_name} ${requester.last_name}${firmName}`;
