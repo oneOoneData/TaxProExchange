@@ -6,7 +6,7 @@ import { supabaseService } from "@/lib/supabaseService";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Generate a clean, URL-friendly slug from name and ID
+// Generate a clean, URL-friendly slug from name and ID with retry logic
 async function generateUniqueSlug(firstName: string | null, lastName: string | null, userId: string, supabase: any): Promise<string> {
   // Create base slug from name
   let baseSlug = '';
@@ -29,13 +29,19 @@ async function generateUniqueSlug(firstName: string | null, lastName: string | n
   
   // Add a short unique identifier to prevent conflicts
   const shortId = userId.substring(0, 8);
-  let slug = `${baseSlug}-${shortId}`;
+  const baseSlugWithId = `${baseSlug}-${shortId}`;
   
-  // Check if slug exists and append counter if needed
+  // Add timestamp and random component to make it more unique
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  let finalSlug = `${baseSlugWithId}-${timestamp}-${random}`;
+  
+  // Check if slug exists and try alternatives if needed
   let counter = 1;
-  let finalSlug = slug;
+  let attempts = 0;
+  const maxAttempts = 10;
   
-  while (true) {
+  while (attempts < maxAttempts) {
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
@@ -43,23 +49,18 @@ async function generateUniqueSlug(firstName: string | null, lastName: string | n
       .single();
     
     if (!existingProfile) {
-      break; // Slug is unique
+      return finalSlug; // Slug is unique
     }
     
     // Slug exists, try with counter
-    finalSlug = `${slug}-${counter}`;
+    finalSlug = `${baseSlugWithId}-${timestamp}-${random}-${counter}`;
     counter++;
-    
-    // Prevent infinite loop
-    if (counter > 100) {
-      // Fallback to timestamp-based slug
-      const timestamp = Date.now().toString(36);
-      finalSlug = `${baseSlug}-${timestamp}`;
-      break;
-    }
+    attempts++;
   }
   
-  return finalSlug;
+  // Final fallback - use UUID if all else fails
+  const uuid = crypto.randomUUID().substring(0, 8);
+  return `${baseSlug}-${uuid}`;
 }
 
 export async function POST(request: Request) {
@@ -157,13 +158,40 @@ export async function POST(request: Request) {
       
       console.log('🔍 Attempting to upsert profile with data:', profileData);
 
-      const { error } = await supabase
-        .from("profiles")
-        .upsert(profileData, { onConflict: "clerk_id" });
+      // Retry logic for profile creation
+      let profileCreated = false;
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (!profileCreated && attempts < maxAttempts) {
+        attempts++;
         
-      if (error) {
-        console.error('🔍 Supabase upsert error:', error);
-        return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+        // Generate a new slug for this attempt
+        profileData.slug = await generateUniqueSlug(u.first_name, u.last_name, u.id, supabase);
+        
+        const { error } = await supabase
+          .from("profiles")
+          .upsert(profileData, { onConflict: "clerk_id" });
+          
+        if (error) {
+          console.error(`🔍 Supabase upsert attempt ${attempts} error:`, error);
+          
+          // If it's a duplicate key error and we have attempts left, retry
+          if (error.code === '23505' && attempts < maxAttempts) {
+            console.log(`🔍 Retrying profile upsert (attempt ${attempts + 1}/${maxAttempts})`);
+            // Add a small delay before retry
+            await new Promise(resolve => setTimeout(resolve, 100 * attempts));
+            continue;
+          }
+          
+          return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+        }
+        
+        profileCreated = true;
+      }
+      
+      if (!profileCreated) {
+        return NextResponse.json({ ok: false, error: "Failed to create profile after multiple attempts" }, { status: 500 });
       }
       
       console.log('🔍 Profile upserted successfully for user:', u.id);

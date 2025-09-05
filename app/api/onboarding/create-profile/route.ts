@@ -11,18 +11,23 @@ function supabaseService() {
   );
 }
 
-// Generate a unique slug that checks for conflicts
+// Generate a unique slug that checks for conflicts with retry logic
 async function generateUniqueSlug(userId: string, supabase: any): Promise<string> {
-  // Start with a base slug
   const baseSlug = 'new-user';
   const shortId = userId.substring(0, 8);
-  let slug = `${baseSlug}-${shortId}`;
+  const baseSlugWithId = `${baseSlug}-${shortId}`;
   
-  // Check if slug exists and append counter if needed
+  // Add timestamp and random component to make it more unique
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  let finalSlug = `${baseSlugWithId}-${timestamp}-${random}`;
+  
+  // Check if slug exists and try alternatives if needed
   let counter = 1;
-  let finalSlug = slug;
+  let attempts = 0;
+  const maxAttempts = 10;
   
-  while (true) {
+  while (attempts < maxAttempts) {
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
@@ -30,23 +35,18 @@ async function generateUniqueSlug(userId: string, supabase: any): Promise<string
       .single();
     
     if (!existingProfile) {
-      break; // Slug is unique
+      return finalSlug; // Slug is unique
     }
     
     // Slug exists, try with counter
-    finalSlug = `${slug}-${counter}`;
+    finalSlug = `${baseSlugWithId}-${timestamp}-${random}-${counter}`;
     counter++;
-    
-    // Prevent infinite loop
-    if (counter > 100) {
-      // Fallback to timestamp-based slug
-      const timestamp = Date.now().toString(36);
-      finalSlug = `${baseSlug}-${timestamp}`;
-      break;
-    }
+    attempts++;
   }
   
-  return finalSlug;
+  // Final fallback - use UUID if all else fails
+  const uuid = crypto.randomUUID().substring(0, 8);
+  return `${baseSlug}-${uuid}`;
 }
 
 export async function POST(req: Request) {
@@ -118,47 +118,70 @@ export async function POST(req: Request) {
       return new Response('Profile already exists', { status: 400 });
     }
 
-    // Create new profile with legal acceptance
+    // Create new profile with legal acceptance and retry logic
     const now = new Date().toISOString();
     
-    // Generate a unique slug
-    const slug = await generateUniqueSlug(userId, supabase);
+    let profileCreated = false;
+    let attempts = 0;
+    const maxAttempts = 3;
     
-    const { error } = await supabase
-      .from('profiles')
-      .insert({
-        clerk_id: userId,
-        first_name: 'Unknown',
-        last_name: 'User',
-        headline: 'New Tax Professional',
-        bio: 'Profile created automatically',
-        credential_type: 'Other',
-        firm_name: '',
-        public_email: '',
-        phone: '',
-        website_url: '',
-        linkedin_url: '',
-        accepting_work: true,
-        public_contact: false,
-        works_multistate: false,
-        works_international: false,
-        countries: [],
-        specializations: [],
-        states: [],
-        software: [],
-        other_software: [],
-        years_experience: null,
-        entity_revenue_range: null,
-        slug: slug,
-        tos_version: LEGAL_VERSIONS.TOS,
-        tos_accepted_at: now,
-        privacy_version: LEGAL_VERSIONS.PRIVACY,
-        privacy_accepted_at: now
-      });
+    while (!profileCreated && attempts < maxAttempts) {
+      attempts++;
+      
+      // Generate a unique slug for this attempt
+      const slug = await generateUniqueSlug(userId, supabase);
+      
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          clerk_id: userId,
+          first_name: 'Unknown',
+          last_name: 'User',
+          headline: 'New Tax Professional',
+          bio: 'Profile created automatically',
+          credential_type: 'Other',
+          firm_name: '',
+          public_email: '',
+          phone: '',
+          website_url: '',
+          linkedin_url: '',
+          accepting_work: true,
+          public_contact: false,
+          works_multistate: false,
+          works_international: false,
+          countries: [],
+          specializations: [],
+          states: [],
+          software: [],
+          other_software: [],
+          years_experience: null,
+          entity_revenue_range: null,
+          slug: slug,
+          tos_version: LEGAL_VERSIONS.TOS,
+          tos_accepted_at: now,
+          privacy_version: LEGAL_VERSIONS.PRIVACY,
+          privacy_accepted_at: now
+        });
 
-    if (error) {
-      console.error('Profile creation error:', error);
-      return new Response('Failed to create profile', { status: 500 });
+      if (error) {
+        console.error(`Profile creation attempt ${attempts} error:`, error);
+        
+        // If it's a duplicate key error and we have attempts left, retry
+        if (error.code === '23505' && attempts < maxAttempts) {
+          console.log(`Retrying profile creation (attempt ${attempts + 1}/${maxAttempts})`);
+          // Add a small delay before retry
+          await new Promise(resolve => setTimeout(resolve, 100 * attempts));
+          continue;
+        }
+        
+        return new Response('Failed to create profile', { status: 500 });
+      }
+      
+      profileCreated = true;
+    }
+    
+    if (!profileCreated) {
+      return new Response('Failed to create profile after multiple attempts', { status: 500 });
     }
 
     return new Response('Profile created successfully', { status: 201 });
