@@ -58,7 +58,7 @@ export async function GET() {
         await channel.watch();
 
         // Get unread count for this user
-        const unreadCount = channel.state.unreadCount[profile.id] || 0;
+        const unreadCount = (channel.state.unreadCount as any)[profile.id] || 0;
         
         if (unreadCount > 0) {
           hasUnreadMessages = true;
