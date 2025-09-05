@@ -10,9 +10,9 @@ export async function GET(request: NextRequest) {
     // Test Clerk API connection
     let clerkTest = {
       connected: false,
-      error: null,
+      error: null as string | null,
       userCount: 0,
-      environment: null
+      environment: null as string | null
     };
 
     if (clerkSecretKey) {
