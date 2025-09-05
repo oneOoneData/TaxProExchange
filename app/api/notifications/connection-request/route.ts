@@ -159,7 +159,7 @@ The TaxProExchange Team
       `
     });
 
-    if (!emailResult.success) {
+    if (emailResult.error) {
       return NextResponse.json(
         { error: 'Failed to send email' },
         { status: 500 }

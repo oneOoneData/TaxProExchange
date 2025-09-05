@@ -185,7 +185,7 @@ The TaxProExchange Team
           `
         });
 
-        if (emailResult.success) {
+        if (emailResult && !emailResult.error) {
           results.emailsSent++;
         } else {
           results.emailsFailed++;
