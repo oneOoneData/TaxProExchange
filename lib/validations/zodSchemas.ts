@@ -7,6 +7,8 @@ export const CredentialTypeEnum = z.enum([
   "CPA", 
   "EA", 
   "CTEC", 
+  "OR_Tax_Preparer",
+  "OR_Tax_Consultant",
   "Student", 
   "Tax Lawyer (JD)", 
   "PTIN Only", 
@@ -25,7 +27,7 @@ export const LicenseKindEnum = z.enum([
 export const LicenseSchema = z.object({
   license_kind: LicenseKindEnum,
   license_number: z.string().min(2, "License number must be at least 2 characters"),
-  issuing_authority: z.string().min(2, "Issuing authority is required"),
+  issuing_authority: z.string().min(2, "Issuing authority must be at least 2 characters"),
   state: z.string().nullable().optional().refine((val) => !val || val.length === 2, {
     message: "State must be 2 characters or empty"
   }),
@@ -47,18 +49,25 @@ export const ProfileCredentialSchema = z.object({
   // Students don't need licenses
   if (val.credential_type === "Student") return;
   
-  // Non-students must have at least one license
-  if (!val.licenses?.length) {
+  const validLicenses = val.licenses?.filter(license => 
+    license.license_number && 
+    license.license_number.trim().length >= 2 && 
+    license.issuing_authority && 
+    license.issuing_authority.trim().length >= 2
+  ) || [];
+  
+  // Non-students must have at least one valid license
+  if (validLicenses.length === 0) {
     ctx.addIssue({ 
       code: "custom", 
-      message: "At least one license is required for non-students." 
+      message: "At least one valid license is required for non-students." 
     });
     return;
   }
   
-  // CPA licenses must have state
+  // CPA licenses must have a state
   if (val.credential_type === "CPA") {
-    val.licenses.forEach((lic, i) => {
+    validLicenses.forEach((lic, i) => {
       if (!lic.state) {
         ctx.addIssue({ 
           path: ["licenses", i, "state"], 
@@ -140,14 +149,22 @@ export const CredentialUpdateSchema = z.object({
   licenses: z.array(LicenseSchema).default([])
 }).superRefine((val, ctx) => {
   if (val.credential_type === "Student") return;
-  if (!val.licenses?.length) {
+  
+  const validLicenses = val.licenses?.filter(license => 
+    license.license_number && 
+    license.license_number.trim().length >= 2 && 
+    license.issuing_authority && 
+    license.issuing_authority.trim().length >= 2
+  ) || [];
+  
+  if (validLicenses.length === 0) {
     ctx.addIssue({
       code: "custom",
-      message: "At least one license is required for non-students."
+      message: "At least one valid license is required for non-students."
     });
   }
   if (val.credential_type === "CPA") {
-    val.licenses.forEach((lic, i) => {
+    validLicenses.forEach((lic, i) => {
       if (!lic.state) {
         ctx.addIssue({ 
           path: ["licenses", i, "state"], 

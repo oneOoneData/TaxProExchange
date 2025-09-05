@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { auth } from '@clerk/nextjs/server';
+import { sendConnectionRequestNotification, shouldSendEmail, type EmailPreferences } from '@/lib/email';
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -63,6 +64,43 @@ export async function POST(req: Request) {
     if (connectionError) {
       console.error('Connection creation error:', connectionError);
       return NextResponse.json({ error: 'Failed to create connection' }, { status: 500 });
+    }
+
+    // Send email notification to recipient
+    try {
+      // Get recipient profile details
+      const { data: recipientProfile, error: recipientError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email, email_preferences')
+        .eq('id', recipientProfileId)
+        .single();
+
+      if (!recipientError && recipientProfile) {
+        // Get requester profile details
+        const { data: requesterProfile, error: requesterError } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, firm_name, credential_type')
+          .eq('id', profile.id)
+          .single();
+
+        if (!requesterError && requesterProfile) {
+          // Check if recipient wants connection request emails
+          const emailPreferences = recipientProfile.email_preferences as EmailPreferences | null;
+          if (shouldSendEmail(emailPreferences, 'connection_requests')) {
+            await sendConnectionRequestNotification({
+              requesterName: `${requesterProfile.first_name} ${requesterProfile.last_name}`,
+              requesterFirm: requesterProfile.firm_name || '',
+              requesterCredential: requesterProfile.credential_type || '',
+              recipientName: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
+              recipientEmail: recipientProfile.email || '',
+              acceptLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/messages`
+            });
+          }
+        }
+      }
+    } catch (emailError) {
+      console.error('Failed to send connection request email:', emailError);
+      // Don't fail the connection creation if email fails
     }
 
     return NextResponse.json({ 

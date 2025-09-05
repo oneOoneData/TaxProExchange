@@ -39,7 +39,8 @@ interface SearchFilters {
   q: string;
   credential_type: string;
   state: string;
-  specialization: string;
+  specialization: string[];
+  software: string;
   accepting_work: string;
   verified_only: boolean;
   years_experience: string;
@@ -85,7 +86,8 @@ export default function SearchPage() {
     q: '',
     credential_type: '',
     state: '',
-    specialization: '',
+    specialization: [],
+    software: '',
     accepting_work: '',
     verified_only: true,
     years_experience: ''
@@ -109,6 +111,23 @@ export default function SearchPage() {
     { value: '21-25', label: '21-25 years' },
     { value: '26-30', label: '26-30 years' },
     { value: '31+', label: '31+ years' }
+  ];
+
+  const softwareOptions = [
+    { value: '', label: 'All software' },
+    { value: 'proseries', label: 'ProSeries' },
+    { value: 'drake_tax', label: 'Drake Tax' },
+    { value: 'turbotax', label: 'TurboTax' },
+    { value: 'lacerte', label: 'Lacerte' },
+    { value: 'ultratax', label: 'UltraTax' },
+    { value: 'taxact', label: 'TaxAct' },
+    { value: 'taxslayer', label: 'TaxSlayer' },
+    { value: 'taxdome', label: 'TaxDome' },
+    { value: 'canopy', label: 'Canopy' },
+    { value: 'quickbooks', label: 'QuickBooks' },
+    { value: 'xero', label: 'Xero' },
+    { value: 'freshbooks', label: 'FreshBooks' },
+    { value: 'truss', label: 'Truss' }
   ];
 
   useEffect(() => {
@@ -148,6 +167,13 @@ export default function SearchPage() {
           // Handle boolean values properly
           if (typeof value === 'boolean') {
             params.append(key, value.toString());
+          } else if (Array.isArray(value)) {
+            // Handle arrays by appending each item
+            value.forEach(item => {
+              if (item) {
+                params.append(key, item);
+              }
+            });
           } else {
             params.append(key, value.toString());
           }
@@ -190,12 +216,26 @@ export default function SearchPage() {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  const toggleSpecialization = (specializationSlug: string) => {
+    setFilters(prev => {
+      const newSpecializations = prev.specialization.includes(specializationSlug)
+        ? prev.specialization.filter(s => s !== specializationSlug)
+        : [...prev.specialization, specializationSlug];
+      
+      const newFilters = { ...prev, specialization: newSpecializations };
+      // Auto-search when specializations change
+      setTimeout(() => searchProfiles(newFilters, 1), 100);
+      return newFilters;
+    });
+  };
+
   const clearFilters = () => {
     const clearedFilters = {
       q: '',
       credential_type: '',
       state: '',
-      specialization: '',
+      specialization: [],
+      software: '',
       accepting_work: '',
       verified_only: false,
       years_experience: ''
@@ -309,30 +349,28 @@ export default function SearchPage() {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-slate-900">Specializations</h3>
       
-      {/* Specialization Search */}
-      <div className="relative">
-                              <input
-                        type="text"
-                        placeholder="Search specializations..."
-                        value={filters.specialization}
-                                                                         onChange={(e) => {
-                          const newFilters = { ...filters, specialization: e.target.value };
-                          setFilters(newFilters);
-                          // Auto-search when this filter changes (debounced)
-                          if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                          searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
-                        }}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      />
-        {filters.specialization && (
-          <button
-            onClick={() => setFilters(prev => ({ ...prev, specialization: '' }))}
-            className="absolute right-2 top-2 text-slate-400 hover:text-slate-600"
-          >
-            ×
-          </button>
-        )}
-      </div>
+      {/* Selected Specializations */}
+      {filters.specialization.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-slate-700">Selected:</p>
+          <div className="flex flex-wrap gap-2">
+            {filters.specialization.map(spec => (
+              <span
+                key={spec}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
+              >
+                {specializationGroups.flatMap(group => group.items).find(s => s.slug === spec)?.label || spec}
+                <button
+                  onClick={() => toggleSpecialization(spec)}
+                  className="ml-1 text-blue-500 hover:text-blue-700"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick Filter Buttons for Common Specializations */}
       <div className="space-y-2">
@@ -344,13 +382,9 @@ export default function SearchPage() {
             return (
               <button
                 key={specSlug}
-                                                 onClick={() => {
-                  const newFilters = { ...filters, specialization: specSlug };
-                  setFilters(newFilters);
-                  setTimeout(() => searchProfiles(newFilters, 1), 100);
-                }}
+                onClick={() => toggleSpecialization(specSlug)}
                 className={`px-2 py-1 text-xs rounded border transition-colors ${
-                  filters.specialization === specSlug
+                  filters.specialization.includes(specSlug)
                     ? 'bg-blue-100 text-blue-700 border-blue-200'
                     : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
                 }`}
@@ -376,15 +410,9 @@ export default function SearchPage() {
                 {group.items.map((spec) => (
                   <label key={spec.slug} className="flex items-center space-x-2 text-xs">
                     <input
-                      type="radio"
-                      name="specialization"
-                      value={spec.slug}
-                      checked={filters.specialization === spec.slug}
-                                                                   onChange={(e) => {
-                        const newFilters = { ...filters, specialization: e.target.value };
-                        setFilters(newFilters);
-                        setTimeout(() => searchProfiles(newFilters, 1), 100);
-                      }}
+                      type="checkbox"
+                      checked={filters.specialization.includes(spec.slug)}
+                      onChange={() => toggleSpecialization(spec.slug)}
                       className="text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-slate-700">{spec.label}</span>
@@ -481,10 +509,10 @@ export default function SearchPage() {
                   const searchValue = e.target.value;
                   const newFilters = { ...filters, q: searchValue };
                   
-                  // Check if the search value is a state code
-                  const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase());
-                  if (stateCode) {
-                    // If it's a state code, set the location filter and clear the search query
+                  // Check if the search value is exactly a state code (not just containing one)
+                  const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase().trim());
+                  if (stateCode && searchValue.trim().length === 2) {
+                    // If it's exactly a 2-letter state code, set the location filter and clear the search query
                     newFilters.state = stateCode;
                     newFilters.q = '';
                   }
@@ -571,7 +599,7 @@ export default function SearchPage() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
-                      <span className="text-sm font-medium text-blue-900">Verified Pros Only</span>
+                      <span className="text-sm font-medium text-blue-900">Verified</span>
                     </div>
                     <div className="relative">
                       <input
@@ -607,10 +635,10 @@ export default function SearchPage() {
                       const searchValue = e.target.value;
                       const newFilters = { ...filters, q: searchValue };
                       
-                      // Check if the search value is a state code
-                      const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase());
-                      if (stateCode) {
-                        // If it's a state code, set the location filter and clear the search query
+                      // Check if the search value is exactly a state code (not just containing one)
+                      const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase().trim());
+                      if (stateCode && searchValue.trim().length === 2) {
+                        // If it's exactly a 2-letter state code, set the location filter and clear the search query
                         newFilters.state = stateCode;
                         newFilters.q = '';
                       }
@@ -685,6 +713,25 @@ export default function SearchPage() {
                   </select>
                 </div>
 
+                {/* Software */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Software</label>
+                  <select
+                    value={filters.software}
+                    onChange={(e) => {
+                      const newFilters = { ...filters, software: e.target.value };
+                      setFilters(newFilters);
+                      // Auto-search when this filter changes
+                      setTimeout(() => searchProfiles(newFilters, 1), 100);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {softwareOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Specializations */}
                 {renderSpecializationFilters()}
 
@@ -717,7 +764,7 @@ export default function SearchPage() {
                  </button>
 
                 {/* Clear All Filters */}
-                {(filters.q || filters.credential_type || filters.state || filters.specialization || filters.accepting_work || filters.verified_only || filters.years_experience) && (
+                {(filters.q || filters.credential_type || filters.state || filters.specialization.length > 0 || filters.software || filters.accepting_work || filters.verified_only || filters.years_experience) && (
                   <button
                                        onClick={() => {
                      const clearedFilters = {
@@ -725,6 +772,7 @@ export default function SearchPage() {
                        credential_type: '',
                        state: '',
                        specialization: '',
+                       software: '',
                        accepting_work: '',
                        verified_only: true,
                        years_experience: ''
@@ -795,11 +843,14 @@ export default function SearchPage() {
                         <p className="text-slate-600 text-sm mb-3">{profile.bio}</p>
                         
                         <div className="flex flex-wrap gap-2 mb-3">
-                          {safeMap(profile.specializations, spec => {
+                          {safeMap(profile.specializations, (spec, index) => {
+                            // Skip null, undefined, or empty specializations
+                            if (!spec || spec.trim() === '') return null;
+                            
                             const specLabel = specializationGroups.flatMap(group => group.items).find(s => s.slug === spec)?.label || spec;
                             return (
                               <span
-                                key={spec}
+                                key={`${profile.id}-spec-${index}-${spec}`}
                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
                               >
                                 {specLabel}

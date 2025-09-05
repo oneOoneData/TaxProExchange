@@ -16,6 +16,8 @@ const CREDENTIAL_TYPES = [
   { value: 'CPA', label: 'CPA (Certified Public Accountant)' },
   { value: 'EA', label: 'EA (Enrolled Agent)' },
   { value: 'CTEC', label: 'CTEC (California Tax Education Council)' },
+  { value: 'OR_Tax_Preparer', label: 'OR Tax Preparer (Oregon Board of Tax Practitioners)' },
+  { value: 'OR_Tax_Consultant', label: 'OR Tax Consultant (Oregon Board of Tax Practitioners)' },
   { value: 'Tax Lawyer (JD)', label: 'Tax Lawyer (JD)' },
   { value: 'PTIN Only', label: 'PTIN Only' },
   { value: 'Other', label: 'Other Professional' },
@@ -50,6 +52,8 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
       case 'CPA': return 'CPA_STATE_LICENSE';
       case 'EA': return 'EA_ENROLLMENT';
       case 'CTEC': return 'CTEC_REG';
+      case 'OR_Tax_Preparer': return 'OTHER';
+      case 'OR_Tax_Consultant': return 'OTHER';
       case 'Tax Lawyer (JD)': return 'OTHER';
       case 'PTIN Only': return 'OTHER';
       case 'Other': return 'OTHER';
@@ -62,6 +66,8 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
       case 'CPA': return 'State Board of Accountancy';
       case 'EA': return 'IRS';
       case 'CTEC': return 'CTEC';
+      case 'OR_Tax_Preparer': return 'Oregon Board of Tax Practitioners';
+      case 'OR_Tax_Consultant': return 'Oregon Board of Tax Practitioners';
       case 'Tax Lawyer (JD)': return 'State Bar';
       case 'PTIN Only': return 'IRS';
       case 'Other': return '';
@@ -96,6 +102,8 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
           ...license,
           license_kind: licenseKind as any,
           issuing_authority: issuingAuthority,
+          // Keep existing license_number or empty string
+          license_number: license.license_number || '',
           // Clear state for non-CPA licenses
           state: credential_type === 'CPA' ? license.state : undefined
         }));

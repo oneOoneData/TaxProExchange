@@ -11,6 +11,7 @@ interface EmailPreferences {
   job_notifications: boolean;
   application_updates: boolean;
   connection_requests: boolean;
+  message_notifications: boolean;
   verification_emails: boolean;
   marketing_updates: boolean;
   frequency: 'immediate' | 'daily' | 'weekly' | 'never';
@@ -25,6 +26,7 @@ export default function SettingsPage() {
     job_notifications: true,
     application_updates: true,
     connection_requests: true,
+    message_notifications: true,
     verification_emails: true,
     marketing_updates: false,
     frequency: 'immediate'
@@ -51,9 +53,17 @@ export default function SettingsPage() {
       const response = await fetch(`/api/profile?clerk_id=${user.id}`);
       if (response.ok) {
         const data = await response.json();
-        if (data.email_preferences) {
-          setPreferences(data.email_preferences);
-        }
+        // Load preferences from both email_preferences JSONB and connection_email_notifications boolean
+        const emailPrefs = data.email_preferences || {};
+        setPreferences({
+          job_notifications: emailPrefs.job_notifications ?? true,
+          application_updates: emailPrefs.application_updates ?? true,
+          connection_requests: data.connection_email_notifications ?? true,
+          message_notifications: emailPrefs.message_notifications ?? true,
+          verification_emails: emailPrefs.verification_emails ?? true,
+          marketing_updates: emailPrefs.marketing_updates ?? false,
+          frequency: emailPrefs.frequency || 'immediate'
+        });
       } else {
         console.error('Failed to load preferences:', response.status, response.statusText);
       }
@@ -76,7 +86,15 @@ export default function SettingsPage() {
         },
         body: JSON.stringify({
           clerk_id: user.id,
-          email_preferences: preferences
+          connection_email_notifications: preferences.connection_requests,
+          email_preferences: {
+            job_notifications: preferences.job_notifications,
+            application_updates: preferences.application_updates,
+            message_notifications: preferences.message_notifications,
+            verification_emails: preferences.verification_emails,
+            marketing_updates: preferences.marketing_updates,
+            frequency: preferences.frequency
+          }
         }),
       });
 
@@ -222,6 +240,19 @@ export default function SettingsPage() {
                       <span className="ml-3 text-slate-700">
                         <strong>Connection requests</strong>
                         <span className="block text-sm text-slate-500">When someone wants to connect with you</span>
+                      </span>
+                    </label>
+
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={preferences.message_notifications}
+                        onChange={(e) => handlePreferenceChange('message_notifications', e.target.checked)}
+                        className="rounded border-slate-300 text-slate-900 focus:ring-slate-500"
+                      />
+                      <span className="ml-3 text-slate-700">
+                        <strong>New messages</strong>
+                        <span className="block text-sm text-slate-500">When you receive a new message from a connection</span>
                       </span>
                     </label>
                   </div>

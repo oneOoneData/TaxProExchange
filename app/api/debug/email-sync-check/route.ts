@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     const clerkUserMap = new Map();
     const clerkEmailMap = new Map();
     
-    clerkUsers.forEach(user => {
+    clerkUsers.forEach((user: any) => {
       const userId = user.id;
       const emails = user.email_addresses?.map((e: any) => e.email_address) || [];
       const primaryEmail = user.primary_email_address_id 
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       });
 
       // Map each email to the user
-      emails.forEach(email => {
+      emails.forEach((email: string) => {
         clerkEmailMap.set(email, userId);
       });
     });
@@ -119,14 +119,14 @@ export async function GET(request: NextRequest) {
       totalProfiles: profiles.length,
       activeProfiles: profiles.filter(p => !p.is_deleted).length,
       deletedProfiles: profiles.filter(p => p.is_deleted).length,
-      mismatches: [],
-      orphanedProfiles: [],
-      missingProfiles: [],
-      emailMismatches: []
+      mismatches: [] as any[],
+      orphanedProfiles: [] as any[],
+      missingProfiles: [] as any[],
+      emailMismatches: [] as any[]
     };
 
     // Check each profile
-    profiles.forEach(profile => {
+    profiles.forEach((profile: any) => {
       const clerkId = profile.clerk_id;
       const profileEmail = profile.public_email;
 
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Check for Clerk users without profiles
-    clerkUsers.forEach(clerkUser => {
+    clerkUsers.forEach((clerkUser: any) => {
       const hasProfile = profiles.some(p => p.clerk_id === clerkUser.id);
       if (!hasProfile) {
         analysis.missingProfiles.push({

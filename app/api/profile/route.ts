@@ -37,7 +37,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const clerkId = searchParams.get('clerk_id') ?? null;
   
-  console.log('🔍 Profile API called with clerk_id:', clerkId);
+  // Get profile by clerk_id
   
   if (!clerkId) {
     return NextResponse.json({ error: 'clerk_id is required' }, { status: 400 });
@@ -200,8 +200,7 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     
-    // Debug logging
-    console.log('Profile PUT request body:', JSON.stringify(body, null, 2));
+    // Process profile update request
     
     // Check if this is a credential-only update
     // If the request only contains credential fields and clerk_id, it's credential-only
@@ -213,18 +212,15 @@ export async function PUT(request: Request) {
     
     let validationResult;
     if (isCredentialUpdate) {
-      console.log('Detected credential-only update');
       // Use credential-specific validation
       const { CredentialUpdateSchema } = await import('@/lib/validations/zodSchemas');
       validationResult = CredentialUpdateSchema.safeParse(body);
     } else {
-      console.log('Detected full profile update');
       // Use full profile validation
       validationResult = ProfileUpdateSchema.safeParse(body);
     }
     
     if (!validationResult.success) {
-      console.log('Validation failed:', validationResult.error.flatten());
       return NextResponse.json({ 
         error: 'Validation failed', 
         details: validationResult.error.flatten() 
@@ -237,7 +233,7 @@ export async function PUT(request: Request) {
     let specializations, locations, software, other_software, public_contact, 
         works_multistate, works_international, countries, email_preferences, 
         primary_location, location_radius, credential_type, licenses, 
-        years_experience, entity_revenue_range, profileData;
+        years_experience, entity_revenue_range, connection_email_notifications, profileData;
     
     if (isCredentialUpdate) {
       // For credential-only updates
@@ -278,6 +274,7 @@ export async function PUT(request: Request) {
         licenses,
         years_experience,
         entity_revenue_range,
+        connection_email_notifications,
         ...profileData 
       } = fullProfileData);
       
@@ -399,6 +396,7 @@ export async function PUT(request: Request) {
           location_radius: location_radius || 50,
           years_experience: years_experience || null,
           entity_revenue_range: entity_revenue_range || null,
+          connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           credential_type,
         };
@@ -431,6 +429,7 @@ export async function PUT(request: Request) {
           location_radius: location_radius || 50,
           years_experience: years_experience || null,
           entity_revenue_range: entity_revenue_range || null,
+          connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           updated_at: new Date().toISOString(),
         })
@@ -596,9 +595,11 @@ export async function PUT(request: Request) {
     }
 
     // Send notification email to admin when profile is completed
+    // Temporarily disabled to debug the JSON coercion error
+    /*
     if (profile && profile.onboarding_complete) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/profile-completed`, {
+        const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/profile-completed`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -613,15 +614,61 @@ export async function PUT(request: Request) {
             firm_name: profile.firm_name
           }),
         });
-        console.log('Profile completion notification sent to admin');
+        
+        if (!notificationResponse.ok) {
+          console.error('Notification API returned error:', notificationResponse.status, notificationResponse.statusText);
+        } else {
+          console.log('Profile completion notification sent to admin');
+        }
       } catch (emailError) {
         console.error('Failed to send profile completion notification:', emailError);
         // Don't fail the request if email fails
       }
     }
+    */
 
-    console.log('Profile saved successfully:', profile);
-    return NextResponse.json({ ok: true, profile });
+    // Profile saved successfully
+    
+    // Return updated profile
+    
+    // Create a completely clean response object to avoid any circular references
+    const cleanProfile = {
+      id: String(profile?.id || ''),
+      first_name: String(profile?.first_name || ''),
+      last_name: String(profile?.last_name || ''),
+      headline: String(profile?.headline || ''),
+      bio: String(profile?.bio || ''),
+      credential_type: String(profile?.credential_type || ''),
+      ptin: String(profile?.ptin || ''),
+      website_url: String(profile?.website_url || ''),
+      linkedin_url: String(profile?.linkedin_url || ''),
+      firm_name: String(profile?.firm_name || ''),
+      phone: String(profile?.phone || ''),
+      public_email: String(profile?.public_email || ''),
+      avatar_url: String(profile?.avatar_url || ''),
+      is_listed: Boolean(profile?.is_listed),
+      visibility_state: String(profile?.visibility_state || ''),
+      accepting_work: Boolean(profile?.accepting_work),
+      slug: String(profile?.slug || ''),
+      public_contact: Boolean(profile?.public_contact),
+      works_multistate: Boolean(profile?.works_multistate),
+      works_international: Boolean(profile?.works_international),
+      countries: Array.isArray(profile?.countries) ? profile.countries : [],
+      other_software: Array.isArray(profile?.other_software) ? profile.other_software : [],
+      email_preferences: profile?.email_preferences || null,
+      primary_location: profile?.primary_location || null,
+      location_radius: Number(profile?.location_radius) || 50,
+      years_experience: String(profile?.years_experience || ''),
+      entity_revenue_range: String(profile?.entity_revenue_range || ''),
+      onboarding_complete: Boolean(profile?.onboarding_complete),
+      created_at: String(profile?.created_at || ''),
+      updated_at: String(profile?.updated_at || '')
+    };
+    
+    return NextResponse.json({ 
+      ok: true, 
+      profile: profile 
+    });
   } catch (error) {
     console.error('Profile update error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

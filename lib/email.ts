@@ -24,6 +24,24 @@ export interface ProfileCompletionEmailData {
   adminViewLink: string;
 }
 
+export interface ConnectionRequestEmailData {
+  requesterName: string;
+  requesterFirm: string;
+  requesterCredential: string;
+  recipientName: string;
+  recipientEmail: string;
+  acceptLink: string;
+}
+
+export interface MessageNotificationEmailData {
+  senderName: string;
+  senderFirm: string;
+  recipientName: string;
+  recipientEmail: string;
+  messagePreview: string;
+  messageLink: string;
+}
+
 export interface EmailTemplate {
   subject: string;
   html: string;
@@ -36,6 +54,7 @@ export interface EmailPreferences {
   job_notifications: boolean;
   application_updates: boolean;
   connection_requests: boolean;
+  message_notifications: boolean;
   verification_emails: boolean;
   marketing_updates: boolean;
   frequency: 'immediate' | 'daily' | 'weekly' | 'never';
@@ -153,6 +172,92 @@ export const emailTemplates = {
       </html>
     `,
     text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\nHeadline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\n\nReview Profile: ${data.adminViewLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
+  }),
+
+  connectionRequest: (data: ConnectionRequestEmailData): EmailTemplate => ({
+    subject: `New Connection Request from ${data.requesterName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Connection Request</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">New Connection Request</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">${data.requesterName} wants to connect</h2>
+            
+            <div style="margin: 20px 0;">
+              <strong>Professional:</strong> ${data.requesterName}<br>
+              <strong>Firm:</strong> ${data.requesterFirm || 'Not specified'}<br>
+              <strong>Credential:</strong> ${data.requesterCredential}
+            </div>
+            
+            <p style="color: #4a5568; margin: 20px 0;">
+              ${data.requesterName} has sent you a connection request on TaxProExchange. 
+              Once you accept, you'll be able to message and collaborate with them.
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.acceptLink}" style="background: #4299e1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View & Respond to Request</a>
+          </div>
+          
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
+            <p>You're receiving this because you have connection request notifications enabled.</p>
+            <p>TaxProExchange - Connecting verified tax professionals</p>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `New Connection Request from ${data.requesterName}\n\nProfessional: ${data.requesterName}\nFirm: ${data.requesterFirm || 'Not specified'}\nCredential: ${data.requesterCredential}\n\n${data.requesterName} has sent you a connection request on TaxProExchange. Once you accept, you'll be able to message and collaborate with them.\n\nView & Respond: ${data.acceptLink}`
+  }),
+
+  messageNotification: (data: MessageNotificationEmailData): EmailTemplate => ({
+    subject: `New message from ${data.senderName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Message</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">New Message</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Message from ${data.senderName}</h2>
+            
+            <div style="margin: 20px 0;">
+              <strong>From:</strong> ${data.senderName}<br>
+              <strong>Firm:</strong> ${data.senderFirm || 'Not specified'}
+            </div>
+            
+            <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #10b981; margin: 20px 0;">
+              <p style="margin: 0; color: #4a5568; font-style: italic;">"${data.messagePreview}"</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.messageLink}" style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Message</a>
+          </div>
+          
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
+            <p>You're receiving this because you have message notifications enabled.</p>
+            <p>TaxProExchange - Connecting verified tax professionals</p>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `New message from ${data.senderName}\n\nFrom: ${data.senderName}\nFirm: ${data.senderFirm || 'Not specified'}\n\nMessage: "${data.messagePreview}"\n\nView Message: ${data.messageLink}`
   })
 };
 
@@ -246,4 +351,16 @@ export async function sendProfileCompletionNotification(data: ProfileCompletionE
   const adminEmail = process.env.ADMIN_EMAIL || 'koen@cardifftax.com';
   const template = emailTemplates.profileCompletion(data);
   return sendEmailLegacy(adminEmail, template);
+}
+
+// Send connection request notification
+export async function sendConnectionRequestNotification(data: ConnectionRequestEmailData) {
+  const template = emailTemplates.connectionRequest(data);
+  return sendEmailLegacy(data.recipientEmail, template);
+}
+
+// Send message notification
+export async function sendMessageNotification(data: MessageNotificationEmailData) {
+  const template = emailTemplates.messageNotification(data);
+  return sendEmailLegacy(data.recipientEmail, template);
 }

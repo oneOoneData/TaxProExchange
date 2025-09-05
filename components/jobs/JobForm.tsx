@@ -39,6 +39,8 @@ const credentials = [
   { value: 'CPA', label: 'CPA' },
   { value: 'EA', label: 'EA' },
   { value: 'CTEC', label: 'CTEC' },
+  { value: 'OR_Tax_Preparer', label: 'OR Tax Preparer' },
+  { value: 'OR_Tax_Consultant', label: 'OR Tax Consultant' },
   { value: 'Tax_Lawyer', label: 'Tax Lawyer (JD)' },
   { value: 'PTIN_ONLY', label: 'PTIN Only' }
 ];
@@ -55,7 +57,8 @@ const software = [
   { value: 'canopy', label: 'Canopy' },
   { value: 'quickbooks', label: 'QuickBooks' },
   { value: 'xero', label: 'Xero' },
-  { value: 'freshbooks', label: 'FreshBooks' }
+  { value: 'freshbooks', label: 'FreshBooks' },
+  { value: 'truss', label: 'Truss' }
 ];
 const states = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',

@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q') || '';
     const credential_type = searchParams.get('credential_type') || '';
     const specialization = searchParams.get('specialization') || '';
+    const software = searchParams.get('software') || '';
     const state = searchParams.get('state') || '';
     const accepting_work = searchParams.get('accepting_work') || '';
     const verified_only = searchParams.get('verified_only') || 'false';
@@ -57,8 +58,9 @@ export async function GET(request: NextRequest) {
         countries,
         primary_location,
         years_experience,
+        software,
         created_at
-      `, { count: 'exact' })
+`, { count: 'exact' })
       .eq('is_listed', true);
 
     // Apply verified filter based on user preference
@@ -90,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     // Apply text search (only if it's not a state code)
     if (query && !state) {
-      supabaseQuery = supabaseQuery.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%,firm_name.ilike.%${query}%`);
+      supabaseQuery = supabaseQuery.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%,firm_name.ilike.%${query}%,software.cs.%${query}%`);
     }
 
     // Apply credential type filter
@@ -106,6 +108,11 @@ export async function GET(request: NextRequest) {
     // Apply years of experience filter
     if (years_experience) {
       supabaseQuery = supabaseQuery.eq('years_experience', years_experience);
+    }
+
+    // Apply software filter if specified
+    if (software) {
+      supabaseQuery = supabaseQuery.contains('software', [software]);
     }
 
     // Apply specialization filter if specified

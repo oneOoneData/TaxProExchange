@@ -16,6 +16,8 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAdmin, isLoading: isAdminLoading } = useAdminStatus();
 
@@ -28,6 +30,28 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Check for unread messages
+  useEffect(() => {
+    const checkUnreadMessages = async () => {
+      try {
+        const response = await fetch('/api/messages/unread');
+        if (response.ok) {
+          const data = await response.json();
+          setHasUnreadMessages(data.hasUnreadMessages);
+          setUnreadCount(data.unreadCount);
+        }
+      } catch (error) {
+        console.error('Failed to check unread messages:', error);
+      }
+    };
+
+    checkUnreadMessages();
+    
+    // Check every 30 seconds
+    const interval = setInterval(checkUnreadMessages, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -45,21 +69,32 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   return (
     <div className="relative" ref={menuRef}>
       {/* User Icon Button */}
-      <button
-        onClick={toggleMenu}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
-        aria-label="User menu"
-      >
-        {userName ? (
-          <span className="text-sm font-medium">
-            {userName.split(' ').map(n => n[0]).join('').toUpperCase()}
-          </span>
-        ) : (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
+      <div className="relative">
+        <button
+          onClick={toggleMenu}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+          aria-label="User menu"
+        >
+          {userName ? (
+            <span className="text-sm font-medium">
+              {userName.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </span>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          )}
+        </button>
+        
+        {/* Unread message indicator */}
+        {hasUnreadMessages && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+            <span className="text-xs text-white font-bold">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          </div>
         )}
-      </button>
+      </div>
 
       {/* Dropdown Menu */}
       <AnimatePresence>
@@ -132,10 +167,20 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
                 onClick={() => setIsOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+                <div className="relative">
+                  <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  {hasUnreadMessages && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                  )}
+                </div>
                 Messages
+                {hasUnreadMessages && (
+                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
 
               <Link

@@ -159,7 +159,7 @@ export default function Page() {
                   {[
                     { name: 'Jordan C., CPA', tag: 'S-Corp / Multi-State', state: 'CA', software: 'Drake Tax', verified: true },
                     { name: 'Maya R., EA', tag: 'IRS Representation', state: 'TX', software: 'ProConnect', verified: true },
-                    { name: 'Leo P., CTEC', tag: '1040 + Sched C', state: 'CA', software: 'TaxDome', verified: true },
+                    { name: 'Leo P., CTEC', tag: '1040 + Sched C', state: 'CA', software: 'Truss', verified: true },
                   ].map((p, i) => (
                     <li key={i} className="flex items-center justify-between rounded-xl border p-3">
                       <div>

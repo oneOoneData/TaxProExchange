@@ -138,7 +138,10 @@ const softwareOptions = [
   { slug: 'caseware', label: 'CaseWare Working Papers' },
   { slug: 'workiva', label: 'Workiva' },
   { slug: 'sureprep', label: 'SurePrep' },
-  { slug: 'cch_workstream', label: 'CCH Axcess Workstream' }
+  { slug: 'cch_workstream', label: 'CCH Axcess Workstream' },
+  
+  // Practice management & workflow
+  { slug: 'truss', label: 'Truss' }
 ];
 
 export default function EditProfilePage() {
@@ -310,6 +313,7 @@ export default function EditProfilePage() {
     setLoading(true);
     
     try {
+      // Update profile with validation
       const response = await fetch('/api/profile', {
         method: 'PUT',
         headers: {
@@ -317,10 +321,8 @@ export default function EditProfilePage() {
         },
         body: JSON.stringify({
           clerk_id: user?.id,
-          ...(() => {
-            const { other_software_raw, ...formData } = profileForm;
-            return formData;
-          })()
+          credential_type: profileForm.credential_type,
+          licenses: profileForm.licenses
         }),
       });
 
@@ -333,8 +335,16 @@ export default function EditProfilePage() {
         setShowWrapUp(true);
       } else {
         let msg = `Failed (${response.status})`;
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
         try { 
-          const j = await response.json(); 
+          const responseText = await response.text();
+          console.log('Raw response text:', responseText);
+          
+          const j = JSON.parse(responseText);
+          console.log('Parsed JSON response:', j);
+          
           if (j?.error) {
             msg = j.error;
             // If there are detailed validation errors, show them
@@ -345,10 +355,15 @@ export default function EditProfilePage() {
               msg = `Validation failed:\n${fieldErrors}`;
             }
           }
-        } catch { 
+        } catch (parseError) { 
+          console.error('JSON parse error:', parseError);
           try { 
             msg = await response.text(); 
-          } catch {} 
+            console.log('Fallback text response:', msg);
+          } catch (textError) {
+            console.error('Text parse error:', textError);
+            msg = `Failed to parse response (${response.status})`;
+          }
         }
         throw new Error(msg);
       }
