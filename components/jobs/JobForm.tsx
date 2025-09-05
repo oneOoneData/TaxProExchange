@@ -160,7 +160,6 @@ export function JobForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted');
-    alert('Form submitted! Check console for details.');
     
     if (!validateForm()) {
       console.log('Form validation failed, not submitting');

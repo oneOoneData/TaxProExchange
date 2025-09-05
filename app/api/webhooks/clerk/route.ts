@@ -143,7 +143,7 @@ export async function POST(request: Request) {
         first_name: u.first_name ?? 'New User',
         last_name: u.last_name ?? '',
         headline: `${u.first_name || 'New'} ${u.last_name || 'User'}`,
-        credential_type: 'Other', // Set default value
+        credential_type: 'Other', // Set default value - ensure this is never null
         firm_name: null,
         public_email: email,
         phone: null,
@@ -155,6 +155,19 @@ export async function POST(request: Request) {
         slug: await generateUniqueSlug(u.first_name, u.last_name, u.id, supabase),
         image_url: u.image_url ?? null,
       };
+
+      // Validate that credential_type is not null before upsert
+      if (!profileData.credential_type) {
+        console.error('🔍 credential_type is null, setting to default');
+        profileData.credential_type = 'Other';
+      }
+      
+      // Double-check that credential_type is valid
+      const validCredentialTypes = ['CPA', 'EA', 'CTEC', 'Student', 'Tax Lawyer (JD)', 'PTIN Only', 'Other'];
+      if (!validCredentialTypes.includes(profileData.credential_type)) {
+        console.error('🔍 Invalid credential_type, setting to default:', profileData.credential_type);
+        profileData.credential_type = 'Other';
+      }
       
       console.log('🔍 Attempting to upsert profile with data:', profileData);
 
@@ -175,6 +188,17 @@ export async function POST(request: Request) {
           
         if (error) {
           console.error(`🔍 Supabase upsert attempt ${attempts} error:`, error);
+          
+          // Check for credential_type constraint violation
+          if (error.message && error.message.includes('credential_type') && error.message.includes('not-null constraint')) {
+            console.error('🔍 CREDENTIAL_TYPE CONSTRAINT VIOLATION:', {
+              error: error.message,
+              profileData: profileData,
+              credential_type: profileData.credential_type,
+              isNull: profileData.credential_type === null,
+              isUndefined: profileData.credential_type === undefined
+            });
+          }
           
           // If it's a duplicate key error and we have attempts left, retry
           if (error.code === '23505' && attempts < maxAttempts) {

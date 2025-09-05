@@ -35,6 +35,8 @@ export default function NewJobPage() {
       const response = await fetch(`/api/profile?clerk_id=${user?.id}`);
       const data = await response.json();
 
+      console.log('Profile check response:', { response: response.ok, data, hasId: !!data.id });
+
       if (response.ok && data.id) {
         if (data.visibility_state !== 'verified') {
           setError('Only verified profiles can post jobs. Please complete verification first.');
@@ -44,6 +46,7 @@ export default function NewJobPage() {
           setProfile(data);
         }
       } else {
+        console.log('No profile found, setting error');
         setError('Profile not found. Please complete your profile first.');
       }
     } catch (error) {
@@ -92,6 +95,14 @@ export default function NewJobPage() {
                   className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
                 >
                   Edit Profile
+                </button>
+              )}
+              {error.includes('Profile not found') && (
+                <button
+                  onClick={() => router.push('/profile/edit')}
+                  className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                >
+                  Complete Profile Setup
                 </button>
               )}
               <button
