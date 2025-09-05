@@ -108,6 +108,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const { userId } = await auth();
+    console.log('Auth result - userId:', userId);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -156,13 +157,17 @@ export async function POST(request: Request) {
     const supabase = supabaseService();
 
     // Check if user can post jobs (verified firm)
+    console.log('Looking for profile with clerk_id:', userId);
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, visibility_state, firm_name')
+      .select('id, visibility_state, firm_name, clerk_id')
       .eq('clerk_id', userId)
       .single();
 
+    console.log('Profile query result:', { profile, profileError });
+
     if (profileError || !profile) {
+      console.log('Profile not found, error:', profileError);
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
