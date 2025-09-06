@@ -105,6 +105,7 @@ export async function POST(req: Request) {
       senderFirm: senderProfile.firm_name || '',
       recipientName: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
       recipientEmail: recipientProfile.public_email || '',
+      recipientProfileId: recipientId,
       messagePreview,
       messageLink
     });

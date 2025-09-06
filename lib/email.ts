@@ -38,6 +38,7 @@ export interface MessageNotificationEmailData {
   senderFirm: string;
   recipientName: string;
   recipientEmail: string;
+  recipientProfileId: string;
   messagePreview: string;
   messageLink: string;
 }
@@ -251,7 +252,11 @@ export const emailTemplates = {
           </div>
           
           <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
-            <p>You're receiving this because you have message notifications enabled.</p>
+            <p>You're receiving this because you have message notifications enabled. <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/settings" style="color: #10b981; text-decoration: none;">Change your email preferences</a>.</p>
+            <p style="margin: 10px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/api/unsubscribe?token=${data.recipientProfileId ? Buffer.from(data.recipientProfileId).toString('base64') : ''}&type=messages" style="color: #718096; text-decoration: underline;">Unsubscribe from message notifications</a> | 
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/api/unsubscribe?token=${data.recipientProfileId ? Buffer.from(data.recipientProfileId).toString('base64') : ''}&type=all" style="color: #718096; text-decoration: underline;">Unsubscribe from all emails</a>
+            </p>
             <p>TaxProExchange - Connecting verified tax professionals</p>
           </div>
         </body>

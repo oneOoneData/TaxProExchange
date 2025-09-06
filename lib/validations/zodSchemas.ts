@@ -135,6 +135,21 @@ export const ProfileUpdateSchema = z.object({
   entity_revenue_range: z.enum(['< $1M', '$1M - $10M', '$10M - $50M', '$50M - $100M', '$100M - $500M', '$500M - $1B', '> $1B']).optional()
 }).merge(ProfileCredentialSchema);
 
+// Email preferences update schema (for settings page)
+export const EmailPreferencesUpdateSchema = z.object({
+  clerk_id: z.string().min(1, "Clerk ID is required"),
+  connection_email_notifications: z.boolean().optional(),
+  email_preferences: z.object({
+    frequency: z.enum(["immediate", "daily", "weekly"]).default("immediate"),
+    job_notifications: z.boolean().default(true),
+    marketing_updates: z.boolean().default(false),
+    application_updates: z.boolean().default(true),
+    connection_requests: z.boolean().default(true),
+    verification_emails: z.boolean().default(true),
+    message_notifications: z.boolean().default(true)
+  }).optional()
+});
+
 // Onboarding schema (extends profile update with mandatory experience)
 export const OnboardingSchema = ProfileUpdateSchema.extend({
   years_experience: z.enum(['1-2', '3-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+']), // Required for new users

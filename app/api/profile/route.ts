@@ -202,19 +202,27 @@ export async function PUT(request: Request) {
     
     // Process profile update request
     
-    // Check if this is a credential-only update
-    // If the request only contains credential fields and clerk_id, it's credential-only
+    // Check what type of update this is
     const requestKeys = Object.keys(body);
     const isCredentialUpdate = requestKeys.length <= 3 && 
                               requestKeys.includes('clerk_id') &&
                               requestKeys.includes('credential_type') &&
                               requestKeys.includes('licenses');
     
+    const isEmailPreferencesUpdate = requestKeys.length <= 3 && 
+                                    requestKeys.includes('clerk_id') &&
+                                    (requestKeys.includes('connection_email_notifications') || 
+                                     requestKeys.includes('email_preferences'));
+    
     let validationResult;
     if (isCredentialUpdate) {
       // Use credential-specific validation
       const { CredentialUpdateSchema } = await import('@/lib/validations/zodSchemas');
       validationResult = CredentialUpdateSchema.safeParse(body);
+    } else if (isEmailPreferencesUpdate) {
+      // Use email preferences validation
+      const { EmailPreferencesUpdateSchema } = await import('@/lib/validations/zodSchemas');
+      validationResult = EmailPreferencesUpdateSchema.safeParse(body);
     } else {
       // Use full profile validation
       validationResult = ProfileUpdateSchema.safeParse(body);
@@ -255,7 +263,28 @@ export async function PUT(request: Request) {
       years_experience = undefined;
       entity_revenue_range = undefined;
       profileData = {};
-        } else {
+    } else if (isEmailPreferencesUpdate) {
+      // For email preferences updates
+      const emailData = validatedData as any;
+      connection_email_notifications = emailData.connection_email_notifications;
+      email_preferences = emailData.email_preferences;
+      // Set other fields to undefined so they don't get updated
+      specializations = undefined;
+      locations = undefined;
+      software = undefined;
+      other_software = undefined;
+      public_contact = undefined;
+      works_multistate = undefined;
+      works_international = undefined;
+      countries = undefined;
+      primary_location = undefined;
+      location_radius = undefined;
+      credential_type = undefined;
+      licenses = undefined;
+      years_experience = undefined;
+      entity_revenue_range = undefined;
+      profileData = {};
+    } else {
       // For full profile updates
       const fullProfileData = validatedData as any;
       ({
