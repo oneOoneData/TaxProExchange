@@ -121,6 +121,14 @@ export async function POST(req: Request) {
     // Create new profile with legal acceptance and retry logic
     const now = new Date().toISOString();
     
+    console.log('🔍 Creating profile with data:', {
+      clerk_id: userId,
+      userEmail,
+      slug: 'will be generated',
+      tos_version: LEGAL_VERSIONS.TOS,
+      privacy_version: LEGAL_VERSIONS.PRIVACY
+    });
+    
     let profileCreated = false;
     let attempts = 0;
     const maxAttempts = 3;
@@ -131,40 +139,48 @@ export async function POST(req: Request) {
       // Generate a unique slug for this attempt
       const slug = await generateUniqueSlug(userId, supabase);
       
+      // Start with minimal required fields
+      const profileData = {
+        clerk_id: userId,
+        first_name: 'Unknown',
+        last_name: 'User',
+        credential_type: 'Other',
+        slug: slug
+      };
+
+      // Add optional fields if they exist in schema
+      const optionalFields = {
+        headline: 'New Tax Professional',
+        bio: 'Profile created automatically',
+        firm_name: '',
+        public_email: userEmail || '',
+        phone: '',
+        website_url: '',
+        linkedin_url: '',
+        accepting_work: true,
+        tos_version: LEGAL_VERSIONS.TOS,
+        tos_accepted_at: now,
+        privacy_version: LEGAL_VERSIONS.PRIVACY,
+        privacy_accepted_at: now
+      };
+
+      // Merge optional fields
+      const fullProfileData = { ...profileData, ...optionalFields };
+
+      console.log('🔍 Attempting to insert profile data:', fullProfileData);
+
       const { error } = await supabase
         .from('profiles')
-        .insert({
-          clerk_id: userId,
-          first_name: 'Unknown',
-          last_name: 'User',
-          headline: 'New Tax Professional',
-          bio: 'Profile created automatically',
-          credential_type: 'Other',
-          firm_name: '',
-          public_email: '',
-          phone: '',
-          website_url: '',
-          linkedin_url: '',
-          accepting_work: true,
-          public_contact: false,
-          works_multistate: false,
-          works_international: false,
-          countries: [],
-          specializations: [],
-          states: [],
-          software: [],
-          other_software: [],
-          years_experience: null,
-          entity_revenue_range: null,
-          slug: slug,
-          tos_version: LEGAL_VERSIONS.TOS,
-          tos_accepted_at: now,
-          privacy_version: LEGAL_VERSIONS.PRIVACY,
-          privacy_accepted_at: now
-        });
+        .insert(fullProfileData);
 
       if (error) {
         console.error(`Profile creation attempt ${attempts} error:`, error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         
         // If it's a duplicate key error and we have attempts left, retry
         if (error.code === '23505' && attempts < maxAttempts) {
@@ -174,7 +190,31 @@ export async function POST(req: Request) {
           continue;
         }
         
-        return new Response('Failed to create profile', { status: 500 });
+        // If it's a column doesn't exist error, try with minimal fields
+        if (error.code === '42703' && attempts === 1) {
+          console.log('🔍 Trying with minimal fields only...');
+          const { error: minimalError } = await supabase
+            .from('profiles')
+            .insert(profileData);
+          
+          if (!minimalError) {
+            console.log('✅ Profile created with minimal fields');
+            profileCreated = true;
+            break;
+          } else {
+            console.error('❌ Even minimal fields failed:', minimalError);
+          }
+        }
+        
+        // Return the actual error details for debugging
+        return new Response(JSON.stringify({
+          error: 'Failed to create profile',
+          details: error.message,
+          code: error.code
+        }), { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
       }
       
       profileCreated = true;
