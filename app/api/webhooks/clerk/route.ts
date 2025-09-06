@@ -155,88 +155,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: true, message: "User created but no email available" });
       }
 
-      const profileData = {
-        clerk_id: u.id,
-        email,
-        first_name: u.first_name ?? 'New User',
-        last_name: u.last_name ?? '',
-        headline: `${u.first_name || 'New'} ${u.last_name || 'User'}`,
-        credential_type: 'Other', // Set default value - ensure this is never null
-        firm_name: null,
-        public_email: email,
-        phone: null,
-        website_url: null,
-        linkedin_url: null,
-        accepting_work: false,
-        // visibility_state will use database default ('hidden')
-        is_listed: false,
-        slug: await generateUniqueSlug(u.first_name, u.last_name, u.id, supabase),
-        image_url: u.image_url ?? null,
-      };
-
-      // Validate that credential_type is not null before upsert
-      if (!profileData.credential_type) {
-        console.error('🔍 credential_type is null, setting to default');
-        profileData.credential_type = 'Other';
-      }
-      
-      // Double-check that credential_type is valid
-      const validCredentialTypes = ['CPA', 'EA', 'CTEC', 'Student', 'Tax Lawyer (JD)', 'PTIN Only', 'Other'];
-      if (!validCredentialTypes.includes(profileData.credential_type)) {
-        console.error('🔍 Invalid credential_type, setting to default:', profileData.credential_type);
-        profileData.credential_type = 'Other';
-      }
-      
-      console.log('🔍 Attempting to upsert profile with data:', profileData);
-
-      // Retry logic for profile creation
-      let profileCreated = false;
-      let attempts = 0;
-      const maxAttempts = 3;
-      
-      while (!profileCreated && attempts < maxAttempts) {
-        attempts++;
-        
-        // Generate a new slug for this attempt
-        profileData.slug = await generateUniqueSlug(u.first_name, u.last_name, u.id, supabase);
-        
-        const { error } = await supabase
-          .from("profiles")
-          .upsert(profileData, { onConflict: "clerk_id" });
-          
-        if (error) {
-          console.error(`🔍 Supabase upsert attempt ${attempts} error:`, error);
-          
-          // Check for credential_type constraint violation
-          if (error.message && error.message.includes('credential_type') && error.message.includes('not-null constraint')) {
-            console.error('🔍 CREDENTIAL_TYPE CONSTRAINT VIOLATION:', {
-              error: error.message,
-              profileData: profileData,
-              credential_type: profileData.credential_type,
-              isNull: profileData.credential_type === null,
-              isUndefined: profileData.credential_type === undefined
-            });
-          }
-          
-          // If it's a duplicate key error and we have attempts left, retry
-          if (error.code === '23505' && attempts < maxAttempts) {
-            console.log(`🔍 Retrying profile upsert (attempt ${attempts + 1}/${maxAttempts})`);
-            // Add a small delay before retry
-            await new Promise(resolve => setTimeout(resolve, 100 * attempts));
-            continue;
-          }
-          
-          return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
-        }
-        
-        profileCreated = true;
-      }
-      
-      if (!profileCreated) {
-        return NextResponse.json({ ok: false, error: "Failed to create profile after multiple attempts" }, { status: 500 });
-      }
-      
-      console.log('🔍 Profile upserted successfully for user:', u.id);
+      // Don't create profile automatically - user must complete profile edit first
+      console.log('🔍 User authenticated, profile will be created when user completes profile edit');
+      return NextResponse.json({ ok: true, message: "User authenticated - profile creation deferred to user action" });
     } else {
       console.log('🔍 Webhook event type not handled:', evt.type);
     }

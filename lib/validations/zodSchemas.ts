@@ -81,8 +81,12 @@ export const ProfileCredentialSchema = z.object({
 
 // Profile update schema (extends credential schema)
 export const ProfileUpdateSchema = z.object({
-  first_name: z.string().min(1, "First name is required"),
-  last_name: z.string().min(1, "Last name is required"),
+  first_name: z.string().min(1, "First name is required").refine((val) => val !== 'Unknown' && val !== 'New User', {
+    message: "Please enter your actual first name"
+  }),
+  last_name: z.string().min(1, "Last name is required").refine((val) => val !== 'User' && val !== 'New User', {
+    message: "Please enter your actual last name"
+  }),
   headline: z.string().optional(),
   bio: z.string().optional(),
   opportunities: z.string().optional(),

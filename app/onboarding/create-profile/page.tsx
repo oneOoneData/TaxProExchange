@@ -28,28 +28,8 @@ export default function CreateProfilePage() {
   }
 
   const handleCreateProfile = async () => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/onboarding/create-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create profile');
-      }
-
-      // Redirect to profile edit to complete setup
-      router.push('/profile/edit');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Skip profile creation - go directly to profile edit
+    router.push('/profile/edit');
   };
 
   return (
