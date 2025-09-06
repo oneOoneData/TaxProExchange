@@ -47,6 +47,26 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
     setLicenses(value.licenses || []);
   }, [value.licenses]);
 
+  // Initialize license when credential type is set but no licenses exist
+  useEffect(() => {
+    if (value.credential_type && value.credential_type !== 'Student' && (!value.licenses || value.licenses.length === 0)) {
+      const licenseKind = getLicenseKindForCredential(value.credential_type);
+      const issuingAuthority = getIssuingAuthorityForCredential(value.credential_type);
+      
+      const newLicense: License = {
+        license_kind: licenseKind as any,
+        license_number: '',
+        issuing_authority: issuingAuthority,
+        state: value.credential_type === 'CPA' ? '' : undefined,
+        expires_on: '',
+        board_profile_url: ''
+      };
+      
+      setLicenses([newLicense]);
+      onChange({ credential_type: value.credential_type, licenses: [newLicense] });
+    }
+  }, [value.credential_type, value.licenses, onChange]);
+
   const getLicenseKindForCredential = (credential_type: CredentialType): string => {
     switch (credential_type) {
       case 'CPA': return 'CPA_STATE_LICENSE';
