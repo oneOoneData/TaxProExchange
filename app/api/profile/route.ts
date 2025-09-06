@@ -447,6 +447,7 @@ export async function PUT(request: Request) {
         .insert({
           clerk_id,
           ...profileData,
+          credential_type: credential_type || 'Student', // Ensure credential_type is always set
           slug: generateSlug(profileData.first_name, profileData.last_name, clerk_id),
           public_contact: public_contact ?? false,
           works_multistate: works_multistate ?? false,
