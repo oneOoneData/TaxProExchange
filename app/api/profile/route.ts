@@ -595,8 +595,6 @@ export async function PUT(request: Request) {
     }
 
     // Send notification email to admin when profile is completed
-    // Temporarily disabled to debug the JSON coercion error
-    /*
     if (profile && profile.onboarding_complete) {
       try {
         const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/profile-completed`, {
@@ -625,7 +623,6 @@ export async function PUT(request: Request) {
         // Don't fail the request if email fails
       }
     }
-    */
 
     // Profile saved successfully
     
