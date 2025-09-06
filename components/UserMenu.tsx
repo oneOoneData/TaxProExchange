@@ -18,6 +18,8 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasPendingConnections, setHasPendingConnections] = useState(false);
+  const [pendingConnectionCount, setPendingConnectionCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAdmin, isLoading: isAdminLoading } = useAdminStatus();
 
@@ -51,6 +53,28 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
     
     // Check every 30 seconds
     const interval = setInterval(checkUnreadMessages, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Check for pending connection requests
+  useEffect(() => {
+    const checkPendingConnections = async () => {
+      try {
+        const response = await fetch('/api/connections/pending');
+        if (response.ok) {
+          const data = await response.json();
+          setHasPendingConnections(data.count > 0);
+          setPendingConnectionCount(data.count);
+        }
+      } catch (error) {
+        console.error('Failed to check pending connections:', error);
+      }
+    };
+
+    checkPendingConnections();
+    
+    // Check every 30 seconds
+    const interval = setInterval(checkPendingConnections, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -179,6 +203,27 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
                 {hasUnreadMessages && (
                   <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                     {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+
+              <Link
+                href="/messages"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <div className="relative">
+                  <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  {hasPendingConnections && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"></div>
+                  )}
+                </div>
+                Connections
+                {hasPendingConnections && (
+                  <span className="ml-auto bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                    {pendingConnectionCount > 9 ? '9+' : pendingConnectionCount}
                   </span>
                 )}
               </Link>
