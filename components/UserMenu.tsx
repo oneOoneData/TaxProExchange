@@ -53,7 +53,20 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
     
     // Check every 30 seconds
     const interval = setInterval(checkUnreadMessages, 30000);
-    return () => clearInterval(interval);
+    
+    // Also check when the page becomes visible (user navigates back)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkUnreadMessages();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Check for pending connection requests
@@ -195,7 +208,25 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
               <Link
                 href="/messages"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  // Refresh unread count when navigating to messages
+                  setTimeout(() => {
+                    const checkUnreadMessages = async () => {
+                      try {
+                        const response = await fetch('/api/messages/unread');
+                        if (response.ok) {
+                          const data = await response.json();
+                          setHasUnreadMessages(data.hasUnreadMessages);
+                          setUnreadCount(data.unreadCount);
+                        }
+                      } catch (error) {
+                        console.error('Failed to check unread messages:', error);
+                      }
+                    };
+                    checkUnreadMessages();
+                  }, 1000); // Small delay to allow navigation
+                }}
                 className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 <div className="relative">
