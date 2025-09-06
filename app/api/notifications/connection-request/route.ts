@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if recipient has email notifications enabled
-    if (!connection.recipient.connection_email_notifications) {
+    if (!(connection.recipient as any).connection_email_notifications) {
       return NextResponse.json(
         { message: 'Recipient has disabled connection email notifications' },
         { status: 200 }
@@ -64,11 +64,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get recipient's email - try public_email first, then Clerk API
-    let userEmail: string | null = connection.recipient.public_email || null;
+    let userEmail: string | null = (connection.recipient as any).public_email || null;
     
     if (!userEmail) {
       try {
-        const response = await fetch(`https://api.clerk.com/v1/users/${connection.recipient.clerk_id}`, {
+        const response = await fetch(`https://api.clerk.com/v1/users/${(connection.recipient as any).clerk_id}`, {
           headers: {
             'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
             'Content-Type': 'application/json',
@@ -99,9 +99,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare email data
-    const requesterName = `${connection.requester.first_name} ${connection.requester.last_name}`;
-    const recipientName = connection.recipient.first_name;
-    const firmName = connection.requester.firm_name ? ` at ${connection.requester.firm_name}` : '';
+    const requesterName = `${(connection.requester as any).first_name} ${(connection.requester as any).last_name}`;
+    const recipientName = (connection.recipient as any).first_name;
+    const firmName = (connection.requester as any).firm_name ? ` at ${(connection.requester as any).firm_name}` : '';
     
     const viewRequestUrl = `${process.env.NEXT_PUBLIC_APP_URL}/messages`;
     const notificationSettingsUrl = `${process.env.NEXT_PUBLIC_APP_URL}/settings`;
