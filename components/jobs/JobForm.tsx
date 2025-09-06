@@ -47,7 +47,7 @@ const credentials = [
 
 const software = [
   { value: 'proseries', label: 'ProSeries' },
-  { value: 'drake', label: 'Drake' },
+  { value: 'drake', label: 'Drake Tax' },
   { value: 'turbotax', label: 'TurboTax' },
   { value: 'lacerte', label: 'Lacerte' },
   { value: 'ultratax', label: 'UltraTax' },

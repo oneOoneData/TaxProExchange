@@ -80,7 +80,7 @@ const softwareOptions = [
   // Professional preparer suites
   { slug: 'lacerte', label: 'Intuit Lacerte' },
   { slug: 'proseries', label: 'Intuit ProSeries' },
-  { slug: 'drake_tax', label: 'Drake Tax' },
+  { slug: 'drake', label: 'Drake Tax' },
   { slug: 'ultratax', label: 'Thomson Reuters UltraTax CS' },
   { slug: 'cch_axcess', label: 'CCH Axcess Tax' },
   { slug: 'cch_prosystem', label: 'CCH ProSystem fx Tax' },

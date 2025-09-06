@@ -27,6 +27,7 @@ interface Profile {
   verified: boolean;
   specializations: string[];
   states: string[];
+  software: string[];
   avatar_url: string | null;
   years_experience?: string;
   primary_location?: { country?: string; state?: string; city?: string; display_name?: string } | null;
@@ -116,7 +117,7 @@ export default function SearchPage() {
   const softwareOptions = [
     { value: '', label: 'All software' },
     { value: 'proseries', label: 'ProSeries' },
-    { value: 'drake_tax', label: 'Drake Tax' },
+    { value: 'drake', label: 'Drake Tax' },
     { value: 'turbotax', label: 'TurboTax' },
     { value: 'lacerte', label: 'Lacerte' },
     { value: 'ultratax', label: 'UltraTax' },
@@ -509,12 +510,17 @@ export default function SearchPage() {
                   const searchValue = e.target.value;
                   const newFilters = { ...filters, q: searchValue };
                   
-                  // Check if the search value is exactly a state code (not just containing one)
+                  // Only auto-detect state codes if the search is exactly 2 characters and matches a state
                   const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase().trim());
-                  if (stateCode && searchValue.trim().length === 2) {
+                  if (stateCode && searchValue.trim().length === 2 && searchValue.trim().length === searchValue.length) {
                     // If it's exactly a 2-letter state code, set the location filter and clear the search query
                     newFilters.state = stateCode;
                     newFilters.q = '';
+                  } else {
+                    // Clear state filter if user is typing a name or other search term
+                    if (filters.state && searchValue.length > 0) {
+                      newFilters.state = '';
+                    }
                   }
                   
                   setFilters(newFilters);
@@ -635,12 +641,17 @@ export default function SearchPage() {
                       const searchValue = e.target.value;
                       const newFilters = { ...filters, q: searchValue };
                       
-                      // Check if the search value is exactly a state code (not just containing one)
+                      // Only auto-detect state codes if the search is exactly 2 characters and matches a state
                       const stateCode = states.find(state => state.toLowerCase() === searchValue.toLowerCase().trim());
-                      if (stateCode && searchValue.trim().length === 2) {
+                      if (stateCode && searchValue.trim().length === 2 && searchValue.trim().length === searchValue.length) {
                         // If it's exactly a 2-letter state code, set the location filter and clear the search query
                         newFilters.state = stateCode;
                         newFilters.q = '';
+                      } else {
+                        // Clear state filter if user is typing a name or other search term
+                        if (filters.state && searchValue.length > 0) {
+                          newFilters.state = '';
+                        }
                       }
                       
                       setFilters(newFilters);

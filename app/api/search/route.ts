@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
     const credential_type = searchParams.get('credential_type') || '';
-    const specialization = searchParams.get('specialization') || '';
+    // Handle multiple specializations - get all values for this parameter
+    const specializations = searchParams.getAll('specialization');
     const software = searchParams.get('software') || '';
     const state = searchParams.get('state') || '';
     const accepting_work = searchParams.get('accepting_work') || '';
@@ -90,8 +91,8 @@ export async function GET(request: NextRequest) {
     // When verified_only is false, show all profiles (both verified and unverified)
     // Users can still only view verified profiles due to profile API restrictions
 
-    // Apply text search (only if it's not a state code)
-    if (query && !state) {
+    // Apply text search for names, firm names, headlines, and bios
+    if (query) {
       const searchTerm = `%${query}%`;
       console.log('🔍 Applying text search with term:', searchTerm);
       supabaseQuery = supabaseQuery.or(`first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},headline.ilike.${searchTerm},bio.ilike.${searchTerm},firm_name.ilike.${searchTerm}`);
@@ -112,40 +113,52 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.eq('years_experience', years_experience);
     }
 
-    // Apply software filter if specified
+    // Apply software filter if specified - use profile_software table
     if (software) {
-      supabaseQuery = supabaseQuery.contains('software', [software]);
+      const { data: profileSoftware } = await supabase
+        .from('profile_software')
+        .select('profile_id')
+        .eq('software_slug', software);
+      
+      if (profileSoftware && profileSoftware.length > 0) {
+        const profileIds = profileSoftware.map(ps => ps.profile_id);
+        supabaseQuery = supabaseQuery.in('id', profileIds);
+      } else {
+        // No profiles with this software, return empty result
+        return NextResponse.json({
+          profiles: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0
+          }
+        });
+      }
     }
 
-    // Apply specialization filter if specified
-    if (specialization) {
-      const { data: specData } = await supabase
-        .from('specializations')
-        .select('id')
-        .eq('slug', specialization)
-        .single();
+    // Apply specialization filter if specified - handle multiple specializations
+    if (specializations && specializations.length > 0) {
+      // Get profiles that have any of the selected specializations
+      const { data: profileSpecs } = await supabase
+        .from('profile_specializations')
+        .select('profile_id')
+        .in('specialization_slug', specializations);
       
-      if (specData) {
-        const { data: profileSpecs } = await supabase
-          .from('profile_specializations')
-          .select('profile_id')
-          .eq('specialization_id', specData.id);
-        
-        if (profileSpecs && profileSpecs.length > 0) {
-          const profileIds = profileSpecs.map(ps => ps.profile_id);
-          supabaseQuery = supabaseQuery.in('id', profileIds);
-        } else {
-          // No profiles with this specialization, return empty result
-          return NextResponse.json({
-            profiles: [],
-            pagination: {
-              page,
-              limit,
-              total: 0,
-              totalPages: 0
-            }
-          });
-        }
+      if (profileSpecs && profileSpecs.length > 0) {
+        const profileIds = profileSpecs.map(ps => ps.profile_id);
+        supabaseQuery = supabaseQuery.in('id', profileIds);
+      } else {
+        // No profiles with these specializations, return empty result
+        return NextResponse.json({
+          profiles: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0
+          }
+        });
       }
     }
 
@@ -183,7 +196,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🔍 Search API - Raw profiles found:', profiles?.length || 0);
-    console.log('🔍 Search parameters:', { query, credential_type, specialization, software, state, accepting_work, verified_only, years_experience });
+    console.log('🔍 Search parameters:', { query, credential_type, specializations, software, state, accepting_work, verified_only, years_experience });
     
     // Debug: Check if Alvin Choy is in the main query results
     if (profiles && profiles.length > 0) {
@@ -253,26 +266,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Filter by software if specified
-    if (software) {
-      filteredProfiles = filteredProfiles.filter(p => 
-        p.software && p.software.includes(software)
-      );
-    }
+    // Software filtering is now handled in the SQL query above for better performance
 
-    // Fetch specializations, locations, and licenses for each profile
+    // Fetch specializations, locations, software, and licenses for each profile
     const profilesWithDetails = await Promise.all(
       filteredProfiles.map(async (profile) => {
         // Get specializations
         const { data: specializations } = await supabase
           .from('profile_specializations')
-          .select('specialization_id')
+          .select('specialization_slug')
           .eq('profile_id', profile.id);
 
         // Get locations
         const { data: locations } = await supabase
           .from('profile_locations')
-          .select('location_id')
+          .select('state')
+          .eq('profile_id', profile.id);
+
+        // Get software
+        const { data: software } = await supabase
+          .from('profile_software')
+          .select('software_slug')
           .eq('profile_id', profile.id);
 
         // Get licenses using the public view (never includes license_number)
@@ -283,8 +297,9 @@ export async function GET(request: NextRequest) {
 
         return {
           ...profile,
-          specializations: specializations?.map(s => s.specialization_id) || [],
-          states: locations?.map(l => l.location_id) || [],
+          specializations: specializations?.map(s => s.specialization_slug) || [],
+          states: locations?.map(l => l.state) || [],
+          software: software?.map(s => s.software_slug) || [],
           licenses: licenses || [],
           verified: profile.visibility_state === 'verified',
           works_multistate: profile.works_multistate || false,
