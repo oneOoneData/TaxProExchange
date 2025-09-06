@@ -38,11 +38,15 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   useEffect(() => {
     const checkUnreadMessages = async () => {
       try {
+        console.log('Checking unread messages...');
         const response = await fetch('/api/messages/unread');
         if (response.ok) {
           const data = await response.json();
+          console.log('Unread messages response:', data);
           setHasUnreadMessages(data.hasUnreadMessages);
           setUnreadCount(data.unreadCount);
+        } else {
+          console.error('Failed to fetch unread messages:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Failed to check unread messages:', error);
