@@ -25,7 +25,9 @@ export function useAdminStatus() {
         if (response.ok) {
           const data = await response.json();
           console.log('🔍 useAdminStatus: Response data:', data);
-          setIsAdmin(data.isAdmin || false);
+          const adminStatus = data.isAdmin || false;
+          console.log('🔍 useAdminStatus: Setting admin status to:', adminStatus);
+          setIsAdmin(adminStatus);
         } else {
           console.log('🔍 useAdminStatus: Response not ok');
           setIsAdmin(false);
@@ -35,7 +37,6 @@ export function useAdminStatus() {
         setIsAdmin(false);
       } finally {
         setIsLoading(false);
-        console.log('🔍 useAdminStatus: Final state:', { isAdmin: isAdmin, isLoading: false });
       }
     }
 
