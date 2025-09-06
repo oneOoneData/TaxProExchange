@@ -63,11 +63,18 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
         const response = await fetch('/api/connections/pending');
         if (response.ok) {
           const data = await response.json();
+          console.log('Pending connections data:', data);
           setHasPendingConnections(data.count > 0);
           setPendingConnectionCount(data.count);
+        } else {
+          console.log('Failed to fetch pending connections:', response.status);
+          setHasPendingConnections(false);
+          setPendingConnectionCount(0);
         }
       } catch (error) {
         console.error('Failed to check pending connections:', error);
+        setHasPendingConnections(false);
+        setPendingConnectionCount(0);
       }
     };
 
@@ -208,7 +215,7 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
               </Link>
 
               <Link
-                href="/messages"
+                href="/messages?tab=pending"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
