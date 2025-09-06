@@ -121,18 +121,20 @@ export async function POST(req: Request) {
     
     // Check if profile already exists by email first, then by clerk_id
     let existingProfile = null;
+    let foundByEmail = false;
     
     if (userEmail) {
       console.log('🔍 Searching for profile by email:', userEmail);
       const { data: emailProfile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, clerk_id')
         .eq('public_email', userEmail)
         .single();
       
       if (emailProfile) {
-        console.log('🔍 Profile found by email:', emailProfile.id);
+        console.log('🔍 Profile found by email:', emailProfile.id, 'with clerk_id:', emailProfile.clerk_id);
         existingProfile = emailProfile;
+        foundByEmail = true;
       }
     }
     
@@ -141,58 +143,137 @@ export async function POST(req: Request) {
       console.log('🔍 Searching for profile by clerk_id:', userId);
       const { data: clerkProfile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, clerk_id')
         .eq('clerk_id', userId)
         .single();
 
-      existingProfile = clerkProfile;
+      if (clerkProfile) {
+        console.log('🔍 Profile found by clerk_id:', clerkProfile.id);
+        existingProfile = clerkProfile;
+      }
     }
 
     if (existingProfile) {
       console.log('🔍 Profile already exists, checking if user is still active in Clerk...');
       
-      // Check if the user is still active in Clerk
-      try {
-        const clerkResponse = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        });
+      // If we found the profile by email but clerk_id doesn't match, it's an orphaned profile
+      if (foundByEmail && existingProfile.clerk_id !== userId) {
+        console.log('🔍 Found profile by email but clerk_id mismatch - this is an orphaned profile');
+        console.log('🔍 Old clerk_id:', existingProfile.clerk_id, 'New clerk_id:', userId);
         
-        if (clerkResponse.ok) {
-          console.log('🔍 User is still active in Clerk, returning 400');
-          return new Response(JSON.stringify({
-            error: 'Profile already exists',
-            details: 'A profile with this email or clerk_id already exists'
-          }), { 
-            status: 400,
-            headers: { 'Content-Type': 'application/json' }
+        // Check if the old clerk_id user still exists in Clerk
+        try {
+          const oldUserResponse = await fetch(`https://api.clerk.com/v1/users/${existingProfile.clerk_id}`, {
+            headers: {
+              'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+              'Content-Type': 'application/json',
+            },
           });
-        } else if (clerkResponse.status === 404) {
-          console.log('🔍 User not found in Clerk, deleting orphaned profile and creating new one');
           
-          // Delete the orphaned profile
-          const { error: deleteError } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('clerk_id', userId);
+          if (oldUserResponse.status === 404) {
+            console.log('🔍 Old user not found in Clerk, deleting orphaned profile');
             
-          if (deleteError) {
-            console.error('❌ Error deleting orphaned profile:', deleteError);
+            // Delete the orphaned profile using the old clerk_id
+            const { error: deleteError } = await supabase
+              .from('profiles')
+              .delete()
+              .eq('clerk_id', existingProfile.clerk_id);
+            
+            if (deleteError) {
+              console.error('❌ Error deleting orphaned profile:', deleteError);
+              return new Response(JSON.stringify({
+                error: 'Failed to clean up orphaned profile',
+                details: deleteError.message
+              }), { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
+            
+            console.log('✅ Orphaned profile deleted, continuing with new profile creation');
+            existingProfile = null; // Reset so we can create a new profile
+          } else if (oldUserResponse.ok) {
+            console.log('🔍 Old user still exists in Clerk, returning 400');
             return new Response(JSON.stringify({
-              error: 'Failed to clean up orphaned profile',
-              details: deleteError.message
+              error: 'Profile already exists',
+              details: 'A profile with this email already exists for a different user'
+            }), { 
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          } else {
+            console.error('❌ Unexpected Clerk API response for old user:', oldUserResponse.status);
+            return new Response(JSON.stringify({
+              error: 'Failed to verify user status',
+              details: 'Could not verify if old user exists in Clerk'
             }), { 
               status: 500,
               headers: { 'Content-Type': 'application/json' }
             });
           }
+        } catch (error) {
+          console.error('❌ Error checking old user status in Clerk:', error);
+          return new Response(JSON.stringify({
+            error: 'Failed to verify user status',
+            details: 'Could not verify if old user exists in Clerk'
+          }), { 
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      } else {
+        // Profile found by clerk_id, check if user is still active
+        try {
+          const clerkResponse = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+              'Content-Type': 'application/json',
+            },
+          });
           
-          console.log('✅ Orphaned profile deleted, continuing with profile creation');
-          // Continue with profile creation below
-        } else {
-          console.error('❌ Unexpected Clerk API response:', clerkResponse.status);
+          if (clerkResponse.ok) {
+            console.log('🔍 User is still active in Clerk, returning 400');
+            return new Response(JSON.stringify({
+              error: 'Profile already exists',
+              details: 'A profile with this clerk_id already exists'
+            }), { 
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          } else if (clerkResponse.status === 404) {
+            console.log('🔍 User not found in Clerk, deleting orphaned profile and creating new one');
+            
+            // Delete the orphaned profile
+            const { error: deleteError } = await supabase
+              .from('profiles')
+              .delete()
+              .eq('clerk_id', userId);
+            
+            if (deleteError) {
+              console.error('❌ Error deleting orphaned profile:', deleteError);
+              return new Response(JSON.stringify({
+                error: 'Failed to clean up orphaned profile',
+                details: deleteError.message
+              }), { 
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
+            
+            console.log('✅ Orphaned profile deleted, continuing with new profile creation');
+            existingProfile = null; // Reset so we can create a new profile
+          } else {
+            console.error('❌ Unexpected Clerk API response:', clerkResponse.status);
+            return new Response(JSON.stringify({
+              error: 'Failed to verify user status',
+              details: 'Could not verify if user exists in Clerk'
+            }), { 
+              status: 500,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+        } catch (error) {
+          console.error('❌ Error checking user status in Clerk:', error);
           return new Response(JSON.stringify({
             error: 'Failed to verify user status',
             details: 'Could not verify if user exists in Clerk'
@@ -201,15 +282,6 @@ export async function POST(req: Request) {
             headers: { 'Content-Type': 'application/json' }
           });
         }
-      } catch (error) {
-        console.error('❌ Error checking user status in Clerk:', error);
-        return new Response(JSON.stringify({
-          error: 'Failed to verify user status',
-          details: 'Could not verify if user exists in Clerk'
-        }), { 
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        });
       }
     }
 
