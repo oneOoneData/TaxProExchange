@@ -71,7 +71,7 @@ export async function POST(req: Request) {
       // Get recipient profile details
       const { data: recipientProfile, error: recipientError } = await supabase
         .from('profiles')
-        .select('first_name, last_name, email, email_preferences')
+        .select('first_name, last_name, public_email, email_preferences, clerk_id')
         .eq('id', recipientProfileId)
         .single();
 
@@ -87,14 +87,39 @@ export async function POST(req: Request) {
           // Check if recipient wants connection request emails
           const emailPreferences = recipientProfile.email_preferences as EmailPreferences | null;
           if (shouldSendEmail(emailPreferences, 'connection_requests')) {
-            await sendConnectionRequestNotification({
-              requesterName: `${requesterProfile.first_name} ${requesterProfile.last_name}`,
-              requesterFirm: requesterProfile.firm_name || '',
-              requesterCredential: requesterProfile.credential_type || '',
-              recipientName: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
-              recipientEmail: recipientProfile.email || '',
-              acceptLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/messages`
-            });
+            // Get recipient email (try public_email first, then Clerk API)
+            let recipientEmail = recipientProfile.public_email;
+            
+            if (!recipientEmail && recipientProfile.clerk_id) {
+              try {
+                const clerkResponse = await fetch(`https://api.clerk.com/v1/users/${recipientProfile.clerk_id}`, {
+                  headers: {
+                    'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                  }
+                });
+                
+                if (clerkResponse.ok) {
+                  const clerkUser = await clerkResponse.json();
+                  recipientEmail = clerkUser.email_addresses?.[0]?.email_address;
+                }
+              } catch (clerkError) {
+                console.error('Failed to fetch email from Clerk:', clerkError);
+              }
+            }
+
+            if (recipientEmail) {
+              await sendConnectionRequestNotification({
+                requesterName: `${requesterProfile.first_name} ${requesterProfile.last_name}`,
+                requesterFirm: requesterProfile.firm_name || '',
+                requesterCredential: requesterProfile.credential_type || '',
+                recipientName: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
+                recipientEmail: recipientEmail,
+                acceptLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/messages`
+              });
+            } else {
+              console.error('No email found for recipient:', recipientProfileId);
+            }
           }
         }
       }
