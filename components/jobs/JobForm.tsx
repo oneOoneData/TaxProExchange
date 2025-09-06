@@ -47,10 +47,14 @@ const credentials = [
 
 const software = [
   { value: 'proseries', label: 'ProSeries' },
+  { value: 'proconnect', label: 'ProConnect' },
   { value: 'drake', label: 'Drake Tax' },
   { value: 'turbotax', label: 'TurboTax' },
   { value: 'lacerte', label: 'Lacerte' },
   { value: 'ultratax', label: 'UltraTax' },
+  { value: 'axcess', label: 'Axcess' },
+  { value: 'atx', label: 'ATX' },
+  { value: 'prosystemfx', label: 'ProSystemFX' },
   { value: 'taxact', label: 'TaxAct' },
   { value: 'taxslayer', label: 'TaxSlayer' },
   { value: 'taxdome', label: 'TaxDome' },

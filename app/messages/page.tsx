@@ -173,19 +173,24 @@ export default function MessagesPage() {
             </div>
 
             <div className="flex items-center gap-2 mb-4">
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                 connection.status === 'pending' 
-                  ? 'bg-yellow-100 text-yellow-700' 
+                  ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
                   : connection.status === 'accepted'
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
+                  ? 'bg-green-100 text-green-700 border border-green-200'
+                  : 'bg-red-100 text-red-700 border border-red-200'
               }`}>
-                {connection.status === 'pending' ? 'Pending' : 
-                 connection.status === 'accepted' ? 'Connected' : 'Declined'}
+                {connection.status === 'pending' ? '⏳ Pending' : 
+                 connection.status === 'accepted' ? '✅ Connected' : '❌ Declined'}
               </span>
-              <span className="text-xs text-slate-500">
-                {isRequester ? 'You requested' : 'Requested you'}
+              <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                {isRequester ? 'You requested this connection' : 'They requested to connect with you'}
               </span>
+              {connection.status === 'accepted' && (
+                <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded font-medium">
+                  ✓ Connection accepted
+                </span>
+              )}
             </div>
           </div>
 
@@ -228,19 +233,24 @@ export default function MessagesPage() {
             )}
 
             {connection.status === 'accepted' && (
-              <div className="flex gap-2">
-                <Link
-                  href={`/messages/${connection.id}`}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                >
-                  Message
-                </Link>
-                <button
-                  onClick={() => handleDeleteConnection(connection.id)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
-                >
-                  Delete
-                </button>
+              <div className="flex flex-col gap-2">
+                <div className="text-xs text-slate-500 text-right">
+                  Connected {new Date(connection.created_at).toLocaleDateString()}
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    href={`/messages/${connection.id}`}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    💬 Message
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteConnection(connection.id)}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             )}
 
@@ -297,15 +307,54 @@ export default function MessagesPage() {
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900 mb-2">Messages</h1>
-          <p className="text-slate-600">Manage your professional connections and communications.</p>
+          <p className="text-slate-600 mb-4">Manage your professional connections and communications.</p>
+          
+          {/* Connection Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-blue-600 text-sm font-semibold">{connections.length}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Total Connections</p>
+                  <p className="text-xs text-slate-500">All connection requests</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-green-600 text-sm font-semibold">{connections.filter(c => c.status === 'accepted').length}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Connected</p>
+                  <p className="text-xs text-slate-500">Active connections</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-yellow-600 text-sm font-semibold">{connections.filter(c => c.status === 'pending').length}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Pending</p>
+                  <p className="text-xs text-slate-500">Awaiting response</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 bg-slate-100 rounded-lg p-1 mb-6">
           {[
-            { key: 'all', label: 'All', count: connections.length },
-            { key: 'pending', label: 'Pending', count: connections.filter(c => c.status === 'pending').length },
-            { key: 'active', label: 'Active', count: connections.filter(c => c.status === 'accepted').length }
+            { key: 'all', label: 'All Connections', count: connections.length },
+            { key: 'pending', label: 'Pending Requests', count: connections.filter(c => c.status === 'pending').length },
+            { key: 'active', label: 'Connected', count: connections.filter(c => c.status === 'accepted').length }
           ].map((tab) => (
             <button
               key={tab.key}
@@ -337,13 +386,20 @@ export default function MessagesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No connections yet</h3>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              {activeTab === 'pending' 
+                ? 'No pending requests'
+                : activeTab === 'active'
+                ? 'No active connections'
+                : 'No connections yet'
+              }
+            </h3>
             <p className="text-slate-600 mb-4">
               {activeTab === 'pending' 
-                ? 'No pending connection requests.'
+                ? 'You don\'t have any pending connection requests at the moment.'
                 : activeTab === 'active'
-                ? 'No active connections yet.'
-                : 'Start connecting with other tax professionals to see messages here.'
+                ? 'You haven\'t connected with any tax professionals yet. Start building your network!'
+                : 'Start connecting with other tax professionals to build your network and see messages here.'
               }
             </p>
             <Link
