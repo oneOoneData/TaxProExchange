@@ -22,20 +22,20 @@ export async function POST(req: Request) {
     }
 
     // Get channel members (excluding the sender)
-    const channelState = channel.state || {};
-    const members = Object.keys(channelState.members || {});
+    const members = channel.members || [];
+    const memberIds = members.map((member: any) => member.user_id || member.user?.id).filter(Boolean);
     const senderId = message.user?.id;
     
-    console.log('🔔 Channel state:', channelState);
-    console.log('🔔 Channel members:', members, 'Sender ID:', senderId);
+    console.log('🔔 Channel members array:', members);
+    console.log('🔔 Member IDs:', memberIds, 'Sender ID:', senderId);
     
-    if (!senderId || members.length < 2) {
+    if (!senderId || memberIds.length < 2) {
       console.log('🔔 Invalid sender or insufficient members');
       return NextResponse.json({ success: true });
     }
 
     // Find the recipient (the other member)
-    const recipientId = members.find(id => id !== senderId);
+    const recipientId = memberIds.find(id => id !== senderId);
     if (!recipientId) {
       console.log('🔔 No recipient found');
       return NextResponse.json({ success: true });
