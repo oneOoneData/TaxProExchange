@@ -202,38 +202,18 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
                   <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  {hasUnreadMessages && (
+                  {(hasUnreadMessages || hasPendingConnections) && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
                   )}
                 </div>
                 Messages
-                {hasUnreadMessages && (
+                {(hasUnreadMessages || hasPendingConnections) && (
                   <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {(unreadCount + pendingConnectionCount) > 9 ? '9+' : (unreadCount + pendingConnectionCount)}
                   </span>
                 )}
               </Link>
 
-              <Link
-                href="/messages?tab=pending"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <div className="relative">
-                  <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  {hasPendingConnections && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full"></div>
-                  )}
-                </div>
-                Connections
-                {hasPendingConnections && (
-                  <span className="ml-auto bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-                    {pendingConnectionCount > 9 ? '9+' : pendingConnectionCount}
-                  </span>
-                )}
-              </Link>
 
               <Link
                 href="/settings"
