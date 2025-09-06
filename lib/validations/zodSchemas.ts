@@ -46,8 +46,8 @@ export const ProfileCredentialSchema = z.object({
   }),
   licenses: z.array(LicenseSchema).default([])
 }).superRefine((val, ctx) => {
-  // Students don't need licenses
-  if (val.credential_type === "Student") return;
+  // Students and "Other" credential type don't need licenses
+  if (val.credential_type === "Student" || val.credential_type === "Other") return;
   
   const validLicenses = val.licenses?.filter(license => 
     license.license_number && 
@@ -56,11 +56,11 @@ export const ProfileCredentialSchema = z.object({
     license.issuing_authority.trim().length >= 2
   ) || [];
   
-  // Non-students must have at least one valid license
+  // Professional credentials (CPA, EA, CTEC, etc.) must have at least one valid license
   if (validLicenses.length === 0) {
     ctx.addIssue({ 
       code: "custom", 
-      message: "At least one valid license is required for non-students." 
+      message: "At least one valid license is required for professional credentials." 
     });
     return;
   }
@@ -148,7 +148,8 @@ export const CredentialUpdateSchema = z.object({
   }),
   licenses: z.array(LicenseSchema).default([])
 }).superRefine((val, ctx) => {
-  if (val.credential_type === "Student") return;
+  // Students and "Other" credential type don't need licenses
+  if (val.credential_type === "Student" || val.credential_type === "Other") return;
   
   const validLicenses = val.licenses?.filter(license => 
     license.license_number && 
@@ -157,10 +158,11 @@ export const CredentialUpdateSchema = z.object({
     license.issuing_authority.trim().length >= 2
   ) || [];
   
+  // Professional credentials (CPA, EA, CTEC, etc.) must have at least one valid license
   if (validLicenses.length === 0) {
     ctx.addIssue({
       code: "custom",
-      message: "At least one valid license is required for non-students."
+      message: "At least one valid license is required for professional credentials."
     });
   }
   if (val.credential_type === "CPA") {
