@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     // Find the recipient (the other member)
-    const recipientId = memberIds.find(id => id !== senderId);
+    const recipientId = memberIds.find((id: string) => id !== senderId);
     if (!recipientId) {
       console.log('🔔 No recipient found');
       return NextResponse.json({ success: true });
