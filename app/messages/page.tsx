@@ -91,6 +91,31 @@ export default function MessagesPage() {
     }
   };
 
+  const handleDeleteConnection = async (connectionId: string) => {
+    if (!confirm('Are you sure you want to delete this connection? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/connections/${connectionId}/delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        // Refresh connections after deletion
+        await fetchConnections();
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to delete connection:', errorData.error);
+        alert('Failed to delete connection. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error deleting connection:', error);
+      alert('Failed to delete connection. Please try again.');
+    }
+  };
+
   const getCurrentUserProfile = (connection: ConnectionWithProfiles) => {
     if (!currentProfileId) return connection.requester_profile;
     return connection.requester_profile_id === currentProfileId 
@@ -179,22 +204,58 @@ export default function MessagesPage() {
                 >
                   Decline
                 </button>
+                <button
+                  onClick={() => handleDeleteConnection(connection.id)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                >
+                  Delete
+                </button>
               </div>
             )}
 
             {connection.status === 'pending' && isRequester && (
-              <span className="text-sm text-slate-500 px-4 py-2">
-                Waiting for response
-              </span>
+              <div className="flex gap-2">
+                <span className="text-sm text-slate-500 px-4 py-2">
+                  Waiting for response
+                </span>
+                <button
+                  onClick={() => handleDeleteConnection(connection.id)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
             )}
 
             {connection.status === 'accepted' && (
-              <Link
-                href={`/messages/${connection.id}`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                Message
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={`/messages/${connection.id}`}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                >
+                  Message
+                </Link>
+                <button
+                  onClick={() => handleDeleteConnection(connection.id)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+
+            {connection.status === 'declined' && (
+              <div className="flex gap-2">
+                <span className="text-sm text-slate-500 px-4 py-2">
+                  Connection declined
+                </span>
+                <button
+                  onClick={() => handleDeleteConnection(connection.id)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+                >
+                  Remove
+                </button>
+              </div>
             )}
           </div>
         </div>
