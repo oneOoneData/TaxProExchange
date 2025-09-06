@@ -80,14 +80,23 @@ const softwareOptions = [
   // Professional preparer suites
   { slug: 'lacerte', label: 'Intuit Lacerte' },
   { slug: 'proseries', label: 'Intuit ProSeries' },
+  { slug: 'proconnect', label: 'Intuit ProConnect' },
   { slug: 'drake', label: 'Drake Tax' },
   { slug: 'ultratax', label: 'Thomson Reuters UltraTax CS' },
   { slug: 'cch_axcess', label: 'CCH Axcess Tax' },
+  { slug: 'axcess', label: 'Axcess' },
   { slug: 'cch_prosystem', label: 'CCH ProSystem fx Tax' },
+  { slug: 'prosystemfx', label: 'ProSystemFX' },
   { slug: 'atx', label: 'ATX' },
   { slug: 'taxwise', label: 'TaxWise' },
   { slug: 'canopy', label: 'Canopy' },
   { slug: 'taxdome', label: 'TaxDome' },
+  
+  // Other tax prep software
+  { slug: 'gosystem_taxrs', label: 'GoSystemTaxRS' },
+  { slug: 'mytaxprepoffice', label: 'MyTaxPrepOffice' },
+  { slug: 'crosslink', label: 'CrossLink' },
+  { slug: 'wg', label: 'WG' },
   
   // Corporate & enterprise
   { slug: 'corptax', label: 'CSC Corptax' },
