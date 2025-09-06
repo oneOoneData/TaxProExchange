@@ -38,14 +38,6 @@ export default function CredentialsPage() {
     setError(null);
 
     try {
-      // First, get the existing profile data
-      const getResponse = await fetch(`/api/profile?clerk_id=${user.id}`);
-      if (!getResponse.ok) {
-        throw new Error('Failed to fetch profile data');
-      }
-      const existingProfile = await getResponse.json();
-      console.log('Existing profile data:', existingProfile);
-
       // Update the profile with credential data only
       const updateData = {
         clerk_id: user.id,

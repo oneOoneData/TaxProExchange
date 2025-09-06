@@ -28,8 +28,38 @@ export default function CreateProfilePage() {
   }
 
   const handleCreateProfile = async () => {
-    // Skip profile creation - go directly to profile edit
-    router.push('/profile/edit');
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Create a basic profile first
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clerk_id: user.id,
+          first_name: user.firstName || 'New',
+          last_name: user.lastName || 'User',
+          public_email: user.primaryEmailAddress?.emailAddress || '',
+          credential_type: 'Student', // Default to Student, will be updated in credentials step
+          licenses: []
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create profile');
+      }
+
+      // Redirect to credentials step
+      router.push('/onboarding/credentials');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
