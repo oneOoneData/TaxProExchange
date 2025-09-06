@@ -100,12 +100,30 @@ export async function POST(request: Request) {
     console.log('🔍 Webhook event received:', evt.type, evt.data.id);
     console.log('🔍 Event data:', JSON.stringify(evt.data, null, 2));
 
-    if (evt.type === "user.created" || evt.type === "user.updated") {
+    if (evt.type === "user.created" || evt.type === "user.updated" || evt.type === "user.deleted") {
       const u = evt.data;
       console.log('🔍 Processing user event:', evt.type, 'for user:', u.id);
       
       const supabase = supabaseService();
       console.log('🔍 Supabase client created for webhook');
+
+      // Handle user deletion
+      if (evt.type === "user.deleted") {
+        console.log('🔍 Deleting profile for deleted user:', u.id);
+        
+        const { error: deleteError } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('clerk_id', u.id);
+          
+        if (deleteError) {
+          console.error('🔍 Error deleting profile for user:', u.id, deleteError);
+          return NextResponse.json({ ok: false, error: deleteError.message }, { status: 500 });
+        }
+        
+        console.log('🔍 Profile deleted successfully for user:', u.id);
+        return NextResponse.json({ ok: true, message: "Profile deleted successfully" });
+      }
       
       // Extract email from the correct path in the data structure
       let email = null;
