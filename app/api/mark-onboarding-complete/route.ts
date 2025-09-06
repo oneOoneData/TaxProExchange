@@ -1,6 +1,7 @@
 // /app/api/mark-onboarding-complete/route.ts
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { supabaseService } from '@/lib/supabaseService';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,35 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const host = new URL(req.url).hostname;
-  console.log(`[debug] Setting onboarding_complete cookie for host: ${host}`);
+  console.log(`[debug] Setting onboarding_complete for host: ${host}`);
+
+  // Update the database to mark onboarding as complete
+  try {
+    const supabase = supabaseService();
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ 
+        onboarding_complete: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('clerk_id', userId);
+
+    if (updateError) {
+      console.error('Failed to update onboarding_complete in database:', updateError);
+      return NextResponse.json({ 
+        error: 'Failed to update profile in database',
+        details: updateError.message 
+      }, { status: 500 });
+    }
+
+    console.log(`[debug] Successfully updated onboarding_complete for user ${userId}`);
+  } catch (dbError) {
+    console.error('Database error updating onboarding_complete:', dbError);
+    return NextResponse.json({ 
+      error: 'Database error',
+      details: dbError instanceof Error ? dbError.message : String(dbError)
+    }, { status: 500 });
+  }
 
   const cookie: Parameters<typeof NextResponse.prototype.cookies.set>[2] = {
     path: '/',
@@ -41,7 +70,7 @@ export async function POST(req: Request) {
     ok: true, 
     host,
     cookieDomain: cookie.domain || 'host-only',
-    message: 'Onboarding marked as complete'
+    message: 'Onboarding marked as complete in database and cookie'
   });
   
   // Set the cookie
