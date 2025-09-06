@@ -49,6 +49,11 @@ export async function GET() {
       .eq('table_schema', 'public')
       .eq('table_name', 'profiles');
 
+    // Extract error messages safely
+    const tableError = tableResult.error?.message || null;
+    const sampleError = sampleResult.error?.message || null;
+    const constraintError = constraintResult.error?.message || null;
+
     return NextResponse.json({
       userId,
       tableStructure: tableResult.data,
@@ -56,9 +61,9 @@ export async function GET() {
       clerkIdColumn: clerkIdColumn,
       constraints: constraintResult.data,
       errors: {
-        tableError: tableResult.error ? tableResult.error.message : null,
-        sampleError: sampleResult.error ? sampleResult.error.message : null,
-        constraintError: constraintResult.error ? constraintResult.error.message : null
+        tableError,
+        sampleError,
+        constraintError
       }
     });
 
