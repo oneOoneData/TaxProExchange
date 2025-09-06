@@ -31,14 +31,14 @@ export default function Page() {
             // User doesn't have a profile yet, redirect to onboarding
             console.log('[trace] router.push → /onboarding (no profile)');
             router.push('/onboarding');
-          } else if (data.credential_type) {
+          } else if (data.onboarding_complete) {
             // User has completed onboarding, stay on home page
             console.log('[trace] onboarding complete, staying on home page');
             setIsCheckingOnboarding(false);
           } else {
-            // User hasn't completed onboarding, redirect to onboarding flow
-            console.log('[trace] router.push → /onboarding (onboarding incomplete)');
-            router.push('/onboarding');
+            // User hasn't completed onboarding, redirect to profile edit
+            console.log('[trace] router.push → /profile/edit (onboarding incomplete)');
+            router.push('/profile/edit');
           }
         })
         .catch(error => {
