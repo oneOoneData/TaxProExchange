@@ -262,7 +262,8 @@ export async function POST(req: Request) {
         tos_version: LEGAL_VERSIONS.TOS,
         tos_accepted_at: now,
         privacy_version: LEGAL_VERSIONS.PRIVACY,
-        privacy_accepted_at: now
+        privacy_accepted_at: now,
+        onboarding_complete: false // Explicitly set onboarding as incomplete
       };
 
       // Merge optional fields
