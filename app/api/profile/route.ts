@@ -129,8 +129,8 @@ export async function GET(request: Request) {
         console.log('🔍 Sample of existing profiles:', allProfiles);
       }
       
-      console.log('🔍 Returning empty object');
-      return NextResponse.json({});
+      console.log('🔍 Returning 404 - profile not found');
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
     console.log('🔍 Profile found:', profile);
