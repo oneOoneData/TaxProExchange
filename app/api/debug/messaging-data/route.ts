@@ -50,19 +50,7 @@ export async function GET() {
         created_at,
         stream_channel_id,
         requester_profile_id,
-        recipient_profile_id,
-        requester:profiles!connections_requester_profile_id_fkey(
-          first_name,
-          last_name,
-          credential_type,
-          firm_name
-        ),
-        recipient:profiles!connections_recipient_profile_id_fkey(
-          first_name,
-          last_name,
-          credential_type,
-          firm_name
-        )
+        recipient_profile_id
       `)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -86,22 +74,45 @@ export async function GET() {
       .select('*', { count: 'exact', head: true })
       .eq('visibility_state', 'verified');
 
+    // Get profile data for all connections
+    const profileIds = new Set<string>();
+    connections?.forEach(conn => {
+      if (conn.requester_profile_id) profileIds.add(conn.requester_profile_id);
+      if (conn.recipient_profile_id) profileIds.add(conn.recipient_profile_id);
+    });
+
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name, credential_type, firm_name')
+      .in('id', Array.from(profileIds));
+
+    if (profilesError) {
+      throw profilesError;
+    }
+
+    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
     // Format the data for easy reading
-    const formattedConnections = connections?.map(conn => ({
-      connection_id: conn.id,
-      status: conn.status,
-      created_at: conn.created_at,
-      stream_channel_id: conn.stream_channel_id,
-      requester_name: conn.requester ? `${conn.requester.first_name} ${conn.requester.last_name}` : 'Unknown',
-      requester_type: conn.requester?.credential_type || 'Unknown',
-      requester_firm: conn.requester?.firm_name || 'N/A',
-      recipient_name: conn.recipient ? `${conn.recipient.first_name} ${conn.recipient.last_name}` : 'Unknown',
-      recipient_type: conn.recipient?.credential_type || 'Unknown',
-      recipient_firm: conn.recipient?.firm_name || 'N/A',
-      messaging_status: conn.stream_channel_id ? '✅ Can message' : 
-                       conn.status === 'accepted' ? '❌ No messaging channel' : 
-                       '⏳ Pending acceptance'
-    })) || [];
+    const formattedConnections = connections?.map(conn => {
+      const requester = profileMap.get(conn.requester_profile_id);
+      const recipient = profileMap.get(conn.recipient_profile_id);
+      
+      return {
+        connection_id: conn.id,
+        status: conn.status,
+        created_at: conn.created_at,
+        stream_channel_id: conn.stream_channel_id,
+        requester_name: requester ? `${requester.first_name} ${requester.last_name}` : 'Unknown',
+        requester_type: requester?.credential_type || 'Unknown',
+        requester_firm: requester?.firm_name || 'N/A',
+        recipient_name: recipient ? `${recipient.first_name} ${recipient.last_name}` : 'Unknown',
+        recipient_type: recipient?.credential_type || 'Unknown',
+        recipient_firm: recipient?.firm_name || 'N/A',
+        messaging_status: conn.stream_channel_id ? '✅ Can message' : 
+                         conn.status === 'accepted' ? '❌ No messaging channel' : 
+                         '⏳ Pending acceptance'
+      };
+    }) || [];
 
     return NextResponse.json({
       summary: {
