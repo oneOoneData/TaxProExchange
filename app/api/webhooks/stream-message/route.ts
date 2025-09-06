@@ -6,6 +6,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     console.log('🔔 Stream webhook called:', body.type);
+    console.log('🔔 Full webhook payload:', JSON.stringify(body, null, 2));
     
     // Verify this is a message.new event from Stream
     if (body.type !== 'message.new') {
@@ -21,9 +22,11 @@ export async function POST(req: Request) {
     }
 
     // Get channel members (excluding the sender)
-    const members = Object.keys(channel.state.members || {});
+    const channelState = channel.state || {};
+    const members = Object.keys(channelState.members || {});
     const senderId = message.user?.id;
     
+    console.log('🔔 Channel state:', channelState);
     console.log('🔔 Channel members:', members, 'Sender ID:', senderId);
     
     if (!senderId || members.length < 2) {
