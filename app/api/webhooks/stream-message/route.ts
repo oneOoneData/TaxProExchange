@@ -5,9 +5,11 @@ import { sendMessageNotification, shouldSendEmail, type EmailPreferences } from 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    console.log('🔔 Stream webhook called:', body.type);
     
     // Verify this is a message.new event from Stream
     if (body.type !== 'message.new') {
+      console.log('🔔 Not a message.new event, ignoring');
       return NextResponse.json({ success: true });
     }
 
@@ -22,15 +24,21 @@ export async function POST(req: Request) {
     const members = Object.keys(channel.state.members || {});
     const senderId = message.user?.id;
     
+    console.log('🔔 Channel members:', members, 'Sender ID:', senderId);
+    
     if (!senderId || members.length < 2) {
+      console.log('🔔 Invalid sender or insufficient members');
       return NextResponse.json({ success: true });
     }
 
     // Find the recipient (the other member)
     const recipientId = members.find(id => id !== senderId);
     if (!recipientId) {
+      console.log('🔔 No recipient found');
       return NextResponse.json({ success: true });
     }
+    
+    console.log('🔔 Processing message from', senderId, 'to', recipientId);
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -45,7 +53,7 @@ export async function POST(req: Request) {
     // Get recipient profile details
     const { data: recipientProfile, error: recipientError } = await supabase
       .from('profiles')
-      .select('first_name, last_name, email, email_preferences')
+      .select('first_name, last_name, public_email, email_preferences')
       .eq('id', recipientId)
       .single();
 
@@ -66,9 +74,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true });
     }
 
+    // Check if recipient has a valid email address
+    if (!recipientProfile.public_email) {
+      console.log('🔔 Recipient has no public email address');
+      return NextResponse.json({ success: true });
+    }
+
     // Check if recipient wants message notifications
     const emailPreferences = recipientProfile.email_preferences as EmailPreferences | null;
+    console.log('🔔 Recipient email preferences:', emailPreferences);
+    console.log('🔔 Recipient email:', recipientProfile.public_email);
+    console.log('🔔 Message notifications enabled:', emailPreferences?.message_notifications);
+    
     if (!shouldSendEmail(emailPreferences, 'message_notifications')) {
+      console.log('🔔 Recipient has disabled message notifications');
       return NextResponse.json({ success: true });
     }
 
@@ -76,14 +95,18 @@ export async function POST(req: Request) {
     const messagePreview = message.text?.substring(0, 100) || 'New message';
     const messageLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/messages`;
 
+    console.log('🔔 Sending message notification email to:', recipientProfile.public_email);
+    
     await sendMessageNotification({
       senderName: `${senderProfile.first_name} ${senderProfile.last_name}`,
       senderFirm: senderProfile.firm_name || '',
       recipientName: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
-      recipientEmail: recipientProfile.email || '',
+      recipientEmail: recipientProfile.public_email || '',
       messagePreview,
       messageLink
     });
+    
+    console.log('🔔 Message notification email sent successfully');
 
     return NextResponse.json({ success: true });
 
