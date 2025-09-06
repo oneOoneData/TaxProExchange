@@ -80,6 +80,7 @@ export async function POST(req: Request) {
     // First, try to get the user's email from Clerk
     let userEmail: string | null = null;
     try {
+      console.log('🔍 Fetching user data from Clerk for userId:', userId);
       const response = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
         headers: {
           'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
@@ -87,19 +88,33 @@ export async function POST(req: Request) {
         },
       });
       
+      console.log('🔍 Clerk API response status:', response.status);
+      
       if (response.ok) {
         const userData = await response.json();
+        console.log('🔍 Clerk user data:', {
+          hasEmailAddresses: !!userData.email_addresses,
+          emailCount: userData.email_addresses?.length || 0,
+          primaryEmailId: userData.primary_email_address_id
+        });
+        
         if (userData.primary_email_address_id && userData.email_addresses) {
           const primaryEmail = userData.email_addresses.find((e: any) => e.id === userData.primary_email_address_id);
           if (primaryEmail) {
             userEmail = primaryEmail.email_address;
+            console.log('🔍 Found primary email:', userEmail);
           }
         } else if (userData.email_addresses && userData.email_addresses.length > 0) {
           userEmail = userData.email_addresses[0].email_address;
+          console.log('🔍 Using first email:', userEmail);
         }
+      } else {
+        console.error('❌ Clerk API error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('❌ Clerk API error details:', errorText);
       }
     } catch (error) {
-      console.log('🔍 Could not fetch email from Clerk, will use clerk_id lookup:', error);
+      console.error('❌ Could not fetch email from Clerk:', error);
     }
     
     console.log('🔍 User email from Clerk:', userEmail);
@@ -134,7 +149,14 @@ export async function POST(req: Request) {
     }
 
     if (existingProfile) {
-      return new Response('Profile already exists', { status: 400 });
+      console.log('🔍 Profile already exists, returning 400');
+      return new Response(JSON.stringify({
+        error: 'Profile already exists',
+        details: 'A profile with this email or clerk_id already exists'
+      }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Create new profile with legal acceptance and retry logic
@@ -147,6 +169,12 @@ export async function POST(req: Request) {
       tos_version: LEGAL_VERSIONS.TOS,
       privacy_version: LEGAL_VERSIONS.PRIVACY
     });
+
+    // If we couldn't get email from Clerk, we'll create the profile without it
+    // The user can add their email later in their profile
+    if (!userEmail) {
+      console.log('⚠️ No email found from Clerk, creating profile without email');
+    }
     
     let profileCreated = false;
     let attempts = 0;
