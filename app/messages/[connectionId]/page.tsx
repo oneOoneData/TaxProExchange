@@ -68,6 +68,27 @@ export default function ChatThreadPage() {
     };
   }, [chatClient]);
 
+  // Mark messages as read when chat client is ready and user is viewing
+  useEffect(() => {
+    if (chatClient && connection?.stream_channel_id) {
+      const channel = chatClient.channel('messaging', connection.stream_channel_id);
+      
+      // Mark as read immediately when component mounts
+      channel.markRead().catch(console.error);
+      
+      // Set up listener to mark new messages as read when they arrive
+      const handleNewMessage = () => {
+        channel.markRead().catch(console.error);
+      };
+      
+      channel.on('message.new', handleNewMessage);
+      
+      return () => {
+        channel.off('message.new', handleNewMessage);
+      };
+    }
+  }, [chatClient, connection?.stream_channel_id]);
+
   const fetchConnection = async () => {
     try {
       setLoading(true);
@@ -136,6 +157,15 @@ export default function ChatThreadPage() {
       
       console.log('Stream Chat client connected');
       setChatClient(client);
+
+      // Mark messages as read when user opens the chat
+      if (connection?.stream_channel_id) {
+        const channel = client.channel('messaging', connection.stream_channel_id);
+        await channel.watch();
+        // Mark all messages as read for this user
+        await channel.markRead();
+        console.log('Messages marked as read');
+      }
     } catch (error) {
       console.error('Error initializing Stream Chat:', error);
     }
