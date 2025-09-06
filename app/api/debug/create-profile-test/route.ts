@@ -49,10 +49,12 @@ export async function GET() {
       .eq('table_schema', 'public')
       .eq('table_name', 'profiles');
 
-    // Extract error messages safely
-    const tableError = tableResult.error?.message || null;
-    const sampleError = sampleResult.error?.message || null;
-    const constraintError = constraintResult.error?.message || null;
+    // Simple error handling without complex type inference
+    const errors = {
+      tableError: tableResult.error ? String(tableResult.error) : null,
+      sampleError: sampleResult.error ? String(sampleResult.error) : null,
+      constraintError: constraintResult.error ? String(constraintResult.error) : null
+    };
 
     return NextResponse.json({
       userId,
@@ -60,11 +62,7 @@ export async function GET() {
       sampleProfile: sampleResult.data?.[0] || null,
       clerkIdColumn: clerkIdColumn,
       constraints: constraintResult.data,
-      errors: {
-        tableError,
-        sampleError,
-        constraintError
-      }
+      errors
     });
 
   } catch (error) {
