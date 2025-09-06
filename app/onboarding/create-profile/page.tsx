@@ -32,7 +32,7 @@ export default function CreateProfilePage() {
     setError(null);
 
     try {
-      // Create a basic profile first
+      // Create a basic profile first with proper validation data
       const response = await fetch('/api/profile', {
         method: 'PUT',
         headers: {
@@ -41,16 +41,29 @@ export default function CreateProfilePage() {
         body: JSON.stringify({
           clerk_id: user.id,
           first_name: user.firstName || 'New',
-          last_name: user.lastName || 'User',
+          last_name: user.lastName || 'Name',
           public_email: user.primaryEmailAddress?.emailAddress || '',
           credential_type: 'Student', // Default to Student, will be updated in credentials step
-          licenses: []
+          licenses: [],
+          // Add required fields for validation
+          accepting_work: true,
+          public_contact: false,
+          works_multistate: false,
+          works_international: false,
+          countries: [],
+          other_software: [],
+          specializations: [],
+          locations: [],
+          software: []
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create profile');
+        console.error('Profile creation error:', errorData);
+        console.error('Response status:', response.status);
+        console.error('Response headers:', response.headers);
+        throw new Error(errorData.error || `Failed to create profile (${response.status})`);
       }
 
       // Redirect to credentials step
