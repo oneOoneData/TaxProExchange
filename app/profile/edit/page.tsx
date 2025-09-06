@@ -149,6 +149,7 @@ export default function EditProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showNameRequired, setShowNameRequired] = useState(false);
   const [profileForm, setProfileForm] = useState<ProfileForm>({
     first_name: '',
     last_name: '',
@@ -203,46 +204,10 @@ export default function EditProfilePage() {
             
             // Check if profile data is empty or missing
             if (!p || Object.keys(p).length === 0 || !p.id) {
-              try {
-                const createResponse = await fetch('/api/profile', {
-                  method: 'PUT',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    clerk_id: user.id,
-                    first_name: user.firstName || 'New',
-                    last_name: user.lastName || 'User',
-                    headline: `${user.firstName || 'New'} ${user.lastName || 'User'}`,
-                    bio: 'Profile created automatically',
-                    credential_type: 'Other',
-                    firm_name: '',
-                    public_email: user.emailAddresses[0]?.emailAddress || '',
-                    phone: '',
-                    website_url: '',
-                    linkedin_url: '',
-                    accepting_work: true,
-                    public_contact: false,
-                    works_multistate: false,
-                    works_international: false,
-                    countries: [],
-                    specializations: [],
-                    states: [],
-                    software: [],
-                    other_software: []
-                  }),
-                });
-                
-                if (createResponse.ok) {
-                  // Refresh the page to load the new profile
-                  window.location.reload();
-                  return;
-                } else {
-                  console.error('Failed to create basic profile:', createResponse.status);
-                }
-              } catch (createError) {
-                console.error('Error creating basic profile:', createError);
-              }
+              // No profile exists - user must create one with their real name
+              setProfile(null);
+              setShowNameRequired(true);
+              return;
             }
             
             // Check if user needs to accept updated legal documents
@@ -312,6 +277,23 @@ export default function EditProfilePage() {
     e.preventDefault();
     setLoading(true);
     
+    // Validate that user has entered real names (not placeholders)
+    const invalidNames = ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'];
+    const firstNameInvalid = invalidNames.includes(profileForm.first_name.trim());
+    const lastNameInvalid = invalidNames.includes(profileForm.last_name.trim());
+    
+    if (firstNameInvalid || lastNameInvalid) {
+      alert('Please enter your actual first and last name. Placeholder names like "New User" are not allowed.');
+      setLoading(false);
+      return;
+    }
+    
+    if (!profileForm.first_name.trim() || !profileForm.last_name.trim()) {
+      alert('Please enter both your first and last name.');
+      setLoading(false);
+      return;
+    }
+    
     try {
       // Update profile with validation
       const response = await fetch('/api/profile', {
@@ -321,8 +303,28 @@ export default function EditProfilePage() {
         },
         body: JSON.stringify({
           clerk_id: user?.id,
+          first_name: profileForm.first_name.trim(),
+          last_name: profileForm.last_name.trim(),
+          headline: profileForm.headline.trim(),
+          bio: profileForm.bio.trim(),
+          opportunities: profileForm.opportunities.trim(),
           credential_type: profileForm.credential_type,
-          licenses: profileForm.licenses
+          licenses: profileForm.licenses,
+          firm_name: profileForm.firm_name.trim(),
+          public_email: profileForm.public_email.trim(),
+          phone: profileForm.phone.trim(),
+          website_url: profileForm.website_url.trim(),
+          linkedin_url: profileForm.linkedin_url.trim(),
+          accepting_work: profileForm.accepting_work,
+          public_contact: profileForm.public_contact,
+          works_multistate: profileForm.works_multistate,
+          works_international: profileForm.works_international,
+          countries: profileForm.countries,
+          specializations: profileForm.specializations,
+          states: profileForm.states,
+          software: profileForm.software,
+          other_software: profileForm.other_software,
+          primary_location: profileForm.primary_location
         }),
       });
 
@@ -611,6 +613,109 @@ export default function EditProfilePage() {
 
   if (!isSignedIn) return null;
 
+  // Show name required form if no profile exists
+  if (showNameRequired) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">Complete Your Profile</h1>
+              <p className="text-slate-600">Please enter your name to get started</p>
+            </div>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!profileForm.first_name.trim() || !profileForm.last_name.trim()) {
+                alert('Please enter both first and last name');
+                return;
+              }
+              
+              try {
+                setLoading(true);
+                const response = await fetch('/api/profile', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    clerk_id: user?.id,
+                    first_name: profileForm.first_name.trim(),
+                    last_name: profileForm.last_name.trim(),
+                    headline: `${profileForm.first_name.trim()} ${profileForm.last_name.trim()}`,
+                    bio: 'Profile created automatically',
+                    credential_type: 'Other',
+                    firm_name: '',
+                    public_email: user?.emailAddresses[0]?.emailAddress || '',
+                    phone: '',
+                    website_url: '',
+                    linkedin_url: '',
+                    accepting_work: true,
+                    public_contact: false,
+                    works_multistate: false,
+                    works_international: false,
+                    countries: [],
+                    specializations: [],
+                    states: [],
+                    software: [],
+                    other_software: []
+                  })
+                });
+                
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  const error = await response.json();
+                  alert(error.error || 'Failed to create profile');
+                }
+              } catch (error) {
+                alert('Failed to create profile. Please try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.first_name}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, first_name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your first name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.last_name}
+                    onChange={(e) => setProfileForm(prev => ({ ...prev, last_name: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your last name"
+                  />
+                </div>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-6 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? 'Creating Profile...' : 'Create Profile'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
@@ -672,8 +777,16 @@ export default function EditProfilePage() {
                     required
                     value={profileForm.first_name}
                     onChange={(e) => updateForm('first_name', e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${
+                      ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.first_name.trim()) 
+                        ? 'border-red-300 focus:ring-red-300 bg-red-50' 
+                        : 'border-slate-300 focus:ring-slate-300'
+                    }`}
+                    placeholder="Enter your first name"
                   />
+                  {['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.first_name.trim()) && (
+                    <p className="text-red-600 text-xs mt-1">Please enter your actual first name</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Last Name *</label>
@@ -682,8 +795,16 @@ export default function EditProfilePage() {
                     required
                     value={profileForm.last_name}
                     onChange={(e) => updateForm('last_name', e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${
+                      ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.last_name.trim()) 
+                        ? 'border-red-300 focus:ring-red-300 bg-red-50' 
+                        : 'border-slate-300 focus:ring-slate-300'
+                    }`}
+                    placeholder="Enter your last name"
                   />
+                  {['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.last_name.trim()) && (
+                    <p className="text-red-600 text-xs mt-1">Please enter your actual last name</p>
+                  )}
                 </div>
               </div>
 
@@ -1214,7 +1335,7 @@ export default function EditProfilePage() {
                 <button
                   type="submit"
                   onClick={handleSubmit}
-                  disabled={loading}
+                  disabled={loading || ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.first_name.trim()) || ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.last_name.trim())}
                   className="rounded-xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? 'Saving...' : 'Save Profile'}
