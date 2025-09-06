@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
     console.log('Email result:', emailResult);
 
     return NextResponse.json({
-      success: emailResult.success,
-      message: emailResult.success ? 'Test email sent successfully' : 'Failed to send test email',
+      success: !emailResult.error,
+      message: !emailResult.error ? 'Test email sent successfully' : 'Failed to send test email',
       details: emailResult
     });
 
