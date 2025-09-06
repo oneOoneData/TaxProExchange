@@ -205,7 +205,6 @@ export default function EditProfilePage() {
             // Check if profile data is empty or missing
             if (!p || Object.keys(p).length === 0 || !p.id) {
               // No profile exists - user must create one with their real name
-              setProfile(null);
               setShowNameRequired(true);
               return;
             }
