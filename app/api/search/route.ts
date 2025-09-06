@@ -92,7 +92,9 @@ export async function GET(request: NextRequest) {
 
     // Apply text search (only if it's not a state code)
     if (query && !state) {
-      supabaseQuery = supabaseQuery.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,headline.ilike.%${query}%,bio.ilike.%${query}%,firm_name.ilike.%${query}%,software.cs.%${query}%`);
+      const searchTerm = `%${query}%`;
+      console.log('🔍 Applying text search with term:', searchTerm);
+      supabaseQuery = supabaseQuery.or(`first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},headline.ilike.${searchTerm},bio.ilike.${searchTerm},firm_name.ilike.${searchTerm}`);
     }
 
     // Apply credential type filter
@@ -181,6 +183,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🔍 Search API - Raw profiles found:', profiles?.length || 0);
+    console.log('🔍 Search parameters:', { query, credential_type, specialization, software, state, accepting_work, verified_only, years_experience });
     
     // Debug: Check if Alvin Choy is in the main query results
     if (profiles && profiles.length > 0) {
@@ -247,6 +250,13 @@ export async function GET(request: NextRequest) {
     if (country) {
       filteredProfiles = filteredProfiles.filter(p => 
         p.works_international && p.countries && p.countries.includes(country)
+      );
+    }
+
+    // Filter by software if specified
+    if (software) {
+      filteredProfiles = filteredProfiles.filter(p => 
+        p.software && p.software.includes(software)
       );
     }
 
