@@ -200,7 +200,7 @@ export async function POST(req: Request) {
         headline: 'New Tax Professional',
         bio: 'Profile created automatically',
         firm_name: '',
-        public_email: userEmail || '',
+        public_email: userEmail || null, // Use null instead of empty string
         phone: '',
         website_url: '',
         linkedin_url: '',
