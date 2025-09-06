@@ -767,16 +767,16 @@ export default function SearchPage() {
                 {(filters.q || filters.credential_type || filters.state || filters.specialization.length > 0 || filters.software || filters.accepting_work || filters.verified_only || filters.years_experience) && (
                   <button
                                        onClick={() => {
-                     const clearedFilters = {
-                       q: '',
-                       credential_type: '',
-                       state: '',
-                       specialization: '',
-                       software: '',
-                       accepting_work: '',
-                       verified_only: true,
-                       years_experience: ''
-                     };
+                    const clearedFilters = {
+                      q: '',
+                      credential_type: '',
+                      state: '',
+                      specialization: [],
+                      software: '',
+                      accepting_work: '',
+                      verified_only: true,
+                      years_experience: ''
+                    };
                      setFilters(clearedFilters);
                      setTimeout(() => searchProfiles(clearedFilters), 100);
                    }}
