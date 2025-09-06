@@ -51,12 +51,31 @@ async function generateUniqueSlug(userId: string, supabase: any): Promise<string
 
 export async function POST(req: Request) {
   try {
+    console.log('🔍 Create profile endpoint called');
+    
     const { userId } = await auth();
+    console.log('🔍 User ID from auth:', userId);
+    
     if (!userId) {
+      console.log('❌ No user ID found');
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const supabase = supabaseService();
+    console.log('🔍 Creating Supabase client...');
+    let supabase;
+    try {
+      supabase = supabaseService();
+      console.log('✅ Supabase client created');
+    } catch (error) {
+      console.error('❌ Failed to create Supabase client:', error);
+      return new Response(JSON.stringify({
+        error: 'Database connection failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     
     // First, try to get the user's email from Clerk
     let userEmail: string | null = null;
