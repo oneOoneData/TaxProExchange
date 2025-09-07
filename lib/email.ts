@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { verifiedListedHtml, verifiedListedText } from './verifiedListedTemplate';
 
 // Initialize Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -41,6 +42,17 @@ export interface MessageNotificationEmailData {
   recipientProfileId: string;
   messagePreview: string;
   messageLink: string;
+}
+
+export interface VerifiedListedEmailData {
+  firstName: string;
+  profileUrl: string;
+  foundingMemberUrl: string;
+  shareLinkedInUrl: string;
+  shareXUrl: string;
+  inviteUrl: string;
+  managePrefsUrl: string;
+  year: number;
 }
 
 export interface EmailTemplate {
@@ -368,4 +380,56 @@ export async function sendConnectionRequestNotification(data: ConnectionRequestE
 export async function sendMessageNotification(data: MessageNotificationEmailData) {
   const template = emailTemplates.messageNotification(data);
   return sendEmailLegacy(data.recipientEmail, template);
+}
+
+// Send verified + listed notification
+export async function sendVerifiedListedEmail(opts: {
+  to: string;
+  firstName: string | null;
+  slug: string;
+  managePrefsUrl?: string;
+}) {
+  const SITE_URL = process.env.SITE_URL || 'https://www.taxproexchange.com';
+  const FOUNDING_MEMBER_URL = process.env.FOUNDING_MEMBER_URL || 'https://buymeacoffee.com/koenf';
+  
+  const profileUrl = `${SITE_URL}/p/${opts.slug}`;
+  const shareLinkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`;
+  const shareXUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent('I just got verified on TaxProExchange—open for connections & referrals.')}&url=${encodeURIComponent(profileUrl)}`;
+  const inviteUrl = `${SITE_URL}/invite`;
+  const managePrefsUrl = opts.managePrefsUrl || `${SITE_URL}/settings`;
+  const year = new Date().getFullYear();
+
+  const html = verifiedListedHtml({
+    firstName: opts.firstName || '',
+    profileUrl,
+    foundingMemberUrl: FOUNDING_MEMBER_URL,
+    shareLinkedInUrl,
+    shareXUrl,
+    inviteUrl,
+    managePrefsUrl,
+    siteUrl: SITE_URL,
+    year
+  });
+
+  const text = verifiedListedText({
+    firstName: opts.firstName || '',
+    profileUrl,
+    foundingMemberUrl: FOUNDING_MEMBER_URL,
+    shareLinkedInUrl,
+    shareXUrl,
+    inviteUrl,
+    managePrefsUrl,
+    siteUrl: SITE_URL,
+    year
+  });
+
+  return sendEmail({
+    to: opts.to,
+    subject: "You are verified and listed. Your profile is live",
+    html,
+    text,
+    headers: {
+      'List-Unsubscribe': `<mailto:support@taxproexchange.com?subject=unsubscribe>, <${managePrefsUrl}>`,
+    },
+  });
 }
