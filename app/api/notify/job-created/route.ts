@@ -174,6 +174,8 @@ function formatPayout(job: any): string {
     return `$${job.payout_min?.toLocaleString()}/hr - $${job.payout_max?.toLocaleString()}/hr`;
   } else if (job.payout_type === 'per_return') {
     return `$${job.payout_min?.toLocaleString()} - $${job.payout_max?.toLocaleString()} per return`;
+  } else if (job.payout_type === 'discussed') {
+    return 'To be discussed';
   }
   return 'Compensation not specified';
 }

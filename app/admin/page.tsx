@@ -9,13 +9,29 @@ import Logo from '@/components/Logo';
 function TestEmailButton() {
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState('');
 
   const testEmail = async () => {
     setTesting(true);
     setResult(null);
     
     try {
-      const response = await fetch('/api/test/verified-listed-email', {
+      // First check database migration status
+      const dbCheck = await fetch('/api/debug/check-db-migration');
+      const dbData = await dbCheck.json();
+      
+      if (!dbData.success) {
+        setResult(`❌ Database issue: ${dbData.error}`);
+        return;
+      }
+      
+      if (!dbData.migration.column_exists) {
+        setResult(`❌ Database migration not run. Column 'notified_verified_listed_at' missing.`);
+        return;
+      }
+      
+      // Test email send
+      const response = await fetch('/api/debug/test-email-send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -27,10 +43,42 @@ function TestEmailButton() {
 
       if (response.ok) {
         const data = await response.json();
-        setResult(`✅ Success! Email sent to ${data.email}`);
+        setResult(`✅ Success! Email sent to koen@cardifftax.com`);
       } else {
-        const error = await response.text();
-        setResult(`❌ Error: ${error}`);
+        const error = await response.json();
+        setResult(`❌ Error: ${error.error || error.details || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const checkProfile = async () => {
+    if (!profileId.trim()) {
+      setResult('❌ Please enter a profile ID');
+      return;
+    }
+
+    setTesting(true);
+    setResult(null);
+    
+    try {
+      const response = await fetch(`/api/debug/check-profile/${profileId.trim()}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setResult(`✅ Profile Check:\n` +
+          `- ID: ${data.profile.id}\n` +
+          `- Name: ${data.profile.first_name}\n` +
+          `- Slug: ${data.profile.slug || 'MISSING'}\n` +
+          `- Email: ${data.user.email || 'MISSING'}\n` +
+          `- Notified: ${data.profile.notified_verified_listed_at || 'Never'}\n` +
+          `- Should send: ${data.emailCheck.shouldSendEmail ? 'YES' : 'NO'}\n` +
+          `- Reason: ${data.emailCheck.reason}`);
+      } else {
+        setResult(`❌ Error: ${data.error}`);
       }
     } catch (error) {
       setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -40,16 +88,36 @@ function TestEmailButton() {
   };
 
   return (
-    <div>
-      <button
-        onClick={testEmail}
-        disabled={testing}
-        className="inline-flex items-center justify-center rounded-xl bg-orange-600 text-white px-4 py-2 text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50"
-      >
-        {testing ? 'Testing...' : 'Send Test Email'}
-      </button>
+    <div className="space-y-3">
+      <div>
+        <button
+          onClick={testEmail}
+          disabled={testing}
+          className="inline-flex items-center justify-center rounded-xl bg-orange-600 text-white px-4 py-2 text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50"
+        >
+          {testing ? 'Testing...' : 'Send Test Email'}
+        </button>
+      </div>
+      
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Profile ID to check"
+          value={profileId}
+          onChange={(e) => setProfileId(e.target.value)}
+          className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+        <button
+          onClick={checkProfile}
+          disabled={testing}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
+        >
+          Check Profile
+        </button>
+      </div>
+      
       {result && (
-        <div className="mt-2 text-xs text-slate-600">
+        <div className="mt-2 text-xs text-slate-600 whitespace-pre-line">
           {result}
         </div>
       )}

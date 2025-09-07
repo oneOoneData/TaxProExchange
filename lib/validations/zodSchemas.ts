@@ -202,7 +202,7 @@ export const jobSchema = z.object({
   title: z.string().min(3, "Job title must be at least 3 characters"),
   description: z.string().min(20, "Job description must be at least 20 characters"),
   deadline_date: z.coerce.date().optional(),
-  payout_type: z.enum(["fixed", "hourly", "per_return"]).default("fixed"),
+  payout_type: z.enum(["fixed", "hourly", "per_return", "discussed"]).default("fixed"),
   payout_fixed: z.coerce.number().nonnegative().optional(),
   payout_min: z.coerce.number().nonnegative().optional(),
   payout_max: z.coerce.number().nonnegative().optional(),
@@ -218,6 +218,7 @@ export const jobSchema = z.object({
   draft_eta_date: z.coerce.date().optional(),
   final_review_buffer_days: z.coerce.number().int().min(0).max(30).default(3),
   pro_liability_required: z.boolean().default(false),
+  free_consultation_required: z.boolean().default(false),
 })
 .superRefine((data, ctx) => {
   // Validate payout logic
@@ -233,6 +234,13 @@ export const jobSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["payout_min"],
       message: "Hourly/per_return payout requires min and max amounts",
+    });
+  }
+  if (data.payout_type === 'discussed' && (data.payout_fixed || data.payout_min || data.payout_max)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["payout_type"],
+      message: "Amount fields should be empty when payout type is 'To be discussed'",
     });
   }
   if (data.payout_min && data.payout_max && data.payout_min > data.payout_max) {
