@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendVerifiedListedEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,21 @@ export async function POST(
 
     // TODO: Add admin role check here
     // For now, allow access to anyone (we'll secure this later)
+
+    // First, get the current profile data to check if we need to send email
+    const { data: currentProfile, error: profileFetchError } = await supabase
+      .from('profiles')
+      .select('id, user_id, first_name, slug, notified_verified_listed_at, visibility_state, is_listed')
+      .eq('id', profileId)
+      .single();
+
+    if (profileFetchError || !currentProfile) {
+      console.error('Error fetching profile:', profileFetchError);
+      return NextResponse.json(
+        { error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
 
     // Update profile to verified status
     const { error: profileError } = await supabase
@@ -64,7 +80,43 @@ export async function POST(
       // Don't fail the whole operation if license update fails
     }
 
-    // TODO: Send email notification to user about approval
+    // Send email notification if not already sent
+    if (!currentProfile.notified_verified_listed_at && currentProfile.slug) {
+      try {
+        // Get user email
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('email')
+          .eq('id', currentProfile.user_id)
+          .single();
+
+        if (!userError && userData?.email) {
+          await sendVerifiedListedEmail({
+            to: userData.email,
+            firstName: currentProfile.first_name,
+            slug: currentProfile.slug,
+          });
+
+          // Mark as notified
+          await supabase
+            .from('profiles')
+            .update({ notified_verified_listed_at: new Date().toISOString() })
+            .eq('id', profileId);
+
+          console.log('✅ Verified + listed email sent to:', userData.email);
+        } else {
+          console.warn('Could not find user email for profile:', profileId);
+        }
+      } catch (emailError) {
+        // Don't fail the approval if email fails
+        console.error('❌ Failed to send verified + listed email:', emailError);
+      }
+    } else if (currentProfile.notified_verified_listed_at) {
+      console.log('Email already sent for profile:', profileId);
+    } else {
+      console.warn('Profile has no slug, cannot send email:', profileId);
+    }
+
     // TODO: Log admin action in audit_logs table
 
     return NextResponse.json({

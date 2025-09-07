@@ -1,19 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { SignUpButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import { setReferralCookie } from '@/lib/cookies';
 
 // Check if we're in build time (no Clerk environment variables)
 const isBuildTime = typeof process !== 'undefined' && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export const dynamic = 'force-dynamic';
 
-export default function JoinPage() {
+// Component that uses search params
+function JoinPageContent() {
   const [acceptLegal, setAcceptLegal] = useState(false);
   const [acceptAge, setAcceptAge] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Handle referral parameter
+  useEffect(() => {
+    const refSlug = searchParams.get('ref');
+    if (refSlug) {
+      setReferralCookie(refSlug);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
@@ -127,5 +139,21 @@ export default function JoinPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Main export with Suspense boundary
+export default function JoinPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
+          <p className="mt-2 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <JoinPageContent />
+    </Suspense>
   );
 }

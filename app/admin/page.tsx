@@ -5,6 +5,58 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 
+// Test Email Button Component
+function TestEmailButton() {
+  const [testing, setTesting] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const testEmail = async () => {
+    setTesting(true);
+    setResult(null);
+    
+    try {
+      const response = await fetch('/api/test/verified-listed-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'koen@cardifftax.com',
+          firstName: 'Koen',
+          slug: 'test-user'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResult(`✅ Success! Email sent to ${data.email}`);
+      } else {
+        const error = await response.text();
+        setResult(`❌ Error: ${error}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <div>
+      <button
+        onClick={testEmail}
+        disabled={testing}
+        className="inline-flex items-center justify-center rounded-xl bg-orange-600 text-white px-4 py-2 text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50"
+      >
+        {testing ? 'Testing...' : 'Send Test Email'}
+      </button>
+      {result && (
+        <div className="mt-2 text-xs text-slate-600">
+          {result}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface AdminStats {
   totalProfiles: number;
   pendingVerifications: number;
@@ -195,6 +247,22 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
+            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Test Email</h3>
+            <p className="text-slate-600 mb-4">Test the verified + listed email functionality.</p>
+            <TestEmailButton />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
             className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
           >
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">

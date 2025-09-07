@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { ProfileUpdateSchema } from '@/lib/validations/zodSchemas';
+import { parseReferralCookie } from '@/lib/cookies';
 
 export const dynamic = 'force-dynamic';
 
@@ -441,6 +442,25 @@ export async function PUT(request: Request) {
       profile = updatedProfile;
       profileError = updateError;
     } else {
+      // Handle referral tracking for new profiles
+      let referrerProfileId = null;
+      const cookieHeader = request.headers.get('cookie');
+      const refSlug = parseReferralCookie(cookieHeader);
+      
+      if (refSlug) {
+        // Look up the referrer's profile ID by slug
+        const { data: referrerProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('slug', refSlug)
+          .single();
+        
+        if (referrerProfile) {
+          referrerProfileId = referrerProfile.id;
+          console.log('🎯 Referral tracking:', { refSlug, referrerProfileId });
+        }
+      }
+
       // Insert new profile
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
@@ -461,6 +481,7 @@ export async function PUT(request: Request) {
           entity_revenue_range: entity_revenue_range || null,
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
+          referrer_profile_id: referrerProfileId,
           updated_at: new Date().toISOString(),
         })
         .select()
