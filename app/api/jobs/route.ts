@@ -132,6 +132,7 @@ export async function POST(request: Request) {
       draft_eta_date,
       final_review_buffer_days,
       pro_liability_required,
+      free_consultation_required,
       // Legacy fields for backward compatibility
       sla,
       trial_ok,
@@ -152,6 +153,9 @@ export async function POST(request: Request) {
     }
     if ((payout_type === 'hourly' || payout_type === 'per_return') && (!payout_min || !payout_max)) {
       return NextResponse.json({ error: 'Hourly/per_return payout requires min and max amounts' }, { status: 400 });
+    }
+    if (payout_type === 'discussed' && (payout_fixed || payout_min || payout_max)) {
+      return NextResponse.json({ error: 'Amount fields should be empty when payout type is "To be discussed"' }, { status: 400 });
     }
 
     const supabase = supabaseService();
@@ -214,6 +218,7 @@ export async function POST(request: Request) {
         draft_eta_date,
         final_review_buffer_days: final_review_buffer_days || 3,
         pro_liability_required: pro_liability_required || false,
+        free_consultation_required: free_consultation_required || false,
         // Legacy fields for backward compatibility
         sla: sla || {},
         trial_ok: trial_ok || false,

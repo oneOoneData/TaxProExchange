@@ -81,6 +81,8 @@ type ExtendedJobFormData = Partial<JobFormData> & {
   location_countries?: string[];
   remote_ok?: boolean;
   sla?: any;
+  // New fields
+  free_consultation_required?: boolean;
 };
 
 export function JobForm() {
@@ -109,6 +111,8 @@ export function JobForm() {
     location_us_only: true,
     location_countries: [],
     remote_ok: true,
+    // New fields
+    free_consultation_required: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -151,6 +155,11 @@ export function JobForm() {
       
       if (formData.payout_type === 'fixed' && !formData.payout_fixed) {
         setErrors({ payout_fixed: 'Fixed amount is required for fixed payout type' });
+        return false;
+      }
+      
+      if (formData.payout_type === 'discussed' && (formData.payout_fixed || formData.payout_min || formData.payout_max)) {
+        setErrors({ payout_type: 'Amount fields should be empty when payout type is "To be discussed"' });
         return false;
       }
       
@@ -291,6 +300,7 @@ export function JobForm() {
               <option value="fixed">Fixed Amount</option>
               <option value="hourly">Hourly Rate</option>
               <option value="per_return">Per Return</option>
+              <option value="discussed">To be discussed</option>
             </select>
             {errors.payout_type && <p className="mt-1 text-sm text-red-600">{errors.payout_type}</p>}
           </div>
@@ -315,6 +325,15 @@ export function JobForm() {
                 />
               </div>
               {errors.payout_fixed && <p className="mt-1 text-sm text-red-600">{errors.payout_fixed}</p>}
+            </div>
+          ) : formData.payout_type === 'discussed' ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Compensation
+              </label>
+              <div className="flex items-center h-10 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-500">
+                To be discussed during consultation
+              </div>
             </div>
           ) : (
             <>
@@ -466,6 +485,18 @@ export function JobForm() {
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Trial period available</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={formData.free_consultation_required}
+                onChange={(e) => handleInputChange('free_consultation_required', e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-700">This job requires a free consultation first</span>
             </label>
           </div>
 

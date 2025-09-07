@@ -81,8 +81,17 @@ export async function POST(
     }
 
     // Send email notification if not already sent
+    console.log('🔍 Email check - Profile data:', {
+      id: currentProfile.id,
+      slug: currentProfile.slug,
+      notified_verified_listed_at: currentProfile.notified_verified_listed_at,
+      user_id: currentProfile.user_id
+    });
+
     if (!currentProfile.notified_verified_listed_at && currentProfile.slug) {
       try {
+        console.log('📧 Attempting to send email for profile:', profileId);
+        
         // Get user email
         const { data: userData, error: userError } = await supabase
           .from('users')
@@ -90,12 +99,18 @@ export async function POST(
           .eq('id', currentProfile.user_id)
           .single();
 
+        console.log('👤 User data:', { userData, userError });
+
         if (!userError && userData?.email) {
-          await sendVerifiedListedEmail({
+          console.log('📤 Sending email to:', userData.email);
+          
+          const emailResult = await sendVerifiedListedEmail({
             to: userData.email,
             firstName: currentProfile.first_name,
             slug: currentProfile.slug,
           });
+
+          console.log('📧 Email send result:', emailResult);
 
           // Mark as notified
           await supabase
@@ -105,16 +120,16 @@ export async function POST(
 
           console.log('✅ Verified + listed email sent to:', userData.email);
         } else {
-          console.warn('Could not find user email for profile:', profileId);
+          console.warn('❌ Could not find user email for profile:', profileId, { userError, userData });
         }
       } catch (emailError) {
         // Don't fail the approval if email fails
         console.error('❌ Failed to send verified + listed email:', emailError);
       }
     } else if (currentProfile.notified_verified_listed_at) {
-      console.log('Email already sent for profile:', profileId);
+      console.log('📧 Email already sent for profile:', profileId);
     } else {
-      console.warn('Profile has no slug, cannot send email:', profileId);
+      console.warn('❌ Profile has no slug, cannot send email:', profileId);
     }
 
     // TODO: Log admin action in audit_logs table
