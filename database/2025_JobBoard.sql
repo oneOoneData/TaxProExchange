@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   description TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','assigned','closed','cancelled')),
   deadline_date DATE,
-  payout_type TEXT NOT NULL CHECK (payout_type IN ('fixed','hourly','per_return')),
+  payout_type TEXT NOT NULL CHECK (payout_type IN ('fixed','hourly','per_return','discussed')),
   payout_fixed NUMERIC(12,2),
   payout_min NUMERIC(12,2),
   payout_max NUMERIC(12,2),
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS job_applications (
   applicant_user_id TEXT NOT NULL,                  -- Clerk sub (denormalized for RLS)
   cover_note TEXT,
   proposed_rate NUMERIC(12,2),
-  proposed_payout_type TEXT CHECK (proposed_payout_type IN ('fixed','hourly','per_return')),
+  proposed_payout_type TEXT CHECK (proposed_payout_type IN ('fixed','hourly','per_return','discussed')),
   proposed_timeline TEXT,
   status TEXT NOT NULL DEFAULT 'applied' CHECK (status IN ('applied','shortlisted','hired','withdrawn','rejected','completed')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
