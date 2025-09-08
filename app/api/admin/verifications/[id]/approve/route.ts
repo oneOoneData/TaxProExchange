@@ -81,93 +81,112 @@ export async function POST(
     }
 
     // Send email notification if not already sent
-    console.log('🔍 Email check - Profile data:', {
-      id: currentProfile.id,
-      slug: currentProfile.slug,
-      notified_verified_listed_at: currentProfile.notified_verified_listed_at,
-      user_id: currentProfile.user_id,
-      public_email: currentProfile.public_email
-    });
+    // Check the UPDATED profile data (now verified and listed)
+    const { data: updatedProfile, error: updatedProfileError } = await supabase
+      .from('profiles')
+      .select('id, user_id, first_name, slug, notified_verified_listed_at, visibility_state, is_listed, public_email')
+      .eq('id', profileId)
+      .single();
 
-    // Only send email if:
-    // 1. Profile is verified and listed
-    // 2. Has a slug (for profile URL)
-    // 3. Has not been notified before
-    // 4. Has an email address
-    const shouldSendEmail = (
-      currentProfile.visibility_state === 'verified' &&
-      currentProfile.is_listed === true &&
-      !currentProfile.notified_verified_listed_at &&
-      currentProfile.slug &&
-      (currentProfile.public_email || currentProfile.user_id)
-    );
-
-    if (shouldSendEmail) {
-      try {
-        console.log('📧 Attempting to send email for profile:', profileId);
-        
-        let emailToSend = null;
-        
-        // Try to get email from users table first
-        if (currentProfile.user_id) {
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('email')
-            .eq('id', currentProfile.user_id)
-            .single();
-
-          console.log('👤 User data:', { userData, userError });
-
-          if (!userError && userData?.email) {
-            emailToSend = userData.email;
-          }
-        }
-        
-        // Fallback to public_email if no user email found
-        if (!emailToSend && currentProfile.public_email) {
-          console.log('📧 Using public_email:', currentProfile.public_email);
-          emailToSend = currentProfile.public_email;
-        }
-
-        if (emailToSend) {
-          console.log('📤 Sending email to:', emailToSend);
-          
-          const emailResult = await sendVerifiedListedEmail({
-            to: emailToSend,
-            firstName: currentProfile.first_name,
-            slug: currentProfile.slug,
-          });
-
-          console.log('📧 Email send result:', emailResult);
-
-          // Mark as notified (with additional safety check)
-          const { error: notifyError } = await supabase
-            .from('profiles')
-            .update({ notified_verified_listed_at: new Date().toISOString() })
-            .eq('id', profileId)
-            .is('notified_verified_listed_at', null); // Only update if still null
-
-          if (notifyError) {
-            console.warn('⚠️ Could not mark as notified (may have been sent already):', notifyError);
-          } else {
-            console.log('✅ Profile marked as notified');
-          }
-
-          console.log('✅ Verified + listed email sent to:', emailToSend);
-        } else {
-          console.warn('❌ Could not find any email for profile:', profileId, { 
-            user_id: currentProfile.user_id, 
-            public_email: currentProfile.public_email 
-          });
-        }
-      } catch (emailError) {
-        // Don't fail the approval if email fails
-        console.error('❌ Failed to send verified + listed email:', emailError);
-      }
-    } else if (currentProfile.notified_verified_listed_at) {
-      console.log('📧 Email already sent for profile:', profileId);
+    if (updatedProfileError) {
+      console.error('Error fetching updated profile:', updatedProfileError);
     } else {
-      console.warn('❌ Profile has no slug, cannot send email:', profileId);
+      console.log('🔍 Email check - Updated profile data:', {
+        id: updatedProfile.id,
+        slug: updatedProfile.slug,
+        notified_verified_listed_at: updatedProfile.notified_verified_listed_at,
+        user_id: updatedProfile.user_id,
+        public_email: updatedProfile.public_email,
+        visibility_state: updatedProfile.visibility_state,
+        is_listed: updatedProfile.is_listed
+      });
+
+      // Only send email if:
+      // 1. Profile is verified and listed
+      // 2. Has a slug (for profile URL)
+      // 3. Has not been notified before
+      // 4. Has an email address
+      const shouldSendEmail = (
+        updatedProfile.visibility_state === 'verified' &&
+        updatedProfile.is_listed === true &&
+        !updatedProfile.notified_verified_listed_at &&
+        updatedProfile.slug &&
+        (updatedProfile.public_email || updatedProfile.user_id)
+      );
+
+      if (shouldSendEmail) {
+        try {
+          console.log('📧 Attempting to send email for profile:', profileId);
+          
+          let emailToSend = null;
+          
+          // Try to get email from users table first
+          if (updatedProfile.user_id) {
+            const { data: userData, error: userError } = await supabase
+              .from('users')
+              .select('email')
+              .eq('id', updatedProfile.user_id)
+              .single();
+
+            console.log('👤 User data:', { userData, userError });
+
+            if (!userError && userData?.email) {
+              emailToSend = userData.email;
+            }
+          }
+          
+          // Fallback to public_email if no user email found
+          if (!emailToSend && updatedProfile.public_email) {
+            console.log('📧 Using public_email:', updatedProfile.public_email);
+            emailToSend = updatedProfile.public_email;
+          }
+
+          if (emailToSend) {
+            console.log('📤 Sending email to:', emailToSend);
+            
+            const emailResult = await sendVerifiedListedEmail({
+              to: emailToSend,
+              firstName: updatedProfile.first_name,
+              slug: updatedProfile.slug,
+            });
+
+            console.log('📧 Email send result:', emailResult);
+
+            // Mark as notified (with additional safety check)
+            const { error: notifyError } = await supabase
+              .from('profiles')
+              .update({ notified_verified_listed_at: new Date().toISOString() })
+              .eq('id', profileId)
+              .is('notified_verified_listed_at', null); // Only update if still null
+
+            if (notifyError) {
+              console.warn('⚠️ Could not mark as notified (may have been sent already):', notifyError);
+            } else {
+              console.log('✅ Profile marked as notified');
+            }
+
+            console.log('✅ Verified + listed email sent to:', emailToSend);
+          } else {
+            console.warn('❌ Could not find any email for profile:', profileId, { 
+              user_id: updatedProfile.user_id, 
+              public_email: updatedProfile.public_email 
+            });
+          }
+        } catch (emailError) {
+          // Don't fail the approval if email fails
+          console.error('❌ Failed to send verified + listed email:', emailError);
+        }
+      } else if (updatedProfile.notified_verified_listed_at) {
+        console.log('📧 Email already sent for profile:', profileId);
+      } else {
+        console.warn('❌ Cannot send email - missing requirements:', {
+          isVerified: updatedProfile.visibility_state === 'verified',
+          isListed: updatedProfile.is_listed === true,
+          hasSlug: !!updatedProfile.slug,
+          hasEmail: !!(updatedProfile.public_email || updatedProfile.user_id),
+          alreadyNotified: !!updatedProfile.notified_verified_listed_at
+        });
+      }
     }
 
     // TODO: Log admin action in audit_logs table
