@@ -89,7 +89,20 @@ export async function POST(
       public_email: currentProfile.public_email
     });
 
-    if (!currentProfile.notified_verified_listed_at && currentProfile.slug) {
+    // Only send email if:
+    // 1. Profile is verified and listed
+    // 2. Has a slug (for profile URL)
+    // 3. Has not been notified before
+    // 4. Has an email address
+    const shouldSendEmail = (
+      currentProfile.visibility_state === 'verified' &&
+      currentProfile.is_listed === true &&
+      !currentProfile.notified_verified_listed_at &&
+      currentProfile.slug &&
+      (currentProfile.public_email || currentProfile.user_id)
+    );
+
+    if (shouldSendEmail) {
       try {
         console.log('📧 Attempting to send email for profile:', profileId);
         
@@ -127,11 +140,18 @@ export async function POST(
 
           console.log('📧 Email send result:', emailResult);
 
-          // Mark as notified
-          await supabase
+          // Mark as notified (with additional safety check)
+          const { error: notifyError } = await supabase
             .from('profiles')
             .update({ notified_verified_listed_at: new Date().toISOString() })
-            .eq('id', profileId);
+            .eq('id', profileId)
+            .is('notified_verified_listed_at', null); // Only update if still null
+
+          if (notifyError) {
+            console.warn('⚠️ Could not mark as notified (may have been sent already):', notifyError);
+          } else {
+            console.log('✅ Profile marked as notified');
+          }
 
           console.log('✅ Verified + listed email sent to:', emailToSend);
         } else {
