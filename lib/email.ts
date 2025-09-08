@@ -130,14 +130,29 @@ export const emailTemplates = {
             <a href="${data.link}" style="background: #4299e1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Job Details</a>
           </div>
           
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #0ea5e9;">
+            <p style="margin: 0; color: #0c4a6e; font-weight: 500;">
+              Got work to hand off or need a specialist?<br>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/new" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">👉 Post a job on TaxProExchange</a>
+            </p>
+          </div>
+          
           <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
-            <p>You're receiving this because your notification preferences match this job's requirements.</p>
+            <p>You're receiving this because you have job notifications enabled in your account settings.</p>
+            <p><strong>Don't want these emails?</strong> You can easily turn off job notifications:</p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Go to your <a href="${process.env.NEXT_PUBLIC_APP_URL}/settings" style="color: #4299e1;">Settings page</a></li>
+              <li>Scroll down to "Email Preferences"</li>
+              <li>Uncheck "Job Notifications"</li>
+              <li>Click "Save Preferences"</li>
+            </ul>
+            <p>Or <a href="${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications" style="color: #4299e1;">click here to unsubscribe</a> from job notifications.</p>
             <p>TaxProExchange - Connecting verified tax professionals</p>
           </div>
         </body>
       </html>
     `,
-    text: `New Job Opportunity: ${data.title}\n\nCompensation: ${data.payout}\nDeadline: ${data.deadline}\n\nView Job: ${data.link}`
+    text: `New Job Opportunity: ${data.title}\n\nCompensation: ${data.payout}\nDeadline: ${data.deadline}\n\nView Job: ${data.link}\n\n---\nGot work to hand off or need a specialist?\n👉 Post a job on TaxProExchange: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/new\n\n---\nYou're receiving this because you have job notifications enabled in your account settings.\n\nDon't want these emails? You can easily turn off job notifications:\n1. Go to your Settings page: ${process.env.NEXT_PUBLIC_APP_URL}/settings\n2. Scroll down to "Email Preferences"\n3. Uncheck "Job Notifications"\n4. Click "Save Preferences"\n\nOr click here to unsubscribe: ${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications\n\nTaxProExchange - Connecting verified tax professionals`
   }),
 
   profileCompletion: (data: ProfileCompletionEmailData): EmailTemplate => ({

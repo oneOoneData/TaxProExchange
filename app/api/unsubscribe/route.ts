@@ -10,31 +10,41 @@ export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const token = url.searchParams.get('token');
+    const email = url.searchParams.get('email');
     const type = url.searchParams.get('type') || 'all';
     
-    if (!token) {
+    if (!token && !email) {
       return NextResponse.json({ 
-        error: 'Missing unsubscribe token' 
+        error: 'Missing unsubscribe token or email' 
       }, { status: 400 });
     }
 
-    // Decode the token (in a real implementation, you'd want to use JWT or similar)
-    // For now, we'll use a simple base64 encoded profile ID
-    let profileId: string;
-    try {
-      profileId = Buffer.from(token, 'base64').toString('utf-8');
-    } catch (error) {
-      return NextResponse.json({ 
-        error: 'Invalid unsubscribe token' 
-      }, { status: 400 });
+    let profileId: string | null = null;
+    
+    if (token) {
+      // Decode the token (in a real implementation, you'd want to use JWT or similar)
+      // For now, we'll use a simple base64 encoded profile ID
+      try {
+        profileId = Buffer.from(token, 'base64').toString('utf-8');
+      } catch (error) {
+        return NextResponse.json({ 
+          error: 'Invalid unsubscribe token' 
+        }, { status: 400 });
+      }
     }
 
     // Get the user's profile
-    const { data: profile, error: profileError } = await supabase
+    let query = supabase
       .from('profiles')
-      .select('id, first_name, last_name, email_preferences, connection_email_notifications')
-      .eq('id', profileId)
-      .single();
+      .select('id, first_name, last_name, email_preferences, connection_email_notifications, public_email');
+    
+    if (profileId) {
+      query = query.eq('id', profileId);
+    } else if (email) {
+      query = query.eq('public_email', email);
+    }
+    
+    const { data: profile, error: profileError } = await query.single();
 
     if (profileError || !profile) {
       return NextResponse.json({ 
@@ -76,6 +86,14 @@ export async function GET(req: NextRequest) {
           connection_requests: false
         }
       };
+    } else if (type === 'job_notifications') {
+      // Disable only job notifications
+      updateData = {
+        email_preferences: {
+          ...profile.email_preferences,
+          job_notifications: false
+        }
+      };
     }
 
     // Update the profile
@@ -108,7 +126,7 @@ export async function GET(req: NextRequest) {
         <body>
           <h1>Successfully Unsubscribed</h1>
           <div class="success">
-            <p><strong>You have been unsubscribed from ${type === 'all' ? 'all email notifications' : type + ' notifications'}.</strong></p>
+            <p><strong>You have been unsubscribed from ${type === 'all' ? 'all email notifications' : type === 'job_notifications' ? 'job notifications' : type + ' notifications'}.</strong></p>
             <p>You will no longer receive ${type === 'all' ? 'any' : 'these'} email notifications from TaxProExchange.</p>
           </div>
           <p>You can still access your account and change your preferences at any time:</p>
