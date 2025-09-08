@@ -36,7 +36,7 @@ export async function POST(
     // First, get the current profile data to check if we need to send email
     const { data: currentProfile, error: profileFetchError } = await supabase
       .from('profiles')
-      .select('id, user_id, first_name, slug, notified_verified_listed_at, visibility_state, is_listed')
+      .select('id, user_id, first_name, slug, notified_verified_listed_at, visibility_state, is_listed, public_email')
       .eq('id', profileId)
       .single();
 
@@ -85,27 +85,42 @@ export async function POST(
       id: currentProfile.id,
       slug: currentProfile.slug,
       notified_verified_listed_at: currentProfile.notified_verified_listed_at,
-      user_id: currentProfile.user_id
+      user_id: currentProfile.user_id,
+      public_email: currentProfile.public_email
     });
 
     if (!currentProfile.notified_verified_listed_at && currentProfile.slug) {
       try {
         console.log('📧 Attempting to send email for profile:', profileId);
         
-        // Get user email
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('email')
-          .eq('id', currentProfile.user_id)
-          .single();
+        let emailToSend = null;
+        
+        // Try to get email from users table first
+        if (currentProfile.user_id) {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('email')
+            .eq('id', currentProfile.user_id)
+            .single();
 
-        console.log('👤 User data:', { userData, userError });
+          console.log('👤 User data:', { userData, userError });
 
-        if (!userError && userData?.email) {
-          console.log('📤 Sending email to:', userData.email);
+          if (!userError && userData?.email) {
+            emailToSend = userData.email;
+          }
+        }
+        
+        // Fallback to public_email if no user email found
+        if (!emailToSend && currentProfile.public_email) {
+          console.log('📧 Using public_email:', currentProfile.public_email);
+          emailToSend = currentProfile.public_email;
+        }
+
+        if (emailToSend) {
+          console.log('📤 Sending email to:', emailToSend);
           
           const emailResult = await sendVerifiedListedEmail({
-            to: userData.email,
+            to: emailToSend,
             firstName: currentProfile.first_name,
             slug: currentProfile.slug,
           });
@@ -118,9 +133,12 @@ export async function POST(
             .update({ notified_verified_listed_at: new Date().toISOString() })
             .eq('id', profileId);
 
-          console.log('✅ Verified + listed email sent to:', userData.email);
+          console.log('✅ Verified + listed email sent to:', emailToSend);
         } else {
-          console.warn('❌ Could not find user email for profile:', profileId, { userError, userData });
+          console.warn('❌ Could not find any email for profile:', profileId, { 
+            user_id: currentProfile.user_id, 
+            public_email: currentProfile.public_email 
+          });
         }
       } catch (emailError) {
         // Don't fail the approval if email fails
