@@ -235,6 +235,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to create job' }, { status: 500 });
     }
 
+    // Send job notifications to eligible users
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-created`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Secret': process.env.WEBHOOK_SECRET || '',
+        },
+        body: JSON.stringify({ job_id: job.id }),
+      });
+      console.log(`Job notifications triggered for job ${job.id}`);
+    } catch (notificationError) {
+      console.error('Failed to trigger job notifications:', notificationError);
+      // Don't fail the job creation if notifications fail
+    }
+
     return NextResponse.json({ job: job }, { status: 201 });
   } catch (error) {
     console.error('Job creation error:', error);

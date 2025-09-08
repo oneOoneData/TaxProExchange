@@ -42,22 +42,18 @@ export async function POST(request: Request) {
 
     // Find users whose notification preferences match this job
     const { data: matchingUsers, error: usersError } = await supabase
-      .from('notification_prefs')
+      .from('profiles')
       .select(`
-        user_id,
-        min_payout,
-        payout_type_filter,
-        specialization_filter,
-        states_filter,
-        international,
-        countries_filter,
-        profiles!notification_prefs_user_id_fkey(
-          first_name,
-          last_name,
-          public_email
-        )
+        clerk_id,
+        first_name,
+        last_name,
+        public_email,
+        email_preferences,
+        works_international,
+        countries
       `)
-      .eq('email_enabled', true);
+      .eq('email_preferences->job_notifications', true)
+      .not('public_email', 'is', null);
 
     if (usersError) {
       console.error('Users fetch error:', usersError);
@@ -66,71 +62,19 @@ export async function POST(request: Request) {
 
     // Filter users based on job requirements
     const eligibleUsers = matchingUsers?.filter(user => {
-      // Check payout minimum
-      if (user.min_payout) {
-        const jobPayout = job.payout_fixed || job.payout_min || 0;
-        if (jobPayout < user.min_payout) {
-          return false;
-        }
-      }
-
-      // Check payout type filter
-      if (user.payout_type_filter && user.payout_type_filter.length > 0) {
-        if (!user.payout_type_filter.includes(job.payout_type)) {
-          return false;
-        }
-      }
-
-      // Check specialization filter
-      if (user.specialization_filter && user.specialization_filter.length > 0) {
-        const hasMatchingSpecialization = user.specialization_filter.some((spec: string) => 
-          job.specialization_keys.includes(spec)
-        );
-        if (!hasMatchingSpecialization) {
-          return false;
-        }
-      }
-
-      // Check location filters
-      if (user.states_filter && user.states_filter.length > 0) {
-        if (job.location_us_only && job.location_states.length > 0) {
-          const hasMatchingState = user.states_filter.some((state: string) => 
-            job.location_states.includes(state)
-          );
-          if (!hasMatchingState) {
-            return false;
-          }
-        }
-      }
-
-      // Check international filter
-      if (user.international !== null) {
-        if (user.international && job.location_us_only) {
-          return false;
-        }
-        if (!user.international && !job.location_us_only) {
-          return false;
-        }
-      }
-
-      // Check countries filter
-      if (user.countries_filter && user.countries_filter.length > 0) {
-        if (job.location_countries.length > 0) {
-          const hasMatchingCountry = user.countries_filter.some((country: string) => 
-            job.location_countries.includes(country)
-          );
-          if (!hasMatchingCountry) {
-            return false;
-          }
-        }
-      }
-
+      // For now, we'll send to all users with job_notifications enabled
+      // In the future, we can add more sophisticated filtering based on:
+      // - User specializations
+      // - Location preferences
+      // - Payout preferences
+      // - etc.
+      
       return true;
     }) || [];
 
     // Prepare email notifications
     const notifications: JobCreatedEmailData[] = eligibleUsers
-      .filter(user => user.profiles?.[0]?.public_email) // Only users with public emails
+      .filter(user => user.public_email) // Only users with public emails
       .map(user => ({
         title: job.title,
         payout: formatPayout(job),
@@ -141,8 +85,8 @@ export async function POST(request: Request) {
           ...job.specialization_keys
         ].slice(0, 5), // Limit to 5 badges
         link: `${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}`,
-        recipientEmail: user.profiles![0].public_email,
-        recipientName: `${user.profiles![0].first_name} ${user.profiles![0].last_name}`
+        recipientEmail: user.public_email,
+        recipientName: `${user.first_name} ${user.last_name}`
       }));
 
     // Send notifications
