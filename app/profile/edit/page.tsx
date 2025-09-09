@@ -111,6 +111,13 @@ const softwareOptions = [
   { slug: 'taxjar', label: 'TaxJar' },
   { slug: 'stripe_tax', label: 'Stripe Tax' },
   
+  // Accounting & bookkeeping
+  { slug: 'quickbooks_online', label: 'QuickBooks Online' },
+  { slug: 'xero', label: 'Xero' },
+  { slug: 'freshbooks', label: 'FreshBooks' },
+  { slug: 'sage', label: 'Sage' },
+  { slug: 'wave', label: 'Wave' },
+  
   // Payroll & employer
   { slug: 'adp', label: 'ADP' },
   { slug: 'paychex', label: 'Paychex' },

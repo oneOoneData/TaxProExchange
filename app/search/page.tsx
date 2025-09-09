@@ -129,7 +129,7 @@ export default function SearchPage() {
     { value: 'taxslayer', label: 'TaxSlayer' },
     { value: 'taxdome', label: 'TaxDome' },
     { value: 'canopy', label: 'Canopy' },
-    { value: 'quickbooks', label: 'QuickBooks' },
+    { value: 'quickbooks_online', label: 'QuickBooks Online' },
     { value: 'xero', label: 'Xero' },
     { value: 'freshbooks', label: 'FreshBooks' },
     { value: 'truss', label: 'Truss' }
