@@ -340,9 +340,12 @@ export default function AdminDashboard() {
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Platform Analytics</h3>
             <p className="text-slate-600 mb-4">View platform usage and user statistics.</p>
-            <button className="inline-flex items-center justify-center rounded-xl bg-purple-600 text-white px-4 py-2 text-sm font-medium hover:bg-purple-700 transition-colors">
+            <Link
+              href="/admin/analytics"
+              className="inline-flex items-center justify-center rounded-xl bg-purple-600 text-white px-4 py-2 text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
               View Analytics
-            </button>
+            </Link>
           </motion.div>
         </div>
 
