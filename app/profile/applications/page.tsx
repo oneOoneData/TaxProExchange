@@ -146,6 +146,8 @@ export default function ApplicationsPage() {
         }
         const data = await response.json();
         console.log('Received applications data:', data.applications);
+        console.log('First application job data:', data.applications?.[0]?.job);
+        console.log('First application raw data:', data.applications?.[0]);
         setReceivedApplications(data.applications || []);
 
       } catch (err) {
