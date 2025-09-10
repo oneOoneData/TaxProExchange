@@ -69,23 +69,27 @@ export async function GET() {
     console.log('API: Found applications:', applications?.length || 0);
     console.log('API: Applications data:', applications);
     
-    // Transform the data to handle job as array vs object
+    // Transform the data to handle job and applicant as array vs object
     const transformedApplications = applications?.map(app => {
       const job = Array.isArray(app.job) ? app.job[0] : app.job;
+      const applicant = Array.isArray(app.applicant) ? app.applicant[0] : app.applicant;
       return {
         ...app,
-        job
+        job,
+        applicant
       };
     }) || [];
     
     // Log each application to see what's missing
     transformedApplications.forEach((app, index) => {
+      const job = app.job as any;
+      const applicant = app.applicant as any;
       console.log(`API: Application ${index}:`, {
         id: app.id,
-        hasJob: !!app.job,
-        jobTitle: app.job?.title,
-        hasApplicant: !!app.applicant,
-        applicantName: app.applicant ? `${app.applicant.first_name} ${app.applicant.last_name}` : 'No applicant'
+        hasJob: !!job,
+        jobTitle: job?.title,
+        hasApplicant: !!applicant,
+        applicantName: applicant ? `${applicant.first_name} ${applicant.last_name}` : 'No applicant'
       });
     });
 

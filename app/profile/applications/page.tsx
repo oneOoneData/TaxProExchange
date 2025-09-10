@@ -523,7 +523,7 @@ export default function ApplicationsPage() {
                       {application.job?.title || 'Job Not Found (Debug Mode)'}
                     </h3>
                     {activeTab === 'sent' ? (
-                      <p className="text-sm text-gray-600">{application.job?.firm_name || 'Unknown Company'}</p>
+                      <p className="text-sm text-gray-600">{(application.job as any)?.firm_name || 'Unknown Company'}</p>
                     ) : (
                       <p className="text-sm text-gray-600">
                         Applied by: {(application as ReceivedApplication).applicant?.first_name || 'Unknown'} {(application as ReceivedApplication).applicant?.last_name || 'User'}
@@ -547,7 +547,7 @@ export default function ApplicationsPage() {
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Job Compensation</h4>
                     <p className="text-sm text-gray-600">
-                      {application.job ? formatJobPayout(application.job) : 'Job details not available'}
+                      {application.job ? formatJobPayout(application.job as any) : 'Job details not available'}
                     </p>
                   </div>
                   
