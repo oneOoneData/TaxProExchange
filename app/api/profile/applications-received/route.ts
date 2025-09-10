@@ -69,8 +69,17 @@ export async function GET() {
     console.log('API: Found applications:', applications?.length || 0);
     console.log('API: Applications data:', applications);
     
+    // Transform the data to handle job as array vs object
+    const transformedApplications = applications?.map(app => {
+      const job = Array.isArray(app.job) ? app.job[0] : app.job;
+      return {
+        ...app,
+        job
+      };
+    }) || [];
+    
     // Log each application to see what's missing
-    applications?.forEach((app, index) => {
+    transformedApplications.forEach((app, index) => {
       console.log(`API: Application ${index}:`, {
         id: app.id,
         hasJob: !!app.job,
@@ -80,7 +89,7 @@ export async function GET() {
       });
     });
 
-    return NextResponse.json({ applications: applications || [] });
+    return NextResponse.json({ applications: transformedApplications });
 
   } catch (error) {
     console.error('Error in /api/profile/applications-received:', error);
