@@ -520,7 +520,7 @@ export default function ApplicationsPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {application.job?.title || 'Job Not Found (Debug Mode)'}
+                      {application.job?.title || 'Job Not Found'}
                     </h3>
                     {activeTab === 'sent' ? (
                       <p className="text-sm text-gray-600">{(application.job as any)?.firm_name || 'Unknown Company'}</p>

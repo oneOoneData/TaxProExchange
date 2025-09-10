@@ -53,7 +53,7 @@ export async function PATCH(
     }
 
     const job = Array.isArray(application.job) ? application.job[0] : application.job;
-    if (!job || job.created_by !== profile.id) {
+    if (!job || job.created_by !== userId) {
       return NextResponse.json({ error: 'Unauthorized to update this application' }, { status: 403 });
     }
 
