@@ -30,8 +30,7 @@ export async function GET() {
     console.log('API: Is admin:', profile.is_admin);
 
     // Get applications for jobs created by this user ONLY
-    // SECURITY: Always filter by job ownership, even for admins
-    // Note: created_by in jobs table stores the Clerk user ID, not profile ID
+    // SECURITY: Use service role key to bypass RLS and enforce our own filtering
     const { data: applications, error: applicationsError } = await supabase
       .from('job_applications')
       .select(`
@@ -43,7 +42,7 @@ export async function GET() {
         status,
         created_at,
         notes,
-        job:jobs(
+        job:jobs!inner(
           id,
           title,
           payout_type,
@@ -88,6 +87,7 @@ export async function GET() {
     console.log('API: User jobs data:', userJobs);
     
     // Transform the data to handle job and applicant as array vs object
+    // SECURITY: Double-check that all applications belong to this user's jobs
     const transformedApplications = applications?.map(app => {
       const job = Array.isArray(app.job) ? app.job[0] : app.job;
       const applicant = Array.isArray(app.applicant) ? app.applicant[0] : app.applicant;
@@ -96,6 +96,10 @@ export async function GET() {
         job,
         applicant
       };
+    }).filter(app => {
+      // SECURITY: Ensure job belongs to current user
+      const job = app.job;
+      return job && job.created_by === userId;
     }) || [];
     
     // Log each application to see what's missing
