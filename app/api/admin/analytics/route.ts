@@ -30,8 +30,11 @@ export async function GET(request: NextRequest) {
     const signupsByDay: { [key: string]: number } = {};
     
     signupData?.forEach(profile => {
-      const date = new Date(profile.created_at).toISOString().split('T')[0];
-      signupsByDay[date] = (signupsByDay[date] || 0) + 1;
+      // Use local date to avoid timezone issues
+      const date = new Date(profile.created_at);
+      const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+      const dateStr = localDate.toISOString().split('T')[0];
+      signupsByDay[dateStr] = (signupsByDay[dateStr] || 0) + 1;
     });
 
     // Fill in missing days with 0
@@ -49,6 +52,9 @@ export async function GET(request: NextRequest) {
     // Calculate total signups and average
     const totalSignups = result.reduce((sum, day) => sum + day.signups, 0);
     const averageSignups = Math.round((totalSignups / days) * 10) / 10;
+    
+    // Find peak day
+    const peakDay = result.reduce((max, day) => day.signups > max.signups ? day : max, result[0] || { signups: 0 });
 
     return NextResponse.json({
       success: true,
@@ -56,7 +62,12 @@ export async function GET(request: NextRequest) {
         signupsByDay: result,
         totalSignups,
         averageSignups,
-        period: `${days} days`
+        peakDay: peakDay.signups,
+        period: `${days} days`,
+        debug: {
+          rawSignupCount: signupData?.length || 0,
+          calculatedTotal: totalSignups
+        }
       }
     });
 

@@ -10,8 +10,11 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     const { connectionId, recipientProfileId } = await request.json();
+    
+    console.log('🔔 Connection request notification called:', { connectionId, recipientProfileId });
 
     if (!connectionId || !recipientProfileId) {
+      console.log('❌ Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -107,6 +110,7 @@ export async function POST(request: NextRequest) {
     const notificationSettingsUrl = `${process.env.NEXT_PUBLIC_APP_URL}/settings`;
 
     // Send email
+    console.log('📧 Attempting to send connection request email to:', userEmail);
     const emailResult = await sendEmail({
       to: userEmail,
       subject: 'You have a pending connection request on TaxProExchange',
@@ -159,13 +163,17 @@ The TaxProExchange Team
       `
     });
 
+    console.log('📧 Email result:', emailResult);
+
     if (emailResult.error) {
+      console.error('❌ Email sending failed:', emailResult.error);
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: 'Failed to send email', details: emailResult.error },
         { status: 500 }
       );
     }
 
+    console.log('✅ Connection request email sent successfully');
     return NextResponse.json({
       message: 'Connection request notification sent successfully',
       connectionId,

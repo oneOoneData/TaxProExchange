@@ -148,6 +148,48 @@ export async function POST(
       return NextResponse.json({ error: 'Failed to submit application' }, { status: 500 });
     }
 
+    // Auto-connect: Create connection between job poster and applicant
+    try {
+      // Get job poster's profile ID
+      const { data: jobPosterProfile, error: jobPosterError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('clerk_id', job.created_by)
+        .single();
+
+      if (!jobPosterError && jobPosterProfile) {
+        // Check if connection already exists
+        const { data: existingConnection } = await supabase
+          .from('connections')
+          .select('id, status')
+          .or(`and(requester_profile_id.eq.${profile.id},recipient_profile_id.eq.${jobPosterProfile.id}),and(requester_profile_id.eq.${jobPosterProfile.id},recipient_profile_id.eq.${profile.id})`)
+          .single();
+
+        // Create connection if it doesn't exist
+        if (!existingConnection) {
+          const { data: connection, error: connectionError } = await supabase
+            .from('connections')
+            .insert({
+              requester_profile_id: profile.id, // Applicant initiates the connection
+              recipient_profile_id: jobPosterProfile.id,
+              status: 'accepted' // Auto-accept since they're applying to their job
+            })
+            .select()
+            .single();
+
+          if (connectionError) {
+            console.error('Auto-connect creation error:', connectionError);
+            // Don't fail the application if connection creation fails
+          } else {
+            console.log('Auto-connect created:', connection.id);
+          }
+        }
+      }
+    } catch (autoConnectError) {
+      console.error('Auto-connect error:', autoConnectError);
+      // Don't fail the application if auto-connect fails
+    }
+
     // Send notification email to job poster about new application
     try {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-application-received`, {

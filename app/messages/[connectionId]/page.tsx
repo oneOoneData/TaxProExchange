@@ -73,8 +73,19 @@ export default function ChatThreadPage() {
     if (chatClient && connection?.stream_channel_id) {
       const channel = chatClient.channel('messaging', connection.stream_channel_id);
       
-      // Mark as read immediately when component mounts
-      channel.markRead().catch(console.error);
+      // Watch the channel first, then mark as read
+      const initializeChannel = async () => {
+        try {
+          await channel.watch();
+          // Now it's safe to mark as read
+          await channel.markRead();
+          console.log('Messages marked as read');
+        } catch (error) {
+          console.error('Error initializing channel:', error);
+        }
+      };
+      
+      initializeChannel();
       
       // Set up listener to mark new messages as read when they arrive
       const handleNewMessage = () => {
@@ -86,6 +97,34 @@ export default function ChatThreadPage() {
       return () => {
         channel.off('message.new', handleNewMessage);
       };
+    }
+  }, [chatClient, connection?.stream_channel_id]);
+
+  // Set up auto-expanding textarea after component mounts
+  useEffect(() => {
+    if (chatClient && connection?.stream_channel_id) {
+      const setupAutoExpandingTextarea = () => {
+        const textarea = document.querySelector('.str-chat__textarea') as HTMLTextAreaElement;
+        if (textarea) {
+          const autoExpand = () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+          };
+          
+          textarea.addEventListener('input', autoExpand);
+          textarea.addEventListener('paste', () => setTimeout(autoExpand, 0));
+          
+          return () => {
+            textarea.removeEventListener('input', autoExpand);
+            textarea.removeEventListener('paste', () => setTimeout(autoExpand, 0));
+          };
+        }
+      };
+
+      // Set up after a short delay to ensure DOM is ready
+      const timeoutId = setTimeout(setupAutoExpandingTextarea, 100);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [chatClient, connection?.stream_channel_id]);
 
@@ -135,6 +174,14 @@ export default function ChatThreadPage() {
         throw new Error('NEXT_PUBLIC_STREAM_KEY is not set');
       }
       
+      // Check if client is already connected
+      const existingClient = StreamChat.getInstance(process.env.NEXT_PUBLIC_STREAM_KEY!);
+      if (existingClient.userID === profileId) {
+        console.log('Stream Chat client already connected for this user');
+        setChatClient(existingClient);
+        return;
+      }
+      
       // Get Stream token
       const tokenResponse = await fetch('/api/stream/token');
       if (!tokenResponse.ok) {
@@ -157,15 +204,6 @@ export default function ChatThreadPage() {
       
       console.log('Stream Chat client connected');
       setChatClient(client);
-
-      // Mark messages as read when user opens the chat
-      if (connection?.stream_channel_id) {
-        const channel = client.channel('messaging', connection.stream_channel_id);
-        await channel.watch();
-        // Mark all messages as read for this user
-        await channel.markRead();
-        console.log('Messages marked as read');
-      }
     } catch (error) {
       console.error('Error initializing Stream Chat:', error);
     }
@@ -214,23 +252,12 @@ export default function ChatThreadPage() {
     }
   };
 
-  if (!isLoaded || !user) {
+  if (!isLoaded || !user || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
           <p className="mt-2 text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
-          <p className="mt-2 text-slate-600">Loading chat...</p>
         </div>
       </div>
     );
@@ -328,17 +355,95 @@ export default function ChatThreadPage() {
         </div>
 
         {/* Chat Interface */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden h-[500px] md:h-[600px] lg:h-[700px] flex flex-col">
           {chatClient && connection.stream_channel_id ? (
-            <Chat client={chatClient} theme="str-chat__theme-light">
-              <Channel channel={chatClient.channel('messaging', connection.stream_channel_id)}>
-                <Window>
-                  <MessageList />
-                  <MessageInput />
-                </Window>
-                <Thread />
-              </Channel>
-            </Chat>
+            <div className="flex-1 flex flex-col">
+              <style jsx global>{`
+                .str-chat {
+                  height: 100% !important;
+                }
+                .str-chat__container {
+                  height: 100% !important;
+                }
+                .str-chat__main-panel {
+                  height: 100% !important;
+                  display: flex !important;
+                  flex-direction: column !important;
+                }
+                .str-chat__list {
+                  flex: 1 !important;
+                  overflow-y: auto !important;
+                }
+                .str-chat__input-flat {
+                  flex-shrink: 0 !important;
+                }
+                .str-chat__message-input {
+                  /* Let TextareaAutosize handle height */
+                }
+                .str-chat__textarea {
+                  resize: vertical !important;
+                  overflow-y: auto !important;
+                  line-height: 1.4 !important;
+                  padding: 12px !important;
+                  font-size: 14px !important;
+                  border: 1px solid #e2e8f0 !important;
+                  border-radius: 8px !important;
+                  transition: height 0.2s ease !important;
+                }
+                .str-chat__textarea:focus {
+                  outline: none !important;
+                  border-color: #3b82f6 !important;
+                  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+                }
+                .str-chat__textarea::placeholder {
+                  color: #94a3b8 !important;
+                }
+                /* Ensure the input container grows with content */
+                .str-chat__input-flat .str-chat__message-input-inner {
+                  display: flex !important;
+                  flex-direction: column !important;
+                }
+                .str-chat__input-flat .str-chat__message-input-inner .str-chat__textarea-wrapper {
+                  flex: 1 !important;
+                  display: flex !important;
+                }
+                /* Make sure the textarea auto-expands */
+                .str-chat__textarea[data-textarea] {
+                  height: auto !important;
+                  overflow-y: auto !important;
+                }
+              `}</style>
+              <Chat client={chatClient} theme="str-chat__theme-light">
+                <Channel channel={chatClient.channel('messaging', connection.stream_channel_id)}>
+                  <Window>
+                    <MessageList />
+                    <MessageInput 
+                      additionalTextareaProps={{
+                        style: {
+                          resize: 'vertical',
+                          overflow: 'auto',
+                          lineHeight: '1.4',
+                          padding: '12px',
+                          fontSize: '14px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          transition: 'height 0.2s ease',
+                        },
+                        maxRows: 6,
+                        minRows: 1,
+                        onInput: (e: any) => {
+                          // Auto-expand textarea
+                          const textarea = e.target;
+                          textarea.style.height = 'auto';
+                          textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+                        }
+                      }}
+                    />
+                  </Window>
+                  <Thread />
+                </Channel>
+              </Chat>
+            </div>
           ) : (
             <div className="p-8 text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">

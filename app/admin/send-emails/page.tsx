@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
+import AdminRouteGuard from '@/components/AdminRouteGuard';
 
 export default function SendEmailsPage() {
   const { user, isLoaded } = useUser();
@@ -100,7 +101,8 @@ export default function SendEmailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <AdminRouteGuard>
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
@@ -194,5 +196,6 @@ export default function SendEmailsPage() {
         </motion.div>
       </div>
     </div>
+    </AdminRouteGuard>
   );
 }

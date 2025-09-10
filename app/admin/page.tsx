@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import AdminRouteGuard from '@/components/AdminRouteGuard';
 
 // Test Email Button Component
 function TestEmailButton() {
@@ -166,7 +167,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <AdminRouteGuard>
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
@@ -363,5 +365,6 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
     </div>
+    </AdminRouteGuard>
   );
 }

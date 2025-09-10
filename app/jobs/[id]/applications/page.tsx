@@ -40,6 +40,11 @@ export default function JobApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [connectionStates, setConnectionStates] = useState<Record<string, {
+    status: 'pending' | 'accepted' | 'declined';
+    connectionId?: string;
+    isRequester?: boolean;
+  }>>({});
 
   // Redirect unauthenticated users
   useEffect(() => {
@@ -131,6 +136,57 @@ export default function JobApplicationsPage() {
       throw err;
     }
   };
+
+  const checkConnectionStatus = async (profileSlug: string) => {
+    try {
+      const response = await fetch(`/api/connections/check?profileSlug=${profileSlug}`);
+      if (response.ok) {
+        const data = await response.json();
+        setConnectionStates(prev => ({
+          ...prev,
+          [profileSlug]: {
+            status: data.status,
+            connectionId: data.connectionId,
+            isRequester: data.isRequester
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('Error checking connection status:', error);
+    }
+  };
+
+  const handleConnect = async (profileSlug: string) => {
+    try {
+      const response = await fetch('/api/connections/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileSlug })
+      });
+
+      if (response.ok) {
+        await checkConnectionStatus(profileSlug);
+      } else {
+        const error = await response.json();
+        console.error('Connection failed:', error);
+        alert('Failed to send connection request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Connection error:', error);
+      alert('Failed to send connection request. Please try again.');
+    }
+  };
+
+  // Check connection status for all applicants when applications load
+  useEffect(() => {
+    if (applications.length > 0) {
+      applications.forEach(app => {
+        if (app.applicant.slug) {
+          checkConnectionStatus(app.applicant.slug);
+        }
+      });
+    }
+  }, [applications]);
 
   const filteredApplications = applications.filter(app => 
     statusFilter === 'all' || app.status === statusFilter
@@ -280,6 +336,8 @@ export default function JobApplicationsPage() {
                 key={application.id}
                 application={application}
                 onStatusUpdate={handleStatusUpdate}
+                connectionState={connectionStates[application.applicant.slug]}
+                onConnect={handleConnect}
               />
             ))}
           </div>

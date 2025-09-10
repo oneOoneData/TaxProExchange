@@ -44,7 +44,8 @@ export async function GET() {
           headline,
           firm_name,
           public_email,
-          avatar_url
+          avatar_url,
+          slug
         ),
         recipient_profile:profiles!connections_recipient_profile_id_fkey(
           id,
@@ -53,7 +54,8 @@ export async function GET() {
           headline,
           firm_name,
           public_email,
-          avatar_url
+          avatar_url,
+          slug
         )
       `)
       .or(`requester_profile_id.eq.${currentProfile.id},recipient_profile_id.eq.${currentProfile.id}`)
