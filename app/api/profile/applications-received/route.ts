@@ -17,7 +17,7 @@ export async function GET() {
     // Get current user's profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, is_admin')
       .eq('clerk_id', userId)
       .single();
 
@@ -25,7 +25,13 @@ export async function GET() {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Get applications for jobs created by this user
+    console.log('API: Looking for applications for profile ID:', profile.id);
+    console.log('API: User ID:', userId);
+    console.log('API: Is admin:', profile.is_admin);
+
+    // Get applications for jobs created by this user ONLY
+    // SECURITY: Always filter by job ownership, even for admins
+    // Note: created_by in jobs table stores the Clerk user ID, not profile ID
     const { data: applications, error: applicationsError } = await supabase
       .from('job_applications')
       .select(`
@@ -44,7 +50,8 @@ export async function GET() {
           payout_fixed,
           payout_min,
           payout_max,
-          created_at
+          created_at,
+          created_by
         ),
         applicant:profiles!job_applications_applicant_profile_id_fkey(
           id,
@@ -58,7 +65,7 @@ export async function GET() {
           credential_type
         )
       `)
-      .eq('job.created_by', profile.id)
+      .eq('job.created_by', userId)  // SECURITY: Always filter by job ownership
       .order('created_at', { ascending: false });
 
     if (applicationsError) {
@@ -88,8 +95,10 @@ export async function GET() {
         id: app.id,
         hasJob: !!job,
         jobTitle: job?.title,
+        jobId: job?.id,
         hasApplicant: !!applicant,
-        applicantName: applicant ? `${applicant.first_name} ${applicant.last_name}` : 'No applicant'
+        applicantName: applicant ? `${applicant.first_name} ${applicant.last_name}` : 'No applicant',
+        rawJob: app.job
       });
     });
 
