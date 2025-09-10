@@ -7,7 +7,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -16,7 +16,7 @@ export async function PATCH(
     }
 
     const { status, notes } = await request.json();
-    const applicationId = params.id;
+    const { id: applicationId } = await params;
 
     if (!status || !['applied', 'shortlisted', 'hired', 'rejected', 'withdrawn'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
@@ -52,7 +52,8 @@ export async function PATCH(
       return NextResponse.json({ error: 'Application not found' }, { status: 404 });
     }
 
-    if (application.job.created_by !== profile.id) {
+    const job = Array.isArray(application.job) ? application.job[0] : application.job;
+    if (!job || job.created_by !== profile.id) {
       return NextResponse.json({ error: 'Unauthorized to update this application' }, { status: 403 });
     }
 

@@ -419,18 +419,6 @@ export default function ChatThreadPage() {
                     <MessageList />
                     <MessageInput 
                       additionalTextareaProps={{
-                        style: {
-                          resize: 'vertical',
-                          overflow: 'auto',
-                          lineHeight: '1.4',
-                          padding: '12px',
-                          fontSize: '14px',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '8px',
-                          transition: 'height 0.2s ease',
-                        },
-                        maxRows: 6,
-                        minRows: 1,
                         onInput: (e: any) => {
                           // Auto-expand textarea
                           const textarea = e.target;
