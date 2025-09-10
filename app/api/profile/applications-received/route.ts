@@ -75,6 +75,17 @@ export async function GET() {
 
     console.log('API: Found applications:', applications?.length || 0);
     console.log('API: Applications data:', applications);
+    console.log('API: Filtering by userId:', userId);
+    console.log('API: Profile ID:', profile.id);
+
+    // Debug: Check what jobs exist for this user
+    const { data: userJobs, error: jobsError } = await supabase
+      .from('jobs')
+      .select('id, title, created_by')
+      .eq('created_by', userId);
+    
+    console.log('API: User jobs found:', userJobs?.length || 0);
+    console.log('API: User jobs data:', userJobs);
     
     // Transform the data to handle job and applicant as array vs object
     const transformedApplications = applications?.map(app => {
