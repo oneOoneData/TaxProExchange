@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import AdminRouteGuard from '@/components/AdminRouteGuard';
 
 interface SignupData {
   date: string;
@@ -14,7 +15,12 @@ interface AnalyticsData {
   signupsByDay: SignupData[];
   totalSignups: number;
   averageSignups: number;
+  peakDay: number;
   period: string;
+  debug?: {
+    rawSignupCount: number;
+    calculatedTotal: number;
+  };
 }
 
 export default function AnalyticsPage() {
@@ -66,7 +72,8 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <AdminRouteGuard>
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
@@ -156,7 +163,7 @@ export default function AnalyticsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-slate-600">Peak Day</p>
-                    <p className="text-3xl font-semibold text-orange-600">{getMaxSignups()}</p>
+                    <p className="text-3xl font-semibold text-orange-600">{data?.peakDay || 0}</p>
                     <p className="text-sm text-slate-500">signups in one day</p>
                   </div>
                   <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -263,10 +270,28 @@ export default function AnalyticsPage() {
                 </table>
               </div>
             </motion.div>
+            
+            {/* Debug Information */}
+            {data?.debug && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mt-6"
+              >
+                <h4 className="text-sm font-medium text-yellow-800 mb-2">Debug Information</h4>
+                <div className="text-xs text-yellow-700 space-y-1">
+                  <p>Raw signup count from database: {data.debug.rawSignupCount}</p>
+                  <p>Calculated total from daily breakdown: {data.debug.calculatedTotal}</p>
+                  <p>Data consistency: {data.debug.rawSignupCount === data.debug.calculatedTotal ? '✅ Consistent' : '❌ Inconsistent'}</p>
+                </div>
+              </motion.div>
+            )}
           </>
         )}
       </div>
     </div>
+    </AdminRouteGuard>
   );
 }
 

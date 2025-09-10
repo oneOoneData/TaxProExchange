@@ -7,8 +7,8 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { recipientProfileId } = await req.json();
-  if (!recipientProfileId) return NextResponse.json({ error: 'Recipient profile ID required' }, { status: 400 });
+  const { recipientProfileId, profileSlug } = await req.json();
+  if (!recipientProfileId && !profileSlug) return NextResponse.json({ error: 'Recipient profile ID or profile slug required' }, { status: 400 });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -36,11 +36,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
+    // Resolve recipient profile ID if profileSlug is provided
+    let finalRecipientProfileId = recipientProfileId;
+    if (profileSlug && !recipientProfileId) {
+      const { data: targetProfile, error: targetError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('slug', profileSlug)
+        .single();
+
+      if (targetError || !targetProfile) {
+        return NextResponse.json({ error: 'Target profile not found' }, { status: 404 });
+      }
+
+      finalRecipientProfileId = targetProfile.id;
+    }
+
     // Check if connection already exists
     const { data: existingConnection } = await supabase
       .from('connections')
       .select('id, status')
-      .or(`and(requester_profile_id.eq.${profile.id},recipient_profile_id.eq.${recipientProfileId}),and(requester_profile_id.eq.${recipientProfileId},recipient_profile_id.eq.${profile.id})`)
+      .or(`and(requester_profile_id.eq.${profile.id},recipient_profile_id.eq.${finalRecipientProfileId}),and(requester_profile_id.eq.${finalRecipientProfileId},recipient_profile_id.eq.${profile.id})`)
       .single();
 
     if (existingConnection) {
@@ -55,7 +71,7 @@ export async function POST(req: Request) {
       .from('connections')
       .insert({
         requester_profile_id: profile.id,
-        recipient_profile_id: recipientProfileId,
+        recipient_profile_id: finalRecipientProfileId,
         status: 'pending'
       })
       .select()
@@ -72,7 +88,7 @@ export async function POST(req: Request) {
       const { data: recipientProfile, error: recipientError } = await supabase
         .from('profiles')
         .select('first_name, last_name, public_email, email_preferences, clerk_id')
-        .eq('id', recipientProfileId)
+        .eq('id', finalRecipientProfileId)
         .single();
 
       if (!recipientError && recipientProfile) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface Application {
   id: string;
@@ -22,6 +23,12 @@ interface Application {
 interface ApplicationCardProps {
   application: Application;
   onStatusUpdate: (applicationId: string, newStatus: string, notes?: string) => Promise<void>;
+  connectionState?: {
+    status: 'pending' | 'accepted' | 'declined';
+    connectionId?: string;
+    isRequester?: boolean;
+  };
+  onConnect?: (profileId: string) => Promise<void>;
 }
 
 const statusColors = {
@@ -42,7 +49,7 @@ const statusLabels = {
   completed: 'Completed'
 };
 
-export function ApplicationCard({ application, onStatusUpdate }: ApplicationCardProps) {
+export function ApplicationCard({ application, onStatusUpdate, connectionState, onConnect }: ApplicationCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [notes, setNotes] = useState(application.notes || '');
@@ -184,6 +191,33 @@ export function ApplicationCard({ application, onStatusUpdate }: ApplicationCard
           View Applicant Profile →
         </a>
       </div>
+
+      {/* Connect/Message Buttons */}
+      {connectionState && onConnect && (
+        <div className="pt-3 border-t border-gray-200">
+          <div className="flex items-center gap-3">
+            {connectionState.status === 'accepted' ? (
+              <Link
+                href={`/messages/${connectionState.connectionId}`}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                💬 Message
+              </Link>
+            ) : connectionState.status === 'pending' ? (
+              <span className="text-sm text-gray-500 px-4 py-2">
+                {connectionState.isRequester ? 'Connection request sent' : 'Connection request pending'}
+              </span>
+            ) : (
+              <button
+                onClick={() => onConnect(application.applicant.slug)}
+                className="inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
+              >
+                Connect
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

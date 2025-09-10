@@ -52,8 +52,10 @@ interface JobFilters {
 export default function JobsPage() {
   const { user, isSignedIn } = useUser();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [myJobs, setMyJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'my'>('all');
   const [filters, setFilters] = useState<JobFilters>({
     specialization: '',
     state: '',
@@ -65,7 +67,10 @@ export default function JobsPage() {
 
   useEffect(() => {
     fetchJobs();
-  }, [filters]);
+    if (isSignedIn && user) {
+      fetchMyJobs();
+    }
+  }, [filters, isSignedIn, user]);
 
   const fetchJobs = async () => {
     try {
@@ -90,6 +95,21 @@ export default function JobsPage() {
       console.error('Error fetching jobs:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMyJobs = async () => {
+    try {
+      const response = await fetch('/api/jobs/my');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMyJobs(data.jobs || []);
+      } else {
+        console.error('Failed to fetch my jobs:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching my jobs:', error);
     }
   };
 
@@ -164,10 +184,35 @@ export default function JobsPage() {
           </p>
         </div>
 
+        {/* Tabs */}
+        {isSignedIn && (
+          <div className="flex gap-1 bg-slate-100 rounded-lg p-1 mb-6">
+            {[
+              { key: 'all', label: 'All Jobs', count: jobs.length },
+              { key: 'my', label: 'My Jobs', count: myJobs.length }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+                <span className="ml-2 text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <div className="text-sm text-gray-600">
-            {loading ? 'Loading...' : `${jobs.length} open jobs found`}
+            {loading ? 'Loading...' : `${activeTab === 'my' ? myJobs.length : jobs.length} ${activeTab === 'my' ? 'my' : 'open'} jobs found`}
           </div>
           
           {isSignedIn && (
@@ -203,29 +248,51 @@ export default function JobsPage() {
                   </div>
                 ))}
               </div>
-            ) : jobs.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
-                  </svg>
+            ) : (() => {
+              const currentJobs = activeTab === 'my' ? myJobs : jobs;
+              const isEmpty = currentJobs.length === 0;
+              
+              if (isEmpty) {
+                return (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      {activeTab === 'my' ? 'No jobs posted yet' : 'No jobs found'}
+                    </h3>
+                    <p className="text-gray-500">
+                      {activeTab === 'my' 
+                        ? 'You haven\'t posted any jobs yet. Create your first job posting to get started.'
+                        : 'Try adjusting your filters or check back later for new opportunities.'
+                      }
+                    </p>
+                    {activeTab === 'my' && (
+                      <Link
+                        href="/jobs/new"
+                        className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                      >
+                        Post Your First Job
+                      </Link>
+                    )}
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="space-y-4">
+                  {currentJobs.map((job) => (
+                    <JobCard 
+                      key={job.id} 
+                      job={job} 
+                      isOwner={user?.id === job.created_by}
+                    />
+                  ))}
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
-                <p className="text-gray-500">
-                  Try adjusting your filters or check back later for new opportunities.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {jobs.map((job) => (
-                  <JobCard 
-                  key={job.id} 
-                  job={job} 
-                  isOwner={user?.id === job.created_by}
-                />
-                ))}
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
 

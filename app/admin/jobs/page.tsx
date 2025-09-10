@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import AdminRouteGuard from '@/components/AdminRouteGuard';
 
 interface Job {
   id: string;
@@ -148,7 +149,8 @@ export default function AdminJobsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <AdminRouteGuard>
+      <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Jobs Management</h1>
@@ -285,5 +287,6 @@ export default function AdminJobsPage() {
         )}
       </div>
     </div>
+    </AdminRouteGuard>
   );
 }

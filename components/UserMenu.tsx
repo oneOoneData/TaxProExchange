@@ -1,4 +1,4 @@
-import { useClerk } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
@@ -12,7 +12,9 @@ interface UserMenuProps {
 }
 
 export default function UserMenu({ userName, userEmail }: UserMenuProps) {
+  console.log('🔍 UserMenu: Component rendered');
   const { signOut } = useClerk();
+  const { user, isLoaded } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -22,6 +24,9 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const [pendingConnectionCount, setPendingConnectionCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAdmin, isLoading: isAdminLoading } = useAdminStatus();
+  
+  // Debug logging
+  console.log('🔍 UserMenu: Admin status:', { isAdmin, isAdminLoading });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -36,6 +41,8 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
   // Check for unread messages
   useEffect(() => {
+    if (!isLoaded || !user) return;
+
     const checkUnreadMessages = async () => {
       try {
         console.log('Checking unread messages...');
@@ -71,10 +78,12 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [isLoaded, user]);
 
   // Check for pending connection requests
   useEffect(() => {
+    if (!isLoaded || !user) return;
+
     const checkPendingConnections = async () => {
       try {
         const response = await fetch('/api/connections/pending');
@@ -100,7 +109,7 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
     // Check every 30 seconds
     const interval = setInterval(checkPendingConnections, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isLoaded, user]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 

@@ -27,6 +27,7 @@ interface Profile {
   firm_name?: string;
   public_email: string;
   avatar_url?: string;
+  slug?: string;
 }
 
 interface ConnectionWithProfiles extends Connection {
@@ -161,14 +162,25 @@ export default function MessagesPage() {
                   {otherProfile.first_name[0]}{otherProfile.last_name[0]}
                 </span>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {otherProfile.first_name} {otherProfile.last_name}
-                </h3>
+              <div className="flex-1">
+                <Link 
+                  href={`/p/${otherProfile.slug || otherProfile.id}`}
+                  className="group"
+                >
+                  <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {otherProfile.first_name} {otherProfile.last_name}
+                  </h3>
+                </Link>
                 <p className="text-slate-600 text-sm">{otherProfile.headline}</p>
                 {otherProfile.firm_name && (
                   <p className="text-slate-500 text-xs">{otherProfile.firm_name}</p>
                 )}
+                <Link 
+                  href={`/p/${otherProfile.slug || otherProfile.id}`}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
+                >
+                  View Profile →
+                </Link>
               </div>
             </div>
 
