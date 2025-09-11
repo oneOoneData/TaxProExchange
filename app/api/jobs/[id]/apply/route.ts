@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
+import { getServerStreamClient } from '@/lib/stream';
 
 export const dynamic = 'force-dynamic';
 
@@ -161,7 +162,7 @@ export async function POST(
         // Check if connection already exists
         const { data: existingConnection } = await supabase
           .from('connections')
-          .select('id, status')
+          .select('id, status, stream_channel_id, requester_profile_id, recipient_profile_id')
           .or(`and(requester_profile_id.eq.${profile.id},recipient_profile_id.eq.${jobPosterProfile.id}),and(requester_profile_id.eq.${jobPosterProfile.id},recipient_profile_id.eq.${profile.id})`)
           .single();
 
@@ -182,6 +183,142 @@ export async function POST(
             // Don't fail the application if connection creation fails
           } else {
             console.log('Auto-connect created:', connection.id);
+            
+            // Create Stream Chat channel for the auto-accepted connection
+            try {
+              console.log('Creating Stream Chat channel for auto-connect:', connection.id);
+              
+              // Check if Stream environment variables are set
+              if (!process.env.STREAM_KEY || !process.env.STREAM_SECRET) {
+                console.warn('Stream Chat environment variables not set, skipping channel creation');
+              } else {
+                const streamClient = getServerStreamClient();
+                
+                // Get both participant profile IDs
+                const memberA = String(connection.requester_profile_id);
+                const memberB = String(connection.recipient_profile_id);
+                
+                // Get profile information for both users
+                const { data: profiles, error: profilesError } = await supabase
+                  .from('profiles')
+                  .select('id, first_name, last_name, avatar_url')
+                  .in('id', [memberA, memberB]);
+                
+                if (!profilesError && profiles && profiles.length === 2) {
+                  // Create/update user objects in Stream Chat
+                  for (const profile of profiles) {
+                    await streamClient.upsertUser({
+                      id: profile.id,
+                      name: `${profile.first_name} ${profile.last_name}`,
+                      image: profile.avatar_url,
+                    });
+                  }
+                  
+                  console.log('Stream users created/updated for:', profiles.map(p => p.id));
+                  
+                  // Create a unique channel ID for this connection
+                  const channelId = `conn_${connection.id}`;
+                  
+                  console.log('Creating channel with members:', { memberA, memberB, channelId });
+                  
+                  // Create the Stream channel
+                  const channel = streamClient.channel('messaging', channelId, {
+                    created_by_id: memberA,
+                    members: [memberA, memberB],
+                  });
+                  
+                  await channel.create();
+                  console.log('Stream channel created successfully:', channel.id);
+                  
+                  // Update connection with Stream channel ID
+                  const { data: saved, error: saveError } = await supabase
+                    .from('connections')
+                    .update({ stream_channel_id: channel.id })
+                    .eq('id', connection.id)
+                    .select()
+                    .single();
+                  
+                  if (saveError) {
+                    console.error('Failed to save Stream channel ID:', saveError);
+                  } else {
+                    console.log('Stream channel ID saved to database:', channel.id);
+                  }
+                } else {
+                  console.error('Failed to fetch profile information for Stream users');
+                }
+              }
+            } catch (streamError) {
+              console.error('Stream Chat channel creation error:', streamError);
+              // Don't fail the application if Stream channel creation fails
+            }
+          }
+        } else if (existingConnection && existingConnection.status === 'accepted' && !existingConnection.stream_channel_id) {
+          // Connection exists and is accepted but doesn't have a Stream channel
+          console.log('Existing connection found without Stream channel, creating one:', existingConnection.id);
+          
+          try {
+            // Check if Stream environment variables are set
+            if (!process.env.STREAM_KEY || !process.env.STREAM_SECRET) {
+              console.warn('Stream Chat environment variables not set, skipping channel creation');
+            } else {
+              const streamClient = getServerStreamClient();
+              
+              // Get both participant profile IDs
+              const memberA = String(existingConnection.requester_profile_id);
+              const memberB = String(existingConnection.recipient_profile_id);
+              
+              // Get profile information for both users
+              const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name, avatar_url')
+                .in('id', [memberA, memberB]);
+              
+              if (!profilesError && profiles && profiles.length === 2) {
+                // Create/update user objects in Stream Chat
+                for (const profile of profiles) {
+                  await streamClient.upsertUser({
+                    id: profile.id,
+                    name: `${profile.first_name} ${profile.last_name}`,
+                    image: profile.avatar_url,
+                  });
+                }
+                
+                console.log('Stream users created/updated for existing connection:', profiles.map(p => p.id));
+                
+                // Create a unique channel ID for this connection
+                const channelId = `conn_${existingConnection.id}`;
+                
+                console.log('Creating channel for existing connection with members:', { memberA, memberB, channelId });
+                
+                // Create the Stream channel
+                const channel = streamClient.channel('messaging', channelId, {
+                  created_by_id: memberA,
+                  members: [memberA, memberB],
+                });
+                
+                await channel.create();
+                console.log('Stream channel created successfully for existing connection:', channel.id);
+                
+                // Update connection with Stream channel ID
+                const { data: saved, error: saveError } = await supabase
+                  .from('connections')
+                  .update({ stream_channel_id: channel.id })
+                  .eq('id', existingConnection.id)
+                  .select()
+                  .single();
+                
+                if (saveError) {
+                  console.error('Failed to save Stream channel ID for existing connection:', saveError);
+                } else {
+                  console.log('Stream channel ID saved to database for existing connection:', channel.id);
+                }
+              } else {
+                console.error('Failed to fetch profile information for existing connection Stream users');
+              }
+            }
+          } catch (streamError) {
+            console.error('Stream Chat channel creation error for existing connection:', streamError);
+            // Don't fail the application if Stream channel creation fails
           }
         }
       }
