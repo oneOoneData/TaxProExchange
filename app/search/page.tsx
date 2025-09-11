@@ -144,9 +144,29 @@ export default function SearchPage() {
     
     if (user) {
       fetchSpecializations();
+      // Only search on initial load, not on every user change
       searchProfiles(filters, 1);
     }
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user]); // Remove router from dependencies to prevent unnecessary re-runs
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Helper function for debounced search
+  const debouncedSearch = (newFilters: SearchFilters, page: number = 1) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      searchProfiles(newFilters, page);
+    }, 300);
+  };
 
   // Remove automatic search trigger to prevent infinite loops
 
@@ -228,8 +248,10 @@ export default function SearchPage() {
         : [...prev.specialization, specializationSlug];
       
       const newFilters = { ...prev, specialization: newSpecializations };
-      // Auto-search when specializations change
-      setTimeout(() => searchProfiles(newFilters, 1), 100);
+      
+      // Debounce the search
+      debouncedSearch(newFilters, 1);
+      
       return newFilters;
     });
   };
@@ -246,8 +268,9 @@ export default function SearchPage() {
       years_experience: ''
     };
     setFilters(clearedFilters);
-    // Search with cleared filters and reset to page 1
-    setTimeout(() => searchProfiles(clearedFilters, 1), 100);
+    
+    // Debounce the search
+    debouncedSearch(clearedFilters, 1);
   };
 
   const goToPage = (page: number) => {
@@ -528,8 +551,11 @@ export default function SearchPage() {
                   }
                   
                   setFilters(newFilters);
-                  if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                  searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
+                  
+                  // Only search if there's actual content or if the search is being cleared
+                  if (searchValue.trim().length > 0 || newFilters.q === '') {
+                    debouncedSearch(newFilters, 1);
+                  }
                 }}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -543,7 +569,7 @@ export default function SearchPage() {
                 onChange={(e) => {
                   const newFilters = { ...filters, credential_type: e.target.value };
                   setFilters(newFilters);
-                  setTimeout(() => searchProfiles(newFilters, 1), 100);
+                  debouncedSearch(newFilters, 1);
                 }}
                 className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
@@ -561,7 +587,7 @@ export default function SearchPage() {
                 onChange={(e) => {
                   const newFilters = { ...filters, state: e.target.value };
                   setFilters(newFilters);
-                  setTimeout(() => searchProfiles(newFilters, 1), 100);
+                  debouncedSearch(newFilters, 1);
                 }}
                 className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
@@ -582,7 +608,7 @@ export default function SearchPage() {
                   onChange={(e) => {
                     const newFilters = { ...filters, verified_only: e.target.checked };
                     setFilters(newFilters);
-                    setTimeout(() => searchProfiles(newFilters, 1), 100);
+                    debouncedSearch(newFilters, 1);
                   }}
                   className="sr-only"
                 />
@@ -618,8 +644,7 @@ export default function SearchPage() {
                         onChange={(e) => {
                           const newFilters = { ...filters, verified_only: e.target.checked };
                           setFilters(newFilters);
-                          // Auto-search when this filter changes
-                          setTimeout(() => searchProfiles(newFilters, 1), 100);
+                          debouncedSearch(newFilters, 1);
                         }}
                         className="sr-only"
                       />
@@ -659,9 +684,11 @@ export default function SearchPage() {
                       }
                       
                       setFilters(newFilters);
-                      // Auto-search when text changes (debounced)
-                      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                      searchTimeoutRef.current = setTimeout(() => searchProfiles(newFilters, 1), 500);
+                      
+                      // Only search if there's actual content or if the search is being cleared
+                      if (searchValue.trim().length > 0 || newFilters.q === '') {
+                        debouncedSearch(newFilters, 1);
+                      }
                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
@@ -675,8 +702,7 @@ export default function SearchPage() {
                                          onChange={(e) => {
                        const newFilters = { ...filters, credential_type: e.target.value };
                        setFilters(newFilters);
-                       // Auto-search when this filter changes
-                       setTimeout(() => searchProfiles(newFilters, 1), 100);
+                       debouncedSearch(newFilters, 1);
                      }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -697,8 +723,7 @@ export default function SearchPage() {
                     onChange={(e) => {
                       const newFilters = { ...filters, state: e.target.value };
                       setFilters(newFilters);
-                      // Auto-search when this filter changes
-                      setTimeout(() => searchProfiles(newFilters, 1), 100);
+                      debouncedSearch(newFilters, 1);
                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -717,8 +742,7 @@ export default function SearchPage() {
                     onChange={(e) => {
                       const newFilters = { ...filters, years_experience: e.target.value };
                       setFilters(newFilters);
-                      // Auto-search when this filter changes
-                      setTimeout(() => searchProfiles(newFilters, 1), 100);
+                      debouncedSearch(newFilters, 1);
                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -736,8 +760,7 @@ export default function SearchPage() {
                     onChange={(e) => {
                       const newFilters = { ...filters, software: e.target.value };
                       setFilters(newFilters);
-                      // Auto-search when this filter changes
-                      setTimeout(() => searchProfiles(newFilters, 1), 100);
+                      debouncedSearch(newFilters, 1);
                     }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -758,8 +781,7 @@ export default function SearchPage() {
                                          onChange={(e) => {
                        const newFilters = { ...filters, accepting_work: e.target.value };
                        setFilters(newFilters);
-                       // Auto-search when this filter changes
-                       setTimeout(() => searchProfiles(newFilters, 1), 100);
+                       debouncedSearch(newFilters, 1);
                      }}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -793,7 +815,7 @@ export default function SearchPage() {
                       years_experience: ''
                     };
                      setFilters(clearedFilters);
-                     setTimeout(() => searchProfiles(clearedFilters), 100);
+                     debouncedSearch(clearedFilters, 1);
                    }}
                     className="w-full px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded-lg hover:bg-red-50"
                   >

@@ -255,13 +255,19 @@ export default function ApplicationsPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recipientProfileId: applicant.id,
-          status: 'accepted' // Auto-accept since job poster is initiating
+          recipientProfileId: applicant.id
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // If connection already exists, use the existing connection
+        if (errorData.error === 'Connection already exists' && errorData.connection) {
+          router.push(`/messages/${errorData.connection.id}`);
+          return;
+        }
+        
         throw new Error(errorData.error || 'Failed to create connection');
       }
 

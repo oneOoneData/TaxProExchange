@@ -26,23 +26,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch signup data' }, { status: 500 });
     }
 
-    // Group signups by day
+    // Group signups by day using consistent timezone handling
     const signupsByDay: { [key: string]: number } = {};
     
     signupData?.forEach(profile => {
-      // Use local date to avoid timezone issues
+      // Convert to local date string consistently
       const date = new Date(profile.created_at);
-      const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-      const dateStr = localDate.toISOString().split('T')[0];
+      const dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
       signupsByDay[dateStr] = (signupsByDay[dateStr] || 0) + 1;
     });
 
-    // Fill in missing days with 0
+    // Fill in missing days with 0 using the same timezone logic
     const result = [];
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
       result.push({
         date: dateStr,
         signups: signupsByDay[dateStr] || 0
