@@ -152,6 +152,42 @@ export async function POST(
       }
     }
 
+    // Send connection decision notification to requester
+    try {
+      // Get requester profile details for notification
+      const { data: requesterProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, clerk_id')
+        .eq('id', updated.requester_profile_id)
+        .single();
+
+      // Get responder profile details
+      const { data: responderProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, firm_name')
+        .eq('id', updated.recipient_profile_id)
+        .single();
+
+      if (requesterProfile && responderProfile) {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/connection-decision`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Secret': process.env.WEBHOOK_SECRET || '',
+          },
+          body: JSON.stringify({
+            connection_id: updated.id,
+            decision: decision,
+            responder_name: `${responderProfile.first_name} ${responderProfile.last_name}`,
+            responder_firm: responderProfile.firm_name
+          }),
+        });
+      }
+    } catch (notificationError) {
+      console.error('Failed to send connection decision notification:', notificationError);
+      // Don't fail the connection decision if notification fails
+    }
+
     return NextResponse.json({ 
       success: true, 
       connection: updated 
