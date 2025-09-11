@@ -351,6 +351,29 @@ export async function POST(
       // Don't fail the request if email fails
     }
 
+    // Send confirmation email to applicant
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/application-confirmation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Secret': process.env.WEBHOOK_SECRET || '',
+        },
+        body: JSON.stringify({
+          job_id: jobId,
+          job_title: job.title,
+          firm_name: job.firm_name,
+          applicant_name: `${profile.first_name} ${profile.last_name}`,
+          cover_note: cover_note || '',
+          proposed_rate: proposed_rate || null,
+          proposed_timeline: proposed_timeline || null
+        }),
+      });
+    } catch (emailError) {
+      console.error('Failed to send application confirmation:', emailError);
+      // Don't fail the request if email fails
+    }
+
     return NextResponse.json({ application }, { status: 201 });
   } catch (error) {
     console.error('Job application error:', error);
