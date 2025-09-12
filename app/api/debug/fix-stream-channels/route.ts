@@ -66,12 +66,22 @@ export async function POST() {
         const memberB = String(connection.recipient_profile_id);
         
         // Create/update user objects in Stream Chat
-        const profiles = [connection.requester_profile, connection.recipient_profile];
-        for (const profile of profiles) {
+        const requesterProfile = connection.requester_profile as any;
+        const recipientProfile = connection.recipient_profile as any;
+        
+        if (requesterProfile) {
           await streamClient.upsertUser({
-            id: profile.id,
-            name: `${profile.first_name} ${profile.last_name}`,
-            image: profile.avatar_url,
+            id: requesterProfile.id,
+            name: `${requesterProfile.first_name} ${requesterProfile.last_name}`,
+            image: requesterProfile.avatar_url,
+          });
+        }
+        
+        if (recipientProfile) {
+          await streamClient.upsertUser({
+            id: recipientProfile.id,
+            name: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
+            image: recipientProfile.avatar_url,
           });
         }
         
