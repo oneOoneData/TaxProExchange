@@ -10,9 +10,12 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  console.log('🔍 Job application route called');
   try {
     const { userId } = await auth();
+    console.log('🔍 Auth result:', { userId });
     if (!userId) {
+      console.log('🔍 No userId, returning 401');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
