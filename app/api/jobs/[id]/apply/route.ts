@@ -362,7 +362,6 @@ export async function POST(
         body: JSON.stringify({
           job_id: jobId,
           job_title: job.title,
-          firm_name: job.firm_name,
           applicant_name: `${profile.first_name} ${profile.last_name}`,
           cover_note: cover_note || '',
           proposed_rate: proposed_rate || null,
