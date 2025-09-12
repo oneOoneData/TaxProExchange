@@ -94,7 +94,7 @@ export async function POST(
     // Check if job exists and is open
     const { data: job, error: jobError } = await supabase
       .from('jobs')
-      .select('id, status, created_by, title, firm_name')
+      .select('id, status, created_by, title')
       .eq('id', jobId)
       .single();
 

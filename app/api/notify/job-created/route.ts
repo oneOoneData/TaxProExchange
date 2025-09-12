@@ -25,14 +25,7 @@ export async function POST(request: Request) {
     // Get job details
     const { data: job, error: jobError } = await supabase
       .from('jobs')
-      .select(`
-        *,
-        profiles!jobs_created_by_fkey(
-          first_name,
-          last_name,
-          firm_name
-        )
-      `)
+      .select('*')
       .eq('id', job_id)
       .single();
 
