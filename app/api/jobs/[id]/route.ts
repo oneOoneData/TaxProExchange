@@ -33,8 +33,8 @@ export async function GET(
       .eq('clerk_id', job.created_by)
       .single();
 
-    // Check if the firm profile is verified (unless admin request)
-    if (!isAdminRequest && profile?.visibility_state !== 'verified') {
+    // Check if the firm profile exists (unless admin request)
+    if (!isAdminRequest && !profile) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
