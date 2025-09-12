@@ -17,6 +17,7 @@ export async function POST(
     }
 
     const { id: jobId } = await params;
+    console.log('🔍 Job application request received:', { jobId, userId });
     const body = await request.json();
     const { cover_note, proposed_rate, proposed_payout_type, proposed_timeline } = body;
 
