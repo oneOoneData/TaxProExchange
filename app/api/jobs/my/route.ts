@@ -17,14 +17,7 @@ export async function GET() {
     // Get jobs created by the current user
     const { data: jobs, error: jobsError } = await supabase
       .from('jobs')
-      .select(`
-        *,
-        firm:profiles!jobs_created_by_fkey(
-          name,
-          verified,
-          slug
-        )
-      `)
+      .select('*')
       .eq('created_by', userId)
       .order('created_at', { ascending: false });
 
@@ -33,9 +26,29 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
     }
 
+    // Get firm information for each job manually
+    const jobsWithFirms = await Promise.all(
+      jobs?.map(async (job) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, firm_name, visibility_state, slug')
+          .eq('clerk_id', job.created_by)
+          .single();
+
+        return {
+          ...job,
+          firm: {
+            name: profile?.firm_name || `${profile?.first_name} ${profile?.last_name}` || 'Unknown Firm',
+            verified: profile?.visibility_state === 'verified',
+            slug: profile?.slug
+          }
+        };
+      }) || []
+    );
+
     return NextResponse.json({
       success: true,
-      jobs: jobs || []
+      jobs: jobsWithFirms || []
     });
 
   } catch (error) {
