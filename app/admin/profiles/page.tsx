@@ -203,6 +203,28 @@ export default function AdminProfilesPage() {
     }
   };
 
+  const sendProfileUpdateRequest = async (profileId: string) => {
+    setDeleting(profileId);
+    try {
+      const response = await fetch(`/api/admin/profiles/${profileId}/send-update-request`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        alert('Profile update request sent successfully');
+        // Refresh the list
+        loadProfiles();
+      } else {
+        alert('Error sending profile update request');
+      }
+    } catch (error) {
+      console.error('Error sending profile update request:', error);
+      alert('Error sending profile update request');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const hardDeleteProfile = async (profileId: string) => {
     if (!confirm('⚠️ WARNING: This will PERMANENTLY delete this profile and all associated data. This action cannot be undone. Are you absolutely sure?')) {
       return;

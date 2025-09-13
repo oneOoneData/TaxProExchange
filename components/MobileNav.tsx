@@ -13,6 +13,9 @@ interface MobileNavProps {
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const { user } = useUser();
 
+  // Debug log
+  console.log('MobileNav render:', { isOpen, user: !!user });
+
   const navItems = [
     { href: '#features', label: 'Features' },
     { href: '#how', label: 'How it works' },
@@ -41,7 +44,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed right-0 top-0 h-full w-80 bg-white shadow-xl z-50 md:hidden"
+            className="fixed right-0 top-0 h-full w-80 max-w-[90vw] bg-white shadow-xl z-50 md:hidden"
           >
             <div className="flex flex-col h-full">
               {/* Header */}
