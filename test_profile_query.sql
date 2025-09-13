@@ -2,8 +2,7 @@
 SELECT * 
 FROM profiles 
 WHERE clerk_id = 'user_31vIO0u5Tll3k2sSwpbG72qPOQH'
-   OR clerk_user_id = 'user_31vIO0u5Tll3k2sSwpbG72qPOQH'
-   OR user_id = 'user_31vIO0u5Tll3k2sSwpbG72qPOQH';
+   OR clerk_user_id = 'user_31vIO0u5Tll3k2sSwpbG72qPOQH';
 
 -- Also check if there are any RLS (Row Level Security) issues
 SELECT 
