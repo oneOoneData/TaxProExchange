@@ -320,30 +320,32 @@ export default function AdminProfilesPage() {
             <p className="text-slate-600">No user profiles have been created yet.</p>
           </motion.div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Profile & Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">License Info</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
-                    {showDeleted && (
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Deleted</th>
-                    )}
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {profiles.map((profile, index) => (
-                    <motion.tr
-                      key={profile.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`hover:bg-slate-50 ${profile.is_deleted ? 'bg-red-50' : ''}`}
-                    >
+          <>
+            {/* Desktop Table - Hidden on Mobile */}
+            <div className="hidden md:block bg-white rounded-2xl border border-slate-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Profile & Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">License Info</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
+                      {showDeleted && (
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Deleted</th>
+                      )}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {profiles.map((profile, index) => (
+                      <motion.tr
+                        key={profile.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`hover:bg-slate-50 ${profile.is_deleted ? 'bg-red-50' : ''}`}
+                      >
                       <td className="px-6 py-4">
                         <div className="space-y-1">
                           <div className="text-sm font-medium text-slate-900">
@@ -518,6 +520,124 @@ export default function AdminProfilesPage() {
               </table>
             </div>
           </div>
+
+          {/* Mobile Cards - Hidden on Desktop */}
+          <div className="md:hidden space-y-4">
+            {profiles.map((profile, index) => (
+              <motion.div
+                key={profile.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`bg-white rounded-xl border p-4 space-y-3 ${profile.is_deleted ? 'bg-red-50 border-red-200' : 'border-slate-200'}`}
+              >
+                {/* Profile Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-slate-900">
+                      {profile.first_name} {profile.last_name}
+                    </h3>
+                    <p className="text-sm text-slate-600">{profile.headline}</p>
+                    <p className="text-xs text-slate-500">{profile.email}</p>
+                    {profile.firm_name && (
+                      <p className="text-xs text-slate-500">{profile.firm_name}</p>
+                    )}
+                  </div>
+                  <div className="ml-3">
+                    {getStatusBadge(profile.visibility_state, profile.is_listed, profile.is_deleted)}
+                  </div>
+                </div>
+
+                {/* License Info */}
+                {profile.licenses && profile.licenses.length > 0 && (
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-medium text-slate-700">License Info</h4>
+                    <div className="space-y-1">
+                      {profile.licenses.slice(0, 2).map((license, idx) => (
+                        <div key={idx} className="text-xs text-slate-600">
+                          <span className="font-medium">{license.license_kind}:</span> {license.license_number}
+                          {license.state && ` (${license.state})`}
+                          {license.expires_on && (
+                            <span className={`ml-1 ${new Date(license.expires_on) < new Date() ? 'text-red-600' : 'text-slate-500'}`}>
+                              Expires {new Date(license.expires_on).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {profile.licenses.length > 2 && (
+                        <div className="text-xs text-slate-500">+{profile.licenses.length - 2} more licenses</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="font-medium text-slate-700">Created:</span>
+                    <div className="text-slate-600">{new Date(profile.created_at).toLocaleDateString()}</div>
+                  </div>
+                  {showDeleted && profile.is_deleted && profile.deleted_at && (
+                    <div>
+                      <span className="font-medium text-slate-700">Deleted:</span>
+                      <div className="text-slate-600">{new Date(profile.deleted_at).toLocaleDateString()}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200">
+                  <Link
+                    href={`/p/${profile.slug || profile.id}`}
+                    className="btn-secondary text-xs"
+                  >
+                    View Profile
+                  </Link>
+                  
+                  {!profile.is_deleted ? (
+                    <>
+                      <button
+                        onClick={() => softDeleteProfile(profile.id)}
+                        disabled={deleting === profile.id}
+                        className="btn-secondary text-xs text-orange-600 hover:text-orange-700"
+                      >
+                        {deleting === profile.id ? 'Deleting...' : 'Soft Delete'}
+                      </button>
+                      
+                      {profile.visibility_state === 'pending_verification' && (
+                        <button
+                          onClick={() => sendProfileUpdateRequest(profile.id)}
+                          disabled={deleting === profile.id}
+                          className="btn-primary text-xs"
+                        >
+                          {deleting === profile.id ? 'Sending...' : 'Send Update Request'}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => restoreProfile(profile.id)}
+                        disabled={deleting === profile.id}
+                        className="btn-primary text-xs"
+                      >
+                        {deleting === profile.id ? 'Restoring...' : 'Restore'}
+                      </button>
+                      
+                      <button
+                        onClick={() => hardDeleteProfile(profile.id)}
+                        disabled={deleting === profile.id}
+                        className="btn-secondary text-xs text-red-600 hover:text-red-700"
+                      >
+                        {deleting === profile.id ? 'Processing...' : 'Hard Delete'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </>
         )}
       </div>
     </div>

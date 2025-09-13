@@ -86,7 +86,7 @@ export default function Page() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Nav */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="#features" className="hover:text-slate-900">Features</a>
@@ -123,7 +123,7 @@ export default function Page() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 pt-16 pb-10 md:pt-24 md:pb-16">
+        <div className="container-mobile pt-16 pb-10 md:pt-24 md:pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900">
@@ -187,7 +187,7 @@ export default function Page() {
 
       {/* Logos / social proof (optional placeholders) */}
       <section className="py-6">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="container-mobile">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 text-center text-sm text-slate-500">
             Built by tax pros, for tax pros. Join now to create your professional profile.
           </div>
@@ -196,7 +196,7 @@ export default function Page() {
 
       {/* Features */}
       <section id="features" className="py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="container-mobile">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -210,7 +210,7 @@ export default function Page() {
 
       {/* How it works */}
       <section id="how" className="py-8">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="container-mobile">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

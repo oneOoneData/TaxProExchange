@@ -78,7 +78,7 @@ export default function CreateProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <span className="px-2 py-1 bg-slate-100 rounded-full">Step 1 of 2</span>
@@ -86,7 +86,7 @@ export default function CreateProfilePage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="container-mobile max-w-2xl py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -135,7 +135,7 @@ export default function CreateProfilePage() {
           <button
             onClick={handleCreateProfile}
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-3 rounded-xl bg-slate-900 px-6 py-3 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex items-center justify-center gap-3 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

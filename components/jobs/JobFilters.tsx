@@ -84,7 +84,7 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
           <select
             value={filters.specialization}
             onChange={(e) => onFilterChange({ specialization: e.target.value })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="form-input text-sm"
             suppressHydrationWarning
           >
             <option value="">All Specializations</option>
@@ -104,7 +104,7 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
           <select
             value={filters.state}
             onChange={(e) => onFilterChange({ state: e.target.value })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="form-input text-sm"
             suppressHydrationWarning
           >
             <option value="">All States</option>
@@ -124,7 +124,7 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
           <select
             value={filters.payout_type}
             onChange={(e) => onFilterChange({ payout_type: e.target.value })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="form-input text-sm"
             suppressHydrationWarning
           >
             <option value="">All Types</option>
@@ -146,7 +146,7 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
             value={filters.min_payout}
             onChange={(e) => onFilterChange({ min_payout: e.target.value })}
             placeholder="e.g., 1000"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="form-input text-sm"
             suppressHydrationWarning
           />
         </div>
@@ -159,7 +159,7 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
           <select
             value={filters.deadline}
             onChange={(e) => onFilterChange({ deadline: e.target.value })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="form-input text-sm"
             suppressHydrationWarning
           >
             <option value="">Any Deadline</option>
@@ -179,7 +179,7 @@ export function JobFilters({ filters, onFilterChange, onClearFilters }: JobFilte
           <select
             value={filters.remote}
             onChange={(e) => onFilterChange({ remote: e.target.value })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="form-input text-sm"
             suppressHydrationWarning
           >
             <option value="">Any Arrangement</option>

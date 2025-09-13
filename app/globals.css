@@ -1,3 +1,97 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fluid Typography System */
+:root {
+  --step--1: clamp(0.875rem, 0.82rem + 0.25vw, 0.95rem);
+  --step-0:  clamp(1rem, 0.92rem + 0.6vw, 1.125rem);
+  --step-1:  clamp(1.125rem, 1rem + 0.9vw, 1.25rem);
+  --step-2:  clamp(1.25rem, 1.1rem + 1.2vw, 1.5rem);
+  --step-3:  clamp(1.5rem, 1.3rem + 1.5vw, 1.875rem);
+  --step-4:  clamp(1.875rem, 1.5rem + 2vw, 2.25rem);
+  --step-5:  clamp(2.25rem, 1.8rem + 2.5vw, 3rem);
+}
+
+/* Mobile-first base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Safe area support for mobile devices */
+  .safe-area-inset {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Mobile-first component styles */
+@layer components {
+  /* Standardized button component */
+  .btn {
+    @apply h-11 min-w-[44px] rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-500;
+  }
+  
+  /* Mobile-friendly form inputs */
+  .form-input {
+    @apply w-full h-11 px-4 rounded-lg border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+  }
+  
+  /* Mobile container */
+  .container-mobile {
+    @apply mx-auto w-full max-w-screen-xl px-4 md:px-6;
+  }
+  
+  /* Mobile-friendly card */
+  .card-mobile {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6;
+  }
+  
+  /* Touch-friendly spacing */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+}
+
+/* Mobile-specific utilities */
+@layer utilities {
+  .text-fluid-xs { font-size: var(--step--1); }
+  .text-fluid-sm { font-size: var(--step-0); }
+  .text-fluid-base { font-size: var(--step-1); }
+  .text-fluid-lg { font-size: var(--step-2); }
+  .text-fluid-xl { font-size: var(--step-3); }
+  .text-fluid-2xl { font-size: var(--step-4); }
+  .text-fluid-3xl { font-size: var(--step-5); }
+  
+  /* Prevent text overflow on mobile */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Mobile-friendly line heights */
+  .leading-tight-mobile {
+    line-height: 1.25;
+  }
+  
+  .leading-normal-mobile {
+    line-height: 1.5;
+  }
+}
