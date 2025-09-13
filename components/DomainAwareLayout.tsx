@@ -22,11 +22,13 @@ interface DomainAwareLayoutProps {
 export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) {
   const [isApp, setIsApp] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
       setIsApp(window.location.hostname === 'app.taxproexchange.com');
+      setCurrentPath(window.location.pathname);
     }
   }, []);
 
@@ -42,6 +44,24 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
   }
 
   if (isApp) {
+    // Pages that have their own headers and shouldn't get AppNavigation
+    const pagesWithOwnHeaders = [
+      '/profile/edit',
+      '/profile/verify',
+      '/profile/applications',
+      '/onboarding',
+      '/onboarding/create-profile',
+      '/onboarding/credentials',
+      '/onboarding/specializations',
+      '/onboarding/consent',
+      '/sign-in',
+      '/sign-up'
+    ];
+    
+    const shouldShowAppNavigation = !pagesWithOwnHeaders.some(path => 
+      currentPath.startsWith(path)
+    );
+
     // App layout - noindex, nofollow, separate analytics
     return (
       <html lang="en">
@@ -55,7 +75,7 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
         </head>
         <body className={inter.className}>
           <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-            <AppNavigation />
+            {shouldShowAppNavigation && <AppNavigation />}
             {children}
             <Footer />
           </ClerkProvider>
