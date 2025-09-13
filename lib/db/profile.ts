@@ -49,11 +49,11 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
     const supabase = supabaseService();
     
-    // Try to find profile by clerk_id first, then by user_id
+    // Try to find profile by clerk_user_id first, then clerk_id, then user_id
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .or(`clerk_id.eq.${userId},user_id.eq.${userId}`)
+      .or(`clerk_user_id.eq.${userId},clerk_id.eq.${userId},user_id.eq.${userId}`)
       .single();
 
     if (error) {
