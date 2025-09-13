@@ -61,6 +61,7 @@ export function ApplyDialog({ job, onClose, onSuccess }: ApplyDialogProps) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies for authentication
         body: JSON.stringify({
           cover_note: formData.cover_note,
           proposed_rate: formData.proposed_rate ? parseFloat(formData.proposed_rate) : null,
