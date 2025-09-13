@@ -10,17 +10,24 @@ export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
+      console.log('Stream create-channel: No userId from auth');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { connectionId } = await req.json();
+    const body = await req.json();
+    console.log('Stream create-channel request body:', body);
+    const { connectionId } = body;
+    console.log('Stream create-channel connectionId:', connectionId);
+    
     if (!connectionId) {
+      console.log('Stream create-channel: Missing connectionId');
       return NextResponse.json({ error: 'Connection ID required' }, { status: 400 });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get the connection
+    console.log('Stream create-channel: Looking for connection with ID:', connectionId);
     const { data: connection, error: connectionError } = await supabase
       .from('connections')
       .select('*')
@@ -28,7 +35,10 @@ export async function POST(req: Request) {
       .eq('status', 'accepted')
       .single();
 
+    console.log('Stream create-channel: Connection query result:', { connection, connectionError });
+
     if (connectionError || !connection) {
+      console.log('Stream create-channel: Connection not found or not accepted:', connectionError);
       return NextResponse.json({ error: 'Connection not found or not accepted' }, { status: 404 });
     }
 
