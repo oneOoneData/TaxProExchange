@@ -93,7 +93,7 @@ export async function POST(
         proposed_rate: proposed_rate,
         proposed_payout_type: proposed_payout_type,
         proposed_timeline: proposed_timeline,
-        status: 'pending'
+        status: 'applied'
       })
       .select()
       .single();
