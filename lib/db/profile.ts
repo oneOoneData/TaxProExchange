@@ -61,7 +61,13 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       .single();
 
     if (error) {
-      console.error('🔍 getCurrentProfile: Error fetching profile:', error);
+      console.error('🔍 getCurrentProfile: Error fetching profile:', {
+        error: error,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return null;
     }
 
