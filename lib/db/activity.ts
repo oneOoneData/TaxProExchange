@@ -42,7 +42,7 @@ export interface RecentMessage {
     last_name: string;
     credential_type: string;
     slug?: string;
-  };
+  } | null;
   connection: {
     requester_profile_id: string;
     recipient_profile_id: string;
@@ -51,13 +51,13 @@ export interface RecentMessage {
       last_name: string;
       credential_type: string;
       slug?: string;
-    };
+    } | null;
     recipient_profile?: {
       first_name: string;
       last_name: string;
       credential_type: string;
       slug?: string;
-    };
+    } | null;
   };
 }
 
@@ -194,7 +194,27 @@ export async function getRecentMessages(profileId: string, limit: number = 5): P
       return [];
     }
 
-    return messages || [];
+    // Transform the data to match our interface
+    const transformedMessages: RecentMessage[] = (messages || []).map((msg: any) => ({
+      id: msg.id,
+      connection_id: msg.connection_id,
+      sender_profile_id: msg.sender_profile_id,
+      content: msg.content,
+      created_at: msg.created_at,
+      sender_profile: Array.isArray(msg.sender_profile) ? msg.sender_profile[0] : msg.sender_profile,
+      connection: {
+        requester_profile_id: msg.connection.requester_profile_id,
+        recipient_profile_id: msg.connection.recipient_profile_id,
+        requester_profile: Array.isArray(msg.connection.requester_profile) 
+          ? msg.connection.requester_profile[0] 
+          : msg.connection.requester_profile,
+        recipient_profile: Array.isArray(msg.connection.recipient_profile) 
+          ? msg.connection.recipient_profile[0] 
+          : msg.connection.recipient_profile,
+      }
+    }));
+
+    return transformedMessages;
   } catch (error) {
     console.error('Error in getRecentMessages:', error);
     return [];
