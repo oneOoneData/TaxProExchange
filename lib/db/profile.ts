@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 export interface Profile {
   id: string;
   clerk_id?: string;
+  clerk_user_id?: string;
   user_id?: string;
   first_name: string;
   last_name: string;
