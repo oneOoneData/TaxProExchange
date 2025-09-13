@@ -56,7 +56,7 @@ export function ApplyDialog({ job, onClose, onSuccess }: ApplyDialogProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/jobs/${job.id}/apply-test`, {
+      const response = await fetch(`/api/jobs/${job.id}/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
