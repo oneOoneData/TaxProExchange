@@ -150,10 +150,19 @@ export default function ChatThreadPage() {
             await initializeStreamChat(data.currentProfileId);
           } else {
             console.log('Connection accepted but missing Stream channel, creating now...');
+            console.log('Connection details:', {
+              id: data.connection.id,
+              status: data.connection.status,
+              stream_channel_id: data.connection.stream_channel_id
+            });
             // Automatically create Stream channel for accepted connections
             setCreatingChannel(true);
             try {
+              console.log('Starting automatic Stream channel creation...');
               await createStreamChannel(false); // Don't show error alerts for automatic creation
+              console.log('Automatic Stream channel creation completed');
+            } catch (error) {
+              console.error('Automatic Stream channel creation failed:', error);
             } finally {
               setCreatingChannel(false);
             }
@@ -229,17 +238,25 @@ export default function ChatThreadPage() {
   };
 
   const createStreamChannel = async (showErrorAlert = true) => {
+    console.log('createStreamChannel called with showErrorAlert:', showErrorAlert);
+    console.log('Connection ID:', connection?.id);
+    
     try {
+      console.log('Making API call to /api/stream/create-channel...');
       const response = await fetch('/api/stream/create-channel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connectionId: connection?.id })
       });
 
+      console.log('API response status:', response.status);
+      console.log('API response ok:', response.ok);
+
       if (response.ok) {
         const data = await response.json();
-        console.log('Stream channel created:', data);
+        console.log('Stream channel created successfully:', data);
         // Refresh the connection data
+        console.log('Refreshing connection data...');
         await fetchConnection();
       } else {
         const error = await response.json();
