@@ -88,6 +88,7 @@ export async function POST(
       .insert({
         job_id: jobId,
         applicant_profile_id: profile.id,
+        applicant_user_id: userId,
         cover_note: cover_note,
         proposed_rate: proposed_rate,
         proposed_payout_type: proposed_payout_type,
