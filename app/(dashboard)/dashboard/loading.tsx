@@ -1,7 +1,19 @@
 export default function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header skeleton */}
+      <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
+        <div className="container-mobile py-3 flex items-center justify-between">
+          <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
+          <div className="flex items-center gap-4">
+            <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+      
+      <div className="py-8">
+        <div className="container-mobile">
         {/* Header skeleton */}
         <div className="mb-8">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-2 animate-pulse"></div>
@@ -94,6 +106,7 @@ export default function DashboardLoading() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

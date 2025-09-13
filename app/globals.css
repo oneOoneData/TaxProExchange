@@ -69,6 +69,12 @@
   .touch-target {
     @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
+  
+  /* Mobile menu button - ensure visibility */
+  .mobile-menu-btn {
+    @apply md:hidden p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors touch-target border border-slate-200;
+    z-index: 10;
+  }
 }
 
 /* Mobile-specific utilities */
