@@ -5,23 +5,11 @@ export async function GET() {
   try {
     const supabase = supabaseService();
     
-    // Check recent job applications
+    // Check the structure of job_applications table
     const { data: applications, error } = await supabase
       .from('job_applications')
-      .select(`
-        id,
-        job_id,
-        applicant_profile_id,
-        applicant_user_id,
-        status,
-        created_at,
-        cover_note,
-        proposed_rate,
-        proposed_payout_type,
-        proposed_timeline
-      `)
-      .order('created_at', { ascending: false })
-      .limit(10);
+      .select('*')
+      .limit(1);
 
     if (error) {
       return NextResponse.json({ 
@@ -30,11 +18,16 @@ export async function GET() {
       }, { status: 500 });
     }
 
+    // Get column names from the first record
+    const columnNames = applications && applications.length > 0 
+      ? Object.keys(applications[0])
+      : [];
+
     return NextResponse.json({ 
       success: true,
-      message: 'Recent job applications retrieved',
-      applications: applications || [],
-      count: applications?.length || 0,
+      message: 'Job applications table structure retrieved',
+      columnNames,
+      sampleRecord: applications?.[0] || null,
       timestamp: new Date().toISOString()
     });
 
