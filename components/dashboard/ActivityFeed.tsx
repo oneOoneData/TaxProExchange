@@ -87,7 +87,7 @@ export default function ActivityFeed({ connections, recentlyVerified, currentPro
                         {profile.first_name} {profile.last_name}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           {profile.credential_type}
                         </span>
                         {profile.firm_name && (
