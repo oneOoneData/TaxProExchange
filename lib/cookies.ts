@@ -1,47 +1,122 @@
-// Cookie helper functions for referral tracking
+import { NextRequest, NextResponse } from 'next/server';
 
-export const REFERRAL_COOKIE_NAME = 'tpx_ref';
-export const REFERRAL_COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
+/**
+ * Cross-subdomain cookie configuration
+ */
+export const COOKIE_CONFIG = {
+  domain: '.taxproexchange.com',
+  secure: process.env.NODE_ENV === 'production',
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  path: '/',
+};
 
-export function setReferralCookie(slug: string): void {
-  if (typeof document === 'undefined') return;
-  
-  const cookieValue = `slug=${slug}; path=/; max-age=${REFERRAL_COOKIE_MAX_AGE}; SameSite=Lax`;
-  document.cookie = `${REFERRAL_COOKIE_NAME}=${cookieValue}`;
+/**
+ * Set a cross-subdomain cookie on the server side
+ * @param name - Cookie name
+ * @param value - Cookie value
+ * @param maxAge - Max age in seconds (default: 30 days)
+ * @param response - NextResponse object to set cookie on
+ */
+export function setCrossSubdomainCookie(
+  name: string,
+  value: string,
+  response: NextResponse,
+  maxAge: number = 30 * 24 * 60 * 60 // 30 days
+) {
+  response.cookies.set(name, value, {
+    ...COOKIE_CONFIG,
+    maxAge,
+  });
 }
 
+/**
+ * Set a cross-subdomain cookie in a NextResponse
+ * @param response - NextResponse object
+ * @param name - Cookie name
+ * @param value - Cookie value
+ * @param maxAge - Max age in seconds (default: 30 days)
+ */
+export function setCrossSubdomainCookieInResponse(
+  response: NextResponse,
+  name: string,
+  value: string,
+  maxAge: number = 30 * 24 * 60 * 60 // 30 days
+) {
+  response.cookies.set(name, value, {
+    ...COOKIE_CONFIG,
+    maxAge,
+  });
+  return response;
+}
+
+/**
+ * Get a cookie value from a request
+ * @param request - NextRequest object
+ * @param name - Cookie name
+ * @returns Cookie value or undefined
+ */
+export function getCookie(request: NextRequest, name: string): string | undefined {
+  return request.cookies.get(name)?.value;
+}
+
+/**
+ * Set referral cookie (client-side)
+ * @param refSlug - Referral slug
+ */
+export function setReferralCookie(refSlug: string) {
+  if (typeof document !== 'undefined') {
+    document.cookie = `referral=${refSlug}; path=/; max-age=${30 * 24 * 60 * 60}; samesite=lax`;
+  }
+}
+
+/**
+ * Get referral cookie (client-side)
+ * @returns Referral slug or null
+ */
 export function getReferralCookie(): string | null {
   if (typeof document === 'undefined') return null;
   
   const cookies = document.cookie.split(';');
-  for (const cookie of cookies) {
+  for (let cookie of cookies) {
     const [name, value] = cookie.trim().split('=');
-    if (name === REFERRAL_COOKIE_NAME) {
-      // Parse the value to extract the slug
-      const match = value.match(/slug=([^;]+)/);
-      return match ? match[1] : null;
+    if (name === 'referral') {
+      return value;
     }
   }
   return null;
 }
 
-export function clearReferralCookie(): void {
-  if (typeof document === 'undefined') return;
-  
-  document.cookie = `${REFERRAL_COOKIE_NAME}=; path=/; max-age=0`;
-}
-
-// Server-side cookie parsing for API routes
+/**
+ * Parse referral cookie from cookie header (server-side)
+ * @param cookieHeader - Cookie header string
+ * @returns Referral slug or null
+ */
 export function parseReferralCookie(cookieHeader: string | null): string | null {
   if (!cookieHeader) return null;
   
   const cookies = cookieHeader.split(';');
-  for (const cookie of cookies) {
+  for (let cookie of cookies) {
     const [name, value] = cookie.trim().split('=');
-    if (name === REFERRAL_COOKIE_NAME) {
-      const match = value.match(/slug=([^;]+)/);
-      return match ? match[1] : null;
+    if (name === 'referral') {
+      return value;
     }
   }
   return null;
+}
+
+/**
+ * Delete a cross-subdomain cookie in a NextResponse
+ * @param response - NextResponse object
+ * @param name - Cookie name
+ */
+export function deleteCrossSubdomainCookieInResponse(
+  response: NextResponse,
+  name: string
+) {
+  response.cookies.set(name, '', {
+    ...COOKIE_CONFIG,
+    maxAge: 0,
+  });
+  return response;
 }

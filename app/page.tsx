@@ -32,9 +32,9 @@ export default function Page() {
             console.log('[trace] router.push → /onboarding (no profile)');
             router.push('/onboarding');
           } else if (data.onboarding_complete) {
-            // User has completed onboarding, stay on home page
-            console.log('[trace] onboarding complete, staying on home page');
-            setIsCheckingOnboarding(false);
+            // User has completed onboarding, redirect to dashboard
+            console.log('[trace] onboarding complete, redirecting to dashboard');
+            router.push('/dashboard');
           } else {
             // User hasn't completed onboarding, redirect to profile edit
             console.log('[trace] router.push → /profile/edit (onboarding incomplete)');

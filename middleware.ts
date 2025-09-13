@@ -3,6 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/legal(.*)']);
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit', '/feedback']);
+const isDashboard = createRouteMatcher(['/dashboard']);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionId } = await auth();
@@ -38,6 +39,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // No user - allow (will be handled by Clerk auth)
   if (!userId || !sessionId) {
     response.headers.set('x-debug-redirect', 'none (no user)');
+    return response;
+  }
+
+  // Dashboard routes always allowed for signed-in users
+  if (isDashboard(req)) {
+    response.headers.set('x-debug-redirect', 'none (dashboard)');
     return response;
   }
 
