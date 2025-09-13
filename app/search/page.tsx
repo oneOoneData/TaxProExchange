@@ -8,7 +8,7 @@ import { useUser } from '@clerk/nextjs';
 import UserMenu from '@/components/UserMenu';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
-import MobileNav from '@/components/MobileNav';
+import AppMobileNav from '@/components/AppMobileNav';
 import { getLocationDisplay } from '@/lib/utils/countryFlags';
 
 export const dynamic = 'force-dynamic';
@@ -473,14 +473,11 @@ export default function SearchPage() {
         <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <a href="/#features" className="hover:text-slate-900">Features</a>
-            <a href="/#how" className="hover:text-slate-900">How it works</a>
-            <a href="/#faq" className="hover:text-slate-900">FAQ</a>
             <Link href="/search" className="hover:text-slate-900 font-medium text-slate-900">Directory</Link>
             <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
-            {!user && (
-              <Link href="/join" className="hover:text-slate-900">Join</Link>
-            )}
+            <Link href="/dashboard" className="hover:text-slate-900">Dashboard</Link>
+            <Link href="/messages" className="hover:text-slate-900">Messages</Link>
+            <Link href="/profile/edit" className="hover:text-slate-900">Profile</Link>
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
@@ -1070,7 +1067,7 @@ export default function SearchPage() {
         </div>
       </div>
       {/* Mobile Navigation */}
-      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
+      <AppMobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
     </div>
   );
 }
