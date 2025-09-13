@@ -239,14 +239,19 @@ export default function ChatThreadPage() {
 
   const createStreamChannel = async (showErrorAlert = true) => {
     console.log('createStreamChannel called with showErrorAlert:', showErrorAlert);
-    console.log('Connection ID:', connection?.id);
+    console.log('Connection ID from state:', connection?.id);
+    console.log('Connection ID from params:', connectionId);
+    
+    // Use connectionId from URL params instead of state to avoid timing issues
+    const idToUse = connection?.id || connectionId;
+    console.log('Using connection ID:', idToUse);
     
     try {
       console.log('Making API call to /api/stream/create-channel...');
       const response = await fetch('/api/stream/create-channel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ connectionId: connection?.id })
+        body: JSON.stringify({ connectionId: idToUse })
       });
 
       console.log('API response status:', response.status);
