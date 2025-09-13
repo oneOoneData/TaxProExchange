@@ -55,7 +55,18 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
       '/onboarding/specializations',
       '/onboarding/consent',
       '/sign-in',
-      '/sign-up'
+      '/sign-up',
+      '/refer',
+      '/feedback',
+      '/settings',
+      '/messages',
+      '/jobs/new',
+      '/jobs/',
+      '/search',
+      '/p/',
+      '/legal',
+      '/privacy',
+      '/terms'
     ];
     
     const shouldShowAppNavigation = !pagesWithOwnHeaders.some(path => 
