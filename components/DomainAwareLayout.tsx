@@ -46,27 +46,21 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
   if (isApp) {
     // Pages that have their own headers and shouldn't get AppNavigation
     const pagesWithOwnHeaders = [
-      '/profile/edit',
-      '/profile/verify',
-      '/profile/applications',
-      '/onboarding',
-      '/onboarding/create-profile',
-      '/onboarding/credentials',
-      '/onboarding/specializations',
-      '/onboarding/consent',
+      '/profile/',
+      '/onboarding/',
       '/sign-in',
       '/sign-up',
       '/refer',
       '/feedback',
       '/settings',
       '/messages',
-      '/jobs/new',
       '/jobs/',
       '/search',
       '/p/',
       '/legal',
       '/privacy',
-      '/terms'
+      '/terms',
+      '/admin'
     ];
     
     const shouldShowAppNavigation = !pagesWithOwnHeaders.some(path => 
