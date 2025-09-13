@@ -30,8 +30,8 @@ export default async function DashboardPage() {
 
   const onboardingComplete = isOnboardingComplete(profile);
   
-  // Debug logging
-  console.log('🔍 Dashboard Debug:', {
+  // Debug logging - v2
+  console.log('🔍 Dashboard Debug v2:', {
     userId,
     profile: profile ? {
       id: profile.id,
