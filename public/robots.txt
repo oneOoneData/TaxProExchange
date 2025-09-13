@@ -1,0 +1,24 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /onboarding/
+Disallow: /profile/
+Disallow: /messages/
+Disallow: /settings/
+Disallow: /feedback/
+Disallow: /test-*
+Disallow: /cleanup-*
+Disallow: /reddit/
+Disallow: /refer/
+Disallow: /join/
+Disallow: /sign-in/
+Disallow: /sign-up/
+
+# Host
+Host: https://www.taxproexchange.com
+
+# Sitemaps
+Sitemap: https://www.taxproexchange.com/sitemap.xml

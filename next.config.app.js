@@ -3,35 +3,7 @@ const nextConfig = {
   // appDir is now stable in Next.js 14, no need for experimental flag
   productionBrowserSourceMaps: true,
   
-  // Marketing site redirects
-  async redirects() {
-    return [
-      // Redirect /app/* to app subdomain
-      {
-        source: '/app/:path*',
-        destination: 'https://app.taxproexchange.com/:path*',
-        permanent: true,
-      },
-    ];
-  },
-
-  // Canonicalization redirect (only if not handled at Vercel level)
-  async rewrites() {
-    return [
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'taxproexchange.com',
-          },
-        ],
-        destination: 'https://www.taxproexchange.com/:path*',
-      },
-    ];
-  },
-
-  // Security headers
+  // Security headers for app subdomain
   async headers() {
     return [
       {
@@ -52,6 +24,19 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+          // Content Security Policy for app
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+              "style-src 'self' 'unsafe-inline' https:",
+              "img-src 'self' data: https:",
+              "connect-src 'self' https:",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+            ].join('; '),
           },
           // HSTS - commented out until both domains are fully green
           // {
