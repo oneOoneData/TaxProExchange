@@ -6,6 +6,7 @@ import ProfileStatusCard from '@/components/dashboard/ProfileStatusCard';
 import VerificationCard from '@/components/dashboard/VerificationCard';
 import QuickActions from '@/components/dashboard/QuickActions';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -43,10 +44,31 @@ export default async function DashboardPage() {
     } : null,
     onboardingComplete
   });
+
+  // Client-side debug logging
+  if (typeof window !== 'undefined') {
+    console.log('🔍 Client-side Dashboard Debug:', {
+      userId,
+      profile: profile ? {
+        id: profile.id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        onboarding_complete: profile.onboarding_complete,
+        clerk_id: profile.clerk_id,
+        clerk_user_id: profile.clerk_user_id
+      } : null,
+      onboardingComplete
+    });
+  }
   const canPostJobs = profile?.visibility_state === 'verified' && Boolean(profile?.firm_name);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <DashboardDebug 
+        userId={userId} 
+        profile={profile} 
+        onboardingComplete={onboardingComplete} 
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
