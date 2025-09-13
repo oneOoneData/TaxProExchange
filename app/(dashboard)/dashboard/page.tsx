@@ -176,6 +176,7 @@ export default async function DashboardPage() {
             <VerificationCard 
               verificationRequest={verificationRequest} 
               isOnboardingComplete={onboardingComplete}
+              visibilityState={profile?.visibility_state}
             />
           </div>
 

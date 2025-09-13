@@ -4,10 +4,24 @@ import { VerificationRequest } from '@/lib/db/profile';
 interface VerificationCardProps {
   verificationRequest: VerificationRequest | null;
   isOnboardingComplete: boolean;
+  visibilityState?: 'hidden' | 'pending_verification' | 'verified' | 'rejected';
 }
 
-export default function VerificationCard({ verificationRequest, isOnboardingComplete }: VerificationCardProps) {
+export default function VerificationCard({ verificationRequest, isOnboardingComplete, visibilityState }: VerificationCardProps) {
   const getStatusInfo = () => {
+    // If already verified based on visibility_state, show verified status
+    if (visibilityState === 'verified') {
+      return {
+        status: 'approved',
+        title: 'Verification approved',
+        description: 'Congratulations! Your profile is now verified and visible in the directory.',
+        actionText: 'View Profile',
+        actionHref: '/profile/edit',
+        color: 'bg-green-50 border-green-200',
+        iconColor: 'text-green-600',
+      };
+    }
+
     if (!verificationRequest) {
       if (!isOnboardingComplete) {
         return {
