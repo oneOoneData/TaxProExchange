@@ -31,6 +31,36 @@ export interface RecentlyVerifiedProfile {
   updated_at: string;
 }
 
+export interface RecentMessage {
+  id: string;
+  connection_id: string;
+  sender_profile_id: string;
+  content: string;
+  created_at: string;
+  sender_profile: {
+    first_name: string;
+    last_name: string;
+    credential_type: string;
+    slug?: string;
+  };
+  connection: {
+    requester_profile_id: string;
+    recipient_profile_id: string;
+    requester_profile?: {
+      first_name: string;
+      last_name: string;
+      credential_type: string;
+      slug?: string;
+    };
+    recipient_profile?: {
+      first_name: string;
+      last_name: string;
+      credential_type: string;
+      slug?: string;
+    };
+  };
+}
+
 /**
  * Get recent connections for a profile
  */
@@ -99,6 +129,79 @@ export async function getRecentlyVerified(limit: number = 5): Promise<RecentlyVe
 }
 
 /**
+ * Get recent messages for a profile
+ */
+export async function getRecentMessages(profileId: string, limit: number = 5): Promise<RecentMessage[]> {
+  try {
+    const supabase = supabaseService();
+    
+    // First get all connections for this profile
+    const { data: connections, error: connectionsError } = await supabase
+      .from('connections')
+      .select('id')
+      .or(`requester_profile_id.eq.${profileId},recipient_profile_id.eq.${profileId}`)
+      .eq('status', 'accepted');
+
+    if (connectionsError) {
+      console.error('Error fetching connections for messages:', connectionsError);
+      return [];
+    }
+
+    if (!connections || connections.length === 0) {
+      return [];
+    }
+
+    const connectionIds = connections.map(c => c.id);
+
+    // Get recent messages from these connections
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select(`
+        id,
+        connection_id,
+        sender_profile_id,
+        content,
+        created_at,
+        sender_profile:profiles!messages_sender_profile_id_fkey(
+          first_name,
+          last_name,
+          credential_type,
+          slug
+        ),
+        connection:connections!messages_connection_id_fkey(
+          requester_profile_id,
+          recipient_profile_id,
+          requester_profile:profiles!connections_requester_profile_id_fkey(
+            first_name,
+            last_name,
+            credential_type,
+            slug
+          ),
+          recipient_profile:profiles!connections_recipient_profile_id_fkey(
+            first_name,
+            last_name,
+            credential_type,
+            slug
+          )
+        )
+      `)
+      .in('connection_id', connectionIds)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching recent messages:', error);
+      return [];
+    }
+
+    return messages || [];
+  } catch (error) {
+    console.error('Error in getRecentMessages:', error);
+    return [];
+  }
+}
+
+/**
  * Get connection display name
  */
 export function getConnectionDisplayName(connection: Connection, currentProfileId: string): string {
@@ -140,6 +243,18 @@ export function getConnectionStatusColor(status: string): string {
     default:
       return 'text-gray-600';
   }
+}
+
+/**
+ * Get the other person's name in a message (not the sender)
+ */
+export function getMessageOtherPersonName(message: RecentMessage, currentProfileId: string): string {
+  const isRequester = message.connection.requester_profile_id === currentProfileId;
+  const otherProfile = isRequester ? message.connection.recipient_profile : message.connection.requester_profile;
+  
+  if (!otherProfile) return 'Unknown User';
+  
+  return `${otherProfile.first_name} ${otherProfile.last_name}`;
 }
 
 /**

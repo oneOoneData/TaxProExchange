@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getCurrentProfile, getVerificationRequest, isOnboardingComplete } from '@/lib/db/profile';
-import { getRecentConnections, getRecentlyVerified } from '@/lib/db/activity';
+import { getRecentConnections, getRecentlyVerified, getRecentMessages } from '@/lib/db/activity';
 import ProfileStatusCard from '@/components/dashboard/ProfileStatusCard';
 import VerificationCard from '@/components/dashboard/VerificationCard';
 import QuickActions from '@/components/dashboard/QuickActions';
@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   }
 
   // Fetch user data
-  const [profile, verificationRequest, connections, recentlyVerified] = await Promise.all([
+  const [profile, verificationRequest, connections, recentlyVerified, recentMessages] = await Promise.all([
     getCurrentProfile(),
     getCurrentProfile().then(profile => 
       profile ? getVerificationRequest(profile.id) : null
@@ -26,7 +26,10 @@ export default async function DashboardPage() {
     getCurrentProfile().then(profile => 
       profile ? getRecentConnections(profile.id) : []
     ),
-    getRecentlyVerified()
+    getRecentlyVerified(),
+    getCurrentProfile().then(profile => 
+      profile ? getRecentMessages(profile.id) : []
+    )
   ]);
 
   const onboardingComplete = isOnboardingComplete(profile);
@@ -185,8 +188,9 @@ export default async function DashboardPage() {
             <QuickActions canPostJobs={canPostJobs} />
             <ActivityFeed 
               connections={connections} 
-              recentlyVerified={recentlyVerified} 
-              currentProfileId={profile?.id || ''} 
+              recentlyVerified={recentlyVerified}
+              recentMessages={recentMessages}
+              currentProfileId={profile?.id || ''}
             />
           </div>
         </div>
