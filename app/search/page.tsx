@@ -470,7 +470,7 @@ export default function SearchPage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+        <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="/#features" className="hover:text-slate-900">Features</a>
@@ -510,7 +510,7 @@ export default function SearchPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container-mobile py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900 mb-2">Find Tax Professionals</h1>
           <p className="text-slate-600">Search for verified CPAs, EAs, and CTEC preparers by credential, location, and specialization.</p>

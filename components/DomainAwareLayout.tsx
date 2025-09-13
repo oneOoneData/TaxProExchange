@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
 import CanonicalUrl from '@/components/CanonicalUrl';
 import AppNavigation from '@/components/AppNavigation';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 import { useEffect, useState } from 'react';
 
@@ -81,7 +82,10 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
         <body className={inter.className}>
           <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
             {shouldShowAppNavigation && <AppNavigation />}
-            {children}
+            <div className="pb-16 md:pb-0">
+              {children}
+            </div>
+            <MobileBottomNav />
             <Footer />
           </ClerkProvider>
         </body>
