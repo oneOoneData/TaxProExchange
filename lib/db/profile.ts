@@ -21,7 +21,7 @@ export interface Profile {
   visibility_state: 'hidden' | 'pending_verification' | 'verified' | 'rejected';
   accepting_work: boolean;
   slug?: string;
-  onboarding_complete?: boolean;
+  onboarding_complete: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -115,12 +115,8 @@ export function getPublicProfileUrl(slug?: string): string {
 export function isOnboardingComplete(profile: Profile | null): boolean {
   if (!profile) return false;
   
-  // Check if all required fields are filled
-  const hasBasicInfo = profile.first_name && profile.last_name && profile.credential_type;
-  const hasContactInfo = profile.phone || profile.public_email;
-  const hasBio = profile.bio && profile.bio.length > 10;
-  
-  return Boolean(hasBasicInfo && hasContactInfo && hasBio);
+  // Use the onboarding_complete field from the database
+  return profile.onboarding_complete === true;
 }
 
 /**
