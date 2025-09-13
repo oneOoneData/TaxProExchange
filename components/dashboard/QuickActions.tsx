@@ -27,7 +27,7 @@ export default function QuickActions({ canPostJobs = false }: QuickActionsProps)
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
       ),
-      color: canPostJobs ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed',
+      color: canPostJobs ? 'bg-slate-600 hover:bg-slate-700' : 'bg-gray-400 cursor-not-allowed',
     },
     {
       title: 'Refer a Pro',
@@ -38,7 +38,7 @@ export default function QuickActions({ canPostJobs = false }: QuickActionsProps)
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
         </svg>
       ),
-      color: 'bg-purple-600 hover:bg-purple-700',
+      color: 'bg-indigo-600 hover:bg-indigo-700',
     },
     {
       title: 'Update Availability',
@@ -49,7 +49,7 @@ export default function QuickActions({ canPostJobs = false }: QuickActionsProps)
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      color: 'bg-orange-600 hover:bg-orange-700',
+      color: 'bg-gray-600 hover:bg-gray-700',
     },
   ];
 

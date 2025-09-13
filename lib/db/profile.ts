@@ -159,11 +159,11 @@ export function getCredentialBadgeColor(credentialType: string): string {
     case 'CPA':
       return 'bg-blue-100 text-blue-800';
     case 'EA':
-      return 'bg-green-100 text-green-800';
+      return 'bg-slate-100 text-slate-800';
     case 'CTEC':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-indigo-100 text-indigo-800';
     case 'Tax Lawyer (JD)':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-gray-100 text-gray-800';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -175,9 +175,9 @@ export function getCredentialBadgeColor(credentialType: string): string {
 export function getVisibilityBadgeColor(visibilityState: string): string {
   switch (visibilityState) {
     case 'verified':
-      return 'bg-green-100 text-green-800';
+      return 'bg-blue-100 text-blue-800';
     case 'pending_verification':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-amber-100 text-amber-800';
     case 'rejected':
       return 'bg-red-100 text-red-800';
     case 'hidden':

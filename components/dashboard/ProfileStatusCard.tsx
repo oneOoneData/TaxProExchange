@@ -55,7 +55,7 @@ export default function ProfileStatusCard({ profile, verificationRequest }: Prof
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Work availability:</span>
           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            profile.accepting_work ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+            profile.accepting_work ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
           }`}>
             {profile.accepting_work ? 'Accepting work' : 'Not accepting work'}
           </span>
@@ -93,8 +93,8 @@ export default function ProfileStatusCard({ profile, verificationRequest }: Prof
       </div>
 
       {!profile.slug && (
-        <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-sm text-yellow-800">
+        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
             Complete your profile to get a public listing and start connecting with other tax professionals.
           </p>
         </div>

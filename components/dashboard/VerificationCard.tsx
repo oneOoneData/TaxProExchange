@@ -17,8 +17,8 @@ export default function VerificationCard({ verificationRequest, isOnboardingComp
         description: 'Congratulations! Your profile is now verified and visible in the directory.',
         actionText: 'View Profile',
         actionHref: '/profile/edit',
-        color: 'bg-green-50 border-green-200',
-        iconColor: 'text-green-600',
+        color: 'bg-blue-50 border-blue-200',
+        iconColor: 'text-blue-600',
       };
     }
 
@@ -30,8 +30,8 @@ export default function VerificationCard({ verificationRequest, isOnboardingComp
           description: 'Finish setting up your profile before submitting for verification.',
           actionText: 'Complete Profile',
           actionHref: '/profile/edit',
-          color: 'bg-yellow-50 border-yellow-200',
-          iconColor: 'text-yellow-600',
+          color: 'bg-amber-50 border-amber-200',
+          iconColor: 'text-amber-600',
         };
       }
       return {
@@ -40,8 +40,8 @@ export default function VerificationCard({ verificationRequest, isOnboardingComp
         description: 'Get verified to build trust and increase your visibility in the directory.',
         actionText: 'Submit for Verification',
         actionHref: '/profile/verify',
-        color: 'bg-blue-50 border-blue-200',
-        iconColor: 'text-blue-600',
+        color: 'bg-slate-50 border-slate-200',
+        iconColor: 'text-slate-600',
       };
     }
 
@@ -53,8 +53,8 @@ export default function VerificationCard({ verificationRequest, isOnboardingComp
           description: `We're reviewing your documents. Submitted on ${new Date(verificationRequest.submitted_at).toLocaleDateString()}.`,
           actionText: 'View Status',
           actionHref: '/profile/verify',
-          color: 'bg-yellow-50 border-yellow-200',
-          iconColor: 'text-yellow-600',
+          color: 'bg-amber-50 border-amber-200',
+          iconColor: 'text-amber-600',
         };
       case 'approved':
         return {
@@ -63,8 +63,8 @@ export default function VerificationCard({ verificationRequest, isOnboardingComp
           description: 'Congratulations! Your profile is now verified and visible in the directory.',
           actionText: 'View Profile',
           actionHref: '/profile/edit',
-          color: 'bg-green-50 border-green-200',
-          iconColor: 'text-green-600',
+          color: 'bg-blue-50 border-blue-200',
+          iconColor: 'text-blue-600',
         };
       case 'rejected':
         return {
