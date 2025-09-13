@@ -146,9 +146,15 @@ export async function POST(
             hasStreamKey: !!process.env.STREAM_KEY,
             hasStreamSecret: !!process.env.STREAM_SECRET,
             hasStreamAppId: !!process.env.STREAM_APP_ID
-          }
+          },
+          connectionId: updated.id
         });
+        
+        // Log a warning that the channel will need to be created manually
+        console.warn(`Stream channel creation failed for connection ${updated.id}. Channel will be created automatically when user accesses messaging.`);
+        
         // Don't fail the whole request, just log the error
+        // The messaging page will automatically create the channel when needed
       }
     }
 
