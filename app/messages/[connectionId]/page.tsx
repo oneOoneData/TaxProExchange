@@ -42,6 +42,7 @@ export default function ChatThreadPage() {
   const { user, isLoaded } = useUser();
   const [connection, setConnection] = useState<ConnectionWithProfiles | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatingChannel, setCreatingChannel] = useState(false);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [chatClient, setChatClient] = useState<StreamChat | null>(null);
   const [streamToken, setStreamToken] = useState<string | null>(null);
@@ -142,10 +143,21 @@ export default function ChatThreadPage() {
         setConnection(data.connection);
         setCurrentProfileId(data.currentProfileId);
         
-        // Initialize Stream Chat if connection is accepted and has a channel
-        if (data.connection.status === 'accepted' && data.connection.stream_channel_id) {
-          console.log('Connection accepted with channel ID:', data.connection.stream_channel_id);
-          await initializeStreamChat(data.currentProfileId);
+        // Initialize Stream Chat if connection is accepted
+        if (data.connection.status === 'accepted') {
+          if (data.connection.stream_channel_id) {
+            console.log('Connection accepted with channel ID:', data.connection.stream_channel_id);
+            await initializeStreamChat(data.currentProfileId);
+          } else {
+            console.log('Connection accepted but missing Stream channel, creating now...');
+            // Automatically create Stream channel for accepted connections
+            setCreatingChannel(true);
+            try {
+              await createStreamChannel(false); // Don't show error alerts for automatic creation
+            } finally {
+              setCreatingChannel(false);
+            }
+          }
         } else {
           console.log('Connection not ready for chat:', {
             status: data.connection.status,
@@ -216,7 +228,7 @@ export default function ChatThreadPage() {
       : connection.requester_profile;
   };
 
-  const createStreamChannel = async () => {
+  const createStreamChannel = async (showErrorAlert = true) => {
     try {
       const response = await fetch('/api/stream/create-channel', {
         method: 'POST',
@@ -232,11 +244,21 @@ export default function ChatThreadPage() {
       } else {
         const error = await response.json();
         console.error('Failed to create Stream channel:', error);
-        alert(`Failed to create Stream channel: ${error.error}\n\nDetails: ${error.details || 'Unknown error'}`);
+        if (showErrorAlert) {
+          alert(`Failed to create Stream channel: ${error.error}\n\nDetails: ${error.details || 'Unknown error'}`);
+        } else {
+          // For automatic creation, just log the error
+          console.error('Automatic Stream channel creation failed:', error);
+        }
       }
     } catch (error) {
       console.error('Error creating Stream channel:', error);
-      alert('Error creating Stream channel');
+      if (showErrorAlert) {
+        alert('Error creating Stream channel');
+      } else {
+        // For automatic creation, just log the error
+        console.error('Automatic Stream channel creation failed:', error);
+      }
     }
   };
 
@@ -440,12 +462,14 @@ export default function ChatThreadPage() {
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-slate-900 mb-2">
-                {!connection.stream_channel_id ? 'Chat Not Available' : 'Initializing Chat...'}
+                {creatingChannel ? 'Setting Up Chat...' : !connection.stream_channel_id ? 'Chat Not Available' : 'Initializing Chat...'}
               </h3>
               <p className="text-slate-600 mb-4">
-                {!connection.stream_channel_id 
-                  ? 'This connection needs to be accepted first to enable messaging.'
-                  : 'Setting up your messaging interface...'
+                {creatingChannel 
+                  ? 'Creating your messaging channel, please wait...'
+                  : !connection.stream_channel_id 
+                    ? 'This connection needs to be accepted first to enable messaging.'
+                    : 'Setting up your messaging interface...'
                 }
               </p>
               <div className="text-sm text-slate-500">
@@ -454,7 +478,7 @@ export default function ChatThreadPage() {
                 {connection.stream_channel_id && (
                   <p>Stream Channel: {connection.stream_channel_id}</p>
                 )}
-                {!connection.stream_channel_id && connection.status === 'accepted' && (
+                {!connection.stream_channel_id && connection.status === 'accepted' && !creatingChannel && (
                   <div className="mt-4 space-y-3">
                     <p className="text-amber-600">⚠️ Stream channel not created. Check server logs.</p>
                     <div className="flex gap-2">
