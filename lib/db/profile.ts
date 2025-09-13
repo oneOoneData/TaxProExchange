@@ -44,8 +44,11 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     const { userId } = await auth();
     
     if (!userId) {
+      console.log('🔍 getCurrentProfile: No userId from auth');
       return null;
     }
+
+    console.log('🔍 getCurrentProfile: Looking for profile with userId:', userId);
 
     const supabase = supabaseService();
     
@@ -57,13 +60,21 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       .single();
 
     if (error) {
-      console.error('Error fetching profile:', error);
+      console.error('🔍 getCurrentProfile: Error fetching profile:', error);
       return null;
     }
 
+    console.log('🔍 getCurrentProfile: Found profile:', {
+      id: profile?.id,
+      first_name: profile?.first_name,
+      onboarding_complete: profile?.onboarding_complete,
+      clerk_id: profile?.clerk_id,
+      clerk_user_id: profile?.clerk_user_id
+    });
+
     return profile;
   } catch (error) {
-    console.error('Error in getCurrentProfile:', error);
+    console.error('🔍 getCurrentProfile: Error in getCurrentProfile:', error);
     return null;
   }
 }
