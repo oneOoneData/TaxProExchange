@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
-import MobileNav from '@/components/MobileNav';
+import AppMobileNav from '@/components/AppMobileNav';
 import MobileBottomNav from '@/components/MobileBottomNav';
 
 export default function DashboardLayout({
@@ -29,9 +29,8 @@ export default function DashboardLayout({
             <Link href="/search" className="hover:text-slate-900">Directory</Link>
             <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
             <Link href="/dashboard" className="hover:text-slate-900 font-medium text-slate-900">Dashboard</Link>
-            {!user && (
-              <Link href="/join" className="hover:text-slate-900">Join</Link>
-            )}
+            <Link href="/messages" className="hover:text-slate-900">Messages</Link>
+            <Link href="/profile/edit" className="hover:text-slate-900">Profile</Link>
           </nav>
           
           <div className="flex items-center gap-4">
@@ -72,7 +71,7 @@ export default function DashboardLayout({
       </div>
 
       {/* Mobile Navigation */}
-      <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
+      <AppMobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
