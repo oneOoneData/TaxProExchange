@@ -512,9 +512,16 @@ export default function SearchPage() {
 
       <div className="container-mobile py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-slate-900 mb-2">Find Tax Professionals</h1>
-          <p className="text-slate-600">Search for verified CPAs, EAs, and CTEC preparers by credential, location, and specialization.</p>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-3xl font-semibold text-slate-900 mb-2">Search Verified Tax Professionals</h1>
+          <p className="text-slate-600 text-lg mb-2">
+            Find qualified CPAs, Enrolled Agents (EAs), and CTEC preparers by credential, state, specialization, and availability. 
+            All professionals are verified through state boards and licensing authorities.
+          </p>
+          <p className="text-slate-600 mb-2">
+            Use the filters below to narrow your search by location, years of experience, software expertise, and specific tax specializations 
+            like S-Corporation returns, IRS representation, or international tax work.
+          </p>
+          <p className="text-sm text-slate-500">
             {filters.verified_only 
               ? "Only verified and listed professionals are shown to ensure quality and accessibility."
               : "Showing all profiles. Unverified profiles are visible but cannot be viewed until verification is complete."

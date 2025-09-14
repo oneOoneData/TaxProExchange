@@ -2,14 +2,15 @@ import type { Metadata } from 'next';
 import './globals.css';
 import 'stream-chat-react/dist/css/v2/index.css';
 import DomainAwareLayout from '@/components/DomainAwareLayout';
+import { defaultTitle, defaultDescription, generateOrganizationJsonLd, generateWebSiteJsonLd } from '@/lib/seo';
 
 // This layout will be replaced by DomainAwareLayout
 // Keeping minimal metadata for Next.js
 
 export const metadata: Metadata = {
-  title: 'TaxProExchange - Where Tax Professionals Connect and Collaborate',
-  description: 'A trusted directory for CPAs, EAs, and CTEC preparers to find each other for handoffs, overflow work, and representation.',
-  keywords: 'tax professionals, CPA, EA, CTEC, tax preparation, collaboration',
+  title: defaultTitle,
+  description: defaultDescription,
+  keywords: 'tax professionals, CPA, EA, CTEC, tax preparation, collaboration, verified, directory, referrals, overflow work, IRS representation',
   authors: [{ name: 'TaxProExchange' }],
   creator: 'TaxProExchange',
   publisher: 'TaxProExchange',
@@ -23,8 +24,8 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'TaxProExchange - Where Tax Professionals Connect and Collaborate',
-    description: 'A trusted directory for CPAs, EAs, and CTEC preparers to find each other for handoffs, overflow work, and representation.',
+    title: defaultTitle,
+    description: defaultDescription,
     url: 'https://www.taxproexchange.com',
     siteName: 'TaxProExchange',
     images: [
@@ -40,8 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TaxProExchange - Where Tax Professionals Connect and Collaborate',
-    description: 'A trusted directory for CPAs, EAs, and CTEC preparers to find each other for handoffs, overflow work, and representation.',
+    title: defaultTitle,
+    description: defaultDescription,
     images: ['/og-image.png'],
   },
   icons: {
@@ -60,5 +61,31 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DomainAwareLayout>{children}</DomainAwareLayout>;
+  const organizationJsonLd = generateOrganizationJsonLd();
+  const websiteJsonLd = generateWebSiteJsonLd();
+
+  return (
+    <html lang="en">
+      <head>
+        {/* JSON-LD Schema Markup */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteJsonLd),
+          }}
+        />
+        {/* Preconnect to external domains for performance */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body>
+        <DomainAwareLayout>{children}</DomainAwareLayout>
+      </body>
+    </html>
+  );
 }
