@@ -9,6 +9,7 @@ import { useUser } from '@clerk/nextjs';
 import { safeMap, safeLength } from '@/lib/safe';
 import { getCountryName } from '@/lib/constants/countries';
 import MobileNav from '@/components/MobileNav';
+import ProfileJsonLd from '@/components/ProfileJsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -331,6 +332,9 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {/* JSON-LD Schema Markup */}
+      <ProfileJsonLd profile={profile} />
+      
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -581,7 +585,7 @@ export default function ProfilePage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3">
                 <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900">
-                  {profile.first_name} {profile.last_name}
+                  {profile.first_name} {profile.last_name}, {profile.credential_type}
                 </h1>
                 {profile.verified && (
                   <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-emerald-100 text-emerald-700">

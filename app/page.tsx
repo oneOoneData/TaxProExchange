@@ -9,6 +9,8 @@ import UserMenu from '@/components/UserMenu';
 import Logo from '@/components/Logo';
 import BuyMeACoffee from '@/components/BuyMeACoffee';
 import MobileNav from '@/components/MobileNav';
+import FeaturedProfiles from '@/components/FeaturedProfiles';
+import SeoFaqJsonLd from '@/components/SeoFaqJsonLd';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,8 +84,30 @@ export default function Page() {
     { n: '3', title: 'Connect & Collaborate', desc: 'Search, filter, and message other professionals. Handle scope and payment off-platform.'},
   ];
 
+  const faqs = [
+    {
+      question: 'Do you process payments or hold funds?',
+      answer: 'No. TaxProExchange is a connection-only platform. Professionals handle contracts and payments off-platform.'
+    },
+    {
+      question: 'How do you verify credentials?',
+      answer: 'During beta we manually check state CPA boards, IRS EA enrollment, and CTEC registration before profiles are visible.'
+    },
+    {
+      question: 'Is it free?',
+      answer: 'Yes, for as long as we can keep it free. Costs will run up at some point but our goal is to create value not become the next TaxFyle.'
+    },
+    {
+      question: 'Can clients use this?',
+      answer: 'This is built for professionals only: CPAs, EAs, and registered preparers who need collaboration and referrals.'
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {/* FAQ JSON-LD Schema */}
+      <SeoFaqJsonLd faqs={faqs} />
+      
       {/* Nav */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="container-mobile py-3 flex items-center justify-between">
@@ -140,24 +164,27 @@ export default function Page() {
               </p>
                               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                   {!user && (
-                    <a href="/join" className="rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">
-                      Join Now
+                    <a href="/join" className="rounded-2xl bg-slate-900 text-white px-6 py-3 sm:px-8 text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+                      Join Now - Free During Beta
                     </a>
                   )}
-                  <a href="#features" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-4 py-3 sm:px-5 text-sm font-medium hover:bg-slate-50">
-                    See how it works
+                  <a href="/search" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-6 py-3 sm:px-8 text-sm font-medium hover:bg-slate-50 shadow-sm hover:shadow-md transition-all">
+                    Browse Verified Professionals
                   </a>
                 </div>
               <div className="mt-6 flex items-center gap-3 text-sm text-slate-500">
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Manual credential checks</span>
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Free to list during beta</span>
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> 120+ verified profiles</span>
               </div>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
               <div className="relative rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="text-xs uppercase tracking-wider text-slate-500 mb-2">Example search</div>
-                <div className="rounded-xl border bg-slate-50 p-3 text-sm">CPA • California • S-Corp Reviews • Accepting work</div>
+                <a href="/search?credential_type=CPA&state=CA&specialization=1120s_s_corp&accepting_work=true" className="block rounded-xl border bg-slate-50 p-3 text-sm hover:bg-slate-100 transition-colors">
+                  CPA • California • S-Corp Reviews • Accepting work
+                </a>
                 <ul className="mt-4 space-y-3">
                   {[
                     { name: 'Jordan C., CPA', tag: 'S-Corp / Multi-State', state: 'CA', software: 'Drake Tax', verified: true },
@@ -208,6 +235,13 @@ export default function Page() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Featured Profiles */}
+      <section className="py-16 bg-slate-50">
+        <div className="container-mobile">
+          <FeaturedProfiles />
         </div>
       </section>
 
