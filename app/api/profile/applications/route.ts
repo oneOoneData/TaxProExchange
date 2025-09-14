@@ -89,12 +89,13 @@ export async function GET(request: Request) {
     }
     
     console.log('🔍 Profile ownership verified, proceeding with applications lookup');
+    console.log('🔍 Looking for applications with profile_id:', profile.id, 'or user_id:', userId);
 
-    // Get applications
+    // Get applications - use both applicant_profile_id and applicant_user_id for robustness
     const { data: applications, error: applicationsError } = await supabase
       .from('job_applications')
       .select('*')
-      .eq('applicant_profile_id', profile.id)
+      .or(`applicant_profile_id.eq.${profile.id},applicant_user_id.eq.${userId}`)
       .order('created_at', { ascending: false });
 
     if (applicationsError) {
@@ -103,6 +104,17 @@ export async function GET(request: Request) {
     }
 
     console.log('🔍 Found applications:', applications?.length || 0);
+    
+    // Debug: Log each application to see what we found
+    if (applications && applications.length > 0) {
+      console.log('🔍 Application details:', applications.map(app => ({
+        id: app.id,
+        applicant_profile_id: app.applicant_profile_id,
+        applicant_user_id: app.applicant_user_id,
+        job_id: app.job_id,
+        status: app.status
+      })));
+    }
 
     // Get job details for each application
     const applicationsWithJobs = await Promise.all(
