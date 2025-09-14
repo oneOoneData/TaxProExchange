@@ -1,6 +1,7 @@
 // app/reddit/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import BuyMeACoffee from '@/components/BuyMeACoffee';
 
 export const metadata: Metadata = {
   title: "TaxProExchange - For Reddit Tax Pros",
@@ -185,7 +186,15 @@ export default function RedditLanding() {
         <div className="mt-6 space-y-6">
           <FAQ
             q="Is this free?"
-            a="Yes - free during beta. We may add optional paid features later (e.g., featured listings)."
+            a={
+              <div>
+                <p>Yes, for as long as we can keep it free. Costs will run up at some point but our goal is to create value not become the next TaxFyle.</p>
+                <p className="mt-2">Having said that, we can always use more coffee so we can keep coding.</p>
+                <div className="mt-3">
+                  <BuyMeACoffee />
+                </div>
+              </div>
+            }
           />
           <FAQ
             q="Why not Upwork/TaxFyle?"
@@ -245,13 +254,15 @@ function Step({ n, label, sub }: { n: string; label: string; sub?: string }) {
   );
 }
 
-function FAQ({ q, a }: { q: string; a: string }) {
+function FAQ({ q, a }: { q: string; a: string | React.ReactNode }) {
   return (
     <details className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <summary className="cursor-pointer list-none font-medium text-slate-900">
         {q}
       </summary>
-      <p className="mt-2 text-slate-600">{a}</p>
+      <div className="mt-2 text-slate-600">
+        {typeof a === 'string' ? <p>{a}</p> : a}
+      </div>
     </details>
   );
 }
