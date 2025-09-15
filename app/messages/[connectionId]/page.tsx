@@ -368,9 +368,9 @@ export default function ChatThreadPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-4 md:py-8 overflow-hidden pb-16 md:pb-0 min-h-0">
+      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-2 md:py-8 overflow-hidden pb-16 md:pb-0 min-h-0">
         {/* Chat Header */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex items-center gap-4 mb-4">
             <Link
               href="/messages"
@@ -423,6 +423,8 @@ export default function ChatThreadPage() {
                   overflow-y: auto !important;
                   overflow-x: hidden !important;
                   -webkit-overflow-scrolling: touch !important;
+                  min-height: 0 !important;
+                  max-height: none !important;
                 }
                 .str-chat__input-flat {
                   flex-shrink: 0 !important;
@@ -470,7 +472,9 @@ export default function ChatThreadPage() {
                 /* Mobile-specific fixes */
                 @media (max-width: 768px) {
                   .str-chat__list {
-                    max-height: calc(100vh - 200px) !important;
+                    /* Remove height restriction to allow full scrolling */
+                    min-height: 0 !important;
+                    padding-bottom: 20px !important;
                   }
                   .str-chat__input-flat {
                     position: sticky !important;
