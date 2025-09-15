@@ -368,7 +368,7 @@ export default function ChatThreadPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-2 md:py-8 overflow-hidden pb-16 md:pb-0 min-h-0">
+      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-1 md:py-8 overflow-hidden pb-16 md:pb-0 min-h-0">
         {/* Chat Header */}
         <div className="mb-2">
           <div className="flex items-center gap-4 mb-2">
@@ -400,7 +400,7 @@ export default function ChatThreadPage() {
         </div>
 
         {/* Chat Interface */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0 max-h-[calc(100vh-180px)] md:max-h-none">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0 max-h-[calc(100vh-100px)] md:max-h-none">
           {chatClient && connection.stream_channel_id ? (
             <div className="flex-1 flex flex-col">
               <style jsx global>{`
@@ -473,9 +473,9 @@ export default function ChatThreadPage() {
                 @media (max-width: 768px) {
                   .str-chat__list {
                     /* Set proper height to prevent page scroll while allowing full chat scroll */
-                    max-height: calc(100vh - 160px) !important;
+                    max-height: calc(100vh - 80px) !important;
                     min-height: 0 !important;
-                    padding-bottom: 40px !important;
+                    padding-bottom: 20px !important;
                   }
                   .str-chat__input-flat {
                     position: sticky !important;
