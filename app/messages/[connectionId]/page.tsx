@@ -392,145 +392,168 @@ export default function ChatThreadPage() {
         </div>
       </header>
 
-      {/* Messages List - This is the key part */}
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2">
-        {chatClient && connection.stream_channel_id ? (
-          <div className="h-full">
-            <style jsx global>{`
-              .str-chat {
-                height: 100% !important;
-                overflow: hidden !important;
-              }
-              .str-chat__container {
-                height: 100% !important;
-                overflow: hidden !important;
-              }
-              .str-chat__main-panel {
-                height: 100% !important;
-                display: flex !important;
-                flex-direction: column !important;
-                overflow: hidden !important;
-              }
-              .str-chat__list {
-                flex: 1 !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
-                -webkit-overflow-scrolling: touch !important;
-                min-height: 0 !important;
-                overscroll-behavior: contain !important;
-              }
-              .str-chat__input-flat {
-                flex-shrink: 0 !important;
-                background: white !important;
-                border-top: 1px solid #e2e8f0 !important;
-                position: sticky !important;
-                bottom: 0 !important;
-                z-index: 10 !important;
-                padding: 12px !important;
-                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
-              }
-              .str-chat__message-input {
-                /* Let TextareaAutosize handle height */
-              }
-              .str-chat__textarea {
-                resize: vertical !important;
-                overflow-y: auto !important;
-                line-height: 1.4 !important;
-                padding: 12px !important;
-                font-size: 14px !important;
-                border: 1px solid #e2e8f0 !important;
-                border-radius: 8px !important;
-                transition: height 0.2s ease !important;
-              }
-              .str-chat__textarea:focus {
-                outline: none !important;
-                border-color: #3b82f6 !important;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-              }
-              .str-chat__textarea::placeholder {
-                color: #94a3b8 !important;
-              }
-              /* Ensure the input container grows with content */
-              .str-chat__input-flat .str-chat__message-input-inner {
-                display: flex !important;
-                flex-direction: column !important;
-              }
-              .str-chat__input-flat .str-chat__message-input-inner .str-chat__textarea-wrapper {
-                flex: 1 !important;
-                display: flex !important;
-              }
-              /* Make sure the textarea auto-expands */
-              .str-chat__textarea[data-textarea] {
-                height: auto !important;
-                overflow-y: auto !important;
-              }
-            `}</style>
-            <Chat client={chatClient} theme="str-chat__theme-light">
-              <Channel channel={chatClient.channel('messaging', connection.stream_channel_id)}>
-                <Window>
-                  <MessageList />
-                  <MessageInput 
-                    additionalTextareaProps={{
-                      onInput: (e: any) => {
-                        // Auto-expand textarea
-                        const textarea = e.target;
-                        textarea.style.height = 'auto';
-                        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
-                      }
-                    }}
-                  />
-                </Window>
-                <Thread />
-              </Channel>
-            </Chat>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-2">
-                {creatingChannel ? 'Setting Up Chat...' : !connection.stream_channel_id ? 'Chat Not Available' : 'Initializing Chat...'}
-              </h3>
-              <p className="text-slate-600 mb-4">
-                {creatingChannel 
-                  ? 'Creating your messaging channel, please wait...'
-                  : !connection.stream_channel_id 
-                    ? 'This connection needs to be accepted first to enable messaging.'
-                    : 'Setting up your messaging interface...'
+      {/* Messages + Input share the same flex column */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        {/* Messages List */}
+        <div
+          className="
+            flex-1 min-h-0 overflow-y-auto overscroll-contain
+            px-3 py-2
+            pb-[calc(env(safe-area-inset-bottom,0px)+72px)]
+          "
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {chatClient && connection.stream_channel_id ? (
+            <div className="h-full">
+              <style jsx global>{`
+                .str-chat {
+                  height: 100% !important;
+                  overflow: visible !important;
                 }
-              </p>
-              <div className="text-sm text-slate-500">
-                <p>Connection ID: {connection.id}</p>
-                <p>Status: {connection.status}</p>
-                {connection.stream_channel_id && (
-                  <p>Stream Channel: {connection.stream_channel_id}</p>
-                )}
-                {!connection.stream_channel_id && connection.status === 'accepted' && !creatingChannel && (
-                  <div className="mt-4 space-y-3">
-                    <p className="text-amber-600">⚠️ Stream channel not created. Check server logs.</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={testStreamConfig}
-                        className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-                      >
-                        Test Stream Config
-                      </button>
-                      <button
-                        onClick={() => createStreamChannel(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                      >
-                        Create Stream Channel
-                      </button>
+                .str-chat__container {
+                  height: 100% !important;
+                  overflow: visible !important;
+                }
+                .str-chat__main-panel {
+                  height: 100% !important;
+                  display: flex !important;
+                  flex-direction: column !important;
+                  overflow: visible !important;
+                }
+                .str-chat__list {
+                  flex: 1 !important;
+                  overflow-y: auto !important;
+                  overflow-x: hidden !important;
+                  -webkit-overflow-scrolling: touch !important;
+                  min-height: 0 !important;
+                  overscroll-behavior: contain !important;
+                }
+                /* Hide the Stream Chat input - we'll use our own */
+                .str-chat__input-flat {
+                  display: none !important;
+                }
+              `}</style>
+              <Chat client={chatClient} theme="str-chat__theme-light">
+                <Channel channel={chatClient.channel('messaging', connection.stream_channel_id)}>
+                  <Window>
+                    <MessageList />
+                    {/* Empty MessageInput - we'll use our own below */}
+                    <div style={{ display: 'none' }}>
+                      <MessageInput />
                     </div>
-                  </div>
-                )}
+                  </Window>
+                  <Thread />
+                </Channel>
+              </Chat>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-slate-900 mb-2">
+                  {creatingChannel ? 'Setting Up Chat...' : !connection.stream_channel_id ? 'Chat Not Available' : 'Initializing Chat...'}
+                </h3>
+                <p className="text-slate-600 mb-4">
+                  {creatingChannel 
+                    ? 'Creating your messaging channel, please wait...'
+                    : !connection.stream_channel_id 
+                      ? 'This connection needs to be accepted first to enable messaging.'
+                      : 'Setting up your messaging interface...'
+                  }
+                </p>
+                <div className="text-sm text-slate-500">
+                  <p>Connection ID: {connection.id}</p>
+                  <p>Status: {connection.status}</p>
+                  {connection.stream_channel_id && (
+                    <p>Stream Channel: {connection.stream_channel_id}</p>
+                  )}
+                  {!connection.stream_channel_id && connection.status === 'accepted' && !creatingChannel && (
+                    <div className="mt-4 space-y-3">
+                      <p className="text-amber-600">⚠️ Stream channel not created. Check server logs.</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={testStreamConfig}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                        >
+                          Test Stream Config
+                        </button>
+                        <button
+                          onClick={() => createStreamChannel(true)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        >
+                          Create Stream Channel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+        </div>
+
+        {/* Chat Input - Our own implementation */}
+        {chatClient && connection.stream_channel_id && (
+          <form
+            className="
+              shrink-0
+              sticky bottom-0 z-20
+              border-t bg-white/95 backdrop-blur
+              p-3
+              [padding-bottom:calc(env(safe-area-inset-bottom,0px)+12px)]
+            "
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const message = formData.get('message') as string;
+              if (message.trim()) {
+                try {
+                  const channel = chatClient.channel('messaging', connection.stream_channel_id);
+                  await channel.sendMessage({
+                    text: message.trim(),
+                  });
+                  // Clear the input
+                  (e.currentTarget.querySelector('textarea') as HTMLTextAreaElement).value = '';
+                  (e.currentTarget.querySelector('textarea') as HTMLTextAreaElement).style.height = 'auto';
+                } catch (error) {
+                  console.error('Error sending message:', error);
+                }
+              }
+            }}
+          >
+            <div className="flex items-end gap-2">
+              <textarea
+                name="message"
+                className="
+                  w-full rounded-xl border p-3 max-h-40
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                  resize-none
+                "
+                rows={1}
+                placeholder="Type a message…"
+                onInput={(e) => {
+                  // Auto-expand textarea
+                  const textarea = e.currentTarget;
+                  textarea.style.height = 'auto';
+                  textarea.style.height = Math.min(textarea.scrollHeight, 160) + 'px';
+                }}
+                onFocus={(e) => {
+                  // Nudge into view when mobile keyboard opens
+                  e.currentTarget.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }}
+              />
+              <button
+                type="submit"
+                className="rounded-xl bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
+              >
+                Send
+              </button>
+            </div>
+          </form>
         )}
       </div>
       
