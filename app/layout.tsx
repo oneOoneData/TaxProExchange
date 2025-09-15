@@ -67,6 +67,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Viewport meta for proper mobile behavior */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        
         {/* JSON-LD Schema Markup */}
         <script
           type="application/ld+json"
