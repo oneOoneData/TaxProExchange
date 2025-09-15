@@ -351,9 +351,9 @@ export default function ChatThreadPage() {
   const otherProfile = getOtherProfile();
 
   return (
-    <div className="h-screen bg-gradient-to-b from-white to-slate-50 flex flex-col md:min-h-screen">
+    <div className="fixed inset-0 bg-gradient-to-b from-white to-slate-50 flex flex-col md:relative md:min-h-screen">
       {/* Header */}
-      <header className="flex-shrink-0 backdrop-blur bg-white/70 border-b border-slate-200">
+      <header className="flex-shrink-0 backdrop-blur bg-white/70 border-b border-slate-200 z-10">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
@@ -368,7 +368,7 @@ export default function ChatThreadPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-4 md:py-8 overflow-hidden pb-16 md:pb-0">
+      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-4 md:py-8 overflow-hidden pb-16 md:pb-0 min-h-0">
         {/* Chat Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
@@ -406,23 +406,30 @@ export default function ChatThreadPage() {
               <style jsx global>{`
                 .str-chat {
                   height: 100% !important;
+                  overflow: hidden !important;
                 }
                 .str-chat__container {
                   height: 100% !important;
+                  overflow: hidden !important;
                 }
                 .str-chat__main-panel {
                   height: 100% !important;
                   display: flex !important;
                   flex-direction: column !important;
+                  overflow: hidden !important;
                 }
                 .str-chat__list {
                   flex: 1 !important;
                   overflow-y: auto !important;
+                  overflow-x: hidden !important;
+                  -webkit-overflow-scrolling: touch !important;
                 }
                 .str-chat__input-flat {
                   flex-shrink: 0 !important;
                   background: white !important;
                   border-top: 1px solid #e2e8f0 !important;
+                  position: relative !important;
+                  z-index: 5 !important;
                 }
                 .str-chat__message-input {
                   /* Let TextareaAutosize handle height */
@@ -458,6 +465,18 @@ export default function ChatThreadPage() {
                 .str-chat__textarea[data-textarea] {
                   height: auto !important;
                   overflow-y: auto !important;
+                }
+                
+                /* Mobile-specific fixes */
+                @media (max-width: 768px) {
+                  .str-chat__list {
+                    max-height: calc(100vh - 200px) !important;
+                  }
+                  .str-chat__input-flat {
+                    position: sticky !important;
+                    bottom: 0 !important;
+                    z-index: 10 !important;
+                  }
                 }
                 
               `}</style>
