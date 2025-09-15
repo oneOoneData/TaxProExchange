@@ -400,7 +400,7 @@ export default function ChatThreadPage() {
         </div>
 
         {/* Chat Interface */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0 max-h-[calc(100vh-200px)] md:max-h-none">
           {chatClient && connection.stream_channel_id ? (
             <div className="flex-1 flex flex-col">
               <style jsx global>{`
@@ -424,7 +424,6 @@ export default function ChatThreadPage() {
                   overflow-x: hidden !important;
                   -webkit-overflow-scrolling: touch !important;
                   min-height: 0 !important;
-                  max-height: none !important;
                 }
                 .str-chat__input-flat {
                   flex-shrink: 0 !important;
@@ -472,7 +471,8 @@ export default function ChatThreadPage() {
                 /* Mobile-specific fixes */
                 @media (max-width: 768px) {
                   .str-chat__list {
-                    /* Remove height restriction to allow full scrolling */
+                    /* Set proper height to prevent page scroll while allowing full chat scroll */
+                    max-height: calc(100vh - 180px) !important;
                     min-height: 0 !important;
                     padding-bottom: 20px !important;
                   }
