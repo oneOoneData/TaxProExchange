@@ -367,7 +367,7 @@ export default function ChatThreadPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-8 pb-20 md:pb-8">
         {/* Chat Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
@@ -399,7 +399,7 @@ export default function ChatThreadPage() {
         </div>
 
         {/* Chat Interface */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden h-[500px] md:h-[600px] lg:h-[700px] flex flex-col">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden h-[calc(100vh-200px)] md:h-[600px] lg:h-[700px] flex flex-col">
           {chatClient && connection.stream_channel_id ? (
             <div className="flex-1 flex flex-col">
               <style jsx global>{`
@@ -417,9 +417,17 @@ export default function ChatThreadPage() {
                 .str-chat__list {
                   flex: 1 !important;
                   overflow-y: auto !important;
+                  /* Add padding bottom on mobile to account for bottom nav */
+                  padding-bottom: 80px !important;
                 }
                 .str-chat__input-flat {
                   flex-shrink: 0 !important;
+                  /* Ensure input stays above mobile bottom nav */
+                  position: sticky !important;
+                  bottom: 0 !important;
+                  background: white !important;
+                  border-top: 1px solid #e2e8f0 !important;
+                  z-index: 10 !important;
                 }
                 .str-chat__message-input {
                   /* Let TextareaAutosize handle height */
@@ -455,6 +463,17 @@ export default function ChatThreadPage() {
                 .str-chat__textarea[data-textarea] {
                   height: auto !important;
                   overflow-y: auto !important;
+                }
+                
+                /* Mobile-specific adjustments */
+                @media (max-width: 768px) {
+                  .str-chat__list {
+                    padding-bottom: 100px !important;
+                  }
+                  .str-chat__input-flat {
+                    padding: 12px !important;
+                    margin-bottom: 0 !important;
+                  }
                 }
               `}</style>
               <Chat client={chatClient} theme="str-chat__theme-light">
