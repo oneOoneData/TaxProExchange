@@ -10,6 +10,19 @@ import MobileBottomNav from '@/components/MobileBottomNav';
 import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 import { useEffect, useState } from 'react';
 
+// Real viewport height hook for mobile browsers
+function useRealVH() {
+  useEffect(() => {
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+    setVH();
+    window.addEventListener("resize", setVH);
+    return () => window.removeEventListener("resize", setVH);
+  }, []);
+}
+
 const inter = Inter({ subsets: ['latin'] });
 
 // Google Analytics Measurement IDs
@@ -24,6 +37,9 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
   const [isApp, setIsApp] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [currentPath, setCurrentPath] = useState('');
+
+  // Set up real viewport height for mobile browsers
+  useRealVH();
 
   useEffect(() => {
     setIsClient(true);
