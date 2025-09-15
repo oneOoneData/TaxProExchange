@@ -351,27 +351,18 @@ export default function ChatThreadPage() {
   const otherProfile = getOtherProfile();
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-white to-slate-50 flex flex-col md:relative md:min-h-screen">
+    <div
+      className="fixed inset-0 flex flex-col bg-white md:relative md:min-h-screen"
+      style={{
+        // Use true viewport height on mobile browsers
+        height: "calc(var(--vh) * 100)",
+        touchAction: "manipulation",
+      }}
+    >
       {/* Header */}
-      <header className="flex-shrink-0 backdrop-blur bg-white/70 border-b border-slate-200 z-10">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <Logo />
-          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <Link href="/" className="hover:text-slate-900">Home</Link>
-            <Link href="/search" className="hover:text-slate-900">Search</Link>
-            <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
-          </nav>
-          <UserMenu 
-            userName={user.fullName || undefined}
-            userEmail={user.primaryEmailAddress?.emailAddress}
-          />
-        </div>
-      </header>
-
-      <div className="flex-1 flex flex-col mx-auto max-w-4xl w-full px-4 py-1 md:py-8 overflow-hidden pb-16 md:pb-0 min-h-0">
-        {/* Chat Header */}
-        <div className="mb-2">
-          <div className="flex items-center gap-4 mb-2">
+      <header className="shrink-0 border-b p-3 bg-white/95 backdrop-blur">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <Link
               href="/messages"
               className="text-slate-600 hover:text-slate-900 transition-colors"
@@ -381,131 +372,121 @@ export default function ChatThreadPage() {
               </svg>
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
                 <span className="text-sm font-semibold text-slate-600">
                   {otherProfile?.first_name[0]}{otherProfile?.last_name[0]}
                 </span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-slate-900">
+                <h1 className="text-base font-medium text-slate-900">
                   {otherProfile?.first_name} {otherProfile?.last_name}
                 </h1>
                 <p className="text-slate-600 text-sm">{otherProfile?.headline}</p>
-                {otherProfile?.firm_name && (
-                  <p className="text-slate-500 text-xs">{otherProfile.firm_name}</p>
-                )}
               </div>
             </div>
           </div>
+          <UserMenu 
+            userName={user.fullName || undefined}
+            userEmail={user.primaryEmailAddress?.emailAddress}
+          />
         </div>
+      </header>
 
-        {/* Chat Interface */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex-1 flex flex-col min-h-0 max-h-[calc(100vh-100px)] md:max-h-none">
-          {chatClient && connection.stream_channel_id ? (
-            <div className="flex-1 flex flex-col">
-              <style jsx global>{`
-                .str-chat {
-                  height: 100% !important;
-                  overflow: hidden !important;
-                }
-                .str-chat__container {
-                  height: 100% !important;
-                  overflow: hidden !important;
-                }
-                .str-chat__main-panel {
-                  height: 100% !important;
-                  display: flex !important;
-                  flex-direction: column !important;
-                  overflow: hidden !important;
-                }
-                .str-chat__list {
-                  flex: 1 !important;
-                  overflow-y: auto !important;
-                  overflow-x: hidden !important;
-                  -webkit-overflow-scrolling: touch !important;
-                  min-height: 0 !important;
-                }
-                .str-chat__input-flat {
-                  flex-shrink: 0 !important;
-                  background: white !important;
-                  border-top: 1px solid #e2e8f0 !important;
-                  position: sticky !important;
-                  bottom: 0 !important;
-                  z-index: 10 !important;
-                }
-                .str-chat__message-input {
-                  /* Let TextareaAutosize handle height */
-                }
-                .str-chat__textarea {
-                  resize: vertical !important;
-                  overflow-y: auto !important;
-                  line-height: 1.4 !important;
-                  padding: 12px !important;
-                  font-size: 14px !important;
-                  border: 1px solid #e2e8f0 !important;
-                  border-radius: 8px !important;
-                  transition: height 0.2s ease !important;
-                }
-                .str-chat__textarea:focus {
-                  outline: none !important;
-                  border-color: #3b82f6 !important;
-                  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-                }
-                .str-chat__textarea::placeholder {
-                  color: #94a3b8 !important;
-                }
-                /* Ensure the input container grows with content */
-                .str-chat__input-flat .str-chat__message-input-inner {
-                  display: flex !important;
-                  flex-direction: column !important;
-                }
-                .str-chat__input-flat .str-chat__message-input-inner .str-chat__textarea-wrapper {
-                  flex: 1 !important;
-                  display: flex !important;
-                }
-                /* Make sure the textarea auto-expands */
-                .str-chat__textarea[data-textarea] {
-                  height: auto !important;
-                  overflow-y: auto !important;
-                }
-                
-                /* Mobile-specific fixes */
-                @media (max-width: 768px) {
-                  .str-chat__list {
-                    /* Set proper height to prevent page scroll while allowing full chat scroll */
-                    max-height: calc(100vh - 80px) !important;
-                    min-height: 0 !important;
-                    padding-bottom: 20px !important;
-                  }
-                  .str-chat__input-flat {
-                    position: sticky !important;
-                    bottom: 0 !important;
-                    z-index: 10 !important;
-                  }
-                }
-                
-              `}</style>
-              <Chat client={chatClient} theme="str-chat__theme-light">
-                <Channel channel={chatClient.channel('messaging', connection.stream_channel_id)}>
-                  <Window>
-                    <MessageList />
-                    <MessageInput 
-                      additionalTextareaProps={{
-                        onInput: (e: any) => {
-                          // Auto-expand textarea
-                          const textarea = e.target;
-                          textarea.style.height = 'auto';
-                          textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
-                        }
-                      }}
-                    />
-                  </Window>
-                  <Thread />
-                </Channel>
-              </Chat>
-            </div>
-          ) : (
-            <div className="p-8 text-center">
+      {/* Messages List - This is the key part */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2">
+        {chatClient && connection.stream_channel_id ? (
+          <div className="h-full">
+            <style jsx global>{`
+              .str-chat {
+                height: 100% !important;
+                overflow: hidden !important;
+              }
+              .str-chat__container {
+                height: 100% !important;
+                overflow: hidden !important;
+              }
+              .str-chat__main-panel {
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+              }
+              .str-chat__list {
+                flex: 1 !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                min-height: 0 !important;
+                overscroll-behavior: contain !important;
+              }
+              .str-chat__input-flat {
+                flex-shrink: 0 !important;
+                background: white !important;
+                border-top: 1px solid #e2e8f0 !important;
+                position: sticky !important;
+                bottom: 0 !important;
+                z-index: 10 !important;
+                padding: 12px !important;
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+              }
+              .str-chat__message-input {
+                /* Let TextareaAutosize handle height */
+              }
+              .str-chat__textarea {
+                resize: vertical !important;
+                overflow-y: auto !important;
+                line-height: 1.4 !important;
+                padding: 12px !important;
+                font-size: 14px !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                transition: height 0.2s ease !important;
+              }
+              .str-chat__textarea:focus {
+                outline: none !important;
+                border-color: #3b82f6 !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+              }
+              .str-chat__textarea::placeholder {
+                color: #94a3b8 !important;
+              }
+              /* Ensure the input container grows with content */
+              .str-chat__input-flat .str-chat__message-input-inner {
+                display: flex !important;
+                flex-direction: column !important;
+              }
+              .str-chat__input-flat .str-chat__message-input-inner .str-chat__textarea-wrapper {
+                flex: 1 !important;
+                display: flex !important;
+              }
+              /* Make sure the textarea auto-expands */
+              .str-chat__textarea[data-textarea] {
+                height: auto !important;
+                overflow-y: auto !important;
+              }
+            `}</style>
+            <Chat client={chatClient} theme="str-chat__theme-light">
+              <Channel channel={chatClient.channel('messaging', connection.stream_channel_id)}>
+                <Window>
+                  <MessageList />
+                  <MessageInput 
+                    additionalTextareaProps={{
+                      onInput: (e: any) => {
+                        // Auto-expand textarea
+                        const textarea = e.target;
+                        textarea.style.height = 'auto';
+                        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+                      }
+                    }}
+                  />
+                </Window>
+                <Thread />
+              </Channel>
+            </Chat>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -549,8 +530,8 @@ export default function ChatThreadPage() {
                 )}
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       
       {/* Mobile Bottom Navigation */}
