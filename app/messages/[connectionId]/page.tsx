@@ -354,10 +354,8 @@ export default function ChatThreadPage() {
     <div
       className="fixed inset-0 flex flex-col bg-white md:relative md:min-h-screen page"
       style={{
-        // Use iOS-compatible viewport height
+        // Use iOS-compatible viewport height with fallbacks
         minHeight: "100dvh",
-        minHeight: "100svh",
-        minHeight: "-webkit-fill-available",
         touchAction: "manipulation",
       }}
     >
