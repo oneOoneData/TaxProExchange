@@ -352,10 +352,12 @@ export default function ChatThreadPage() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col bg-white md:relative md:min-h-screen"
+      className="fixed inset-0 flex flex-col bg-white md:relative md:min-h-screen page"
       style={{
-        // Use true viewport height on mobile browsers
-        height: "calc(var(--vh) * 100)",
+        // Use iOS-compatible viewport height
+        minHeight: "100dvh",
+        minHeight: "100svh",
+        minHeight: "-webkit-fill-available",
         touchAction: "manipulation",
       }}
     >
@@ -399,9 +401,12 @@ export default function ChatThreadPage() {
           className="
             flex-1 min-h-0 overflow-y-auto overscroll-contain
             px-3 py-2
-            pb-[calc(env(safe-area-inset-bottom,0px)+72px)]
+            chat-scroll
           "
-          style={{ WebkitOverflowScrolling: "touch" }}
+          style={{ 
+            WebkitOverflowScrolling: "touch",
+            paddingBottom: "calc(var(--reply-h) + env(safe-area-inset-bottom))"
+          }}
         >
           {chatClient && connection.stream_channel_id ? (
             <div className="h-full">
@@ -501,11 +506,14 @@ export default function ChatThreadPage() {
           <form
             className="
               shrink-0
-              sticky bottom-0 z-20
+              sticky bottom-0 z-[1000]
               border-t bg-white/95 backdrop-blur
               p-3
-              [padding-bottom:calc(env(safe-area-inset-bottom,0px)+12px)]
+              reply-bar
             "
+            style={{
+              paddingBottom: "calc(12px + env(safe-area-inset-bottom))"
+            }}
             onSubmit={async (e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);

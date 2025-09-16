@@ -14,17 +14,26 @@
   
   /* Real viewport height for mobile browsers */
   --vh: 1vh; /* fallback */
+  
+  /* Reply bar height for spacing calculations */
+  --reply-h: 72px; /* actual input+buttons height */
 }
 
 /* Mobile-first base styles */
 @layer base {
   html {
     scroll-behavior: smooth;
+    height: 100%;
   }
   
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100%;
+    min-height: 100dvh; /* iOS16+ */
+    min-height: 100svh; /* small viewport unit fallback */
+    /* Extra fallback for older iOS */
+    min-height: -webkit-fill-available;
   }
   
   /* Prevent horizontal scroll on mobile */
@@ -35,6 +44,16 @@
   /* Safe area support for mobile devices */
   .safe-area-inset {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* iOS viewport fixes for full-height containers */
+  .app,
+  .page {
+    min-height: 100%;
+    min-height: 100dvh; /* iOS16+ */
+    min-height: 100svh; /* small viewport unit fallback */
+    /* Extra fallback for older iOS */
+    min-height: -webkit-fill-available;
   }
 }
 
@@ -77,6 +96,20 @@
   .mobile-menu-btn {
     @apply md:hidden p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors touch-target border border-slate-200;
     z-index: 10;
+  }
+  
+  /* Reply bar - iOS safe area aware */
+  .reply-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 1000;
+    background: #fff;
+    border-top: 1px solid #e5e5e5;
+  }
+  
+  /* Chat scroll area with proper spacing */
+  .chat-scroll {
+    /* padding-bottom set via CSS variable in component */
   }
 }
 
