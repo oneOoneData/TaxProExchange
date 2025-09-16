@@ -61,7 +61,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
   }
 
   return (
-    <nav className={`fixed bottom-0 inset-x-0 z-40 border-t bg-white/90 backdrop-blur safe-area-inset md:hidden ${className}`}>
+    <nav className={`fixed bottom-0 inset-x-0 z-[900] border-t bg-white/90 backdrop-blur safe-area-inset md:hidden ${className}`}>
       <div className="mx-auto max-w-screen-sm px-4 py-2">
         <div className="grid grid-cols-3 gap-2">
           {navItems.map((item) => {
