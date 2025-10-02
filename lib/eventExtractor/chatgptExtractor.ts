@@ -108,7 +108,7 @@ HTML Content:\n${truncatedHtml}`
         }
       ],
       temperature: 0.1, // Low temperature for consistent extraction
-      max_tokens: 1000,
+      max_completion_tokens: 1000,
     });
 
     const content = completion.choices[0]?.message?.content;
