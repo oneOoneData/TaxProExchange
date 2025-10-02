@@ -67,8 +67,7 @@ export async function GET() {
         tags,
         organizer,
         reviewed_at,
-        reviewed_by,
-        profiles!events_reviewed_by_fkey(full_name)
+        reviewed_by
       `)
       .order("created_at", { ascending: false });
 
