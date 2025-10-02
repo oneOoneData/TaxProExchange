@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import chrono from "chrono-node";
+import * as chrono from "chrono-node";
 import { EventPayload } from "./types";
 
 export function extractByHeuristics(html: string, finalUrl: string): Partial<EventPayload> {
