@@ -1,7 +1,6 @@
 import { EventPayload } from "./types";
 import { fetchFollow } from "./fetchPage";
 import { extractFromJsonLd } from "./fromJsonLd";
-import { extractFromIcs } from "./fromIcs";
 import { extractFromMeta } from "./fromMeta";
 import { extractByHeuristics } from "./heuristics";
 
@@ -12,15 +11,8 @@ export async function extractEvent(url: string): Promise<EventPayload> {
     return { sourceUrl: url, canonicalUrl: fetched.finalUrl, raw: { status: fetched.status } };
   }
 
-  // ICS first
-  if (fetched.contentType?.includes("text/calendar") || fetched.finalUrl.endsWith(".ics")) {
-    const fromIcs = fetched.buffer ? extractFromIcs(fetched.buffer, fetched.finalUrl) : null;
-    return {
-      sourceUrl: url,
-      canonicalUrl: fromIcs?.canonicalUrl || fetched.finalUrl,
-      ...fromIcs
-    } as EventPayload;
-  }
+  // Skip ICS parsing for now (causing build issues)
+  // TODO: Add ICS parsing back with proper types
 
   const html = fetched.text || "";
   const fromJsonLd = extractFromJsonLd(html, fetched.finalUrl);
