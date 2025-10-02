@@ -27,6 +27,8 @@ export default function EventsReviewPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending_review' | 'approved' | 'rejected'>('pending_review');
+  const [editingEvent, setEditingEvent] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Event>>({});
 
   useEffect(() => {
     loadEvents();
@@ -61,6 +63,61 @@ export default function EventsReviewPage() {
     } catch (error) {
       console.error('Error updating event:', error);
       alert('Error updating event status');
+    }
+  };
+
+  const startEditing = (event: Event) => {
+    setEditingEvent(event.id);
+    setEditForm({
+      title: event.title,
+      description: event.description,
+      candidate_url: event.candidate_url,
+      canonical_url: event.canonical_url,
+      location_city: event.location_city,
+      location_state: event.location_state,
+      organizer: event.organizer,
+      admin_notes: event.admin_notes
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingEvent(null);
+    setEditForm({});
+  };
+
+  const saveEventEdit = async (eventId: string) => {
+    try {
+      const response = await fetch('/api/admin/events-review', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          eventId, 
+          status: 'needs_edit',
+          notes: editForm.admin_notes,
+          updates: {
+            title: editForm.title,
+            description: editForm.description,
+            candidate_url: editForm.candidate_url,
+            canonical_url: editForm.canonical_url,
+            location_city: editForm.location_city,
+            location_state: editForm.location_state,
+            organizer: editForm.organizer
+          }
+        })
+      });
+
+      if (response.ok) {
+        await loadEvents();
+        setEditingEvent(null);
+        setEditForm({});
+        alert('Event updated successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating event:', error);
+      alert('Error updating event');
     }
   };
 
@@ -256,8 +313,103 @@ export default function EventsReviewPage() {
                     </div>
                   )}
 
+                  {/* Edit Form */}
+                  {editingEvent === event.id && (
+                    <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+                      <h4 className="text-lg font-medium mb-4">Edit Event Details</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                          <input
+                            type="text"
+                            value={editForm.title || ''}
+                            onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                          <textarea
+                            value={editForm.description || ''}
+                            onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Location City</label>
+                            <input
+                              type="text"
+                              value={editForm.location_city || ''}
+                              onChange={(e) => setEditForm({...editForm, location_city: e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Location State</label>
+                            <input
+                              type="text"
+                              value={editForm.location_state || ''}
+                              onChange={(e) => setEditForm({...editForm, location_state: e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Event URL</label>
+                          <input
+                            type="url"
+                            value={editForm.candidate_url || ''}
+                            onChange={(e) => setEditForm({...editForm, candidate_url: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Organizer</label>
+                          <input
+                            type="text"
+                            value={editForm.organizer || ''}
+                            onChange={(e) => setEditForm({...editForm, organizer: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes</label>
+                          <textarea
+                            value={editForm.admin_notes || ''}
+                            onChange={(e) => setEditForm({...editForm, admin_notes: e.target.value})}
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="Add notes about your edits..."
+                          />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveEventEdit(event.id)}
+                            className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+                          >
+                            💾 Save Changes
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700"
+                          >
+                            ❌ Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Action Buttons */}
-                  {event.review_status === 'pending_review' && (
+                  {event.review_status === 'pending_review' && !editingEvent && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => updateEventStatus(event.id, 'approved')}
@@ -272,13 +424,10 @@ export default function EventsReviewPage() {
                         ❌ Reject
                       </button>
                       <button
-                        onClick={() => {
-                          const notes = prompt('Enter notes for why this needs editing:');
-                          if (notes) updateEventStatus(event.id, 'needs_edit', notes);
-                        }}
+                        onClick={() => startEditing(event)}
                         className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
                       >
-                        ✏️ Needs Edit
+                        ✏️ Edit Event
                       </button>
                     </div>
                   )}
