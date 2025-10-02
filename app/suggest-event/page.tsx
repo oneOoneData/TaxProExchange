@@ -17,7 +17,9 @@ export default function SuggestEventPage() {
     additionalInfo: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScraping, setIsScraping] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -26,6 +28,51 @@ export default function SuggestEventPage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleUrlScrape = async () => {
+    if (!formData.eventUrl.trim()) {
+      setScrapeError('Please enter a URL first');
+      return;
+    }
+
+    setIsScraping(true);
+    setScrapeError(null);
+
+    try {
+      const response = await fetch('/api/events/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: formData.eventUrl }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const scrapedData = result.data;
+
+        // Update form with scraped data
+        setFormData(prev => ({
+          ...prev,
+          title: scrapedData.title || prev.title,
+          description: scrapedData.description || prev.description,
+          startDate: scrapedData.startDate || prev.startDate,
+          endDate: scrapedData.endDate || prev.endDate,
+          locationCity: scrapedData.locationCity || prev.locationCity,
+          locationState: scrapedData.locationState || prev.locationState,
+          organizer: scrapedData.organizer || prev.organizer,
+        }));
+      } else {
+        const error = await response.json();
+        setScrapeError(error.error || 'Failed to scrape event data');
+      }
+    } catch (error) {
+      console.error('Error scraping URL:', error);
+      setScrapeError('Failed to scrape event data');
+    } finally {
+      setIsScraping(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,11 +137,11 @@ export default function SuggestEventPage() {
         >
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-slate-900 mb-2">
-              Know of a Great Tax Event?
+              Suggest an Event
             </h2>
             <p className="text-slate-600">
-              Help the community by suggesting conferences, workshops, webinars, or other tax-related events.
-              Our team will review and add them to our curated list.
+              Just provide the conference URL and we'll automatically extract the details for you!
+              Our team will review and add it to our curated list.
             </p>
           </div>
 
@@ -127,6 +174,39 @@ export default function SuggestEventPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Event URL - Primary input */}
+            <div>
+              <label htmlFor="eventUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                Conference URL *
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  id="eventUrl"
+                  name="eventUrl"
+                  required
+                  value={formData.eventUrl}
+                  onChange={handleInputChange}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="https://example.com/conference-2024"
+                />
+                <button
+                  type="button"
+                  onClick={handleUrlScrape}
+                  disabled={isScraping || !formData.eventUrl.trim()}
+                  className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isScraping ? '🔄 Scraping...' : '🔍 Auto-fill'}
+                </button>
+              </div>
+              {scrapeError && (
+                <p className="mt-2 text-sm text-red-600">{scrapeError}</p>
+              )}
+              <p className="mt-1 text-sm text-gray-500">
+                We'll automatically extract the event details from this URL. You can edit any fields below if needed.
+              </p>
+            </div>
+
             {/* Event Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -276,22 +356,6 @@ export default function SuggestEventPage() {
               </div>
             </div>
 
-            {/* Event URL */}
-            <div>
-              <label htmlFor="eventUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                Event Website/Registration URL *
-              </label>
-              <input
-                type="url"
-                id="eventUrl"
-                name="eventUrl"
-                required
-                value={formData.eventUrl}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="https://example.com/event"
-              />
-            </div>
 
             {/* Organizer */}
             <div>
