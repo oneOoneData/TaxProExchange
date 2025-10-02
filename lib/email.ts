@@ -14,6 +14,24 @@ export interface JobCreatedEmailData {
   recipientName: string;
 }
 
+export interface AdminEventsNotificationData {
+  adminName: string;
+  totalEvents: number;
+  ingestedEvents: number;
+  updatedEvents: number;
+  validationResults: {
+    processed: number;
+    validated: number;
+    publishable: number;
+    errors: number;
+  };
+  reviewUrl: string;
+  dateRange: {
+    from: string;
+    to: string;
+  };
+}
+
 export interface ProfileCompletionEmailData {
   profileId: string;
   firstName: string;
@@ -23,6 +41,8 @@ export interface ProfileCompletionEmailData {
   headline: string;
   firmName: string;
   adminViewLink: string;
+  approveLink: string;
+  rejectLink: string;
 }
 
 export interface ConnectionRequestEmailData {
@@ -182,13 +202,24 @@ export const emailTemplates = {
           </div>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${data.adminViewLink}" style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">Review & Verify Profile</a>
+            <a href="${data.adminViewLink}" style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block; margin-right: 10px;">Review Full Profile</a>
+          </div>
+          
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #0c4a6e; font-size: 16px;">Quick Actions</h3>
+            <div style="text-align: center;">
+              <a href="${data.approveLink}" style="background: #10b981; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block; margin-right: 10px;">✓ Approve Profile</a>
+              <a href="${data.rejectLink}" style="background: #dc2626; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">✗ Reject Profile</a>
+            </div>
+            <p style="margin: 15px 0 0 0; color: #0c4a6e; font-size: 14px;">
+              <strong>Note:</strong> These buttons will approve/reject the profile immediately. Use "Review Full Profile" for detailed review.
+            </p>
           </div>
           
           <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
             <p style="margin: 0; color: #92400e;">
               <strong>Action Required:</strong> This profile has completed onboarding and is ready for your review. 
-              Click the button above to view their full profile and approve or reject their verification.
+              You can approve/reject directly from this email or review the full profile first.
             </p>
           </div>
           
@@ -199,7 +230,7 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\nHeadline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\n\nReview Profile: ${data.adminViewLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
+    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\nHeadline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
   }),
 
   connectionRequest: (data: ConnectionRequestEmailData): EmailTemplate => ({
@@ -290,6 +321,98 @@ export const emailTemplates = {
       </html>
     `,
     text: `New message from ${data.senderName}\n\nFrom: ${data.senderName}\nFirm: ${data.senderFirm || 'Not specified'}\n\nMessage: "${data.messagePreview}"\n\nView Message: ${data.messageLink}`
+  }),
+
+  adminEventsNotification: (data: AdminEventsNotificationData): EmailTemplate => ({
+    subject: `📅 Weekly Events Update - ${data.ingestedEvents} New Events Ready for Review`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Weekly Events Update</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">📅 Weekly Events Update</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Hello ${data.adminName}!</h2>
+            
+            <p style="margin: 15px 0; font-size: 16px;">
+              The weekly events refresh has completed. Here's what was found:
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #667eea;">
+              <h3 style="margin-top: 0; color: #2d3748;">📊 Summary</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Total Events Found:</strong> ${data.totalEvents}</li>
+                <li><strong>New Events Added:</strong> ${data.ingestedEvents}</li>
+                <li><strong>Events Updated:</strong> ${data.updatedEvents}</li>
+                <li><strong>Date Range:</strong> ${data.dateRange.from} to ${data.dateRange.to}</li>
+              </ul>
+            </div>
+
+            <div style="background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #48bb78;">
+              <h3 style="margin-top: 0; color: #2d3748;">🔍 Link Validation Results</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Events Processed:</strong> ${data.validationResults.processed}</li>
+                <li><strong>Successfully Validated:</strong> ${data.validationResults.validated}</li>
+                <li><strong>High Quality URLs:</strong> ${data.validationResults.publishable}</li>
+                <li><strong>Validation Errors:</strong> ${data.validationResults.errors}</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${data.reviewUrl}" style="display: inline-block; background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
+                📋 Review Events Now
+              </a>
+            </div>
+            
+            <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ffc107;">
+              <p style="margin: 0; color: #856404; font-size: 14px;">
+                <strong>💡 Reminder:</strong> Only events you approve will be shown to users. 
+                Please review the URLs and event details before approving.
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #718096; font-size: 14px;">
+            <p>This is an automated notification from TaxProExchange.</p>
+            <p>Events are refreshed weekly on Mondays at 6 AM UTC.</p>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+Weekly Events Update - ${data.ingestedEvents} New Events Ready for Review
+
+Hello ${data.adminName}!
+
+The weekly events refresh has completed. Here's what was found:
+
+📊 Summary:
+- Total Events Found: ${data.totalEvents}
+- New Events Added: ${data.ingestedEvents}
+- Events Updated: ${data.updatedEvents}
+- Date Range: ${data.dateRange.from} to ${data.dateRange.to}
+
+🔍 Link Validation Results:
+- Events Processed: ${data.validationResults.processed}
+- Successfully Validated: ${data.validationResults.validated}
+- High Quality URLs: ${data.validationResults.publishable}
+- Validation Errors: ${data.validationResults.errors}
+
+📋 Review Events: ${data.reviewUrl}
+
+💡 Reminder: Only events you approve will be shown to users. 
+Please review the URLs and event details before approving.
+
+This is an automated notification from TaxProExchange.
+Events are refreshed weekly on Mondays at 6 AM UTC.
+    `
   })
 };
 
@@ -314,7 +437,7 @@ export async function sendEmail({
   headers: customHeaders = {},
 }: SendEmailArgs) {
   try {
-    const from = process.env.EMAIL_FROM || 'support@taxproexchange.com';
+    const from = process.env.EMAIL_FROM || 'TaxProExchange <support@taxproexchange.com>';
     const headers: Record<string, string> = {
       'List-Unsubscribe': listUnsubscribe,
       ...customHeaders,
@@ -354,17 +477,25 @@ export async function sendEmailLegacy(to: string, template: EmailTemplate) {
   });
 }
 
+// Send admin events notification
+export async function sendAdminEventsNotification(data: AdminEventsNotificationData & { email: string }) {
+  const template = emailTemplates.adminEventsNotification(data);
+  return sendEmailLegacy(data.email, template);
+}
+
 // Send job created notification
 export async function sendJobCreatedNotification(data: JobCreatedEmailData) {
   const template = emailTemplates.jobCreated(data);
   return sendEmailLegacy(data.recipientEmail, template);
 }
 
-// Batch send job notifications
+// Batch send job notifications with rate limiting
 export async function sendBatchJobNotifications(notifications: JobCreatedEmailData[]) {
   const results = [];
   
-  for (const notification of notifications) {
+  for (let i = 0; i < notifications.length; i++) {
+    const notification = notifications[i];
+    
     try {
       const result = await sendJobCreatedNotification(notification);
       results.push({ success: true, email: notification.recipientEmail, result });
@@ -372,6 +503,12 @@ export async function sendBatchJobNotifications(notifications: JobCreatedEmailDa
       console.error(`Failed to send notification to ${notification.recipientEmail}:`, error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       results.push({ success: false, email: notification.recipientEmail, error: errorMessage });
+    }
+    
+    // Rate limiting: Wait 500ms between requests to stay under 2 req/sec limit
+    // This gives us ~2 requests per second with some buffer
+    if (i < notifications.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
   

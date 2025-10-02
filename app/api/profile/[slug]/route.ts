@@ -144,6 +144,8 @@ export async function GET(
     console.log('  - Profile data:', profile);
     console.log('  - Profile error:', profileError);
     console.log('  - Query conditions: slug=', slug, 'visibility_state=verified, is_listed=true');
+    console.log('  - Admin access:', isAdminAccess);
+    console.log('  - User is admin:', userIsAdmin);
 
     if (profileError || !profile) {
       console.log('❌ Profile not found for slug:', slug);

@@ -9,6 +9,7 @@ import Logo from '@/components/Logo';
 import { COUNTRIES, getCountryName } from '@/lib/constants/countries';
 import SpecializationPicker from '@/components/SpecializationPicker';
 import CredentialSection from '@/components/forms/CredentialSection';
+import MentorshipTopicPicker from '@/components/MentorshipTopicPicker';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,10 @@ interface ProfileForm {
   other_software_raw?: string;
   years_experience?: string;
   entity_revenue_range?: string;
+  // Mentorship preferences
+  is_open_to_mentor: boolean;
+  is_seeking_mentor: boolean;
+  mentorship_topics: string[];
   primary_location: {
     country: string;
     state: string | null;
@@ -185,6 +190,10 @@ export default function EditProfilePage() {
     works_international: false,
     countries: [],
     specializations: [],
+    // Mentorship preferences
+    is_open_to_mentor: false,
+    is_seeking_mentor: false,
+    mentorship_topics: [],
     states: [],
     software: [],
     other_software: [],
@@ -237,6 +246,29 @@ export default function EditProfilePage() {
               }
             }
             
+            // Load mentorship preferences
+            let mentorshipPrefs = {
+              is_open_to_mentor: false,
+              is_seeking_mentor: false,
+              mentorship_topics: []
+            };
+            
+            try {
+              const mentorshipRes = await fetch('/api/mentorship/preferences');
+              if (mentorshipRes.ok) {
+                const mentorshipData = await mentorshipRes.json();
+                if (mentorshipData.preferences) {
+                  mentorshipPrefs = {
+                    is_open_to_mentor: mentorshipData.preferences.is_open_to_mentor || false,
+                    is_seeking_mentor: mentorshipData.preferences.is_seeking_mentor || false,
+                    mentorship_topics: mentorshipData.preferences.topics || []
+                  };
+                }
+              }
+            } catch (error) {
+              console.error('Failed to load mentorship preferences:', error);
+            }
+
             setProfileForm(prev => ({
               ...prev,
               first_name: p.first_name || user.firstName || '',
@@ -257,6 +289,10 @@ export default function EditProfilePage() {
               works_international: p.works_international ?? false,
               countries: p.countries || [],
               specializations: p.specializations || [],
+              // Mentorship preferences
+              is_open_to_mentor: mentorshipPrefs.is_open_to_mentor,
+              is_seeking_mentor: mentorshipPrefs.is_seeking_mentor,
+              mentorship_topics: mentorshipPrefs.mentorship_topics,
               states:     p.states     || [],
               software:   p.software   || [],
               other_software: p.other_software || [],
@@ -347,6 +383,24 @@ export default function EditProfilePage() {
         const result = await response.json();
         console.log('Profile update successful:', result);
         
+        // Save mentorship preferences
+        try {
+          await fetch('/api/mentorship/preferences', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              is_open_to_mentor: profileForm.is_open_to_mentor,
+              is_seeking_mentor: profileForm.is_seeking_mentor,
+              topics: profileForm.mentorship_topics
+            }),
+          });
+        } catch (mentorshipError) {
+          console.error('Failed to save mentorship preferences:', mentorshipError);
+          // Don't fail the entire save if mentorship preferences fail
+        }
+
         // Mark onboarding as complete and show wrap-up screen
         await fetch('/api/mark-onboarding-complete', { method: 'POST' });
         setShowWrapUp(true);
@@ -669,6 +723,10 @@ export default function EditProfilePage() {
                     works_international: false,
                     countries: [],
                     specializations: [],
+                    // Mentorship preferences
+                    is_open_to_mentor: false,
+                    is_seeking_mentor: false,
+                    mentorship_topics: [],
                     states: [],
                     software: [],
                     other_software: []
@@ -1030,6 +1088,60 @@ export default function EditProfilePage() {
               <p className="text-xs text-slate-500 ml-6">
                 When enabled, your email, phone, and LinkedIn will be visible to all visitors. When disabled, only signed-in users can see your contact information.
               </p>
+
+              {/* Mentorship Section */}
+              <div className="space-y-4 pt-6 border-t border-slate-200">
+                <div>
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Mentorship</h3>
+                  <p className="text-sm text-slate-600 mb-4">
+                    Connect with other tax professionals for mentorship opportunities. Mentorship matches use your locations & topics.
+                  </p>
+                </div>
+
+                {/* Open to Mentor */}
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="is_open_to_mentor"
+                    checked={profileForm.is_open_to_mentor}
+                    onChange={(e) => updateForm('is_open_to_mentor', e.target.checked)}
+                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                  />
+                  <label htmlFor="is_open_to_mentor" className="text-sm font-medium text-slate-700">
+                    I'm open to mentoring other tax professionals
+                  </label>
+                </div>
+
+                {/* Seeking Mentor */}
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="is_seeking_mentor"
+                    checked={profileForm.is_seeking_mentor}
+                    onChange={(e) => updateForm('is_seeking_mentor', e.target.checked)}
+                    className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                  />
+                  <label htmlFor="is_seeking_mentor" className="text-sm font-medium text-slate-700">
+                    I'm seeking mentorship from experienced tax professionals
+                  </label>
+                </div>
+
+                {/* Mentorship Topics */}
+                {(profileForm.is_open_to_mentor || profileForm.is_seeking_mentor) && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-slate-700">
+                      Mentorship Topics
+                    </label>
+                    <p className="text-xs text-slate-500">
+                      Select the areas where you can offer or need guidance.
+                    </p>
+                    <MentorshipTopicPicker
+                      value={profileForm.mentorship_topics}
+                      onChange={(topics) => updateForm('mentorship_topics', topics)}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

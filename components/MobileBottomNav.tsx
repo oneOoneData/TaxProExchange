@@ -32,6 +32,15 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
       ),
     },
     {
+      href: '/events',
+      label: 'Events',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
       href: '/dashboard',
       label: 'Dashboard',
       icon: (
@@ -63,12 +72,13 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
   return (
     <nav className={`fixed bottom-0 inset-x-0 z-[900] border-t bg-white/90 backdrop-blur safe-area-inset md:hidden ${className}`}>
       <div className="mx-auto max-w-screen-sm px-4 py-2">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href || 
               (item.href === '/dashboard' && pathname.startsWith('/dashboard')) ||
               (item.href === '/jobs' && pathname.startsWith('/jobs')) ||
-              (item.href === '/search' && pathname.startsWith('/search'));
+              (item.href === '/search' && pathname.startsWith('/search')) ||
+              (item.href === '/events' && pathname.startsWith('/events'));
             
             return (
               <Link

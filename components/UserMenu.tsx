@@ -175,38 +175,16 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
             {/* Menu Items */}
             <div className="py-1">
-              <Link
-                href="/dashboard"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z" />
-                </svg>
-                Dashboard
-              </Link>
-
+              {/* Personal Hub Section */}
               <Link
                 href="/profile/edit"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Edit Profile
-              </Link>
-
-              <Link
-                href="/refer"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-                Refer a Pro
+                My Profile
               </Link>
 
               <Link
@@ -217,7 +195,7 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
                 <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
                 </svg>
-                Job Board
+                My Jobs
               </Link>
 
               <Link
@@ -232,44 +210,17 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
               </Link>
 
               <Link
-                href="/messages"
-                onClick={() => {
-                  setIsOpen(false);
-                  // Refresh unread count when navigating to messages
-                  setTimeout(() => {
-                    const checkUnreadMessages = async () => {
-                      try {
-                        const response = await fetch('/api/messages/unread');
-                        if (response.ok) {
-                          const data = await response.json();
-                          setHasUnreadMessages(data.hasUnreadMessages);
-                          setUnreadCount(data.unreadCount);
-                        }
-                      } catch (error) {
-                        console.error('Failed to check unread messages:', error);
-                      }
-                    };
-                    checkUnreadMessages();
-                  }, 1000); // Small delay to allow navigation
-                }}
+                href="/refer"
+                onClick={() => setIsOpen(false)}
                 className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <div className="relative">
-                  <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  {(hasUnreadMessages || hasPendingConnections) && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-                  )}
-                </div>
-                Messages
-                {(hasUnreadMessages || hasPendingConnections) && (
-                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                    {(unreadCount + pendingConnectionCount) > 9 ? '9+' : (unreadCount + pendingConnectionCount)}
-                  </span>
-                )}
+                <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+                Refer a Pro
               </Link>
 
+              <div className="border-t border-slate-100 my-1"></div>
 
               <Link
                 href="/settings"
@@ -291,7 +242,7 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
                 <svg className="w-4 h-4 mr-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                Submit idea/bug
+                Submit Idea / Report Bug
               </Link>
 
               <div className="border-t border-slate-100 my-1"></div>

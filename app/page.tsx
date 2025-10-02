@@ -11,6 +11,7 @@ import BuyMeACoffee from '@/components/BuyMeACoffee';
 import MobileNav from '@/components/MobileNav';
 import FeaturedProfiles from '@/components/FeaturedProfiles';
 import SeoFaqJsonLd from '@/components/SeoFaqJsonLd';
+import { jsonLd, websiteSearchLD } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,12 +77,21 @@ export default function Page() {
       title: 'Handoff-Ready',
       desc: 'Connect for overflow work, review & sign-off, or IRS representation — payments handled offline.'
     },
+    {
+      title: 'Mentorship Opportunities',
+      desc: 'Connect with experienced professionals for guidance or offer mentorship to those starting out.'
+    },
+    {
+      title: 'Curated Events',
+      desc: 'Join webinars, workshops, and networking events designed for tax professionals.'
+    },
   ];
 
   const steps = [
     { n: '1', title: 'Join & Sign In', desc: 'Sign in with Google to get started.'},
     { n: '2', title: 'Create Profile', desc: 'Set up your professional profile with credentials and specializations.'},
     { n: '3', title: 'Connect & Collaborate', desc: 'Search, filter, and message other professionals. Handle scope and payment off-platform.'},
+    { n: '4', title: 'Grow & Learn', desc: 'Access mentorship and attend events to expand your expertise and network.'},
   ];
 
   const faqs = [
@@ -100,6 +110,10 @@ export default function Page() {
     {
       question: 'Can clients use this?',
       answer: 'This is built for professionals only: CPAs, EAs, and registered preparers who need collaboration and referrals.'
+    },
+    {
+      question: 'What about mentorship and events?',
+      answer: 'Beyond the directory and job board, we offer mentorship matching and curated events like webinars and workshops to help you grow professionally.'
     }
   ];
 
@@ -107,6 +121,12 @@ export default function Page() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* FAQ JSON-LD Schema */}
       <SeoFaqJsonLd faqs={faqs} />
+      
+      {/* WebSite + SearchAction JSON-LD */}
+      <script 
+        type="application/ld+json" 
+        dangerouslySetInnerHTML={jsonLd(websiteSearchLD())} 
+      />
       
       {/* Nav */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
@@ -118,6 +138,8 @@ export default function Page() {
             <a href="#faq" className="hover:text-slate-900">FAQ</a>
             <a href="/search" className="hover:text-slate-900">Directory</a>
             <a href="/jobs" className="hover:text-slate-900">Jobs</a>
+            <a href="/events" className="hover:text-slate-900">Events</a>
+            <a href="/mentorship" className="hover:text-slate-900">Mentorship</a>
             {!user && (
               <a href="/join" className="hover:text-slate-900">Join</a>
             )}
@@ -159,8 +181,7 @@ export default function Page() {
               </h1>
               <p className="mt-4 text-slate-600 text-lg">
                 A trusted directory for CPAs, EAs, and CTEC preparers to find each other for
-                handoffs, overflow work, and representation. No payments or file exchange - just
-                verified connections.
+                handoffs, overflow work, and representation. Plus mentorship opportunities and curated events. No payments or file exchange - just verified connections.
               </p>
                               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                   {!user && (
@@ -227,7 +248,7 @@ export default function Page() {
       {/* Features */}
       <section id="features" className="py-16">
         <div className="container-mobile">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {features.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.05 }} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="text-lg font-semibold text-slate-900">{f.title}</h3>
@@ -250,7 +271,7 @@ export default function Page() {
         <div className="container-mobile">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold text-slate-900">How it works</h2>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {steps.map((s, i) => (
                 <div key={i} className="rounded-2xl border p-6">
                   <div className="text-slate-400 text-sm">Step {s.n}</div>
@@ -317,24 +338,18 @@ export default function Page() {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold text-slate-900">FAQ</h2>
             <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-medium text-slate-900">Do you process payments or hold funds?</h4>
-                <p className="mt-2 text-sm text-slate-600">No. TaxProExchange is a connection-only platform. Professionals handle contracts and payments off-platform.</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-slate-900">How do you verify credentials?</h4>
-                <p className="mt-2 text-sm text-slate-600">During beta we manually check state CPA boards, IRS EA enrollment, and CTEC registration before profiles are visible.</p>
-              </div>
-              <div>
-                <h4 className="font-medium text-slate-900">Is it free?</h4>
-                <p className="mt-2 text-sm text-slate-600">Yes, for as long as we can keep it free. Costs will run up at some point but our goal is to create value not become the next TaxFyle.</p>
-                <p className="mt-2 text-sm text-slate-600">Having said that, we can always use more coffee so we can keep coding.</p>
-                <BuyMeACoffee />
-              </div>
-              <div>
-                <h4 className="font-medium text-slate-900">Can clients use this?</h4>
-                <p className="mt-2 text-sm text-slate-600">This is built for professionals only: CPAs, EAs, and registered preparers who need collaboration and referrals.</p>
-              </div>
+              {faqs.map((faq, i) => (
+                <div key={i}>
+                  <h4 className="font-medium text-slate-900">{faq.question}</h4>
+                  <p className="mt-2 text-sm text-slate-600">{faq.answer}</p>
+                  {i === 2 && (
+                    <>
+                      <p className="mt-2 text-sm text-slate-600">Having said that, we can always use more coffee so we can keep coding.</p>
+                      <BuyMeACoffee />
+                    </>
+                  )}
+                </div>
+              ))}
               <div>
                 <h4 className="font-medium text-slate-900">Why did you start this web app?</h4>
                 <p className="mt-2 text-sm text-slate-600"><a href="https://www.taxproexchange.com/reddit" className="text-blue-600 hover:text-blue-800 underline">This</a> explains it best.</p>

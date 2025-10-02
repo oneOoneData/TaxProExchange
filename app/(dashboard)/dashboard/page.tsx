@@ -1,12 +1,23 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { getCurrentProfile, getVerificationRequest, isOnboardingComplete } from '@/lib/db/profile';
-import { getRecentConnections, getRecentlyVerified, getRecentMessages } from '@/lib/db/activity';
+import { getCurrentProfile, isOnboardingComplete } from '@/lib/db/profile';
+import { getRecentConnections, getRecentlyVerified } from '@/lib/db/activity';
+import { getUserJobs, getRecentJobs, getUserProfileForMatching } from '@/lib/db/jobs';
 import ProfileStatusCard from '@/components/dashboard/ProfileStatusCard';
 import VerificationCard from '@/components/dashboard/VerificationCard';
 import QuickActions from '@/components/dashboard/QuickActions';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import AvailabilityToggle from '@/components/dashboard/AvailabilityToggle';
+import OnboardingChecklist from '@/components/dashboard/OnboardingChecklist';
+import Opportunities from '@/components/dashboard/Opportunities';
+import MessagesPreview from '@/components/dashboard/MessagesPreview';
+import JobsPreview from '@/components/dashboard/JobsPreview';
+import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
+import ProfileHealth from '@/components/dashboard/ProfileHealth';
+import MiniAnalytics from '@/components/dashboard/MiniAnalytics';
 import { DashboardDebug } from '@/components/debug/DashboardDebug';
+import NblPromoBanner from '@/components/NblPromoBanner';
+import DashboardTopEventCard from '@/components/DashboardTopEventCard';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -18,19 +29,21 @@ export default async function DashboardPage() {
   }
 
   // Fetch user data
-  const [profile, verificationRequest, connections, recentlyVerified, recentMessages] = await Promise.all([
+  const [profile, connections, recentlyVerified, userJobs, recentJobs, userProfileForMatching] = await Promise.all([
     getCurrentProfile(),
-    getCurrentProfile().then(profile => 
-      profile ? getVerificationRequest(profile.id) : null
-    ),
     getCurrentProfile().then(profile => 
       profile ? getRecentConnections(profile.id) : []
     ),
     getRecentlyVerified(),
-    getCurrentProfile().then(profile => 
-      profile ? getRecentMessages(profile.id) : []
-    )
+    userId ? getUserJobs(userId) : [],
+    getRecentJobs(5),
+    userId ? getUserProfileForMatching(userId) : null
   ]);
+
+  // Note: Messaging is handled via Stream.io, not DB
+  const recentMessages: any[] = [];
+  // Note: Verification is tracked via profile.visibility_state, not separate table
+  const verificationRequest = null;
 
   const onboardingComplete = isOnboardingComplete(profile);
   
@@ -67,132 +80,101 @@ export default async function DashboardPage() {
 
   return (
     <div className="py-8">
+      <NblPromoBanner />
       <DashboardDebug 
         userId={userId} 
         profile={profile} 
         onboardingComplete={onboardingComplete} 
       />
       <div className="container-mobile">
-        {/* Header */}
+        {/* Clean Header */}
         <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="mt-2 text-gray-600">
             Welcome back! Here's what's happening with your profile and connections.
           </p>
         </div>
 
-        {/* Onboarding Checklist - Show if incomplete */}
-        {!onboardingComplete && (
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-200 p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                    Complete your profile to get started
-                  </h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Finish setting up your profile to start connecting with other tax professionals and access all features.
-                  </p>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                        profile?.first_name && profile?.last_name && profile?.credential_type 
-                          ? 'bg-green-100 text-green-600' 
-                          : 'bg-gray-100 text-gray-400'
-                      }`}>
-                        {profile?.first_name && profile?.last_name && profile?.credential_type ? (
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-current"></div>
-                        )}
+            {/* Status and Availability */}
+            <div className="flex items-center gap-4">
+              {/* Status pill */}
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                profile?.visibility_state === 'verified' ? 'bg-green-100 text-green-800' :
+                profile?.visibility_state === 'pending_verification' ? 'bg-yellow-100 text-yellow-800' :
+                profile?.visibility_state === 'rejected' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {profile?.visibility_state === 'verified' ? '✅ Verified' :
+                 profile?.visibility_state === 'pending_verification' ? '⏳ Pending' :
+                 profile?.visibility_state === 'rejected' ? '❌ Rejected' : '👤 Hidden'}
+              </span>
+              
+              {/* Availability toggle */}
+              <AvailabilityToggle profile={profile} />
                       </div>
-                      <span className="text-sm text-gray-700">Basic information (name, credential type)</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                        profile?.phone || profile?.public_email 
-                          ? 'bg-green-100 text-green-600' 
-                          : 'bg-gray-100 text-gray-400'
-                      }`}>
-                        {profile?.phone || profile?.public_email ? (
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-current"></div>
-                        )}
-                      </div>
-                      <span className="text-sm text-gray-700">Contact information (phone or email)</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                        profile?.bio && profile.bio.length > 10 
-                          ? 'bg-green-100 text-green-600' 
-                          : 'bg-gray-100 text-gray-400'
-                      }`}>
-                        {profile?.bio && profile.bio.length > 10 ? (
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-current"></div>
-                        )}
-                      </div>
-                      <span className="text-sm text-gray-700">Professional bio and specializations</span>
                     </div>
                   </div>
                   
-                  <div className="mt-6">
-                    <Link
-                      href="/profile/edit"
-                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Complete Profile
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Main content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left column - Profile Status and Verification */}
-          <div className="lg:col-span-6 space-y-6">
+        {/* 2. Profile Health and Messages Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <ProfileHealth profile={profile} />
+          <MessagesPreview />
+        </div>
+
+        {/* 3. New Jobs and Events Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {userJobs.length > 0 ? (
+            <JobsPreview jobs={userJobs} canPostJobs={canPostJobs} />
+          ) : (
+            <RecentJobsPreview jobs={recentJobs} userProfile={userProfileForMatching} />
+          )}
+          {/* Events component */}
+          <DashboardTopEventCard />
+        </div>
+
+        {/* 4. All the Rest Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Left column (2/3) */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Onboarding Checklist */}
+            <OnboardingChecklist profile={profile} />
+            
+            {/* Opportunities */}
+            <Opportunities profile={profile} />
+          </div>
+
+          {/* Right column (1/3) */}
+          <div className="space-y-6">
+            {/* Mini Analytics */}
+            <MiniAnalytics />
+            
+            {/* Legacy components for now */}
             <ProfileStatusCard 
               profile={profile} 
               verificationRequest={verificationRequest} 
             />
-            <VerificationCard 
-              verificationRequest={verificationRequest} 
-              isOnboardingComplete={onboardingComplete}
-              visibilityState={profile?.visibility_state}
-            />
+            {/* Only show verification card if not already verified */}
+            {profile?.visibility_state !== 'verified' && (
+              <VerificationCard 
+                verificationRequest={verificationRequest} 
+                isOnboardingComplete={onboardingComplete}
+                visibilityState={profile?.visibility_state}
+              />
+            )}
           </div>
+        </div>
 
-          {/* Right column - Quick Actions and Activity */}
-          <div className="lg:col-span-6 space-y-6">
-            <QuickActions canPostJobs={canPostJobs} />
-            <ActivityFeed 
-              connections={connections} 
-              recentlyVerified={recentlyVerified}
-              recentMessages={recentMessages}
-              currentProfileId={profile?.id || ''}
-            />
-          </div>
+        {/* 5. Activity Section - Full Width */}
+        <div className="mt-8">
+          <ActivityFeed 
+            connections={connections} 
+            recentlyVerified={recentlyVerified}
+            recentMessages={recentMessages}
+            currentProfileId={profile?.id || ''}
+          />
         </div>
       </div>
     </div>

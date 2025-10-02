@@ -13,7 +13,7 @@ export default function ActivityFeed({ connections, recentlyVerified, recentMess
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">Activity</h2>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Messages */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Messages</h3>
