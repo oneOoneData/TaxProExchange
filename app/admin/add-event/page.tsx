@@ -221,9 +221,9 @@ export default function AddEventPage() {
                 {scrapeError && (
                   <p className="mt-2 text-sm text-red-600">{scrapeError}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
-                  We'll automatically extract the event details from this URL. You can edit any fields below if needed.
-                </p>
+        <p className="mt-1 text-sm text-gray-500">
+          We'll automatically extract the event details from this URL. Please review data for accuracy.
+        </p>
               </div>
 
               {/* Event Title */}
