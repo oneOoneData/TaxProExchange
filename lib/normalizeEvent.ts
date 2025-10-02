@@ -294,6 +294,12 @@ export async function ingestEvents(rawEvents: RawEvent[], source: string = "ai_g
       // Normalize the event
       const normalized = normalize(raw, source);
 
+      // Skip if normalization failed (e.g., past event)
+      if (!normalized) {
+        console.log(`Skipping invalid event: ${raw.title || 'Unknown'}`);
+        continue;
+      }
+
       // Check if event already exists
       const { data: existing, error: checkError } = await supabase
         .from("events")
