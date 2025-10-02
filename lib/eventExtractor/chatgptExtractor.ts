@@ -14,8 +14,13 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
     // First, fetch the page content
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'TPE-EventExtractor/1.0 (+https://taxproexchange.com)',
-        'Accept': 'text/html,application/xhtml+xml,application/json,text/calendar;q=0.9,*/*;q=0.8'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
       },
     });
 
@@ -37,6 +42,8 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
     console.log('🔍 DEBUG - Looking for 2026:', html.includes('2026') ? 'FOUND' : 'NOT FOUND');
     console.log('🔍 DEBUG - Looking for Cleveland:', html.includes('Cleveland') ? 'FOUND' : 'NOT FOUND');
     console.log('🔍 DEBUG - Looking for Las Vegas:', html.includes('Las Vegas') ? 'FOUND' : 'NOT FOUND');
+    console.log('🔍 DEBUG - Contains "Suggest an Event":', html.includes('Suggest an Event') ? 'WARNING - This looks like a form!' : 'OK');
+    console.log('🔍 DEBUG - Contains "TaxProExchange":', html.includes('TaxProExchange') ? 'WARNING - This looks like our form!' : 'OK');
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Using the more cost-effective model
@@ -68,7 +75,11 @@ Rules:
         },
         {
           role: "user",
-          content: `Extract event information from this HTML content for URL: ${url}\n\nHTML Content:\n${truncatedHtml}`
+          content: `Extract event information from this HTML content for URL: ${url}
+
+IMPORTANT: Look for the most current/upcoming event information. Focus on dates like 2026, 2025, etc. for future events.
+
+HTML Content:\n${truncatedHtml}`
         }
       ],
       temperature: 0.1, // Low temperature for consistent extraction
