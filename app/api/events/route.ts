@@ -48,18 +48,7 @@ export async function GET(req: Request) {
       }
     }
 
-    // Check if review_status column exists first
-    const { data: columnCheck } = await supabase
-      .from("information_schema.columns")
-      .select("column_name")
-      .eq("table_name", "events")
-      .eq("column_name", "review_status")
-      .single();
-
-    if (!columnCheck) {
-      console.log("review_status column doesn't exist yet, returning no events until migration is applied");
-      return NextResponse.json({ events: [] });
-    }
+    // Skip column check since we know review_status exists
 
     // fetch upcoming events (next 365 days) - ONLY admin-approved events
     // Show events from all regions, not just user's region
