@@ -6,6 +6,228 @@ import Link from 'next/link';
 import Logo from '@/components/Logo';
 import AdminRouteGuard from '@/components/AdminRouteGuard';
 
+// Events Refresh Button Component
+function EventsRefreshButton() {
+  const [refreshing, setRefreshing] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [eventsCount, setEventsCount] = useState<number | null>(null);
+  const [publishableCount, setPublishableCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    loadEventsCount();
+  }, []);
+
+  const loadEventsCount = async () => {
+    try {
+      // Get total events count
+      const allResponse = await fetch('/api/events?mode=all');
+      const allData = await allResponse.json();
+      setEventsCount(allData.events?.length ?? 0);
+
+      // Get publishable events count (this will only return verified events)
+      const curatedResponse = await fetch('/api/events?mode=curated');
+      const curatedData = await curatedResponse.json();
+      setPublishableCount(curatedData.events?.length ?? 0);
+    } catch (error) {
+      console.error('Error loading events count:', error);
+    }
+  };
+
+  const refreshEvents = async () => {
+    setRefreshing(true);
+    setResult(null);
+    
+    try {
+      const response = await fetch('/api/events/refresh', {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Handle new response format with ingestion and validation results
+        if (data.ingestion && data.validation) {
+          setResult(`✅ Success! AI fetched ${data.total} events\n\n` +
+            `📥 Ingestion Results:\n` +
+            `  • Processed: ${data.ingestion.processed}\n` +
+            `  • Inserted: ${data.ingestion.inserted}\n` +
+            `  • Updated: ${data.ingestion.updated}\n` +
+            `  • Errors: ${data.ingestion.errors}\n\n` +
+            `🔍 Link Validation Results:\n` +
+            `  • Processed: ${data.validation.processed}\n` +
+            `  • Validated: ${data.validation.validated}\n` +
+            `  • Publishable: ${data.validation.publishable}\n` +
+            `  • Errors: ${data.validation.errors}`);
+        } else {
+          // Fallback for old response format
+          setResult(`✅ Success! AI fetched ${data.total} events\n` +
+            `Inserted: ${data.inserted}\n` +
+            `Errors: ${data.errors}`);
+        }
+        
+        // Reload counts
+        await loadEventsCount();
+      } else {
+        const error = await response.json();
+        setResult(`❌ Error: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const clearEvents = async () => {
+    if (!confirm('Are you sure you want to clear all events? This action cannot be undone.')) {
+      return;
+    }
+
+    setRefreshing(true);
+    setResult(null);
+    
+    try {
+      const response = await fetch('/api/admin/clear-events', {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResult(`✅ Successfully cleared ${data.clearedCount} events\n` +
+          `Staging events cleared: ${data.stagingCleared}\n` +
+          `Tombstones cleared: ${data.tombstonesCleared}`);
+        
+        // Reload counts
+        await loadEventsCount();
+      } else {
+        const error = await response.json();
+        setResult(`❌ Error: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="text-sm text-slate-600 mb-2 space-y-1">
+        <div>
+          Total events in database: <span className="font-semibold">{eventsCount ?? '...'}</span>
+        </div>
+        <div>
+          Verified & publishable events: <span className="font-semibold text-green-600">{publishableCount ?? '...'}</span>
+        </div>
+        {eventsCount !== null && publishableCount !== null && eventsCount > 0 && (
+          <div className="text-xs text-slate-500">
+            Validation rate: {((publishableCount / eventsCount) * 100).toFixed(1)}%
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={refreshEvents}
+          disabled={refreshing}
+          className="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+        >
+          {refreshing ? 'Refreshing & Validating...' : 'Refresh Events (AI + Link Validation)'}
+        </button>
+        <button
+          onClick={clearEvents}
+          disabled={refreshing}
+          className="inline-flex items-center justify-center rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+        >
+          {refreshing ? 'Clearing...' : 'Clear All Events'}
+        </button>
+      </div>
+      
+      {result && (
+        <div className="mt-2 text-xs text-slate-600 whitespace-pre-line bg-slate-50 p-3 rounded-lg border">
+          {result}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Weekly Digest Button Component
+function WeeklyDigestButton() {
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [testEmail, setTestEmail] = useState('');
+
+  const sendDigest = async (testMode = false) => {
+    setSending(true);
+    setResult(null);
+    
+    try {
+      const response = await fetch('/api/admin/send-weekly-digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          testMode,
+          testEmail: testMode ? testEmail : undefined
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResult(`✅ Success! ${data.message}\n` +
+          `Jobs included: ${data.jobsCount}\n` +
+          `Recipients: ${data.totalRecipients}\n` +
+          `Emails sent: ${data.emailsSent}\n` +
+          `Emails failed: ${data.emailsFailed}\n` +
+          `${data.testMode ? 'Test mode enabled' : ''}`);
+      } else {
+        const error = await response.json();
+        setResult(`❌ Error: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <button
+          onClick={() => sendDigest(false)}
+          disabled={sending}
+          className="inline-flex items-center justify-center rounded-xl bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+        >
+          {sending ? 'Sending...' : 'Send Weekly Digest'}
+        </button>
+        <button
+          onClick={() => sendDigest(true)}
+          disabled={sending}
+          className="inline-flex items-center justify-center rounded-xl bg-orange-600 text-white px-4 py-2 text-sm font-medium hover:bg-orange-700 transition-colors disabled:opacity-50"
+        >
+          {sending ? 'Testing...' : 'Test Digest'}
+        </button>
+      </div>
+      
+      <div className="flex gap-2">
+        <input
+          type="email"
+          placeholder="Test email address"
+          value={testEmail}
+          onChange={(e) => setTestEmail(e.target.value)}
+          className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        />
+      </div>
+      
+      {result && (
+        <div className="mt-2 text-xs text-slate-600 whitespace-pre-line">
+          {result}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Test Email Button Component
 function TestEmailButton() {
   const [testing, setTesting] = useState(false);
@@ -335,6 +557,22 @@ export default function AdminDashboard() {
             transition={{ delay: 0.7 }}
             className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
           >
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Weekly Job Digest</h3>
+            <p className="text-slate-600 mb-4">Send weekly digest of new jobs to all users with job notifications enabled.</p>
+            <WeeklyDigestButton />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+          >
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -348,6 +586,30 @@ export default function AdminDashboard() {
             >
               View Analytics
             </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Events Management</h3>
+            <p className="text-slate-600 mb-4">Refresh events from AI or review events before they go live.</p>
+            <EventsRefreshButton />
+            <div className="mt-3">
+              <Link 
+                href="/admin/events-review"
+                className="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 transition-colors"
+              >
+                📋 Review Events
+              </Link>
+            </div>
           </motion.div>
         </div>
 

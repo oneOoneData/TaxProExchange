@@ -130,95 +130,12 @@ export async function getRecentlyVerified(limit: number = 5): Promise<RecentlyVe
 
 /**
  * Get recent messages for a profile
+ * NOTE: Messaging is handled via Stream.io, not DB
+ * Kept for backward compatibility with components
  */
 export async function getRecentMessages(profileId: string, limit: number = 5): Promise<RecentMessage[]> {
-  try {
-    const supabase = supabaseService();
-    
-    // First get all connections for this profile
-    const { data: connections, error: connectionsError } = await supabase
-      .from('connections')
-      .select('id')
-      .or(`requester_profile_id.eq.${profileId},recipient_profile_id.eq.${profileId}`)
-      .eq('status', 'accepted');
-
-    if (connectionsError) {
-      console.error('Error fetching connections for messages:', connectionsError);
-      return [];
-    }
-
-    if (!connections || connections.length === 0) {
-      return [];
-    }
-
-    const connectionIds = connections.map(c => c.id);
-
-    // Get recent messages from these connections
-    const { data: messages, error } = await supabase
-      .from('messages')
-      .select(`
-        id,
-        connection_id,
-        sender_profile_id,
-        content,
-        created_at,
-        sender_profile:profiles!messages_sender_profile_id_fkey(
-          first_name,
-          last_name,
-          credential_type,
-          slug
-        ),
-        connection:connections!messages_connection_id_fkey(
-          requester_profile_id,
-          recipient_profile_id,
-          requester_profile:profiles!connections_requester_profile_id_fkey(
-            first_name,
-            last_name,
-            credential_type,
-            slug
-          ),
-          recipient_profile:profiles!connections_recipient_profile_id_fkey(
-            first_name,
-            last_name,
-            credential_type,
-            slug
-          )
-        )
-      `)
-      .in('connection_id', connectionIds)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error fetching recent messages:', error);
-      return [];
-    }
-
-    // Transform the data to match our interface
-    const transformedMessages: RecentMessage[] = (messages || []).map((msg: any) => ({
-      id: msg.id,
-      connection_id: msg.connection_id,
-      sender_profile_id: msg.sender_profile_id,
-      content: msg.content,
-      created_at: msg.created_at,
-      sender_profile: Array.isArray(msg.sender_profile) ? msg.sender_profile[0] : msg.sender_profile,
-      connection: {
-        requester_profile_id: msg.connection.requester_profile_id,
-        recipient_profile_id: msg.connection.recipient_profile_id,
-        requester_profile: Array.isArray(msg.connection.requester_profile) 
-          ? msg.connection.requester_profile[0] 
-          : msg.connection.requester_profile,
-        recipient_profile: Array.isArray(msg.connection.recipient_profile) 
-          ? msg.connection.recipient_profile[0] 
-          : msg.connection.recipient_profile,
-      }
-    }));
-
-    return transformedMessages;
-  } catch (error) {
-    console.error('Error in getRecentMessages:', error);
-    return [];
-  }
+  // Messages are handled via Stream.io, not stored in Supabase
+  return [];
 }
 
 /**

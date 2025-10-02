@@ -24,22 +24,51 @@ export async function POST(request: NextRequest) {
 
     // Get profile slug for the admin view link
     const supabase = supabaseService();
-    const { data: profile, error: profileError } = await supabase
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('slug')
+      .select('slug, first_name, last_name, visibility_state')
       .eq('id', profile_id)
       .single();
 
     if (profileError || !profile) {
       console.error('Failed to get profile slug:', profileError);
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      );
+      
+      // Try to get profile by ID as fallback
+      const { data: fallbackProfile, error: fallbackError } = await supabase
+        .from('profiles')
+        .select('slug, first_name, last_name, visibility_state')
+        .eq('id', profile_id)
+        .single();
+      
+      if (fallbackError || !fallbackProfile) {
+        console.error('Profile not found by ID either:', fallbackError);
+        return NextResponse.json(
+          { error: 'Profile not found' },
+          { status: 404 }
+        );
+      }
+      
+      console.log('📧 Using fallback profile data:', fallbackProfile);
+      profile = fallbackProfile;
     }
+
+    // Log profile details for debugging
+    console.log('📧 Profile completion notification - Profile details:', {
+      profile_id,
+      slug: profile.slug,
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      visibility_state: profile.visibility_state
+    });
 
     // Create admin view link using the public profile route with admin parameter
     const adminViewLink = `${process.env.NEXT_PUBLIC_APP_URL}/p/${profile.slug}?admin=true`;
+    
+    // Create direct approval/rejection links
+    const approveLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profile_id}&action=approve`;
+    const rejectLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profile_id}&action=reject`;
+    
+    console.log('📧 Generated admin links:', { adminViewLink, approveLink, rejectLink });
 
     // Send notification email to admin
     try {
@@ -51,7 +80,9 @@ export async function POST(request: NextRequest) {
         credentialType: credential_type || 'Not specified',
         headline: headline || '',
         firmName: firm_name || '',
-        adminViewLink: adminViewLink
+        adminViewLink: adminViewLink,
+        approveLink: approveLink,
+        rejectLink: rejectLink
       });
       
       console.log(`Profile completion notification sent to admin for profile ${profile_id}`);

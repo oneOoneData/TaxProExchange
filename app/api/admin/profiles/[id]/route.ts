@@ -87,7 +87,24 @@ export async function GET(
         deleted_at,
         created_at,
         updated_at,
-        clerk_id
+        clerk_id,
+        public_email,
+        phone,
+        website_url,
+        linkedin_url,
+        accepting_work,
+        public_contact,
+        works_multistate,
+        works_international,
+        countries,
+        specializations,
+        states,
+        software,
+        other_software,
+        years_experience,
+        entity_revenue_range,
+        primary_location,
+        ptin
       `)
       .eq('id', profileId)
       .single();
@@ -108,13 +125,28 @@ export async function GET(
       }
     }
 
-    // Add email to the profile data
-    const profileWithEmail = {
+    // Fetch licenses (including license numbers for admin)
+    const { data: licenses } = await supabase
+      .from('licenses')
+      .select('*')
+      .eq('profile_id', profileId);
+
+    // Fetch mentorship preferences
+    const { data: mentorshipPrefs } = await supabase
+      .from('mentorship_preferences')
+      .select('*')
+      .eq('profile_id', profileId)
+      .single();
+
+    // Add email and related data to the profile
+    const profileWithData = {
       ...profile,
-      email
+      email,
+      licenses: licenses || [],
+      mentorship_preferences: mentorshipPrefs || null
     };
 
-    return NextResponse.json({ profile: profileWithEmail });
+    return NextResponse.json({ profile: profileWithData });
 
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -144,17 +176,37 @@ export async function PATCH(
     // TODO: Add admin role check here
     // For now, allow access to anyone (we'll secure this later)
 
-    // Validate allowed fields
-    const allowedFields = ['visibility_state', 'is_listed'];
+    // Validate allowed fields for profile updates
+    const allowedProfileFields = [
+      'visibility_state', 'is_listed', 'first_name', 'last_name', 'headline', 
+      'bio', 'firm_name', 'credential_type', 'public_email', 'phone', 
+      'website_url', 'linkedin_url', 'accepting_work', 'public_contact',
+      'works_multistate', 'works_international', 'countries', 'specializations',
+      'states', 'software', 'other_software', 'years_experience', 
+      'entity_revenue_range', 'primary_location', 'ptin'
+    ];
+    
     const updateData: any = {};
     
-    for (const field of allowedFields) {
+    for (const field of allowedProfileFields) {
       if (body[field] !== undefined) {
         updateData[field] = body[field];
       }
     }
 
-    if (Object.keys(updateData).length === 0) {
+    // Handle licenses update
+    let licensesToUpdate = null;
+    if (body.licenses !== undefined) {
+      licensesToUpdate = body.licenses;
+    }
+
+    // Handle mentorship preferences update
+    let mentorshipToUpdate = null;
+    if (body.mentorship_preferences !== undefined) {
+      mentorshipToUpdate = body.mentorship_preferences;
+    }
+
+    if (Object.keys(updateData).length === 0 && !licensesToUpdate && !mentorshipToUpdate) {
       return NextResponse.json(
         { error: 'No valid fields to update' },
         { status: 400 }
@@ -179,17 +231,82 @@ export async function PATCH(
     updateData.updated_at = new Date().toISOString();
 
     // Update the profile
-    const { error } = await supabase
-      .from('profiles')
-      .update(updateData)
-      .eq('id', profileId);
+    if (Object.keys(updateData).length > 0) {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', profileId);
 
-    if (error) {
-      console.error('Error updating profile:', error);
-      return NextResponse.json(
-        { error: 'Failed to update profile' },
-        { status: 500 }
-      );
+      if (error) {
+        console.error('Error updating profile:', error);
+        return NextResponse.json(
+          { error: 'Failed to update profile' },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Update licenses if provided
+    if (licensesToUpdate !== null) {
+      // Delete existing licenses
+      const { error: deleteError } = await supabase
+        .from('licenses')
+        .delete()
+        .eq('profile_id', profileId);
+      
+      if (deleteError) {
+        console.error('Error deleting existing licenses:', deleteError);
+        return NextResponse.json(
+          { error: 'Failed to update licenses' },
+          { status: 500 }
+        );
+      }
+
+      // Insert new licenses
+      if (licensesToUpdate.length > 0) {
+        const licenseData = licensesToUpdate.map((license: any) => ({
+          profile_id: profileId,
+          license_kind: license.license_kind,
+          license_number: license.license_number,
+          issuing_authority: license.issuing_authority,
+          state: license.state || null,
+          expires_on: license.expires_on || null,
+          board_profile_url: license.board_profile_url || null,
+          status: license.status || 'pending'
+        }));
+
+        const { error: insertError } = await supabase
+          .from('licenses')
+          .insert(licenseData);
+
+        if (insertError) {
+          console.error('Error inserting licenses:', insertError);
+          return NextResponse.json(
+            { error: 'Failed to update licenses' },
+            { status: 500 }
+          );
+        }
+      }
+    }
+
+    // Update mentorship preferences if provided
+    if (mentorshipToUpdate !== null) {
+      const { error: mentorshipError } = await supabase
+        .from('mentorship_preferences')
+        .upsert({
+          profile_id: profileId,
+          is_open_to_mentor: mentorshipToUpdate.is_open_to_mentor || false,
+          is_seeking_mentor: mentorshipToUpdate.is_seeking_mentor || false,
+          topics: mentorshipToUpdate.topics || []
+        });
+
+      if (mentorshipError) {
+        console.error('Error updating mentorship preferences:', mentorshipError);
+        return NextResponse.json(
+          { error: 'Failed to update mentorship preferences' },
+          { status: 500 }
+        );
+      }
     }
 
     // TODO: Log admin action in audit_logs table

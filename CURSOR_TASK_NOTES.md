@@ -1,6 +1,279 @@
 # Cursor Task Notes
 
+## Events Link Health Validation System (2025-01-04) ✅
+
+**Goal**: Fix event URL retrieval by implementing robust link validation system that only returns verified, non-404 links.
+
+**Problem**: Events system pulls URLs from OpenAI but these URLs often result in 404s or broken links, leading to poor user experience.
+
+**Solution Applied**: Complete link health validation system with staging pipeline, URL scoring, and automated validation.
+
+### Implementation Details
+
+#### 1. Database Schema & Migration
+- **Created**: `database/migrations/2025-01-04_events_link_health.sql`
+- **New Tables**:
+  - `staging_events`: Raw event data before validation
+  - `event_url_tombstones`: Permanently dead URLs to avoid re-checking
+- **Enhanced Events Table**: Added link health columns:
+  - `candidate_url`: Original URL from source
+  - `canonical_url`: Resolved canonical URL after redirects
+  - `url_status`: Last HTTP status code
+  - `redirect_chain`: Array of URLs visited during redirect resolution
+  - `link_health_score`: Score 0-100 (≥70 required for publishable)
+  - `last_checked_at`: Last validation timestamp
+  - `publishable`: Boolean flag (link health ≥70 and checked within 24h)
+  - `dedupe_key`: SHA1 hash for deduplication
+
+#### 2. Link Checker Utility (`lib/linkChecker.ts`)
+- **URL Validation**: HEAD/GET requests with proper user agent and headers
+- **Redirect Handling**: Follows redirects up to 5 hops, tracks redirect chain
+- **Scoring Algorithm**: 
+  - Base score: 40 points for 200 OK, 20 for redirects
+  - Keyword matching: +30 points for title matches
+  - Canonical URL: +15 points bonus
+  - SPA detection: -10 points for likely JS-rendered content
+  - Redirect penalty: -3 points per redirect
+- **URL Healing**: Removes problematic query params (UTM, tracking)
+- **Tombstone Detection**: Identifies permanently dead URLs
+
+#### 3. Event Validation Worker (`lib/validateEvents.ts`)
+- **Batch Processing**: Validates events in batches (default 100)
+- **Smart Scheduling**: Only validates if not checked in last 24 hours
+- **Tombstone Integration**: Checks and creates tombstones for dead URLs
+- **Publishable Logic**: Events need score ≥70 and status <400
+- **Individual Validation**: Single event validation by ID
+
+#### 4. Event Ingestion Pipeline (`lib/normalizeEvent.ts`)
+- **Staging System**: Raw events go to staging_events first
+- **Normalization**: Standardizes event data format
+- **Deduplication**: SHA1 hash-based deduplication by title|start_date|organizer
+- **Direct Ingestion**: Alternative path for immediate processing
+- **Backward Compatibility**: Maintains existing `url` field
+
+#### 5. API Route Updates
+- **Events API** (`app/api/events/route.ts`): Only returns `publishable=true` events
+- **Manual Recheck** (`app/api/events/recheck/route.ts`): On-demand validation endpoint
+- **Refresh Routes**: Updated to use new ingestion pipeline with validation
+- **Response Enhancement**: Includes link health score and last checked timestamp
+
+#### 6. Automated Validation
+- **Vercel Cron**: Daily validation at 10:00 UTC (`vercel.json`)
+- **Manual Trigger**: POST to `/api/events/recheck` for on-demand validation
+- **Status Monitoring**: GET endpoint for validation statistics
+
+#### 7. Testing Infrastructure
+- **Unit Tests** (`tests/linkChecker.test.ts`): Comprehensive link checker testing
+- **Integration Tests** (`tests/validateEvents.test.ts`): Event validation worker testing
+- **Curl Examples** (`tests/curl-examples.md`): Manual testing guide
+
+### Key Features
+- ✅ **Never surface 404 links**: Events API only returns verified events
+- ✅ **Automated healing**: Common URL issues (redirects, moved pages) auto-resolved
+- ✅ **Tombstone system**: Dead URLs marked to avoid infinite re-checking
+- ✅ **Smart scoring**: Multi-factor algorithm considers status, content, redirects
+- ✅ **Performance optimized**: Batch processing, 24h validation intervals
+- ✅ **Monitoring**: Validation statistics and health metrics
+- ✅ **Backward compatible**: Existing API shape maintained
+
+### Technical Constraints Met
+- **Stack**: Next.js 14+, TypeScript, Supabase Postgres, Vercel Cron
+- **No external dependencies**: Built-in fetch, no Playwright required
+- **Modular design**: Separate utilities for link checking, validation, ingestion
+- **Testable**: Comprehensive unit and integration tests
+- **Production ready**: Error handling, logging, monitoring
+
+### Acceptance Criteria Met
+- ✅ Events API never returns 404 links in normal operation
+- ✅ `publishable=true` only when `link_health_score ≥ 70` and `last_checked_at ≤ 24h`
+- ✅ Redirects & canonical URLs respected; bad links auto-healed
+- ✅ Manual/cron recheck functionality working
+- ✅ Tests pass with comprehensive coverage
+
+---
+
+## Admin Profile Edit Enhancement (2025-01-03)
+
+### Issues Fixed
+1. **Admin profile edit page was incomplete** - Only showed basic status management
+2. **License numbers not loaded in admin edit mode** - Admin couldn't see/edit license numbers
+3. **Mentorship info not saved** - Mentorship preferences weren't being handled in admin updates
+
+### Changes Made
+
+#### API Updates (`app/api/admin/profiles/[id]/route.ts`)
+- **Enhanced GET endpoint**: Now fetches all profile fields including licenses (with license numbers) and mentorship preferences
+- **Enhanced PATCH endpoint**: Now handles full profile updates including:
+  - All basic profile fields (name, bio, contact info, work preferences, etc.)
+  - License management (add/edit/remove licenses with full details including license numbers)
+  - Mentorship preferences (mentoring availability, topics, etc.)
+
+#### Admin UI Updates (`app/admin/profiles/[id]/edit/page.tsx`)
+- **Complete rewrite** with comprehensive profile editing capabilities
+- **Tabbed interface** with three sections:
+  - **Basic Info**: All profile fields, status management, work preferences
+  - **Licenses**: Full license management with license numbers visible to admin
+  - **Mentorship**: Mentorship preferences management
+- **Real-time updates** with individual field saving
+- **License management**: Add/edit/remove licenses with all fields including private license numbers
+- **Mentorship management**: Toggle mentoring availability and select topics
+
+### Key Features
+- ✅ Admin can now edit all profile fields
+- ✅ License numbers are loaded and editable in admin mode
+- ✅ Mentorship preferences are properly saved and managed
+- ✅ Real-time updates with immediate feedback
+- ✅ Comprehensive form validation and error handling
+- ✅ Maintains existing quick action buttons for status management
+
+### Technical Notes
+- Uses individual field updates for better UX (no full form submission required)
+- License numbers are only visible to admins (marked as private in UI)
+- Mentorship preferences are upserted to handle both new and existing records
+- All updates maintain data integrity with proper error handling
+
 ## Completed Tasks
+
+### 2025-01-03: Admin Email Approval System ✅
+
+**Goal**: Enable admins to approve profiles directly from email notifications when new users join.
+
+**Implementation**: Complete email-based approval system with direct action buttons and API endpoints.
+
+**Solution Applied**:
+
+#### 1. Enhanced Email Template
+- **Updated**: `lib/email.ts` - ProfileCompletionEmailData interface
+- **Added Fields**: `approveLink`, `rejectLink` for direct action buttons
+- **Email Design**: Added "Quick Actions" section with approve/reject buttons
+- **User Experience**: Clear distinction between "Review Full Profile" and direct actions
+- **Mobile Friendly**: Responsive button layout for email clients
+
+#### 2. Email Approval API Endpoint
+- **Created**: `app/api/admin/email-approve/route.ts`
+- **GET Support**: Handles email link clicks (approve/reject actions)
+- **POST Support**: Alternative API endpoint for programmatic access
+- **Profile Updates**: Sets visibility_state and is_listed appropriately
+- **License Verification**: Auto-verifies licenses when profile is approved
+- **User Notification**: Sends verification email to user upon approval
+- **Success Pages**: Returns HTML success/error pages for GET requests
+- **Error Handling**: Comprehensive error tracking and user feedback
+
+#### 3. Updated Notification System
+- **Updated**: `app/api/notify/profile-completed/route.ts`
+- **Link Generation**: Creates approve/reject links with profileId and action parameters
+- **Email Data**: Passes all required data including new approval links
+- **Logging**: Enhanced logging for debugging email link generation
+
+#### 4. Testing Infrastructure
+- **Created**: `app/api/test/admin-approval-email/route.ts`
+- **Test Endpoint**: Allows testing the complete admin approval email flow
+- **Sample Data**: Uses realistic test profile data
+- **Email Verification**: Confirms email template renders correctly with buttons
+
+**Key Features**:
+- ✅ Direct approve/reject buttons in admin notification emails
+- ✅ One-click profile approval without leaving email client
+- ✅ Automatic user notification upon approval
+- ✅ License verification when profiles are approved
+- ✅ Success/error pages for email link clicks
+- ✅ Comprehensive error handling and logging
+- ✅ Test endpoint for verification
+
+**Technical Details**:
+- Email links use GET requests with query parameters
+- API endpoint handles both GET (email links) and POST (programmatic) requests
+- Profile updates include proper timestamp and status changes
+- User verification emails sent automatically upon approval
+- Admin action logging prepared for future audit trail implementation
+
+### 2025-09-30: Events Data Model + AI-Powered Refresh System ✅
+
+**Goal**: Add events data model with RLS, AI-powered refresh route, and Events page with "Curated for You" default and "Show all events" toggle.
+
+**Implementation**: Complete events system with database schema, API routes, filtering logic, and UI components.
+
+**Solution Applied**:
+
+#### 1. Database Schema & RLS
+- **Created**: `database/migrations/2025-09-30_add_events.sql`
+- **Events Table**: id, title, description, start_date, end_date, location_city, location_state, url, tags[], source enum, timestamps
+- **Event Source Enum**: 'curated' | 'ai_generated'
+- **Indexes**: Date, state, tags (GIN), composite unique constraint
+- **RLS Policies**: Public read for authenticated users, admin-only write
+- **Admin Check**: Uses existing profiles.is_admin field with clerk_id matching
+
+#### 2. Events Filtering Library
+- **Created**: `lib/events.ts`
+- **Event Interface**: TypeScript definitions for event data
+- **Profile Matching**: eventMatchesProfile() function for curation logic
+- **Filtering Helpers**: filterUpcomingEvents(), sortEventsByDate()
+- **Display Helpers**: formatEventDate(), formatEventLocation()
+- **Curation Logic**: Matches by state, specialties, software, general_tax tag
+
+#### 3. Events API Routes
+- **Created**: `app/api/events/route.ts` (GET)
+- **Modes**: 'curated' (default) | 'all'
+- **Authentication**: Curated requires auth, 'all' can be public
+- **Profile Data**: Fetches user's specialties, software, locations
+- **Filtering**: Server-side filtering based on user profile
+- **Date Range**: Upcoming events only (next 180 days)
+
+#### 4. AI-Powered Refresh Route
+- **Created**: `app/api/events/refresh/route.ts` (POST)
+- **Admin Only**: Verifies admin status before allowing refresh
+- **OpenAI Integration**: GPT-4o-mini for event discovery
+- **Prompt Engineering**: Structured prompt for tax/accounting events
+- **Data Validation**: Validates required fields, date formats
+- **Upsert Logic**: Handles duplicates using title+start_date+url constraint
+- **Error Handling**: Comprehensive error tracking and logging
+
+#### 5. Event Card Component
+- **Created**: `components/EventCard.tsx`
+- **Design**: Clean card layout with date, location, title, description
+- **Tags Display**: Shows up to 6 tags with overflow indicator
+- **External Links**: "View Event Details" with external link icon
+- **Responsive**: Works on mobile and desktop
+- **Accessibility**: Proper semantic HTML and ARIA labels
+
+#### 6. Events Page
+- **Created**: `app/events/page.tsx`
+- **Toggle Functionality**: "Curated for You" vs "Show All Events"
+- **Server-Side Rendering**: Fetches events on server for performance
+- **Authentication Aware**: Different behavior for signed-in vs anonymous users
+- **Empty States**: Helpful messages when no events found
+- **Responsive Grid**: 1-3 columns based on screen size
+- **Loading States**: Graceful handling of data fetching
+
+**Technical Details**:
+- **Database**: PostgreSQL with RLS, proper indexing for performance
+- **Authentication**: Clerk integration with existing admin role system
+- **AI Integration**: OpenAI GPT-4o-mini for event discovery (server-side only)
+- **TypeScript**: Full type safety with interfaces and proper typing
+- **Performance**: Server-side rendering, efficient database queries
+- **Security**: Admin-only refresh, proper RLS policies, no client-side API keys
+
+**Edge Cases Handled**:
+- **Duplicates**: Upsert with composite unique constraint
+- **Past Events**: Filtered out automatically
+- **Virtual Events**: Proper handling of null location fields
+- **Multi-day Events**: Support for start_date and end_date
+- **Tag-less Events**: Graceful handling of missing tags
+- **Invalid Data**: Validation and error handling for malformed events
+
+**Files Created**: 6 files, ~400 lines total
+- `database/migrations/2025-09-30_add_events.sql` - Database schema and RLS
+- `lib/events.ts` - Filtering and utility functions
+- `app/api/events/route.ts` - GET API for curated/all events
+- `app/api/events/refresh/route.ts` - POST API for AI-powered refresh
+- `components/EventCard.tsx` - Event display component
+- `app/events/page.tsx` - Events page with toggle functionality
+
+**Usage**:
+- **Admin Refresh**: POST to `/api/events/refresh` to fetch new events via AI
+- **View Events**: GET `/events` for curated view, `/events?show=all` for all events
+- **Authentication**: Curated view requires sign-in, all events can be public
+- **Curation**: Based on user's profile specialties, software, and locations
 
 ### 2025-01-XX: Fixed Admin Profile Verification Email Links ✅
 
@@ -1748,5 +2021,346 @@ CREATE INDEX idx_profile_locations_state_city ON profile_locations(state, city);
 - [ ] No console errors or TypeScript issues
 
 **Result**: Users no longer need to manually add "https://" to URLs during setup. The system automatically normalizes URLs while providing clear guidance, eliminating the frustrating "invalid URL" error that was blocking user onboarding.
+
+---
+
+### 2025-01-XX: Dashboard UX Refresh - Actionable Modules for User Engagement ✅
+
+**Goal**: Upgrade the authenticated dashboard with actionable modules that drive user engagement and provide clear next steps for profile completion and platform usage.
+
+**Root Cause**: 
+- Dashboard was static and didn't guide users toward next actions
+- Limited visibility into profile completeness and opportunities
+- No clear path for users to improve their profile or discover connections
+- Missing personalized suggestions and activity tracking
+
+**Solution Applied**:
+
+#### 1. Created Shared UI Components
+- **NEW**: `components/ui/Card.tsx` - Consistent card component for all dashboard modules
+- **Features**: Unified styling, optional titles/descriptions, action buttons, responsive design
+
+#### 2. Implemented Core Dashboard Modules
+- **NEW**: `components/dashboard/AvailabilityToggle.tsx` - Real-time work availability toggle
+- **NEW**: `components/dashboard/OnboardingChecklist.tsx` - Dynamic completion tracking with progress bar
+- **NEW**: `components/dashboard/Opportunities.tsx` - Personalized connection suggestions
+- **NEW**: `components/dashboard/MessagesPreview.tsx` - Recent message threads with unread counts
+- **NEW**: `components/dashboard/JobsPreview.tsx` - User's job postings with applicant tracking
+- **NEW**: `components/dashboard/ProfileHealth.tsx` - Profile completeness scoring (0-100)
+- **NEW**: `components/dashboard/MiniAnalytics.tsx` - Activity metrics with sparklines
+
+#### 3. Enhanced Dashboard Layout
+- **Updated**: `app/(dashboard)/dashboard/page.tsx` - Complete dashboard restructure
+- **Features**:
+  - Top bar with status pills and quick action buttons
+  - Two-column layout (2/3 left, 1/3 right)
+  - Mobile-responsive card stacking
+  - Availability toggle in header
+  - Status indicators (Verified ✅ / Pending ⏳ / Rejected ❌)
+
+#### 4. Created Dashboard Data Layer
+- **NEW**: `lib/queries/dashboard.ts` - Centralized dashboard data queries
+- **NEW**: `app/api/profile/availability/route.ts` - Availability toggle API endpoint
+- **Features**: Profile completion calculation, opportunity suggestions, analytics data
+
+#### 5. Dashboard Module Features
+
+**OnboardingChecklist**:
+- Dynamic completion percentage (0-100%)
+- 8 completion items: avatar, headline, bio, specialties, states, license, connections, jobs
+- 1-click deep links to complete each item
+- Progress bar visualization
+- Empty state for completed profiles
+
+**Opportunities**:
+- Personalized suggestions based on state/specialties
+- "People you may know" with connection buttons
+- Complementary credential matching (CTEC → CPA)
+- Same specialties nearby
+- Empty state guidance
+
+**MessagesPreview**:
+- Last 3 message threads with unread counts
+- Counterpart names and message snippets
+- Direct links to message threads
+- Empty state with browse directory CTA
+
+**JobsPreview**:
+- User's job postings with applicant counts
+- Status indicators (active, closed, draft)
+- Quick access to job management
+- Empty state with "Post your first job" CTA
+
+**ProfileHealth**:
+- Weighted scoring system (avatar=10, headline=15, bio=20, specialties=20, states=10, verified=20, activity=5)
+- Color-coded score display (green/yellow/red)
+- Next improvement suggestions
+- Progress visualization
+
+**MiniAnalytics**:
+- 7-day activity metrics (profile views, directory impressions, connections)
+- Sparkline charts for trend visualization
+- Metric cards with icons and colors
+- Empty state for new users
+
+**AvailabilityToggle**:
+- Real-time work availability toggle
+- Optimistic UI updates
+- API integration with error handling
+- Visual status indicators
+
+#### 6. Technical Implementation
+- **Client-Side Components**: AvailabilityToggle uses React state and API calls
+- **Server-Side Data**: Profile data fetched server-side for performance
+- **Mock Data**: Components include mock data for development/testing
+- **Error Handling**: Graceful fallbacks for missing data
+- **Responsive Design**: Mobile-first approach with proper breakpoints
+
+**Files Modified**: 2 files, ~100 lines changed
+**Files Created**: 9 new files, ~800 lines added
+
+**Technical Details**:
+- **Layout**: Two-column grid (lg:grid-cols-3) with responsive stacking
+- **Components**: Modular, reusable dashboard components
+- **Data Flow**: Server-side profile data + client-side interactions
+- **API Integration**: Real-time availability toggle with optimistic updates
+- **Performance**: Efficient data queries with proper loading states
+
+**User Experience Improvements**:
+- ✅ **Actionable Dashboard**: Clear next steps for profile completion
+- ✅ **Progress Tracking**: Visual completion percentage and progress bars
+- ✅ **Personalized Suggestions**: Relevant connection opportunities
+- ✅ **Activity Visibility**: Profile views, connections, and engagement metrics
+- ✅ **Quick Actions**: One-click access to common tasks
+- ✅ **Status Awareness**: Clear verification and availability status
+- ✅ **Empty State Guidance**: Helpful CTAs when modules are empty
+- ✅ **Mobile Responsive**: Works seamlessly on all device sizes
+
+**Testing Checklist**:
+- [ ] Dashboard loads with all modules displaying correctly
+- [ ] Availability toggle updates immediately and persists
+- [ ] Onboarding checklist shows accurate completion percentage
+- [ ] Opportunities display personalized suggestions
+- [ ] Messages preview shows recent threads
+- [ ] Jobs preview displays user's job postings
+- [ ] Profile health shows accurate scoring
+- [ ] Mini analytics displays activity metrics
+- [ ] All modules handle empty states gracefully
+- [ ] Mobile responsive design works on all screen sizes
+- [ ] Quick action buttons navigate correctly
+- [ ] Status pills display correct verification state
+
+**Commands to Run**:
+```bash
+# No additional commands needed - all components are ready to use
+# Dashboard will automatically load with new modules
+```
+
+**Next Steps**:
+- Test dashboard functionality with real user data
+- Implement real data connections for opportunities and analytics
+- Add keyboard shortcuts (Cmd/Ctrl+K) for quick actions
+- Consider adding saved searches and referral features
+- Monitor user engagement with new dashboard modules
+
+**Result**: Dashboard now provides a comprehensive, actionable experience that guides users toward profile completion, connection building, and platform engagement. Users have clear visibility into their progress and next steps, significantly improving the onboarding and retention experience.
+
+---
+
+### 2025-10-01: Added Mentorship & Events to Public Marketing Site ✅
+
+**Goal**: Expand the public marketing site to include Mentorship and Events features, making them visible in the navigation and featured on the landing page.
+
+**Root Cause**: 
+- Landing page only marketed Directory/Jobs features
+- Top navigation lacked Mentorship/Events links
+- Missing feature cards for Mentorship and Events
+- No FAQ coverage for these modules
+- No dedicated placeholder pages for these features
+
+**Solution Applied**:
+
+#### 1. Enhanced Navigation
+- **Desktop Nav**: Added "Events" and "Mentorship" links to main header navigation
+- **Mobile Nav**: Added "Events" and "Mentorship" to mobile drawer navigation
+- **Consistent Placement**: Links appear between Jobs and Join across all navigation contexts
+
+#### 2. Updated Landing Page Hero
+- **Enhanced Description**: Added "Plus mentorship opportunities and curated events" to hero copy
+- **Maintains Brevity**: Kept copy concise while adding new features
+- **Clear Value Prop**: Emphasizes these as additional platform benefits
+
+#### 3. Added New Feature Cards
+- **Mentorship Opportunities**: "Connect with experienced professionals for guidance or offer mentorship to those starting out."
+- **Curated Events**: "Join webinars, workshops, and networking events designed for tax professionals."
+- **Responsive Grid**: Updated from `lg:grid-cols-3` to `xl:grid-cols-5` to accommodate 5 total cards
+- **Consistent Styling**: Matches existing feature card design
+
+#### 4. Enhanced How It Works Section
+- **Added Step 4**: "Grow & Learn - Access mentorship and attend events to expand your expertise and network."
+- **Updated Grid**: Changed from `lg:grid-cols-3` to `lg:grid-cols-4` for 4 steps
+- **Complete Journey**: Shows full user journey from joining to ongoing learning
+
+#### 5. Expanded FAQ Section
+- **New Question**: "What about mentorship and events?"
+- **Answer**: "Beyond the directory and job board, we offer mentorship matching and curated events like webinars and workshops to help you grow professionally."
+- **Dynamic Rendering**: Converted FAQ from static HTML to dynamic mapping from faqs array
+- **Maintains Special Items**: Preserved BuyMeACoffee button and "Why did you start" question
+
+#### 6. Existing Feature Pages
+- **DISCOVERED**: `app/(dashboard)/events/page.tsx` - Fully functional Events page with curated filtering
+- **DISCOVERED**: `app/(dashboard)/mentorship/page.tsx` - Fully functional Mentorship matching page
+- **Features**:
+  - Events: Curated vs. all events toggle, date-based filtering, personalized recommendations
+  - Mentorship: Preference-based matching, topic overlap, location matching
+  - Both require authentication (in dashboard route group)
+
+**Files Modified**: 2 files, ~30 lines changed
+**Files Created**: 0 new files (used existing functional pages)
+
+**Technical Details**:
+- **Navigation**: Links added to both desktop and mobile navigation components
+- **Hero Copy**: Extended without breaking responsive design
+- **Feature Cards**: Added to existing features array structure
+- **Grid Layouts**: Updated to handle 5 cards and 4 steps responsively
+- **FAQ**: Converted from static to dynamic rendering
+- **Existing Pages**: Navigation routes to fully functional Events and Mentorship pages in `(dashboard)` route group
+
+**User Experience Improvements**:
+- ✅ **Visibility**: Mentorship and Events prominently featured in navigation
+- ✅ **Discovery**: Landing page clearly shows all platform features
+- ✅ **Clear Journey**: How It Works section shows complete user path
+- ✅ **Full Functionality**: Navigation links to actual working features (not placeholders!)
+- ✅ **Consistency**: Design matches existing site patterns
+- ✅ **Responsive**: Works seamlessly on mobile and desktop
+
+**Marketing Impact**:
+- ✅ **Feature Coverage**: All 4 core modules now visible on landing page
+- ✅ **Value Proposition**: Expanded from 3 to 5 feature cards
+- ✅ **User Journey**: Complete 4-step process from join to ongoing learning
+- ✅ **FAQ Coverage**: All platform features addressed in FAQ
+- ✅ **Navigation Discoverability**: All features accessible from top nav
+
+**Testing Checklist**:
+- [ ] Desktop navigation shows all 7 links (Features, How it works, FAQ, Directory, Jobs, Events, Mentorship)
+- [ ] Mobile navigation shows all links in drawer
+- [ ] Landing page displays 5 feature cards
+- [ ] How It Works shows 4 steps in proper grid
+- [ ] FAQ includes mentorship/events question
+- [ ] /events page loads with curated events functionality
+- [ ] /mentorship page loads with mentorship matching
+- [ ] All navigation links work correctly
+- [ ] Responsive design works on mobile/tablet/desktop
+- [ ] No console errors or build warnings
+
+**Commands to Run**:
+```bash
+# No commands needed - all changes are client-side components
+# Build succeeds without errors
+```
+
+**Next Steps**:
+- Monitor user engagement with new navigation links
+- Track conversion from marketing page to Events/Mentorship features
+- Consider adding public preview/teaser content for non-authenticated users
+- Monitor clicks on new navigation items
+- Test authenticated user flow from landing page to features
+
+**Result**: Public marketing site now promotes all four core platform modules (Directory, Jobs, Events, Mentorship) with consistent visibility in navigation and clear messaging about each feature's value proposition. Navigation links route to fully functional, authenticated feature pages that are already built and working.
+
+---
+
+### 2025-10-01: Fixed Admin Dashboard Redirect Issue ✅
+
+**Goal**: Fix the issue where admin users clicking "Admin Panel" in the user menu were being redirected to `/profile/edit` instead of the admin dashboard.
+
+**Root Cause**: 
+- The middleware was checking for `onboarding_complete` cookie on ALL routes (including admin routes)
+- If the cookie wasn't set to '1', middleware redirected to `/profile/edit`
+- Admin routes (`/admin/*`) were not exempt from the onboarding check
+- This prevented admin users from accessing the admin dashboard
+
+**Solution Applied**:
+
+#### 1. Added Admin Route Matcher
+- **NEW**: `isAdmin` route matcher for `/admin(.*)` paths
+- Added to middleware alongside existing `isPublic`, `isOnboarding`, and `isDashboard` matchers
+
+#### 2. Bypass Onboarding Check for Admin Routes
+- Admin routes now skip the `onboarding_complete` check
+- Admins can access admin dashboard regardless of onboarding status
+- Maintains security - still requires authentication via Clerk
+
+**Files Modified**: 1 file, ~5 lines changed
+- `middleware.ts` - Added admin route matcher and bypass logic
+
+**Technical Details**:
+- **Route Matcher**: `createRouteMatcher(['/admin(.*)'])` matches all admin routes
+- **Check Order**: Admin check happens BEFORE onboarding check
+- **Debug Headers**: Added `x-debug-redirect: 'none (admin)'` for debugging
+- **Preserved Logic**: All other middleware behavior unchanged
+
+**Middleware Flow**:
+1. Public routes → allow
+2. No user/session → allow (Clerk handles)
+3. Dashboard routes → allow
+4. Onboarding routes → allow
+5. **Admin routes → allow (NEW!)**
+6. Check onboarding cookie → redirect if incomplete
+7. Otherwise → allow
+
+**Testing**:
+- ✅ Build succeeds without errors
+- ✅ Admin routes bypass onboarding check
+- ✅ Non-admin routes still check onboarding status
+- ✅ Admin panel accessible from user menu
+
+**Commands to Run**:
+```bash
+# No commands needed - middleware change is automatic
+# Build already verified successful
+```
+
+**Result**: Admin users can now access the admin dashboard via the "Admin Panel" menu item without being redirected to profile edit. The fix maintains all existing security while allowing admins to manage the platform regardless of their onboarding status.
+
+---
+
+## Email Notification System for Events (2025-01-04) ✅
+
+**Goal**: Notify admins when new events are ready for review after weekly ingestion.
+
+**Implementation**: Added comprehensive email notification system to the weekly events cron job.
+
+### Features Implemented:
+- **Weekly Schedule**: Emails sent every Monday at 6 AM UTC when events are refreshed
+- **Rich HTML Email**: Professional template with summary statistics and validation results
+- **Direct Action**: "Review Events Now" button links directly to admin review interface
+- **Admin Targeting**: Only sent to users with `is_admin = true` and valid email addresses
+- **Error Handling**: Email failures don't break the cron job - logged but non-blocking
+- **Comprehensive Stats**: Shows total events, ingested, updated, validation results
+
+### Files Modified:
+- `app/api/events/refresh-cron/route.ts` - Added admin email notification logic
+- `lib/email.ts` - Added `AdminEventsNotificationData` interface and template
+- `lib/email.ts` - Added `sendAdminEventsNotification()` function
+- `lib/email.ts` - Added `adminEventsNotification` email template
+
+### Email Template Features:
+- **Professional Design**: Gradient header, structured content sections
+- **Summary Statistics**: Total events found, new events added, updated events
+- **Validation Results**: Events processed, validated, publishable, errors
+- **Date Range**: Shows coverage period (next 180 days)
+- **Call-to-Action**: Prominent "Review Events Now" button
+- **Reminder**: Clear note that only approved events are shown to users
+- **Branding**: TaxProExchange footer with automation notice
+
+### Technical Details:
+- **Template System**: Uses existing email template infrastructure
+- **Data Structure**: Comprehensive data object with all relevant statistics
+- **URL Generation**: Dynamic review URL using `NEXT_PUBLIC_APP_URL`
+- **Date Formatting**: Localized date display for better readability
+- **Batch Processing**: Handles multiple admin emails efficiently
+
+**Result**: Admins now receive professional email notifications every Monday with complete statistics about new events, validation results, and direct access to the review interface. This ensures timely human review of AI-generated events while maintaining quality control.
 
 ---

@@ -19,9 +19,9 @@ export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
   const navItems = [
     { href: '/search', label: 'Directory' },
     { href: '/jobs', label: 'Jobs' },
+    { href: '/events', label: 'Events' },
+    { href: '/mentorship', label: 'Mentorship' },
     { href: '/dashboard', label: 'Dashboard' },
-    { href: '/messages', label: 'Messages' },
-    { href: '/profile/edit', label: 'Profile' },
   ];
 
   return (
@@ -84,11 +84,25 @@ export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
                   <div className="text-slate-900 font-medium">{user.fullName || user.primaryEmailAddress?.emailAddress}</div>
                   <div className="mt-4 space-y-2">
                     <Link
+                      href="/messages"
+                      onClick={onClose}
+                      className="block py-2 px-4 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-center"
+                    >
+                      Messages
+                    </Link>
+                    <Link
                       href="/profile/edit"
                       onClick={onClose}
                       className="block py-2 px-4 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-center"
                     >
-                      Edit Profile
+                      My Profile
+                    </Link>
+                    <Link
+                      href="/jobs"
+                      onClick={onClose}
+                      className="block py-2 px-4 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-center"
+                    >
+                      My Jobs
                     </Link>
                     <Link
                       href="/settings"

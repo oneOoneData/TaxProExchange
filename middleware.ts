@@ -4,6 +4,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/legal(.*)']);
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit', '/feedback']);
 const isDashboard = createRouteMatcher(['/dashboard']);
+const isAdmin = createRouteMatcher(['/admin(.*)']);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionId } = await auth();
@@ -51,6 +52,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Onboarding routes always allowed for signed-in users
   if (isOnboarding(req)) {
     response.headers.set('x-debug-redirect', 'none (onboarding)');
+    return response;
+  }
+
+  // Admin routes always allowed for signed-in users (bypass onboarding check)
+  if (isAdmin(req)) {
+    response.headers.set('x-debug-redirect', 'none (admin)');
     return response;
   }
 

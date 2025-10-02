@@ -72,8 +72,11 @@ export async function POST(request: NextRequest) {
       errors: [] as string[]
     };
 
-    // Send emails to each recipient
-    for (const [recipientId, connections] of Array.from(recipientConnections.entries())) {
+    // Send emails to each recipient with rate limiting
+    const recipientEntries = Array.from(recipientConnections.entries());
+    for (let i = 0; i < recipientEntries.length; i++) {
+      const [recipientId, connections] = recipientEntries[i];
+      
       try {
         const recipient = connections[0].recipient;
         
@@ -196,6 +199,12 @@ The TaxProExchange Team
         console.error(`Error sending email to recipient ${recipientId}:`, error);
         results.emailsFailed++;
         results.errors.push(`Error sending email to recipient ${recipientId}: ${error}`);
+      }
+      
+      // Rate limiting: Wait 500ms between requests to stay under 2 req/sec limit
+      // This gives us ~2 requests per second with some buffer
+      if (i < recipientEntries.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 

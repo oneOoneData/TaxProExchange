@@ -89,33 +89,12 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
 /**
  * Get verification request for a profile
+ * NOTE: This table doesn't exist - verification is tracked via profile.visibility_state
+ * Kept for backward compatibility with components
  */
 export async function getVerificationRequest(profileId: string): Promise<VerificationRequest | null> {
-  try {
-    const supabase = supabaseService();
-    
-    const { data: verification, error } = await supabase
-      .from('verification_requests')
-      .select('*')
-      .eq('profile_id', profileId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      // Table might not exist or no verification request found
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      console.error('Error fetching verification request:', error);
-      return null;
-    }
-
-    return verification;
-  } catch (error) {
-    console.error('Error in getVerificationRequest:', error);
-    return null;
-  }
+  // Table doesn't exist - verification is tracked via profile.visibility_state
+  return null;
 }
 
 /**

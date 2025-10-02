@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
             
             <div style="margin: 20px 0;">
               <strong>Sent via:</strong> Resend (No Amazon SES)<br>
-              <strong>From:</strong> support@taxproexchange.com<br>
+              <strong>From:</strong> TaxProExchange &lt;support@taxproexchange.com&gt;<br>
               <strong>To:</strong> ${to}<br>
               <strong>Time:</strong> ${new Date().toISOString()}
             </div>
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    const testText = `Test Email from TaxProExchange\n\nEmail System Test\n\nSent via: Resend (No Amazon SES)\nFrom: support@taxproexchange.com\nTo: ${to}\nTime: ${new Date().toISOString()}\n\n✅ Success: This email was sent via Resend with proper SPF/DKIM/DMARC alignment.\n\nThis is a test email to verify the email system is working correctly.`;
+    const testText = `Test Email from TaxProExchange\n\nEmail System Test\n\nSent via: Resend (No Amazon SES)\nFrom: TaxProExchange <support@taxproexchange.com>\nTo: ${to}\nTime: ${new Date().toISOString()}\n\n✅ Success: This email was sent via Resend with proper SPF/DKIM/DMARC alignment.\n\nThis is a test email to verify the email system is working correctly.`;
 
     const result = await sendEmail({
       to,

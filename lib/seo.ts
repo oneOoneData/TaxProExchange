@@ -167,3 +167,92 @@ export function generateFaqJsonLd(faqs: Array<{ question: string; answer: string
     }))
   };
 }
+
+/**
+ * Helper function to safely stringify JSON-LD
+ */
+export function jsonLd(obj: unknown) {
+  return { __html: JSON.stringify(obj) };
+}
+
+/**
+ * Generate JSON-LD for ProfessionalService schema (enhanced version)
+ */
+export function professionalServiceLD(p: {
+  slug: string;
+  first_name: string;
+  last_name: string;
+  credential_type: string;
+  bio?: string | null;
+  avatar_url?: string | null;
+  locations?: { state?: string | null; city?: string | null }[];
+  headline?: string | null;
+  firm_name?: string | null;
+  linkedin_url?: string | null;
+}) {
+  const areaServed = (p.locations ?? [])
+    .map(l => l?.state)
+    .filter(Boolean);
+  
+  const jsonLd: any = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    name: `${p.first_name} ${p.last_name}, ${p.credential_type}`,
+    description: p.bio ?? p.headline ?? `${p.first_name} ${p.last_name} is a verified ${p.credential_type} on TaxProExchange.`,
+    url: `${siteUrl}/p/${p.slug}`,
+  };
+
+  if (p.avatar_url) {
+    jsonLd.image = p.avatar_url.startsWith('http') ? p.avatar_url : `${siteUrl}${p.avatar_url}`;
+  }
+
+  if (areaServed.length > 0) {
+    jsonLd.areaServed = areaServed;
+  }
+
+  if (p.linkedin_url) {
+    jsonLd.sameAs = [p.linkedin_url];
+  }
+
+  if (p.firm_name) {
+    jsonLd.brand = {
+      '@type': 'Organization',
+      name: p.firm_name
+    };
+  }
+
+  return jsonLd;
+}
+
+/**
+ * Generate JSON-LD for WebSite with SearchAction (enhanced version)
+ */
+export function websiteSearchLD() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'TaxProExchange',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteUrl}/search?q={query}`,
+      'query-input': 'required name=query'
+    }
+  };
+}
+
+/**
+ * Generate JSON-LD for BreadcrumbList schema
+ */
+export function breadcrumbsLD(items: { name: string; url: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: it.name,
+      item: it.url
+    }))
+  };
+}
