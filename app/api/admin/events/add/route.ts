@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     }
 
     // Parse tags
-    const tagsArray = tags ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+    const tagsArray = tags ? tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [];
 
     // Create event
     const eventData = {
