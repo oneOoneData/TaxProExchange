@@ -46,7 +46,7 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
     console.log('🔍 DEBUG - Contains "TaxProExchange":', html.includes('TaxProExchange') ? 'WARNING - This looks like our form!' : 'OK');
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Using the more cost-effective model
+      model: "gpt-4o", // Using the more capable model for better accuracy
       messages: [
         {
           role: "system",
@@ -71,7 +71,9 @@ Rules:
 - If a field cannot be found, use null
 - For dates, if only one date is found, use it for both startsAt and endsAt
 - Extract the most specific and accurate information available
-- Focus on the main event, not side events or workshops`
+- Focus on the main event, not side events or workshops
+- IGNORE any outdated information (like 2024 dates when 2026 dates are available)
+- PRIORITIZE the most current/upcoming event information`
         },
         {
           role: "user",
@@ -120,7 +122,7 @@ HTML Content:\n${truncatedHtml}`
       organizer: extractedData.organizer || undefined,
       raw: {
         extractionMethod: 'chatgpt',
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         tokensUsed: completion.usage?.total_tokens || 0
       }
     };
