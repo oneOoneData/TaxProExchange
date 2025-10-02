@@ -70,6 +70,7 @@ export async function POST(req: Request) {
       location_city: locationCity?.trim() || null,
       location_state: locationState || null,
       candidate_url: eventUrl.trim(),
+      url: eventUrl.trim(), // Set url field to satisfy NOT NULL constraint
       organizer: organizer.trim(),
       region: locationState || 'CA', // Default region
       source: 'user_suggestion', // User-suggested events
