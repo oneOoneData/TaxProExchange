@@ -54,7 +54,7 @@ export function makeDedupeKey(title: string, startsAt: string, organizer?: strin
 /**
  * Normalizes raw event data into the events table format
  */
-export function normalize(raw: RawEvent, source: string = "ai_generated"): NormalizedEvent {
+export function normalize(raw: RawEvent, source: string = "ai_generated"): NormalizedEvent | null {
   const title = raw.title || raw.summary || "";
   const startsAt = raw.start_date || raw.start || raw.startDate || "";
   const endsAt = raw.end_date || raw.ends_at || raw.endsAt || undefined;
@@ -62,6 +62,18 @@ export function normalize(raw: RawEvent, source: string = "ai_generated"): Norma
   const region = raw.location_state || "CA"; // Default to CA
   const candidateUrl = raw.url || raw.link || raw.website || undefined;
   const location = raw.location_city || raw.location || raw.venue || undefined;
+
+  // Validate that the event is in the future
+  if (startsAt) {
+    const eventDate = new Date(startsAt);
+    const now = new Date();
+    
+    // Reject events that are more than 1 day in the past
+    if (eventDate < new Date(now.getTime() - 24*60*60*1000)) {
+      console.log(`Rejecting past event: ${title} on ${startsAt}`);
+      return null;
+    }
+  }
 
   return {
     title: title.slice(0, 400), // Truncate to prevent DB issues
@@ -160,6 +172,12 @@ export async function processStagedEvents(batchSize: number = 50): Promise<{
       try {
         // Normalize the raw data
         const normalized = normalize(staged.raw, staged.source);
+
+        // Skip if normalization failed (e.g., past event)
+        if (!normalized) {
+          console.log(`Skipping invalid event: ${staged.raw.title || 'Unknown'}`);
+          continue;
+        }
 
         // Check if event already exists
         const { data: existing, error: checkError } = await supabase
