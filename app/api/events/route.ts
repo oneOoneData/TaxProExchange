@@ -61,12 +61,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ events: [] });
     }
 
-    // fetch upcoming events (next 180 days) - ONLY admin-approved events
+    // fetch upcoming events (next 365 days) - ONLY admin-approved events
+    // Show events from all regions, not just user's region
     const { data: events, error: eventsError } = await supabase
       .from("events")
       .select("id,title,description,start_date,end_date,location_city,location_state,canonical_url,candidate_url,link_health_score,last_checked_at,tags,organizer,source,region,review_status")
       .eq("review_status", "approved")  // Only show approved events
-      .eq("region", region)
       .gte("start_date", new Date().toISOString())
       .lte("start_date", new Date(Date.now() + 365*24*60*60*1000).toISOString())
       .order("start_date", { ascending: true })
@@ -79,7 +79,7 @@ export async function GET(req: Request) {
 
     // Events are already filtered by review_status = "approved" in the query
     const filteredEvents = events ?? [];
-    console.log(`Found ${filteredEvents.length} approved events for region ${region}`);
+    console.log(`Found ${filteredEvents.length} approved events from all regions`);
 
     // Transform events to include URL and link health info
     const transformedEvents = filteredEvents.map(event => ({
