@@ -96,12 +96,18 @@ export default async function EventsPage({ searchParams }:{ searchParams?: Promi
     <div className="container-mobile py-8">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Events</h1>
-        <div className="flex items-center gap-4">
-          <a href="/suggest-event" className="text-sm underline text-indigo-600 hover:text-indigo-800">
-            Suggest an Event
+        <div className="flex items-center gap-3">
+          <a 
+            href="/suggest-event" 
+            className="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 transition-colors"
+          >
+            💡 Suggest an Event
           </a>
-          <a href={`/events?show=${showAll ? "curated" : "all"}`} className="text-sm underline">
-            {showAll ? "Show curated for me" : "Show all events"}
+          <a 
+            href={`/events?show=${showAll ? "curated" : "all"}`} 
+            className="inline-flex items-center justify-center rounded-xl bg-gray-600 text-white px-4 py-2 text-sm font-medium hover:bg-gray-700 transition-colors"
+          >
+            {showAll ? "🎯 Show curated for me" : "📋 Show all events"}
           </a>
         </div>
       </div>
