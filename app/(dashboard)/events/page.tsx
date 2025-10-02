@@ -7,10 +7,24 @@ async function fetchEvents(mode: "curated" | "all") {
   try {
     const supabase = createServerClient();
 
-    // fetch upcoming events (next 180 days)
+    // Check if review_status column exists first
+    const { data: columnCheck } = await supabase
+      .from("information_schema.columns")
+      .select("column_name")
+      .eq("table_name", "events")
+      .eq("column_name", "review_status")
+      .single();
+
+    if (!columnCheck) {
+      console.log("review_status column doesn't exist yet, returning no events until migration is applied");
+      return [];
+    }
+
+    // fetch upcoming events (next 180 days) - ONLY approved events
     const { data: events, error: eventsError } = await supabase
       .from("events")
       .select("*")
+      .eq("review_status", "approved")  // Only show approved events
       .gte("start_date", new Date().toISOString())
       .lte("start_date", new Date(Date.now() + 180*24*60*60*1000).toISOString())
       .order("start_date", { ascending: true });
