@@ -48,8 +48,9 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
   "organizer": "Organizer or host organization"
 }
 
+CRITICAL: Return ONLY the JSON object, no markdown formatting, no code blocks, no additional text. Just the raw JSON.
+
 Rules:
-- Return ONLY valid JSON, no other text
 - Use ISO datetime format for dates
 - If a field cannot be found, use null
 - For dates, if only one date is found, use it for both startsAt and endsAt
@@ -70,8 +71,16 @@ Rules:
       throw new Error('No response from ChatGPT');
     }
 
+    // Clean the response - remove markdown code blocks if present
+    let cleanedContent = content.trim();
+    if (cleanedContent.startsWith('```json')) {
+      cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedContent.startsWith('```')) {
+      cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+
     // Parse the JSON response
-    const extractedData = JSON.parse(content);
+    const extractedData = JSON.parse(cleanedContent);
 
     // Validate and format the response
     const result: EventPayload = {
