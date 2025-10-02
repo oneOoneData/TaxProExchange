@@ -68,7 +68,7 @@ export async function GET(req: Request) {
       .eq("review_status", "approved")  // Only show approved events
       .eq("region", region)
       .gte("start_date", new Date().toISOString())
-      .lte("start_date", new Date(Date.now() + 180*24*60*60*1000).toISOString())
+      .lte("start_date", new Date(Date.now() + 365*24*60*60*1000).toISOString())
       .order("start_date", { ascending: true })
       .limit(200);
 
