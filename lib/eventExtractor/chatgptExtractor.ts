@@ -65,7 +65,7 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
     console.log('🔍 DEBUG - Location near 2026:', locationNear2026);
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o", // Using the more capable model for better accuracy
+      model: "gpt-5", // Using the latest and most capable model for maximum accuracy
       messages: [
         {
           role: "system",
@@ -95,7 +95,8 @@ Rules:
 - PRIORITIZE the most current/upcoming event information
 - For location: Look for the ACTUAL event location mentioned with the current year (2026), not previous years
 - Be very careful about location - if multiple cities are mentioned, choose the one associated with the current/upcoming event
-- Double-check that city and state match the same event (don't mix different years' locations)`
+- Double-check that city and state match the same event (don't mix different years' locations)
+- Use your advanced reasoning to distinguish between placeholder text, historical information, and current event details`
         },
         {
           role: "user",
@@ -144,7 +145,7 @@ HTML Content:\n${truncatedHtml}`
       organizer: extractedData.organizer || undefined,
       raw: {
         extractionMethod: 'chatgpt',
-        model: 'gpt-4o',
+        model: 'gpt-5',
         tokensUsed: completion.usage?.total_tokens || 0
       }
     };
