@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       candidate_url: eventUrl.trim(),
       organizer: organizer.trim(),
       region: locationState || 'CA', // Default region
-      source: 'user_suggestion',
+      source: 'user_suggestion', // User-suggested events
       review_status: 'pending_review',
       
       // User suggestion metadata
