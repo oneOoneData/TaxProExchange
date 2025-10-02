@@ -107,7 +107,7 @@ IMPORTANT: Look for the most current/upcoming event information. Focus on dates 
 HTML Content:\n${truncatedHtml}`
         }
       ],
-      temperature: 0.1, // Low temperature for consistent extraction
+      // GPT-5 only supports default temperature (1)
       max_completion_tokens: 1000,
     });
 
