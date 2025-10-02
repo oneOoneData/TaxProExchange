@@ -138,8 +138,11 @@ export async function POST(req: Request) {
 
     if (insertError) {
       console.error('Error inserting admin-created event:', insertError);
+      console.error('Event data that failed:', eventData);
       return NextResponse.json({ 
-        error: "Failed to add event" 
+        error: "Failed to add event",
+        details: insertError.message,
+        code: insertError.code
       }, { status: 500 });
     }
 
