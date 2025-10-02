@@ -83,24 +83,52 @@ export async function scrapeEventFromUrl(url: string): Promise<ScrapedEventData>
 }
 
 function extractTitle(document: Document): string | undefined {
-  // Try multiple selectors for title
+  // Try multiple selectors for title, prioritizing more specific ones
   const selectors = [
-    'h1',
-    'title',
+    // Very specific event title selectors
+    'h1.event-title',
+    'h1.event-name',
+    'h1.conference-title',
+    'h1.conference-name',
+    '.event-title h1',
+    '.event-name h1',
+    '.conference-title h1',
+    '.conference-name h1',
+    
+    // Common title patterns
     '[data-testid*="title"]',
-    '[class*="title"]',
+    '[data-testid*="event-title"]',
+    '[data-testid*="conference-title"]',
     '[class*="event-title"]',
     '[class*="event-name"]',
+    '[class*="conference-title"]',
+    '[class*="conference-name"]',
+    '[class*="event-heading"]',
+    '[class*="event-header"]',
+    
+    // Generic but specific classes
     '.event-title',
     '.event-name',
     '.conference-title',
-    '.conference-name'
+    '.conference-name',
+    '.event-heading',
+    '.event-header',
+    '.hero-title',
+    '.page-title',
+    
+    // Generic selectors (last resort)
+    'h1',
+    'title'
   ];
 
   for (const selector of selectors) {
     const element = document.querySelector(selector);
     if (element && element.textContent?.trim()) {
-      return element.textContent.trim();
+      const title = element.textContent.trim();
+      // Filter out very short or generic titles
+      if (title.length > 5 && !title.toLowerCase().includes('home') && !title.toLowerCase().includes('welcome')) {
+        return title;
+      }
     }
   }
 
@@ -137,17 +165,20 @@ function extractDescription(document: Document): string | undefined {
 function extractLocation(document: Document): { city?: string; state?: string } {
   const location: { city?: string; state?: string } = {};
 
-  // Try multiple selectors for location
+  // Try multiple selectors for location, including text content search
   const selectors = [
     '[data-testid*="location"]',
+    '[data-testid*="venue"]',
     '[class*="location"]',
     '[class*="venue"]',
     '[class*="address"]',
+    '[class*="where"]',
     '.location',
     '.venue',
     '.address',
     '.event-location',
-    '.conference-location'
+    '.conference-location',
+    '.event-venue'
   ];
 
   for (const selector of selectors) {
@@ -164,18 +195,37 @@ function extractLocation(document: Document): { city?: string; state?: string } 
     }
   }
 
+  // If not found with selectors, search for location patterns in the entire document
+  if (!location.city || !location.state) {
+    const bodyText = document.body.textContent || '';
+    const locationMatch = bodyText.match(/([A-Za-z\s]+),\s*([A-Z]{2}|[A-Za-z\s]+)(?:\s+\d{5})?/g);
+    
+    if (locationMatch) {
+      for (const match of locationMatch) {
+        const parsed = parseLocationText(match);
+        if (parsed.city && parsed.state && parsed.city.length > 2) {
+          location.city = parsed.city;
+          location.state = parsed.state;
+          break;
+        }
+      }
+    }
+  }
+
   return location;
 }
 
 function parseLocationText(text: string): { city?: string; state?: string } {
   // Common patterns for location parsing
   const patterns = [
-    // "City, State" or "City, ST"
+    // "City, State" or "City, ST" (most common)
     /([A-Za-z\s]+),\s*([A-Z]{2}|[A-Za-z\s]+)/,
-    // "City State" or "City ST"
+    // "City State" or "City ST" (no comma)
     /([A-Za-z\s]+)\s+([A-Z]{2}|[A-Za-z\s]+)$/,
     // "City, State Country" - extract just city and state
-    /([A-Za-z\s]+),\s*([A-Z]{2}|[A-Za-z\s]+),\s*[A-Za-z\s]+/
+    /([A-Za-z\s]+),\s*([A-Z]{2}|[A-Za-z\s]+),\s*[A-Za-z\s]+/,
+    // "City, State ZipCode" - extract city and state
+    /([A-Za-z\s]+),\s*([A-Z]{2}|[A-Za-z\s]+)\s+\d{5}/
   ];
 
   for (const pattern of patterns) {
@@ -184,8 +234,16 @@ function parseLocationText(text: string): { city?: string; state?: string } {
       const city = match[1]?.trim();
       const state = match[2]?.trim();
       
+      // Validate city and state
       if (city && state && city.length > 1 && state.length > 1) {
-        return { city, state };
+        // Filter out common non-city words
+        const cityWords = city.toLowerCase().split(' ');
+        const invalidWords = ['hotel', 'convention', 'center', 'venue', 'location', 'address'];
+        const hasInvalidWord = cityWords.some(word => invalidWords.includes(word));
+        
+        if (!hasInvalidWord) {
+          return { city, state };
+        }
       }
     }
   }
@@ -193,7 +251,14 @@ function parseLocationText(text: string): { city?: string; state?: string } {
   // If no pattern matches, try to extract just the first part as city
   const firstPart = text.split(',')[0]?.trim();
   if (firstPart && firstPart.length > 1) {
-    return { city: firstPart };
+    // Check if it looks like a city name (not a venue name)
+    const cityWords = firstPart.toLowerCase().split(' ');
+    const invalidWords = ['hotel', 'convention', 'center', 'venue', 'location', 'address'];
+    const hasInvalidWord = cityWords.some(word => invalidWords.includes(word));
+    
+    if (!hasInvalidWord) {
+      return { city: firstPart };
+    }
   }
 
   return {};
@@ -232,15 +297,18 @@ function extractDates(document: Document): { startDate?: string; endDate?: strin
   // Try multiple selectors for dates
   const selectors = [
     '[data-testid*="date"]',
+    '[data-testid*="when"]',
     '[class*="date"]',
     '[class*="start-date"]',
     '[class*="end-date"]',
     '[class*="event-date"]',
+    '[class*="when"]',
     '.date',
     '.start-date',
     '.end-date',
     '.event-date',
-    '.conference-date'
+    '.conference-date',
+    '.event-when'
   ];
 
   for (const selector of selectors) {
@@ -257,33 +325,85 @@ function extractDates(document: Document): { startDate?: string; endDate?: strin
     }
   }
 
+  // If not found with selectors, search for date patterns in the entire document
+  if (!dates.startDate) {
+    const bodyText = document.body.textContent || '';
+    
+    // Look for date patterns like "5/17/2026 to 5/20/2026" or "May 17-20, 2026"
+    const datePatterns = [
+      // "M/D/YYYY to M/D/YYYY" or "MM/DD/YYYY to MM/DD/YYYY"
+      /(\d{1,2}\/\d{1,2}\/\d{4})\s+to\s+(\d{1,2}\/\d{1,2}\/\d{4})/,
+      // "M/D/YYYY - M/D/YYYY" or "MM/DD/YYYY - MM/DD/YYYY"
+      /(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})/,
+      // "Month DD-DD, YYYY"
+      /([A-Za-z]+)\s+(\d{1,2})-(\d{1,2}),\s+(\d{4})/,
+      // "Month DD, YYYY to Month DD, YYYY"
+      /([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})\s+to\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/,
+      // Single date patterns
+      /(\d{1,2}\/\d{1,2}\/\d{4})/,
+      /([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/
+    ];
+
+    for (const pattern of datePatterns) {
+      const match = bodyText.match(pattern);
+      if (match) {
+        const parsed = parseDateText(match[0]);
+        if (parsed.startDate) {
+          dates.startDate = parsed.startDate;
+          if (parsed.endDate) dates.endDate = parsed.endDate;
+          break;
+        }
+      }
+    }
+  }
+
   return dates;
 }
 
 function parseDateText(text: string): { startDate?: string; endDate?: string } {
-  // Common date patterns
+  // Common date patterns - ordered by specificity
   const patterns = [
-    // "MM/DD/YYYY - MM/DD/YYYY"
+    // "M/D/YYYY to M/D/YYYY" (like "5/17/2026 to 5/20/2026")
+    /(\d{1,2}\/\d{1,2}\/\d{4})\s+to\s+(\d{1,2}\/\d{1,2}\/\d{4})/,
+    // "M/D/YYYY - M/D/YYYY"
     /(\d{1,2}\/\d{1,2}\/\d{4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{4})/,
     // "MM/DD/YYYY to MM/DD/YYYY"
-    /(\d{1,2}\/\d{1,2}\/\d{4})\s+to\s+(\d{1,2}\/\d{1,2}\/\d{4})/,
-    // "Month DD, YYYY - Month DD, YYYY"
-    /([A-Za-z]+\s+\d{1,2},\s+\d{4})\s*-\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/,
+    /(\d{2}\/\d{2}\/\d{4})\s+to\s+(\d{2}\/\d{2}\/\d{4})/,
+    // "MM/DD/YYYY - MM/DD/YYYY"
+    /(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/,
+    // "Month DD-DD, YYYY" (like "May 17-20, 2026")
+    /([A-Za-z]+)\s+(\d{1,2})-(\d{1,2}),\s+(\d{4})/,
     // "Month DD, YYYY to Month DD, YYYY"
     /([A-Za-z]+\s+\d{1,2},\s+\d{4})\s+to\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/,
-    // Single date "MM/DD/YYYY" or "Month DD, YYYY"
-    /(\d{1,2}\/\d{1,2}\/\d{4}|[A-Za-z]+\s+\d{1,2},\s+\d{4})/
+    // "Month DD, YYYY - Month DD, YYYY"
+    /([A-Za-z]+\s+\d{1,2},\s+\d{4})\s*-\s*([A-Za-z]+\s+\d{1,2},\s+\d{4})/,
+    // Single date "M/D/YYYY" or "MM/DD/YYYY"
+    /(\d{1,2}\/\d{1,2}\/\d{4})/,
+    // Single date "Month DD, YYYY"
+    /([A-Za-z]+\s+\d{1,2},\s+\d{4})/
   ];
 
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match) {
-      if (match[2]) {
+      if (match[0].includes('to') || match[0].includes('-')) {
         // Two dates found
-        return {
-          startDate: formatDate(match[1]),
-          endDate: formatDate(match[2])
-        };
+        if (pattern.source.includes('\\d{1,2}-\\d{1,2}')) {
+          // Handle "May 17-20, 2026" format
+          const month = match[1];
+          const startDay = match[2];
+          const endDay = match[3];
+          const year = match[4];
+          return {
+            startDate: formatDate(`${month} ${startDay}, ${year}`),
+            endDate: formatDate(`${month} ${endDay}, ${year}`)
+          };
+        } else {
+          return {
+            startDate: formatDate(match[1]),
+            endDate: formatDate(match[2])
+          };
+        }
       } else {
         // Single date found
         return {
