@@ -24,6 +24,16 @@ export default function AddEventPage() {
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const router = useRouter();
 
+  // Helper function to format date for HTML input
+  const formatDateForInput = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0]; // Returns yyyy-MM-dd format
+    } catch {
+      return '';
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -59,8 +69,8 @@ export default function AddEventPage() {
           ...prev,
           title: result.title || prev.title,
           description: result.description || prev.description,
-          startDate: result.startsAt ? new Date(result.startsAt).toISOString().split('T')[0] : prev.startDate,
-          endDate: result.endsAt ? new Date(result.endsAt).toISOString().split('T')[0] : prev.endDate,
+          startDate: result.startsAt ? formatDateForInput(result.startsAt) : prev.startDate,
+          endDate: result.endsAt ? formatDateForInput(result.endsAt) : prev.endDate,
           locationCity: result.city || prev.locationCity,
           locationState: result.state || prev.locationState,
           organizer: result.organizer || prev.organizer,
