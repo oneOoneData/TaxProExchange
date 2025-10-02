@@ -26,7 +26,7 @@ async function fetchEvents(mode: "curated" | "all") {
       .select("*")
       .eq("review_status", "approved")  // Only show approved events
       .gte("start_date", new Date().toISOString())
-      .lte("start_date", new Date(Date.now() + 180*24*60*60*1000).toISOString())
+      .lte("start_date", new Date(Date.now() + 365*24*60*60*1000).toISOString())
       .order("start_date", { ascending: true });
 
     if (eventsError) {
@@ -96,9 +96,14 @@ export default async function EventsPage({ searchParams }:{ searchParams?: Promi
     <div className="container-mobile py-8">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Events</h1>
-        <a href={`/events?show=${showAll ? "curated" : "all"}`} className="text-sm underline">
-          {showAll ? "Show curated for me" : "Show all events"}
-        </a>
+        <div className="flex items-center gap-4">
+          <a href="/suggest-event" className="text-sm underline text-indigo-600 hover:text-indigo-800">
+            Suggest an Event
+          </a>
+          <a href={`/events?show=${showAll ? "curated" : "all"}`} className="text-sm underline">
+            {showAll ? "Show curated for me" : "Show all events"}
+          </a>
+        </div>
       </div>
       {!showAll && (
         <div className="text-sm opacity-70 mt-1">

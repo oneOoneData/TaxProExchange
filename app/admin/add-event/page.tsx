@@ -1,0 +1,373 @@
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import AdminRouteGuard from '@/components/AdminRouteGuard';
+
+export default function AddEventPage() {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    locationCity: '',
+    locationState: '',
+    eventUrl: '',
+    organizer: '',
+    tags: '',
+    reviewStatus: 'approved' // Default to approved for admin-created events
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const router = useRouter();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      const response = await fetch('/api/admin/events/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        // Reset form
+        setFormData({
+          title: '',
+          description: '',
+          startDate: '',
+          endDate: '',
+          locationCity: '',
+          locationState: '',
+          eventUrl: '',
+          organizer: '',
+          tags: '',
+          reviewStatus: 'approved'
+        });
+      } else {
+        const error = await response.json();
+        console.error('Error:', error);
+        setSubmitStatus('error');
+      }
+    } catch (error) {
+      console.error('Error submitting event:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <AdminRouteGuard>
+      <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+        {/* Header */}
+        <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
+          <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-semibold">Add New Event</h1>
+              <p className="text-sm text-slate-600">Manually add an event to the platform</p>
+            </div>
+            <button
+              onClick={() => router.push('/admin/events-review')}
+              className="text-slate-600 hover:text-slate-900"
+            >
+              ← Back to Events Review
+            </button>
+          </div>
+        </header>
+
+        <div className="mx-auto max-w-2xl px-4 py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm"
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-2">
+                Add New Event
+              </h2>
+              <p className="text-slate-600">
+                Manually add a new event to the platform. Admin-created events are approved by default.
+              </p>
+            </div>
+
+            {submitStatus === 'success' && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center">
+                  <div className="text-green-600 mr-3">✅</div>
+                  <div>
+                    <h3 className="text-green-800 font-medium">Event Added Successfully!</h3>
+                    <p className="text-green-700 text-sm">
+                      The event has been added to the platform and is now visible to users.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {submitStatus === 'error' && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center">
+                  <div className="text-red-600 mr-3">❌</div>
+                  <div>
+                    <h3 className="text-red-800 font-medium">Error</h3>
+                    <p className="text-red-700 text-sm">
+                      There was an error adding the event. Please try again.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Event Title */}
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Title *
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  required
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="e.g., Annual Tax Conference 2026"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Description *
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  required
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Describe the event, topics covered, speakers, etc."
+                />
+              </div>
+
+              {/* Date Range */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    required
+                    value={formData.startDate}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    name="endDate"
+                    value={formData.endDate}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="locationCity" className="block text-sm font-medium text-gray-700 mb-2">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="locationCity"
+                    name="locationCity"
+                    value={formData.locationCity}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="e.g., Las Vegas"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="locationState" className="block text-sm font-medium text-gray-700 mb-2">
+                    State/Province
+                  </label>
+                  <select
+                    id="locationState"
+                    name="locationState"
+                    value={formData.locationState}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select a state</option>
+                    <option value="AL">Alabama</option>
+                    <option value="AK">Alaska</option>
+                    <option value="AZ">Arizona</option>
+                    <option value="AR">Arkansas</option>
+                    <option value="CA">California</option>
+                    <option value="CO">Colorado</option>
+                    <option value="CT">Connecticut</option>
+                    <option value="DE">Delaware</option>
+                    <option value="FL">Florida</option>
+                    <option value="GA">Georgia</option>
+                    <option value="HI">Hawaii</option>
+                    <option value="ID">Idaho</option>
+                    <option value="IL">Illinois</option>
+                    <option value="IN">Indiana</option>
+                    <option value="IA">Iowa</option>
+                    <option value="KS">Kansas</option>
+                    <option value="KY">Kentucky</option>
+                    <option value="LA">Louisiana</option>
+                    <option value="ME">Maine</option>
+                    <option value="MD">Maryland</option>
+                    <option value="MA">Massachusetts</option>
+                    <option value="MI">Michigan</option>
+                    <option value="MN">Minnesota</option>
+                    <option value="MS">Mississippi</option>
+                    <option value="MO">Missouri</option>
+                    <option value="MT">Montana</option>
+                    <option value="NE">Nebraska</option>
+                    <option value="NV">Nevada</option>
+                    <option value="NH">New Hampshire</option>
+                    <option value="NJ">New Jersey</option>
+                    <option value="NM">New Mexico</option>
+                    <option value="NY">New York</option>
+                    <option value="NC">North Carolina</option>
+                    <option value="ND">North Dakota</option>
+                    <option value="OH">Ohio</option>
+                    <option value="OK">Oklahoma</option>
+                    <option value="OR">Oregon</option>
+                    <option value="PA">Pennsylvania</option>
+                    <option value="RI">Rhode Island</option>
+                    <option value="SC">South Carolina</option>
+                    <option value="SD">South Dakota</option>
+                    <option value="TN">Tennessee</option>
+                    <option value="TX">Texas</option>
+                    <option value="UT">Utah</option>
+                    <option value="VT">Vermont</option>
+                    <option value="VA">Virginia</option>
+                    <option value="WA">Washington</option>
+                    <option value="WV">West Virginia</option>
+                    <option value="WI">Wisconsin</option>
+                    <option value="WY">Wyoming</option>
+                    <option value="DC">Washington DC</option>
+                    <option value="Virtual">Virtual</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Event URL */}
+              <div>
+                <label htmlFor="eventUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                  Event Website/Registration URL *
+                </label>
+                <input
+                  type="url"
+                  id="eventUrl"
+                  name="eventUrl"
+                  required
+                  value={formData.eventUrl}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="https://example.com/event"
+                />
+              </div>
+
+              {/* Organizer */}
+              <div>
+                <label htmlFor="organizer" className="block text-sm font-medium text-gray-700 mb-2">
+                  Organizer/Host *
+                </label>
+                <input
+                  type="text"
+                  id="organizer"
+                  name="organizer"
+                  required
+                  value={formData.organizer}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="e.g., AICPA, State CPA Society, etc."
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  id="tags"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="e.g., general_tax, virtual, irs_rep"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Common tags: general_tax, virtual, irs_rep, multi_state, bookkeeping, crypto, software_[name]
+                </p>
+              </div>
+
+              {/* Review Status */}
+              <div>
+                <label htmlFor="reviewStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                  Review Status
+                </label>
+                <select
+                  id="reviewStatus"
+                  name="reviewStatus"
+                  value={formData.reviewStatus}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="approved">Approved (visible to users)</option>
+                  <option value="pending_review">Pending Review</option>
+                </select>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-6 border-t">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Adding Event...' : 'Add Event'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      </div>
+    </AdminRouteGuard>
+  );
+}

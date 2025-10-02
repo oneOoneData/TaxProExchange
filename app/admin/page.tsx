@@ -602,12 +602,18 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Events Management</h3>
             <p className="text-slate-600 mb-4">Refresh events from AI or review events before they go live.</p>
             <EventsRefreshButton />
-            <div className="mt-3">
+            <div className="mt-3 flex gap-2">
               <Link 
                 href="/admin/events-review"
                 className="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 transition-colors"
               >
                 📋 Review Events
+              </Link>
+              <Link 
+                href="/admin/add-event"
+                className="inline-flex items-center justify-center rounded-xl bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                ➕ Add Event
               </Link>
             </div>
           </motion.div>
