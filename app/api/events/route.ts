@@ -68,7 +68,7 @@ export async function GET(req: Request) {
       .select("id,title,description,start_date,end_date,location_city,location_state,canonical_url,candidate_url,link_health_score,last_checked_at,tags,organizer,source,region,review_status")
       .eq("review_status", "approved")  // Only show approved events
       .gte("start_date", new Date().toISOString())
-      .lte("start_date", new Date(Date.now() + 365*24*60*60*1000).toISOString())
+      .lte("start_date", new Date(Date.now() + 730*24*60*60*1000).toISOString()) // 2 years ahead
       .order("start_date", { ascending: true })
       .limit(200);
 
