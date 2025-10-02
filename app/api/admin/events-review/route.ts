@@ -108,7 +108,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
-    const { eventId, status, notes } = await req.json();
+    const { eventId, status, notes, updates } = await req.json();
 
     if (!eventId || !status) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -127,7 +127,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Admin profile not found" }, { status: 500 });
     }
 
-    // Update event review status
+    // Update event review status and any other fields
     const updateData: any = {
       review_status: status,
       reviewed_at: new Date().toISOString(),
@@ -136,6 +136,11 @@ export async function PATCH(req: Request) {
 
     if (notes) {
       updateData.admin_notes = notes;
+    }
+
+    // Add any field updates if provided
+    if (updates) {
+      Object.assign(updateData, updates);
     }
 
     const { data, error } = await supabase
