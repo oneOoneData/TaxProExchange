@@ -22,13 +22,11 @@ export async function POST(req: Request) {
       locationState,
       eventUrl,
       organizer,
-      contactEmail,
-      contactName,
       additionalInfo
     } = body;
 
     // Validate required fields
-    if (!title || !description || !startDate || !eventUrl || !organizer || !contactEmail || !contactName) {
+    if (!title || !description || !startDate || !eventUrl || !organizer) {
       return NextResponse.json({ 
         error: "Missing required fields" 
       }, { status: 400 });
@@ -50,7 +48,7 @@ export async function POST(req: Request) {
     // Get user profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, email')
+      .select('id, first_name, last_name, email')
       .eq('clerk_id', userId)
       .single();
 
@@ -59,6 +57,9 @@ export async function POST(req: Request) {
         error: "User profile not found" 
       }, { status: 500 });
     }
+
+    const userName = `${profile.first_name} ${profile.last_name}`.trim();
+    const userEmail = profile.email;
 
     // Create event suggestion
     const eventSuggestion = {
@@ -77,9 +78,7 @@ export async function POST(req: Request) {
       // User suggestion metadata
       suggested_by: profile.id,
       suggested_at: new Date().toISOString(),
-      contact_name: contactName.trim(),
-      contact_email: contactEmail.trim(),
-      additional_info: additionalInfo?.trim() || null,
+      admin_notes: `Suggested by user: ${userName} (${userEmail}). ${additionalInfo ? `Additional info: ${additionalInfo}` : ''}`,
       
       // Link health fields (will be validated later)
       canonical_url: null,

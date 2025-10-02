@@ -14,8 +14,6 @@ export default function SuggestEventPage() {
     locationState: '',
     eventUrl: '',
     organizer: '',
-    contactEmail: '',
-    contactName: '',
     additionalInfo: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,8 +54,6 @@ export default function SuggestEventPage() {
           locationState: '',
           eventUrl: '',
           organizer: '',
-          contactEmail: '',
-          contactName: '',
           additionalInfo: ''
         });
       } else {
@@ -314,46 +310,6 @@ export default function SuggestEventPage() {
               />
             </div>
 
-            {/* Contact Information */}
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Provide your contact details so we can reach out if we need more information.
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="contactName" className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="contactName"
-                    name="contactName"
-                    required
-                    value={formData.contactName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Your full name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="contactEmail"
-                    name="contactEmail"
-                    required
-                    value={formData.contactEmail}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-              </div>
-            </div>
 
             {/* Additional Information */}
             <div>
