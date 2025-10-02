@@ -28,6 +28,15 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
 
     // Truncate HTML to avoid token limits (keep first 50k characters which should include most important content)
     const truncatedHtml = html.substring(0, 50000);
+    
+    // Debug: Log key content to see what we're sending
+    console.log('🔍 DEBUG - URL:', url);
+    console.log('🔍 DEBUG - Final URL:', finalUrl);
+    console.log('🔍 DEBUG - HTML length:', html.length);
+    console.log('🔍 DEBUG - HTML preview (first 500 chars):', html.substring(0, 500));
+    console.log('🔍 DEBUG - Looking for 2026:', html.includes('2026') ? 'FOUND' : 'NOT FOUND');
+    console.log('🔍 DEBUG - Looking for Cleveland:', html.includes('Cleveland') ? 'FOUND' : 'NOT FOUND');
+    console.log('🔍 DEBUG - Looking for Las Vegas:', html.includes('Las Vegas') ? 'FOUND' : 'NOT FOUND');
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Using the more cost-effective model
@@ -81,6 +90,9 @@ Rules:
 
     // Parse the JSON response
     const extractedData = JSON.parse(cleanedContent);
+    
+    // Debug: Log what ChatGPT extracted
+    console.log('🤖 DEBUG - ChatGPT extracted:', JSON.stringify(extractedData, null, 2));
 
     // Validate and format the response
     const result: EventPayload = {
