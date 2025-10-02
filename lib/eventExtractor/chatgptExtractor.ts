@@ -42,8 +42,27 @@ export async function extractEventWithChatGPT(url: string): Promise<EventPayload
     console.log('🔍 DEBUG - Looking for 2026:', html.includes('2026') ? 'FOUND' : 'NOT FOUND');
     console.log('🔍 DEBUG - Looking for Cleveland:', html.includes('Cleveland') ? 'FOUND' : 'NOT FOUND');
     console.log('🔍 DEBUG - Looking for Las Vegas:', html.includes('Las Vegas') ? 'FOUND' : 'NOT FOUND');
+    console.log('🔍 DEBUG - Looking for Ohio:', html.includes('Ohio') ? 'FOUND' : 'NOT FOUND');
+    console.log('🔍 DEBUG - Looking for Nevada:', html.includes('Nevada') ? 'FOUND' : 'NOT FOUND');
     console.log('🔍 DEBUG - Contains "Suggest an Event":', html.includes('Suggest an Event') ? 'WARNING - This looks like a form!' : 'OK');
     console.log('🔍 DEBUG - Contains "TaxProExchange":', html.includes('TaxProExchange') ? 'WARNING - This looks like our form!' : 'OK');
+    
+    // Look for location patterns near 2026
+    const lines = html.split('\n');
+    let locationNear2026 = 'NOT FOUND';
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes('2026')) {
+        // Check lines around the 2026 mention for location info
+        for (let j = Math.max(0, i-3); j <= Math.min(lines.length-1, i+3); j++) {
+          if (lines[j].includes('Cleveland') || lines[j].includes('Las Vegas')) {
+            locationNear2026 = `FOUND: "${lines[j].trim()}" (line ${j+1})`;
+            break;
+          }
+        }
+        break;
+      }
+    }
+    console.log('🔍 DEBUG - Location near 2026:', locationNear2026);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o", // Using the more capable model for better accuracy
@@ -73,7 +92,10 @@ Rules:
 - Extract the most specific and accurate information available
 - Focus on the main event, not side events or workshops
 - IGNORE any outdated information (like 2024 dates when 2026 dates are available)
-- PRIORITIZE the most current/upcoming event information`
+- PRIORITIZE the most current/upcoming event information
+- For location: Look for the ACTUAL event location mentioned with the current year (2026), not previous years
+- Be very careful about location - if multiple cities are mentioned, choose the one associated with the current/upcoming event
+- Double-check that city and state match the same event (don't mix different years' locations)`
         },
         {
           role: "user",
