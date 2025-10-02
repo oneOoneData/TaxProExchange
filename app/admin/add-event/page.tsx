@@ -42,7 +42,7 @@ export default function AddEventPage() {
     setScrapeError(null);
 
     try {
-      const response = await fetch('/api/events/scrape', {
+      const response = await fetch('/api/extract-event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,24 +54,24 @@ export default function AddEventPage() {
         const result = await response.json();
         const scrapedData = result.data;
 
-        // Update form with scraped data
+        // Update form with extracted data
         setFormData(prev => ({
           ...prev,
-          title: scrapedData.title || prev.title,
-          description: scrapedData.description || prev.description,
-          startDate: scrapedData.startDate || prev.startDate,
-          endDate: scrapedData.endDate || prev.endDate,
-          locationCity: scrapedData.locationCity || prev.locationCity,
-          locationState: scrapedData.locationState || prev.locationState,
-          organizer: scrapedData.organizer || prev.organizer,
+          title: result.title || prev.title,
+          description: result.description || prev.description,
+          startDate: result.startsAt ? new Date(result.startsAt).toISOString().split('T')[0] : prev.startDate,
+          endDate: result.endsAt ? new Date(result.endsAt).toISOString().split('T')[0] : prev.endDate,
+          locationCity: result.city || prev.locationCity,
+          locationState: result.state || prev.locationState,
+          organizer: result.organizer || prev.organizer,
         }));
       } else {
         const error = await response.json();
-        setScrapeError(error.error || 'Failed to scrape event data');
+        setScrapeError(error.error || 'Failed to extract event data');
       }
     } catch (error) {
-      console.error('Error scraping URL:', error);
-      setScrapeError('Failed to scrape event data');
+      console.error('Error extracting URL:', error);
+      setScrapeError('Failed to extract event data');
     } finally {
       setIsScraping(false);
     }
