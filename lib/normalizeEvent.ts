@@ -195,7 +195,9 @@ export async function processStagedEvents(batchSize: number = 50): Promise<{
           redirect_chain: [],
           link_health_score: 0,
           last_checked_at: null,
-          publishable: false
+          publishable: false,
+          // Review status - all new events need human review
+          review_status: 'pending_review'
         };
 
         let result;
