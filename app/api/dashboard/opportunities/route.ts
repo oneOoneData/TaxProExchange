@@ -41,7 +41,7 @@ export async function GET() {
       .map((ps: any) => ps.software_slug)
       .filter(Boolean);
 
-    // Build the query to find matching profiles
+    // Build the query to find matching profiles - start with less restrictive criteria
     let query = supabase
       .from("profiles")
       .select(`
@@ -50,10 +50,26 @@ export async function GET() {
         profile_specializations(specialization_slug),
         profile_software(software_slug)
       `)
-      .eq("is_listed", true)
-      .eq("visibility_state", "verified")
       .neq("id", profile.id)
-      .limit(20);
+      .limit(50); // Increase limit to get more candidates
+
+    // Only filter by visibility if we have verified profiles, otherwise be more inclusive
+    const { data: verifiedCount } = await supabase
+      .from("profiles")
+      .select("id", { count: 'exact', head: true })
+      .eq("visibility_state", "verified")
+      .neq("id", profile.id);
+
+    console.log('🔍 Opportunities API: Verified profiles count:', verifiedCount);
+
+    if (verifiedCount && verifiedCount.length > 0) {
+      // If we have verified profiles, use them
+      query = query.eq("visibility_state", "verified");
+    } else {
+      // If no verified profiles, include pending and listed profiles
+      query = query.in("visibility_state", ["verified", "pending_verification"])
+                   .eq("is_listed", true);
+    }
 
     // Execute the query
     const { data: candidates, error } = await query;
@@ -117,9 +133,15 @@ export async function GET() {
 
       // Always give some score to ensure we have results
       if (score === 0) {
-        score = 5;
+        score = 10; // Increase base score
         reasons.push("Tax professional in your network");
       }
+
+      // Give bonus points for having any profile data
+      if (candidate.headline) score += 5;
+      if (candidate.firm_name) score += 5;
+      if (candidateStates.length > 0) score += 5;
+      if (candidateSpecializations.length > 0) score += 5;
 
       return {
         ...candidate,
@@ -131,21 +153,42 @@ export async function GET() {
     });
 
     // Sort by score and take top results
-    const topMatches = scoredCandidates
+    let topMatches = scoredCandidates
       .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
-      .map((candidate: any) => ({
-        id: candidate.id,
-        name: `${candidate.first_name} ${candidate.last_name}`,
-        credential: candidate.credential_type,
-        location: candidate.location,
-        specialties: candidate.specialties,
-        reason: candidate.reasons.join(", "),
-        avatar: candidate.avatar_url,
-        slug: candidate.slug
-      }));
+      .slice(0, 6);
 
-    return NextResponse.json({ opportunities: topMatches });
+    // If we still don't have enough matches, get any profiles as fallback
+    if (topMatches.length === 0) {
+      console.log('🔍 Opportunities API: No scored matches, getting fallback profiles');
+      const { data: fallbackProfiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, credential_type, slug, avatar_url")
+        .neq("id", profile.id)
+        .limit(6);
+
+      topMatches = (fallbackProfiles || []).map((candidate: any) => ({
+        ...candidate,
+        score: 5,
+        reasons: ["Tax professional"],
+        location: "Location not specified",
+        specialties: []
+      }));
+    }
+
+    const formattedMatches = topMatches.map((candidate: any) => ({
+      id: candidate.id,
+      name: `${candidate.first_name} ${candidate.last_name}`,
+      credential: candidate.credential_type,
+      location: candidate.location,
+      specialties: candidate.specialties,
+      reason: candidate.reasons.join(", "),
+      avatar: candidate.avatar_url,
+      slug: candidate.slug
+    }));
+
+    console.log('🔍 Opportunities API: Final matches:', formattedMatches.length);
+
+    return NextResponse.json({ opportunities: formattedMatches });
 
   } catch (error) {
     console.error("Error in opportunities API:", error);
