@@ -49,94 +49,96 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
     }
   }, []);
 
-  // Show loading state during hydration
-  if (!isClient) {
-    return (
-      <html lang="en">
-        <body className={inter.className}>
-          <div>Loading...</div>
-        </body>
-      </html>
-    );
-  }
+  // Pages that have their own headers and shouldn't get AppNavigation
+  const pagesWithOwnHeaders = [
+    '/profile/',
+    '/onboarding/',
+    '/sign-in',
+    '/sign-up',
+    '/refer',
+    '/feedback',
+    '/settings',
+    '/messages',
+    '/jobs/',
+    '/search',
+    '/p/',
+    '/legal',
+    '/privacy',
+    '/terms',
+    '/admin'
+  ];
+  
+  const shouldShowAppNavigation = isClient && isApp && !pagesWithOwnHeaders.some(path => 
+    currentPath.startsWith(path)
+  );
 
-  if (isApp) {
-    // Pages that have their own headers and shouldn't get AppNavigation
-    const pagesWithOwnHeaders = [
-      '/profile/',
-      '/onboarding/',
-      '/sign-in',
-      '/sign-up',
-      '/refer',
-      '/feedback',
-      '/settings',
-      '/messages',
-      '/jobs/',
-      '/search',
-      '/p/',
-      '/legal',
-      '/privacy',
-      '/terms',
-      '/admin'
-    ];
-    
-    const shouldShowAppNavigation = !pagesWithOwnHeaders.some(path => 
-      currentPath.startsWith(path)
-    );
-
-    // App layout - noindex, nofollow, separate analytics
-    return (
-      <html lang="en">
-        <head>
-          <meta name="robots" content="noindex, nofollow" />
-          <meta name="googlebot" content="noindex, nofollow" />
-          <meta name="bingbot" content="noindex, nofollow" />
-          {GA_MEASUREMENT_ID_APP && (
-            <Analytics measurementId={GA_MEASUREMENT_ID_APP} />
-          )}
-        </head>
-        <body className={inter.className}>
-          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-            {shouldShowAppNavigation && <AppNavigation />}
-            <div className="pb-16 md:pb-0">
-              {children}
-            </div>
-            <MobileBottomNav />
-            <Footer />
-          </ClerkProvider>
-        </body>
-      </html>
-    );
-  }
-
-  // Marketing layout - SEO optimized
+  // Always render the same structure to prevent hydration mismatch
   return (
     <html lang="en">
       <head>
-        {/* Canonical URL - will be set dynamically per page */}
-        <link rel="canonical" href="https://www.taxproexchange.com" />
+        {/* Viewport meta for proper mobile behavior */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         
-        {/* JSON-LD Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(getOrganizationJsonLd()),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(getWebsiteJsonLd()),
-          }}
-        />
+        {/* Conditional meta tags based on domain */}
+        {isClient && isApp && (
+          <>
+            <meta name="robots" content="noindex, nofollow" />
+            <meta name="googlebot" content="noindex, nofollow" />
+            <meta name="bingbot" content="noindex, nofollow" />
+          </>
+        )}
+        
+        {/* Canonical URL - will be set dynamically per page */}
+        {!isApp && (
+          <link rel="canonical" href="https://www.taxproexchange.com" />
+        )}
+        
+        {/* JSON-LD Structured Data - only for marketing site */}
+        {!isApp && (
+          <>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(getOrganizationJsonLd()),
+              }}
+            />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(getWebsiteJsonLd()),
+              }}
+            />
+          </>
+        )}
         
         {/* Google Analytics */}
-        <Analytics measurementId={GA_MEASUREMENT_ID_SITE} />
+        {isApp && GA_MEASUREMENT_ID_APP && (
+          <Analytics measurementId={GA_MEASUREMENT_ID_APP} />
+        )}
+        {!isApp && (
+          <Analytics measurementId={GA_MEASUREMENT_ID_SITE} />
+        )}
+        
+        {/* Preconnect to external domains for performance */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={inter.className}>
-        <CanonicalUrl />
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          {children}
+          {/* Conditional navigation */}
+          {shouldShowAppNavigation && <AppNavigation />}
+          
+          {/* Conditional canonical URL component */}
+          {!isApp && <CanonicalUrl />}
+          
+          {/* Main content */}
+          <div className={isApp ? "pb-16 md:pb-0" : ""}>
+            {children}
+          </div>
+          
+          {/* Conditional mobile navigation */}
+          {isApp && <MobileBottomNav />}
+          
+          {/* Footer */}
           <Footer />
         </ClerkProvider>
       </body>

@@ -4,6 +4,9 @@ export type MentorshipPrefs = {
   is_open_to_mentor: boolean;
   is_seeking_mentor: boolean;
   topics: string[];
+  software: string[];
+  specializations: string[];
+  mentoring_message?: string | null;
   timezone?: string | null;
   updated_at?: string;
 };

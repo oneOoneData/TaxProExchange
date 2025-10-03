@@ -13,9 +13,6 @@ interface MobileNavProps {
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const { user } = useUser();
 
-  // Debug log
-  console.log('MobileNav render:', { isOpen, user: !!user });
-
   const navItems = [
     { href: '#features', label: 'Features' },
     { href: '#how', label: 'How it works' },

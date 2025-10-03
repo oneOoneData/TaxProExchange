@@ -12,7 +12,6 @@ interface UserMenuProps {
 }
 
 export default function UserMenu({ userName, userEmail }: UserMenuProps) {
-  console.log('🔍 UserMenu: Component rendered');
   const { signOut } = useClerk();
   const { user, isLoaded } = useUser();
   const [isOpen, setIsOpen] = useState(false);
@@ -25,8 +24,6 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAdmin, isLoading: isAdminLoading } = useAdminStatus();
   
-  // Debug logging
-  console.log('🔍 UserMenu: Admin status:', { isAdmin, isAdminLoading });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,11 +42,9 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
 
     const checkUnreadMessages = async () => {
       try {
-        console.log('Checking unread messages...');
         const response = await fetch('/api/messages/unread');
         if (response.ok) {
           const data = await response.json();
-          console.log('Unread messages response:', data);
           setHasUnreadMessages(data.hasUnreadMessages);
           setUnreadCount(data.unreadCount);
         } else {
@@ -89,11 +84,9 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
         const response = await fetch('/api/connections/pending');
         if (response.ok) {
           const data = await response.json();
-          console.log('Pending connections data:', data);
           setHasPendingConnections(data.count > 0);
           setPendingConnectionCount(data.count);
         } else {
-          console.log('Failed to fetch pending connections:', response.status);
           setHasPendingConnections(false);
           setPendingConnectionCount(0);
         }

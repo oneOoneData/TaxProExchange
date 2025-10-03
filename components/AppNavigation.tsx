@@ -59,7 +59,6 @@ export default function AppNavigation() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => {
-                console.log('Mobile menu button clicked');
                 setIsMobileNavOpen(true);
               }}
               className="mobile-menu-btn"
