@@ -360,7 +360,7 @@ export default function EditProfilePage() {
           bio: profileForm.bio.trim(),
           opportunities: profileForm.opportunities.trim(),
           credential_type: profileForm.credential_type,
-          licenses: profileForm.licenses,
+          licenses: profileForm.licenses || [],
           firm_name: profileForm.firm_name.trim(),
           public_email: profileForm.public_email.trim(),
           phone: profileForm.phone.trim(),

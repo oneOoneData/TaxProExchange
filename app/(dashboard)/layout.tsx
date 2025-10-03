@@ -21,9 +21,7 @@ export default function DashboardLayout({
       {/* Navigation Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="container-mobile py-3 flex items-center justify-between">
-          <Link href="/">
-            <Logo />
-          </Link>
+          <Logo />
           
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <Link href="/search" className="hover:text-slate-900">Directory</Link>

@@ -3,18 +3,14 @@ import { auth } from '@clerk/nextjs/server';
 import { getCurrentProfile, isOnboardingComplete } from '@/lib/db/profile';
 import { getRecentConnections, getRecentlyVerified } from '@/lib/db/activity';
 import { getUserJobs, getRecentJobs, getUserProfileForMatching } from '@/lib/db/jobs';
-import ProfileStatusCard from '@/components/dashboard/ProfileStatusCard';
-import VerificationCard from '@/components/dashboard/VerificationCard';
 import QuickActions from '@/components/dashboard/QuickActions';
 import ActivityFeed from '@/components/dashboard/ActivityFeed';
 import AvailabilityToggle from '@/components/dashboard/AvailabilityToggle';
-import OnboardingChecklist from '@/components/dashboard/OnboardingChecklist';
 import Opportunities from '@/components/dashboard/Opportunities';
 import MessagesPreview from '@/components/dashboard/MessagesPreview';
 import JobsPreview from '@/components/dashboard/JobsPreview';
 import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
 import ProfileHealth from '@/components/dashboard/ProfileHealth';
-import MiniAnalytics from '@/components/dashboard/MiniAnalytics';
 import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import NblPromoBanner from '@/components/NblPromoBanner';
 import DashboardTopEventCard from '@/components/DashboardTopEventCard';
@@ -135,36 +131,9 @@ export default async function DashboardPage() {
           <DashboardTopEventCard />
         </div>
 
-        {/* 4. All the Rest Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Left column (2/3) */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Onboarding Checklist */}
-            <OnboardingChecklist profile={profile} />
-            
-            {/* Opportunities */}
-            <Opportunities profile={profile} />
-          </div>
-
-          {/* Right column (1/3) */}
-          <div className="space-y-6">
-            {/* Mini Analytics */}
-            <MiniAnalytics />
-            
-            {/* Legacy components for now */}
-            <ProfileStatusCard 
-              profile={profile} 
-              verificationRequest={verificationRequest} 
-            />
-            {/* Only show verification card if not already verified */}
-            {profile?.visibility_state !== 'verified' && (
-              <VerificationCard 
-                verificationRequest={verificationRequest} 
-                isOnboardingComplete={onboardingComplete}
-                visibilityState={profile?.visibility_state}
-              />
-            )}
-          </div>
+        {/* 4. Opportunities Section */}
+        <div className="mb-8">
+          <Opportunities profile={profile} />
         </div>
 
         {/* 5. Activity Section - Full Width */}
