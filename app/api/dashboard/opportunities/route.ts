@@ -83,9 +83,13 @@ export async function GET() {
 
     // Score and filter candidates based on matches
     const scoredCandidates = (candidates || []).map((candidate: any) => {
+      console.log('🔍 Processing candidate:', candidate.first_name, candidate.last_name, 'locations:', candidate.profile_locations);
+      
       const candidateStates = (candidate.profile_locations || [])
         .map((pl: any) => pl.state)
         .filter(Boolean);
+      
+      console.log('🔍 Candidate states:', candidateStates);
       
       const candidateSpecializations = (candidate.profile_specializations || [])
         .map((ps: any) => ps.specialization_slug)
@@ -147,7 +151,7 @@ export async function GET() {
         ...candidate,
         score,
         reasons,
-        location: candidateStates.join(", ") || "Location not specified",
+        location: candidateStates.length > 0 ? candidateStates.join(", ") : "Location not specified",
         specialties: candidateSpecializations.slice(0, 3)
       };
     });
@@ -171,7 +175,8 @@ export async function GET() {
         score: 5,
         reasons: ["Tax professional"],
         location: "Location not specified",
-        specialties: []
+        specialties: [],
+        profile_locations: [] // Ensure this is set for consistency
       }));
     }
 
