@@ -141,7 +141,6 @@ export default async function DashboardPage() {
           <ActivityFeed 
             connections={connections} 
             recentlyVerified={recentlyVerified}
-            recentMessages={recentMessages}
             currentProfileId={profile?.id || ''}
           />
         </div>
