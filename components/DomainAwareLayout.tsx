@@ -113,7 +113,7 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
 
   // Always render the same structure to prevent hydration mismatch
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>
         {/* Viewport meta for proper mobile behavior */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
