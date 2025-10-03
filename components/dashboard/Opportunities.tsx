@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Profile } from '@/lib/db/profile';
 import Card from '@/components/ui/Card';
+import { useEffect, useState } from 'react';
 
 interface Opportunity {
   id: string;
@@ -10,6 +11,7 @@ interface Opportunity {
   specialties: string[];
   reason: string;
   avatar?: string;
+  slug?: string;
 }
 
 interface OpportunitiesProps {
@@ -18,9 +20,35 @@ interface OpportunitiesProps {
 }
 
 export default function Opportunities({ profile, opportunities = [] }: OpportunitiesProps) {
+  const [opportunityList, setOpportunityList] = useState<Opportunity[]>(opportunities);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (profile && opportunities.length === 0) {
+      fetchOpportunities();
+    }
+  }, [profile]);
+
+  const fetchOpportunities = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/dashboard/opportunities');
+      if (response.ok) {
+        const data = await response.json();
+        setOpportunityList(data.opportunities || []);
+      } else {
+        console.error('Failed to fetch opportunities');
+      }
+    } catch (error) {
+      console.error('Error fetching opportunities:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!profile) {
     return (
-      <Card title="Opportunities" description="Discover people and connections">
+      <Card title="Tax Pros that match your Profile" description="Discover tax professionals">
         <div className="animate-pulse space-y-3">
           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
           <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -29,13 +57,10 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
     );
   }
 
-  // Use real opportunities data
-  const opportunityList: Opportunity[] = opportunities;
-
   return (
     <Card 
-      title="People You May Know" 
-      description={`Because you're ${profile.credential_type} in CA`}
+      title="Tax Pros that match your Profile" 
+      description="Based on your location, specializations, and software"
       action={
         <Link 
           href="/search"
@@ -45,20 +70,33 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
         </Link>
       }
     >
-      {opportunityList.length === 0 ? (
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg animate-pulse">
+              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : opportunityList.length === 0 ? (
         <div className="text-center py-6">
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
             </svg>
           </div>
-          <h4 className="font-medium text-gray-900 mb-1">No suggestions yet</h4>
-          <p className="text-sm text-gray-600 mb-3">Complete your profile to see personalized recommendations.</p>
+          <h4 className="font-medium text-gray-900 mb-1">No matches found</h4>
+          <p className="text-sm text-gray-600 mb-3">We couldn't find any tax professionals matching your profile right now.</p>
           <Link
-            href="/profile/edit"
+            href="/search"
             className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Complete Profile
+            Browse Directory
           </Link>
         </div>
       ) : (
@@ -113,9 +151,12 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
               </div>
               
               <div className="flex-shrink-0">
-                <button className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
-                  Connect
-                </button>
+                <Link
+                  href={opportunity.slug ? `/p/${opportunity.slug}` : `/p/${opportunity.id}`}
+                  className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  View Profile
+                </Link>
               </div>
             </div>
           ))}
