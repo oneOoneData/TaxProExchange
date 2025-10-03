@@ -28,14 +28,14 @@ export async function GET() {
       .from("profiles")
       .select(`
         id, first_name, last_name, headline, firm_name, credential_type, slug, avatar_url, updated_at,
-        mentorship_preferences!inner(is_open_to_mentor, topics, software, specializations, mentoring_message)
+        mentorship_preferences!inner(is_open_to_mentor, topics, software, specializations, mentoring_message, updated_at)
       `)
       .eq("is_listed", true)
       .eq("visibility_state", "verified")
       .eq("mentorship_preferences.is_open_to_mentor", true)
       .gte("mentorship_preferences.updated_at", sevenDaysAgo.toISOString())
       .neq("id", profile.id)
-      .order("mentorship_preferences.updated_at", { ascending: false })
+      .order("updated_at", { ascending: false })
       .limit(10);
 
     if (error) {

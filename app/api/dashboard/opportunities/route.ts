@@ -45,7 +45,7 @@ export async function GET() {
     let query = supabase
       .from("profiles")
       .select(`
-        id, first_name, last_name, headline, firm_name, credential_type, slug, avatar_url,
+        id, first_name, last_name, headline, firm_name, credential_type, slug, avatar_url, primary_location,
         profile_locations(state, city),
         profile_specializations(specialization_slug),
         profile_software(software_slug)
@@ -147,11 +147,29 @@ export async function GET() {
       if (candidateStates.length > 0) score += 5;
       if (candidateSpecializations.length > 0) score += 5;
 
+      // Try to get location from a different source if profile_locations is empty
+      let displayLocation = "Location not specified";
+      if (candidateStates.length > 0) {
+        displayLocation = candidateStates.join(", ");
+      } else if (candidate.primary_location) {
+        // Try to extract state from primary_location if it's a JSON object
+        try {
+          const primaryLoc = typeof candidate.primary_location === 'string' 
+            ? JSON.parse(candidate.primary_location) 
+            : candidate.primary_location;
+          if (primaryLoc?.state) {
+            displayLocation = primaryLoc.state;
+          }
+        } catch (e) {
+          // Ignore JSON parse errors
+        }
+      }
+
       return {
         ...candidate,
         score,
         reasons,
-        location: candidateStates.length > 0 ? candidateStates.join(", ") : "Location not specified",
+        location: displayLocation,
         specialties: candidateSpecializations.slice(0, 3)
       };
     });
