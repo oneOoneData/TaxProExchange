@@ -44,8 +44,47 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
-      setIsApp(window.location.hostname === 'app.taxproexchange.com');
+      const isAppDomain = window.location.hostname === 'app.taxproexchange.com';
+      setIsApp(isAppDomain);
       setCurrentPath(window.location.pathname);
+      
+      // Update head content based on domain after hydration
+      if (isAppDomain) {
+        // Add noindex meta tags for app domain
+        const robotsMeta = document.querySelector('meta[name="robots"]');
+        if (!robotsMeta) {
+          const meta = document.createElement('meta');
+          meta.name = 'robots';
+          meta.content = 'noindex, nofollow';
+          document.head.appendChild(meta);
+        }
+        
+        const googlebotMeta = document.querySelector('meta[name="googlebot"]');
+        if (!googlebotMeta) {
+          const meta = document.createElement('meta');
+          meta.name = 'googlebot';
+          meta.content = 'noindex, nofollow';
+          document.head.appendChild(meta);
+        }
+        
+        const bingbotMeta = document.querySelector('meta[name="bingbot"]');
+        if (!bingbotMeta) {
+          const meta = document.createElement('meta');
+          meta.name = 'bingbot';
+          meta.content = 'noindex, nofollow';
+          document.head.appendChild(meta);
+        }
+        
+        // Remove canonical link for app domain
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+          canonicalLink.remove();
+        }
+        
+        // Remove JSON-LD scripts for app domain
+        const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
+        jsonLdScripts.forEach(script => script.remove());
+      }
     }
   }, []);
 
@@ -79,64 +118,44 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
         {/* Viewport meta for proper mobile behavior */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         
-        {/* Conditional meta tags based on domain */}
-        {isClient && isApp && (
-          <>
-            <meta name="robots" content="noindex, nofollow" />
-            <meta name="googlebot" content="noindex, nofollow" />
-            <meta name="bingbot" content="noindex, nofollow" />
-          </>
-        )}
+        {/* Default to marketing site meta tags, will be updated by client-side logic */}
+        <link rel="canonical" href="https://www.taxproexchange.com" />
         
-        {/* Canonical URL - will be set dynamically per page */}
-        {!isApp && (
-          <link rel="canonical" href="https://www.taxproexchange.com" />
-        )}
+        {/* JSON-LD Structured Data - always include for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getOrganizationJsonLd()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getWebsiteJsonLd()),
+          }}
+        />
         
-        {/* JSON-LD Structured Data - only for marketing site */}
-        {!isApp && (
-          <>
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify(getOrganizationJsonLd()),
-              }}
-            />
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify(getWebsiteJsonLd()),
-              }}
-            />
-          </>
-        )}
-        
-        {/* Google Analytics */}
-        {isApp && GA_MEASUREMENT_ID_APP && (
-          <Analytics measurementId={GA_MEASUREMENT_ID_APP} />
-        )}
-        {!isApp && (
-          <Analytics measurementId={GA_MEASUREMENT_ID_SITE} />
-        )}
+        {/* Google Analytics - default to site analytics */}
+        <Analytics measurementId={GA_MEASUREMENT_ID_SITE} />
         
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={inter.className}>
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          {/* Conditional navigation */}
+          {/* Conditional navigation - only show after client hydration */}
           {shouldShowAppNavigation && <AppNavigation />}
           
-          {/* Conditional canonical URL component */}
-          {!isApp && <CanonicalUrl />}
+          {/* Canonical URL component - only for marketing site */}
+          {isClient && !isApp && <CanonicalUrl />}
           
           {/* Main content */}
-          <div className={isApp ? "pb-16 md:pb-0" : ""}>
+          <div className={isClient && isApp ? "pb-16 md:pb-0" : ""}>
             {children}
           </div>
           
-          {/* Conditional mobile navigation */}
-          {isApp && <MobileBottomNav />}
+          {/* Conditional mobile navigation - only for app */}
+          {isClient && isApp && <MobileBottomNav />}
           
           {/* Footer */}
           <Footer />
