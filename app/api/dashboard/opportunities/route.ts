@@ -10,13 +10,21 @@ export async function GET() {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const supabase = createServerClient();
+    console.log('🔍 Opportunities API: User ID:', userId);
 
     // Get current profile
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id, credential_type, profile_locations(location_id, locations(state, city)), profile_specializations(specialization_slug), profile_software(software_slug)")
       .eq("clerk_id", userId)
       .single();
+
+    console.log('🔍 Opportunities API: Profile query result:', { profile, profileError });
+
+    if (profileError) {
+      console.error('🔍 Opportunities API: Profile query error:', profileError);
+      return NextResponse.json({ error: "Database error: " + profileError.message }, { status: 500 });
+    }
 
     if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
@@ -50,9 +58,11 @@ export async function GET() {
     // Execute the query
     const { data: candidates, error } = await query;
 
+    console.log('🔍 Opportunities API: Candidates query result:', { candidates: candidates?.length, error });
+
     if (error) {
-      console.error("Error fetching opportunities:", error);
-      return NextResponse.json({ error: "Failed to fetch opportunities" }, { status: 500 });
+      console.error("🔍 Opportunities API: Error fetching candidates:", error);
+      return NextResponse.json({ error: "Failed to fetch opportunities: " + error.message }, { status: 500 });
     }
 
     // Score and filter candidates based on matches

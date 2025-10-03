@@ -37,9 +37,11 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
       const response = await fetch('/api/dashboard/opportunities');
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 Opportunities fetched:', data);
         setOpportunityList(data.opportunities || []);
       } else {
-        console.error('Failed to fetch opportunities');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to fetch opportunities:', response.status, response.statusText, errorData);
       }
     } catch (error) {
       console.error('Error fetching opportunities:', error);
