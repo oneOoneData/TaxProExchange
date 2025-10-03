@@ -15,7 +15,7 @@ export async function GET() {
     // Get current profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, credential_type, profile_locations(location_id, locations(state, city)), profile_specializations(specialization_slug), profile_software(software_slug)")
+      .select("id, credential_type, profile_locations(location_id, profile_locations_view(state, city)), profile_specializations(specialization_slug), profile_software(software_slug)")
       .eq("clerk_id", userId)
       .single();
 
@@ -30,7 +30,7 @@ export async function GET() {
 
     // Get user's locations, specializations, and software
     const userStates = (profile.profile_locations || [])
-      .map((pl: any) => pl.locations?.state)
+      .map((pl: any) => pl.profile_locations_view?.state)
       .filter(Boolean);
     
     const userSpecializations = (profile.profile_specializations || [])
@@ -46,7 +46,7 @@ export async function GET() {
       .from("profiles")
       .select(`
         id, first_name, last_name, headline, firm_name, credential_type, slug, avatar_url,
-        profile_locations(location_id, locations(state, city)),
+        profile_locations(location_id, profile_locations_view(state, city)),
         profile_specializations(specialization_slug),
         profile_software(software_slug)
       `)
@@ -84,7 +84,7 @@ export async function GET() {
     // Score and filter candidates based on matches
     const scoredCandidates = (candidates || []).map((candidate: any) => {
       const candidateStates = (candidate.profile_locations || [])
-        .map((pl: any) => pl.locations?.state)
+        .map((pl: any) => pl.profile_locations_view?.state)
         .filter(Boolean);
       
       const candidateSpecializations = (candidate.profile_specializations || [])
