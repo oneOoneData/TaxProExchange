@@ -13,8 +13,6 @@ interface AppMobileNavProps {
 export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
   const { user } = useUser();
 
-  // Debug log
-  console.log('AppMobileNav render:', { isOpen, user: !!user });
 
   const navItems = [
     { href: '/search', label: 'Directory' },

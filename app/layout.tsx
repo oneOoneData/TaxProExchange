@@ -61,34 +61,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const organizationJsonLd = generateOrganizationJsonLd();
-  const websiteJsonLd = generateWebSiteJsonLd();
-
   return (
-    <html lang="en">
-      <head>
-        {/* Viewport meta for proper mobile behavior */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        
-        {/* JSON-LD Schema Markup */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(websiteJsonLd),
-          }}
-        />
-        {/* Preconnect to external domains for performance */}
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
-      <body>
-        <DomainAwareLayout>{children}</DomainAwareLayout>
-      </body>
-    </html>
+    <DomainAwareLayout>{children}</DomainAwareLayout>
   );
 }
