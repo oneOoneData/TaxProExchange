@@ -16,7 +16,7 @@ export async function GET() {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id, credential_type, profile_locations(state, city), profile_specializations(specialization_slug), profile_software(software_slug)")
-      .eq("clerk_id", userId)
+      .eq("clerk_user_id", userId)
       .single();
 
     console.log('🔍 Opportunities API: Profile query result:', { profile, profileError });
