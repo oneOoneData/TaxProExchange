@@ -14,15 +14,30 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's profile ID
-    const { data: profile, error: profileError } = await supabase
+    // Get user's profile ID - try both clerk_id and clerk_user_id
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id')
       .eq('clerk_id', userId)
       .single();
 
+    // If not found with clerk_id, try clerk_user_id
+    if (profileError && profileError.code === 'PGRST116') {
+      const { data: profile2, error: profileError2 } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('clerk_user_id', userId)
+        .single();
+      
+      if (!profileError2) {
+        profile = profile2;
+        profileError = null;
+      }
+    }
+
     if (profileError || !profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+      console.log('🔍 Pending connections API: Profile not found for userId:', userId, 'error:', profileError);
+      return NextResponse.json({ count: 0, hasPending: false });
     }
 
     // Get pending connection requests where user is the recipient

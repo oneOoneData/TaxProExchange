@@ -136,18 +136,10 @@ export default function SearchPageClient() {
   ];
 
   useEffect(() => {
-    // Check authentication
-    if (isLoaded && !user) {
-      router.push('/sign-in');
-      return;
-    }
-    
-    if (user) {
-      fetchSpecializations();
-      // Only search on initial load, not on every user change
-      searchProfiles(filters, 1);
-    }
-  }, [isLoaded, user]); // Remove router from dependencies to prevent unnecessary re-runs
+    // Always fetch specializations and search - no authentication required
+    fetchSpecializations();
+    searchProfiles(filters, 1);
+  }, [isLoaded]); // Remove user dependency since search is now public
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -221,8 +213,8 @@ export default function SearchPageClient() {
         setPagination(data.pagination);
       }
       
-      // Check connection status for each profile
-      if (data.profiles) {
+      // Check connection status for each profile (only for authenticated users)
+      if (data.profiles && user) {
         data.profiles.forEach((profile: Profile) => {
           checkConnectionStatus(profile.id);
         });
@@ -452,13 +444,13 @@ export default function SearchPageClient() {
     </div>
   );
 
-  // Show loading state while checking authentication
-  if (!isLoaded || !user) {
+  // Show loading state only while profiles are loading (not waiting for auth)
+  if (loading && profiles.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto"></div>
-          <p className="mt-2 text-slate-600">Loading...</p>
+          <p className="mt-2 text-slate-600">Loading professionals...</p>
         </div>
       </div>
     );
@@ -939,39 +931,48 @@ export default function SearchPageClient() {
                         )}
                         
                                                  {profile.accepting_work && (
-                           <button 
-                             onClick={() => {
-                               if (connectionStates[profile.id]?.status === 'pending' && !connectionStates[profile.id]?.isRequester) {
-                                 // Accept connection
-                                 handleAcceptConnection(connectionStates[profile.id]?.connectionId!);
-                               } else {
-                                 // Send connection request
-                                 console.log('🖱️ Button clicked for profile:', profile.id);
-                                 handleConnect(profile.id);
-                               }
-                             }}
-                             disabled={connectionStates[profile.id]?.status === 'accepted'}
-                             className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                               connectionStates[profile.id]?.status === 'accepted'
-                                 ? 'bg-green-100 text-green-700 border-green-200 cursor-default'
-                                 : connectionStates[profile.id]?.status === 'pending'
-                                 ? connectionStates[profile.id]?.isRequester ? 'bg-yellow-100 text-yellow-700 border-yellow-200 cursor-default' : 'bg-green-600 text-white hover:bg-green-700'
-                                 : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
-                             }`}
-                           >
-                             {connectionStates[profile.id]?.status === 'accepted'
-                               ? 'Connected'
-                               : connectionStates[profile.id]?.status === 'pending'
-                               ? connectionStates[profile.id]?.isRequester ? 'Request Sent' : 'Accept Request'
-                               : 'Connect'
-                             }
-                           </button>
-                         )}
+                          user ? (
+                            <button 
+                              onClick={() => {
+                                if (connectionStates[profile.id]?.status === 'pending' && !connectionStates[profile.id]?.isRequester) {
+                                  // Accept connection
+                                  handleAcceptConnection(connectionStates[profile.id]?.connectionId!);
+                                } else {
+                                  // Send connection request
+                                  console.log('🖱️ Button clicked for profile:', profile.id);
+                                  handleConnect(profile.id);
+                                }
+                              }}
+                              disabled={connectionStates[profile.id]?.status === 'accepted'}
+                              className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                                connectionStates[profile.id]?.status === 'accepted'
+                                  ? 'bg-green-100 text-green-700 border-green-200 cursor-default'
+                                  : connectionStates[profile.id]?.status === 'pending'
+                                  ? connectionStates[profile.id]?.isRequester ? 'bg-yellow-100 text-yellow-700 border-yellow-200 cursor-default' : 'bg-green-600 text-white hover:bg-green-700'
+                                  : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
+                              {connectionStates[profile.id]?.status === 'accepted'
+                                ? 'Connected'
+                                : connectionStates[profile.id]?.status === 'pending'
+                                ? connectionStates[profile.id]?.isRequester ? 'Request Sent' : 'Accept Request'
+                                : 'Connect'
+                              }
+                            </button>
+                          ) : (
+                            <a
+                              href="/join"
+                              className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm font-medium transition-colors"
+                            >
+                              Sign in to Connect
+                            </a>
+                          )
+                        )}
                         
 
                         
                         {/* Show Message button for connected users */}
-                        {profile.accepting_work && connectionStates[profile.id]?.status === 'accepted' && (
+                        {profile.accepting_work && connectionStates[profile.id]?.status === 'accepted' && user && (
                           <Link
                             href={`/messages/${connectionStates[profile.id]?.connectionId}`}
                             className="inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors mt-2"

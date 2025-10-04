@@ -128,6 +128,12 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
     const isAdmin = adminParam === 'true';
     setIsAdminView(isAdmin);
     
+    console.log('🔍 Profile loaded:', { 
+      id: profile?.id, 
+      specializations: profile?.specializations,
+      software: profile?.software 
+    });
+    
     fetchSpecializations();
     
     // Check connection status if user is signed in
@@ -151,7 +157,8 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   // Determine if contact info should be shown
   const shouldShowContactInfo = () => {
     if (!profile) return false;
-    return isSignedIn || profile.public_contact;
+    // Only show contact info if user is authenticated AND signed in
+    return isLoaded && isSignedIn && user;
   };
 
   const checkConnectionStatus = async (profileId: string) => {
@@ -229,19 +236,35 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   // Group profile specializations by their groups
   const getGroupedProfileSpecializations = () => {
     if (!profile || !specializationGroups.length) {
+    console.log('🔍 Specializations: Missing profile or groups', { 
+      hasProfile: !!profile, 
+      groupsLength: specializationGroups.length,
+      profileSpecializations: profile?.specializations,
+      profileId: profile?.id
+    });
       return [];
     }
     
-    // Create mapping from labels to slugs
-    const labelToSlugMap = createLabelToSlugMap();
-    
-    // Convert profile specializations from labels to slugs
-    const profileSlugs = profile.specializations.map(label => labelToSlugMap[label]).filter(Boolean);
+    // Profile specializations are already in slug format, so we can directly match them
+    const profileSlugs = profile.specializations || [];
+    console.log('🔍 Specializations: Processing', { 
+      profileSlugs, 
+      profileSlugsLength: profileSlugs.length,
+      groupsCount: specializationGroups.length,
+      firstGroup: specializationGroups[0]?.items?.slice(0, 3),
+      firstGroupItems: specializationGroups[0]?.items?.length
+    });
     
     const grouped = specializationGroups.map(group => ({
       ...group,
       items: group.items.filter(spec => profileSlugs.includes(spec.slug))
     })).filter(group => group.items.length > 0);
+    
+    console.log('🔍 Specializations: Result', { 
+      groupedCount: grouped.length, 
+      grouped,
+      hasMatches: grouped.some(g => g.items.length > 0)
+    });
     
     return grouped;
   };
