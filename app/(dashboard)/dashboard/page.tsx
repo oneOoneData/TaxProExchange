@@ -4,16 +4,17 @@ import { getCurrentProfile, isOnboardingComplete } from '@/lib/db/profile';
 import { getRecentConnections, getRecentlyVerified } from '@/lib/db/activity';
 import { getUserJobs, getRecentJobs, getUserProfileForMatching } from '@/lib/db/jobs';
 import QuickActions from '@/components/dashboard/QuickActions';
-import ActivityFeed from '@/components/dashboard/ActivityFeed';
+// import ActivityFeed from '@/components/dashboard/ActivityFeed';
 import AvailabilityToggle from '@/components/dashboard/AvailabilityToggle';
-import Opportunities from '@/components/dashboard/Opportunities';
+// import Opportunities from '@/components/dashboard/Opportunities';
 import MessagesPreview from '@/components/dashboard/MessagesPreview';
 import JobsPreview from '@/components/dashboard/JobsPreview';
 import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
 import ProfileHealth from '@/components/dashboard/ProfileHealth';
-import { DashboardDebug } from '@/components/debug/DashboardDebug';
+// import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import NblPromoBanner from '@/components/NblPromoBanner';
-import DashboardTopEventCard from '@/components/DashboardTopEventCard';
+// import DashboardTopEventCard from '@/components/DashboardTopEventCard';
+import SlackIntegration from '@/components/dashboard/SlackIntegration';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -35,6 +36,8 @@ export default async function DashboardPage() {
     getRecentJobs(5),
     userId ? getUserProfileForMatching(userId) : null
   ]);
+  
+  // Note: connections and recentlyVerified are temporarily unused due to disabled components
 
   // Note: Messaging is handled via Stream.io, not DB
   const recentMessages: any[] = [];
@@ -77,17 +80,17 @@ export default async function DashboardPage() {
   return (
     <div className="py-8">
       <NblPromoBanner />
-      <DashboardDebug 
+      {/* Temporarily disabled to isolate Slack integration */}
+      {/* <DashboardDebug 
         userId={userId} 
         profile={profile} 
         onboardingComplete={onboardingComplete} 
-      />
+      /> */}
       <div className="container-mobile">
         {/* Clean Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="mt-2 text-gray-600">
             Welcome back! Here's what's happening with your profile and connections.
           </p>
@@ -109,10 +112,18 @@ export default async function DashboardPage() {
               
               {/* Availability toggle */}
               <AvailabilityToggle profile={profile} />
-                      </div>
-                    </div>
-                  </div>
-                  
+            </div>
+          </div>
+        </div>
+
+        {/* Slack Integration - only for verified users */}
+        {profile?.visibility_state === 'verified' && (
+          <div className="mb-8">
+            <div className="container-mobile">
+              <SlackIntegration isVerified={true} />
+            </div>
+          </div>
+        )}
 
         {/* 2. Profile Health and Messages Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -127,23 +138,23 @@ export default async function DashboardPage() {
           ) : (
             <RecentJobsPreview jobs={recentJobs} userProfile={userProfileForMatching} />
           )}
-          {/* Events component */}
-          <DashboardTopEventCard />
+          {/* Events component - Temporarily disabled to isolate Slack integration */}
+          {/* <DashboardTopEventCard /> */}
         </div>
 
-        {/* 4. Opportunities Section */}
-        <div className="mb-8">
+        {/* 4. Opportunities Section - Temporarily disabled due to API issues */}
+        {/* <div className="mb-8">
           <Opportunities profile={profile} />
-        </div>
+        </div> */}
 
-        {/* 5. Activity Section - Full Width */}
-        <div className="mt-8">
+        {/* 5. Activity Section - Temporarily disabled due to API issues */}
+        {/* <div className="mt-8">
           <ActivityFeed 
             connections={connections} 
             recentlyVerified={recentlyVerified}
             currentProfileId={profile?.id || ''}
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

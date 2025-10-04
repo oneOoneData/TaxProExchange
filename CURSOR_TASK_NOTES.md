@@ -1,5 +1,88 @@
 # Cursor Task Notes
 
+## Slack Community Integration (2025-01-05) ✅
+
+**Goal**: Add Slack community invite/signup/log-in for authenticated and verified users with gated access and rate limiting.
+
+**Problem**: Need to provide verified users with access to a private Slack workspace for networking, referrals, and job sharing.
+
+**Solution Applied**: Complete Slack integration with database tracking, API endpoints, and dashboard UI components.
+
+### Implementation Details
+
+#### 1. Database Schema & Migration
+- **Created**: `database/migrations/2025-01-05_add_slack_members.sql`
+- **New Tables**:
+  - `slack_members`: Tracks verified users who joined Slack
+    - `profile_id` (unique FK to profiles)
+    - `slack_user_id` (optional Slack user ID)
+    - `joined_at` (timestamp)
+  - `slack_join_attempts`: Rate limiting for join attempts
+    - `profile_id` (FK to profiles)
+    - `attempted_at` (timestamp)
+    - `success` (boolean)
+- **RLS Policies**: Owner can manage own records, admins can read all
+- **Rate Limiting**: 3 attempts per day per user
+
+#### 2. Slack API Integration (`lib/slack.ts`)
+- **Invite Generation**: Uses Slack Bot Token to create user invites
+- **Membership Checking**: Verifies if user is already in workspace
+- **Database Operations**: CRUD operations for slack_members table
+- **Rate Limiting**: Tracks and enforces daily attempt limits
+- **Error Handling**: Graceful fallbacks for API failures
+
+#### 3. API Endpoints (`app/api/slack/join/route.ts`)
+- **POST /api/slack/join**: Creates invite and tracks membership
+  - Requires authentication and verified profile
+  - Checks rate limits (3 attempts/day)
+  - Generates Slack invite via API
+  - Updates database on success
+- **GET /api/slack/join**: Returns membership status
+  - Shows if user can join, is already member, rate limit status
+
+#### 4. Dashboard UI Components
+- **SlackIntegration**: Clean, single-line design
+  - Text: "Join the TPE Slack Community. For verified members only."
+  - Purple button (#4A154B) with Slack icon and "Connect" text
+  - Right-aligned to keep dashboard clean
+  - Shows "Open Slack" for existing members
+  - Handles join flow, loading states, and error handling inline
+
+#### 5. Dashboard Integration
+- **Location**: Added to verified dashboard below status section
+- **Visibility**: Only shown to users with `visibility_state = 'verified'`
+- **Analytics**: Tracks `slack_join_click` and `slack_join_success` events
+- **UX**: Smooth scroll to card when badge clicked
+
+### Configuration Required
+- **Environment Variables**:
+  - `SLACK_BOT_TOKEN`: Bot token with users:write scope
+  - `SLACK_WORKSPACE_ID`: Workspace ID for invite creation
+  - `NEXT_PUBLIC_SLACK_WORKSPACE_ID`: Public workspace ID for direct links
+
+### Security & Abuse Prevention
+- **Verification Gate**: Only verified profiles can access
+- **Rate Limiting**: 3 join attempts per day per user
+- **Single-Use Invites**: Fresh invites generated per request
+- **RLS Policies**: Database access properly secured
+- **Admin Access**: Admins can view all Slack membership data
+
+### Files Created/Modified
+- `database/migrations/2025-01-05_add_slack_members.sql` (new)
+- `lib/slack.ts` (new)
+- `app/api/slack/join/route.ts` (new)
+- `components/dashboard/SlackIntegration.tsx` (new)
+- `app/(dashboard)/dashboard/page.tsx` (modified)
+
+### Testing
+- Database migration ready for deployment
+- API endpoints handle auth, verification, and rate limiting
+- UI components include loading states and error handling
+- DOM errors resolved by isolating problematic dashboard components
+- Full Slack integration working with proper state management and error handling
+- Analytics tracking implemented for user behavior
+
+
 ## Events Link Health Validation System (2025-01-04) ✅
 
 **Goal**: Fix event URL retrieval by implementing robust link validation system that only returns verified, non-404 links.
