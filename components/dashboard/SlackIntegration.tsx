@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react';
 
+// Global type declaration for gtag
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
 interface SlackStatus {
   canJoin: boolean;
   isMember: boolean;
