@@ -174,18 +174,35 @@ export async function GET(
       );
     }
 
-    // Use array data directly from profiles table instead of separate table queries
-    const specializations = profile.specializations?.map(slug => ({ specialization_slug: slug })) || [];
-    const locations = profile.states?.map(state => ({ state })) || [];
-    const software = profile.software?.map(slug => ({ software_slug: slug })) || [];
+    // Fetch specializations from separate tables (like search API does)
+    const { data: specializations, error: specError } = await supabase
+      .from('profile_specializations')
+      .select(`specialization_slug`)
+      .eq('profile_id', profile.id);
 
-    console.log('🔍 Using array data from profiles table:', { 
-      specializations: profile.specializations, 
-      states: profile.states,
-      software: profile.software,
+    console.log('🔍 Specializations query result:', { 
+      specializations, 
+      specError, 
       profileId: profile.id,
+      specializationsCount: specializations?.length || 0,
       profileSlug: profile.slug
     });
+
+    // Fetch states (locations)
+    const { data: locations, error: locError } = await supabase
+      .from('profile_locations')
+      .select('state')
+      .eq('profile_id', profile.id);
+
+    console.log('🔍 Locations query result:', { locations, locError, profileId: profile.id });
+
+    // Fetch software
+    const { data: software, error: softError } = await supabase
+      .from('profile_software')
+      .select(`software_slug`)
+      .eq('profile_id', profile.id);
+
+    console.log('🔍 Software query result:', { software, softError, profileId: profile.id });
 
     // Fetch licenses (all for admin, only verified for public)
     let licenseQuery = supabase
