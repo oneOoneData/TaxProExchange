@@ -42,15 +42,22 @@ async function getProfile(slug: string) {
   //   return null;
   // }
 
-  // Fetch licenses separately
-  const { data: licenses } = await supabase
-    .from('licenses')
-    .select(`
+  // Fetch specializations, locations, software, and licenses separately
+  const [specializationsResult, locationsResult, softwareResult, licensesResult] = await Promise.all([
+    supabase.from('profile_specializations').select('specialization_slug').eq('profile_id', data.id),
+    supabase.from('profile_locations').select('state').eq('profile_id', data.id),
+    supabase.from('profile_software').select('software_slug').eq('profile_id', data.id),
+    supabase.from('licenses').select(`
       id, license_kind, license_number, issuing_authority,
       state, expires_on, board_profile_url, status
-    `)
-    .eq('profile_id', (data as any)?.id || '')
-    .eq('status', 'verified');
+    `).eq('profile_id', (data as any)?.id || '').eq('status', 'verified')
+  ]);
+
+  // Update the profile data with the fetched specializations, locations, and software
+  data.specializations = specializationsResult.data?.map(s => s.specialization_slug) || [];
+  data.states = locationsResult.data?.map(l => l.state) || [];
+  data.software = softwareResult.data?.map(s => s.software_slug) || [];
+  const licenses = licensesResult.data || [];
 
   return {
     ...(data as any),

@@ -236,20 +236,20 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   // Group profile specializations by their groups
   const getGroupedProfileSpecializations = () => {
     if (!profile || !specializationGroups.length) {
-    console.log('🔍 Specializations: Missing profile or groups', { 
-      hasProfile: !!profile, 
-      groupsLength: specializationGroups.length,
-      profileSpecializations: profile?.specializations,
-      profileId: profile?.id
-    });
+      console.log('🔍 Specializations: Missing profile or groups', { 
+        hasProfile: !!profile, 
+        groupsLength: specializationGroups.length,
+        profileSpecializations: profile?.specializations,
+        profileId: profile?.id
+      });
       return [];
     }
     
-    // Profile specializations are already in slug format, so we can directly match them
-    const profileSlugs = profile.specializations || [];
+    // Profile specializations can be either labels or slugs, so we need to match both
+    const profileSpecializations = profile.specializations || [];
     console.log('🔍 Specializations: Processing', { 
-      profileSlugs, 
-      profileSlugsLength: profileSlugs.length,
+      profileSpecializations, 
+      profileSpecializationsLength: profileSpecializations.length,
       groupsCount: specializationGroups.length,
       firstGroup: specializationGroups[0]?.items?.slice(0, 3),
       firstGroupItems: specializationGroups[0]?.items?.length
@@ -257,7 +257,14 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
     
     const grouped = specializationGroups.map(group => ({
       ...group,
-      items: group.items.filter(spec => profileSlugs.includes(spec.slug))
+      items: group.items.filter(spec => 
+        // Match by slug (e.g., "chart_of_accounts_design")
+        profileSpecializations.includes(spec.slug) ||
+        // Match by label (e.g., "Chart of Accounts Design")
+        profileSpecializations.includes(spec.label) ||
+        // Match group label (e.g., "Bookkeeping & Close")
+        profileSpecializations.includes(group.label)
+      )
     })).filter(group => group.items.length > 0);
     
     console.log('🔍 Specializations: Result', { 
@@ -551,41 +558,33 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
               )}
             </motion.div>
 
-            {/* Experience & Expertise */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
-            >
-              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Experience & Expertise</h2>
-              <div className="space-y-3">
-                {profile.years_experience ? (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Years of Tax Experience</p>
-                    <p className="text-slate-900 font-medium">
-                      {profile.years_experience === '31+' ? '31+ years' : `${profile.years_experience} years`}
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Years of Tax Experience</p>
-                    <p className="text-slate-400 italic">Not specified</p>
-                  </div>
-                )}
-                {profile.entity_revenue_range ? (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Typical Entity Client Size</p>
-                    <p className="text-slate-900 font-medium">{profile.entity_revenue_range}</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-1">Typical Entity Client Size</p>
-                    <p className="text-slate-400 italic">Not specified</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+            {/* Experience & Expertise - Only show if there's actual data */}
+            {(profile.years_experience || profile.entity_revenue_range) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
+              >
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Experience & Expertise</h2>
+                <div className="space-y-3">
+                  {profile.years_experience && (
+                    <div>
+                      <p className="text-sm text-slate-500 mb-1">Years of Tax Experience</p>
+                      <p className="text-slate-900 font-medium">
+                        {profile.years_experience === '31+' ? '31+ years' : `${profile.years_experience} years`}
+                      </p>
+                    </div>
+                  )}
+                  {profile.entity_revenue_range && (
+                    <div>
+                      <p className="text-sm text-slate-500 mb-1">Typical Entity Client Size</p>
+                      <p className="text-slate-900 font-medium">{profile.entity_revenue_range}</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
 
             {/* Specializations */}
             <motion.div
