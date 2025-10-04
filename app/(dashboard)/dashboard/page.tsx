@@ -4,16 +4,16 @@ import { getCurrentProfile, isOnboardingComplete } from '@/lib/db/profile';
 import { getRecentConnections, getRecentlyVerified } from '@/lib/db/activity';
 import { getUserJobs, getRecentJobs, getUserProfileForMatching } from '@/lib/db/jobs';
 import QuickActions from '@/components/dashboard/QuickActions';
-// import ActivityFeed from '@/components/dashboard/ActivityFeed';
+import ActivityFeed from '@/components/dashboard/ActivityFeed';
 import AvailabilityToggle from '@/components/dashboard/AvailabilityToggle';
-// import Opportunities from '@/components/dashboard/Opportunities';
+import Opportunities from '@/components/dashboard/Opportunities';
 import MessagesPreview from '@/components/dashboard/MessagesPreview';
 import JobsPreview from '@/components/dashboard/JobsPreview';
 import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
 import ProfileHealth from '@/components/dashboard/ProfileHealth';
-// import { DashboardDebug } from '@/components/debug/DashboardDebug';
+import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import NblPromoBanner from '@/components/NblPromoBanner';
-// import DashboardTopEventCard from '@/components/DashboardTopEventCard';
+import DashboardTopEventCard from '@/components/DashboardTopEventCard';
 import SlackIntegration from '@/components/dashboard/SlackIntegration';
 import Link from 'next/link';
 
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     userId ? getUserProfileForMatching(userId) : null
   ]);
   
-  // Note: connections and recentlyVerified are temporarily unused due to disabled components
+  // Note: connections and recentlyVerified are used by ActivityFeed component
 
   // Note: Messaging is handled via Stream.io, not DB
   const recentMessages: any[] = [];
@@ -80,12 +80,11 @@ export default async function DashboardPage() {
   return (
     <div className="py-8">
       <NblPromoBanner />
-      {/* Temporarily disabled to isolate Slack integration */}
-      {/* <DashboardDebug 
+      <DashboardDebug 
         userId={userId} 
         profile={profile} 
         onboardingComplete={onboardingComplete} 
-      /> */}
+      />
       <div className="container-mobile">
         {/* Clean Header */}
         <div className="mb-8">
@@ -138,23 +137,22 @@ export default async function DashboardPage() {
           ) : (
             <RecentJobsPreview jobs={recentJobs} userProfile={userProfileForMatching} />
           )}
-          {/* Events component - Temporarily disabled to isolate Slack integration */}
-          {/* <DashboardTopEventCard /> */}
+          <DashboardTopEventCard />
         </div>
 
-        {/* 4. Opportunities Section - Temporarily disabled due to API issues */}
-        {/* <div className="mb-8">
+        {/* 4. Opportunities Section */}
+        <div className="mb-8">
           <Opportunities profile={profile} />
-        </div> */}
+        </div>
 
-        {/* 5. Activity Section - Temporarily disabled due to API issues */}
-        {/* <div className="mt-8">
+        {/* 5. Activity Section */}
+        <div className="mt-8">
           <ActivityFeed 
             connections={connections} 
             recentlyVerified={recentlyVerified}
             currentProfileId={profile?.id || ''}
           />
-        </div> */}
+        </div>
       </div>
     </div>
   );
