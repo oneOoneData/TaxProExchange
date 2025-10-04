@@ -101,7 +101,7 @@ export default function Page() {
     },
     {
       question: 'How do you verify credentials?',
-      answer: 'During beta we manually check state CPA boards, IRS EA enrollment, and CTEC registration before profiles are visible.'
+      answer: 'We manually check state CPA boards, IRS EA enrollment, and CTEC registration before profiles are visible.'
     },
     {
       question: 'Is it free?',
@@ -140,9 +140,6 @@ export default function Page() {
             <a href="/jobs" className="hover:text-slate-900">Jobs</a>
             <a href="/events" className="hover:text-slate-900">Events</a>
             <a href="/mentorship" className="hover:text-slate-900">Mentorship</a>
-            {!user && (
-              <a href="/join" className="hover:text-slate-900">Join</a>
-            )}
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
@@ -186,7 +183,7 @@ export default function Page() {
                               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                   {!user && (
                     <a href="/join" className="rounded-2xl bg-slate-900 text-white px-6 py-3 sm:px-8 text-sm font-medium shadow-lg hover:shadow-xl transition-all">
-                      Join Now - Free During Beta
+                      Join Now
                     </a>
                   )}
                   <a href="/search" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-6 py-3 sm:px-8 text-sm font-medium hover:bg-slate-50 shadow-sm hover:shadow-md transition-all">
@@ -195,7 +192,7 @@ export default function Page() {
                 </div>
               <div className="mt-6 flex items-center gap-3 text-sm text-slate-500">
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Manual credential checks</span>
-                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Free to list during beta</span>
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Free to list</span>
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Hundreds of verified profiles</span>
               </div>
             </motion.div>

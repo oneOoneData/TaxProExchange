@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 
 export default function CreateProfilePage() {
   const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +19,17 @@ export default function CreateProfilePage() {
       router.push('/sign-in');
     }
   }, [isLoaded, user, router]);
+
+  const handleCancel = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Fallback: just redirect to home page
+      router.push('/');
+    }
+  };
 
   if (!isLoaded || !user) {
     return (
@@ -131,24 +143,36 @@ export default function CreateProfilePage() {
             </div>
           )}
 
-          {/* Create Profile Button */}
-          <button
-            onClick={handleCreateProfile}
-            disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-3 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating Profile...
-              </>
-            ) : (
-              'Create My Profile'
-            )}
-          </button>
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={handleCreateProfile}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-3 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Profile...
+                </>
+              ) : (
+                'Create My Profile'
+              )}
+            </button>
+
+            <button
+              onClick={handleCancel}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-6 py-3 text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancel & Return to Home
+            </button>
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-xs text-slate-500">

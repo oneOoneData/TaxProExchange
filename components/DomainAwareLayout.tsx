@@ -47,46 +47,40 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
       const isAppDomain = window.location.hostname === 'app.taxproexchange.com';
       setIsApp(isAppDomain);
       setCurrentPath(window.location.pathname);
-      
-      // Update head content based on domain after hydration
-      if (isAppDomain) {
-        // Add noindex meta tags for app domain
-        const robotsMeta = document.querySelector('meta[name="robots"]');
-        if (!robotsMeta) {
-          const meta = document.createElement('meta');
-          meta.name = 'robots';
-          meta.content = 'noindex, nofollow';
-          document.head.appendChild(meta);
-        }
-        
-        const googlebotMeta = document.querySelector('meta[name="googlebot"]');
-        if (!googlebotMeta) {
-          const meta = document.createElement('meta');
-          meta.name = 'googlebot';
-          meta.content = 'noindex, nofollow';
-          document.head.appendChild(meta);
-        }
-        
-        const bingbotMeta = document.querySelector('meta[name="bingbot"]');
-        if (!bingbotMeta) {
-          const meta = document.createElement('meta');
-          meta.name = 'bingbot';
-          meta.content = 'noindex, nofollow';
-          document.head.appendChild(meta);
-        }
-        
-        // Remove canonical link for app domain
-        const canonicalLink = document.querySelector('link[rel="canonical"]');
-        if (canonicalLink) {
-          canonicalLink.remove();
-        }
-        
-        // Remove JSON-LD scripts for app domain
-        const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
-        jsonLdScripts.forEach(script => script.remove());
-      }
     }
   }, []);
+
+  // Prevent hydration mismatches by not rendering until client-side
+  if (!isClient) {
+    return (
+      <html lang="en" data-scroll-behavior="smooth">
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+          <link rel="canonical" href="https://www.taxproexchange.com" />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(getOrganizationJsonLd()),
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(getWebsiteJsonLd()),
+            }}
+          />
+          <Analytics measurementId={GA_MEASUREMENT_ID_SITE} />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        </head>
+        <body className={inter.className}>
+          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+            {children}
+            <Footer />
+          </ClerkProvider>
+        </body>
+      </html>
+    );
+  }
 
   // Pages that have their own headers and shouldn't get AppNavigation
   const pagesWithOwnHeaders = [
@@ -118,9 +112,8 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
         {/* Viewport meta for proper mobile behavior */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         
-        {/* Default to marketing site meta tags, will be updated by client-side logic */}
+        {/* Always render marketing site meta tags by default */}
         <link rel="canonical" href="https://www.taxproexchange.com" />
-        
         {/* JSON-LD Structured Data - always include for SEO */}
         <script
           type="application/ld+json"
