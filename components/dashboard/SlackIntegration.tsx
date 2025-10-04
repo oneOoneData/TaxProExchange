@@ -196,9 +196,11 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
             style={{ backgroundColor: '#4A154B' }}
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52-2.523c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.523zm0-6.75H2.522a2.528 2.528 0 0 1-2.52-2.52c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.52zm6.75 0v-2.52a2.528 2.528 0 0 1 2.523-2.52c1.393 0 2.52 1.127 2.52 2.52v2.52h-2.52a2.528 2.528 0 0 1-2.523 2.52zm0 6.75h2.52a2.528 2.528 0 0 1 2.523 2.52c0 1.393-1.127 2.52-2.52 2.52h-2.52v-2.52a2.528 2.528 0 0 1 2.523-2.52zm-6.75 0a2.528 2.528 0 0 1-2.52-2.523c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.523zm0-6.75H2.522a2.528 2.528 0 0 1-2.52-2.52c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.52z"/>
-            </svg>
+            <img 
+              src="/Slack_icon_2019.svg" 
+              alt="Slack" 
+              className="w-5 h-5"
+            />
             {loading ? 'Connecting...' : 'Connect'}
           </button>
         ) : slackStatus?.isMember ? (
@@ -207,9 +209,11 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
             style={{ backgroundColor: '#4A154B' }}
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52-2.523c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.523zm0-6.75H2.522a2.528 2.528 0 0 1-2.52-2.52c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.52zm6.75 0v-2.52a2.528 2.528 0 0 1 2.523-2.52c1.393 0 2.52 1.127 2.52 2.52v2.52h-2.52a2.528 2.528 0 0 1-2.523 2.52zm0 6.75h2.52a2.528 2.528 0 0 1 2.523 2.52c0 1.393-1.127 2.52-2.52 2.52h-2.52v-2.52a2.528 2.528 0 0 1 2.523-2.52zm-6.75 0a2.528 2.528 0 0 1-2.52-2.523c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.523zm0-6.75H2.522a2.528 2.528 0 0 1-2.52-2.52c0-1.393 1.116-2.52 2.52-2.52h2.52v2.52a2.528 2.528 0 0 1-2.52 2.52z"/>
-            </svg>
+            <img 
+              src="/Slack_icon_2019.svg" 
+              alt="Slack" 
+              className="w-5 h-5"
+            />
             Open Slack
           </button>
         ) : null}
