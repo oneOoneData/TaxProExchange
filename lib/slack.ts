@@ -6,6 +6,7 @@ const SLACK_WORKSPACE_ID = process.env.SLACK_WORKSPACE_ID;
 
 export interface SlackInviteResponse {
   url?: string;
+  workspaceId?: string;
   error?: string;
 }
 
@@ -45,19 +46,19 @@ export async function generateSlackInvite(userEmail: string, userName: string): 
     
     if (inviteData.ok) {
       // User was invited successfully
-      return { url: `https://app.slack.com/client/${SLACK_WORKSPACE_ID}` };
+      return { workspaceId: SLACK_WORKSPACE_ID };
     } else {
       console.error('Slack invite failed:', inviteData.error);
       
-      // If user already exists, return the workspace URL
+      // If user already exists, return the workspace ID
       if (inviteData.error === 'already_in_team' || inviteData.error === 'already_invited') {
-        return { url: `https://app.slack.com/client/${SLACK_WORKSPACE_ID}` };
+        return { workspaceId: SLACK_WORKSPACE_ID };
       }
       
-      // For testing: if invalid_auth, return workspace URL anyway
+      // For testing: if invalid_auth, return workspace ID anyway
       if (inviteData.error === 'invalid_auth') {
-        console.log('🔍 Testing mode: invalid_auth error, returning workspace URL anyway');
-        return { url: `https://app.slack.com/client/${SLACK_WORKSPACE_ID}` };
+        console.log('🔍 Testing mode: invalid_auth error, returning workspace ID anyway');
+        return { workspaceId: SLACK_WORKSPACE_ID };
       }
       
       return { error: inviteData.error || 'Failed to create invite' };

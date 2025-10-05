@@ -101,7 +101,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             throw new Error(data.error || 'Failed to join Slack');
           }
 
-          if (data.url) {
+          if (data.workspaceId || data.url) {
             // Track analytics event
             if (typeof window !== 'undefined' && window.gtag) {
               window.gtag('event', 'slack_join_success', {
@@ -110,8 +110,27 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
               });
             }
 
-            // Open Slack in new tab
-            const newWindow = window.open(data.url, '_blank', 'noopener,noreferrer');
+            // Generate the appropriate URL based on device type
+            let slackUrl: string;
+            if (data.workspaceId) {
+              // New format: generate URL based on device
+              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                              window.innerWidth <= 768;
+              
+              if (isMobile) {
+                // For mobile, use the Slack app deep link format
+                slackUrl = `slack://workspace?id=${data.workspaceId}`;
+              } else {
+                // For desktop, use the web URL
+                slackUrl = `https://app.slack.com/client/${data.workspaceId}`;
+              }
+            } else {
+              // Fallback to legacy URL format
+              slackUrl = data.url!;
+            }
+
+            // Open Slack
+            const newWindow = window.open(slackUrl, '_blank', 'noopener,noreferrer');
             if (!newWindow) {
               setError('Popup blocked. Please allow popups for this site.');
               return;
@@ -144,7 +163,15 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
         // Open Slack workspace directly
         const workspaceId = process.env.NEXT_PUBLIC_SLACK_WORKSPACE_ID;
         if (workspaceId) {
-          const newWindow = window.open(`https://app.slack.com/client/${workspaceId}`, '_blank', 'noopener,noreferrer');
+          // Generate mobile-aware URL
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                          window.innerWidth <= 768;
+          
+          const slackUrl = isMobile 
+            ? `slack://workspace?id=${workspaceId}`
+            : `https://app.slack.com/client/${workspaceId}`;
+          
+          const newWindow = window.open(slackUrl, '_blank', 'noopener,noreferrer');
           if (!newWindow && mounted) {
             setError('Popup blocked. Please allow popups for this site.');
           }
