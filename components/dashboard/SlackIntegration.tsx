@@ -249,7 +249,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
               alt="Slack" 
               className="w-5 h-5"
             />
-            Open Slack
+            Open
           </button>
         ) : null}
         
