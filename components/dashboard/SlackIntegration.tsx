@@ -130,13 +130,14 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             }
 
             // Open Slack
-            const newWindow = window.open(slackUrl, '_blank', 'noopener,noreferrer');
-            if (!newWindow) {
-              setError('Popup blocked. Please allow popups for this site.');
-              return;
+            window.open(slackUrl, '_blank', 'noopener,noreferrer');
+            
+            // Clear any previous errors since action was successful
+            if (mounted) {
+              setError(null);
             }
             
-            // Refresh status
+            // Refresh status after a delay
             setTimeout(() => {
               fetchSlackStatus();
             }, 1000);
@@ -171,9 +172,11 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             ? `slack://workspace?id=${workspaceId}`
             : `https://app.slack.com/client/${workspaceId}`;
           
-          const newWindow = window.open(slackUrl, '_blank', 'noopener,noreferrer');
-          if (!newWindow && mounted) {
-            setError('Popup blocked. Please allow popups for this site.');
+          window.open(slackUrl, '_blank', 'noopener,noreferrer');
+          
+          // Clear any previous errors since action was successful
+          if (mounted) {
+            setError(null);
           }
         } else if (mounted) {
           setError('Slack workspace not configured');
@@ -216,8 +219,8 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
           Join the TPE Slack Community. For verified members only.
         </span>
         
-        {/* Error state */}
-        {error && (
+        {/* Error state - only show critical errors */}
+        {error && error.includes('workspace not configured') && (
           <span className="text-sm text-red-600">
             {error}
           </span>
