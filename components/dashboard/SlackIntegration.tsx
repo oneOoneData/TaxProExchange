@@ -117,15 +117,9 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
               const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                               window.innerWidth <= 768;
               
-              if (isMobile) {
-                // For mobile, try to use the Slack app deep link with general channel
-                // Format: slack://channel?team=TEAM_ID&id=CHANNEL_ID
-                // We'll use the team ID and try to open the general channel
-                slackUrl = `slack://channel?team=${data.workspaceId}&id=general`;
-              } else {
-                // For desktop, use the web URL
-                slackUrl = `https://app.slack.com/client/${data.workspaceId}`;
-              }
+              // Use the proper Slack workspace URL format for both mobile and desktop
+              // Format: https://taxproexchange.slack.com/
+              slackUrl = `https://taxproexchange.slack.com/`;
             } else {
               // Fallback to legacy URL format
               slackUrl = data.url!;
@@ -170,9 +164,9 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                           window.innerWidth <= 768;
           
-          const slackUrl = isMobile 
-            ? `slack://channel?team=${workspaceId}&id=general`
-            : `https://app.slack.com/client/${workspaceId}`;
+          // Use the proper Slack workspace URL format
+          // Format: https://taxproexchange.slack.com/
+          const slackUrl = `https://taxproexchange.slack.com/`;
           
           window.open(slackUrl, '_blank', 'noopener,noreferrer');
           
