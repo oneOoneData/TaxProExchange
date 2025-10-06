@@ -118,8 +118,10 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
                               window.innerWidth <= 768;
               
               if (isMobile) {
-                // For mobile, use the Slack app deep link format
-                slackUrl = `slack://workspace?id=${data.workspaceId}`;
+                // For mobile, try to use the Slack app deep link with general channel
+                // Format: slack://channel?team=TEAM_ID&id=CHANNEL_ID
+                // We'll use the team ID and try to open the general channel
+                slackUrl = `slack://channel?team=${data.workspaceId}&id=general`;
               } else {
                 // For desktop, use the web URL
                 slackUrl = `https://app.slack.com/client/${data.workspaceId}`;
@@ -169,7 +171,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
                           window.innerWidth <= 768;
           
           const slackUrl = isMobile 
-            ? `slack://workspace?id=${workspaceId}`
+            ? `slack://channel?team=${workspaceId}&id=general`
             : `https://app.slack.com/client/${workspaceId}`;
           
           window.open(slackUrl, '_blank', 'noopener,noreferrer');
