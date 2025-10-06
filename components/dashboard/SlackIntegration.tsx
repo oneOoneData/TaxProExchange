@@ -128,9 +128,11 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             // Open Slack
             window.open(slackUrl, '_blank', 'noopener,noreferrer');
             
-            // Clear any previous errors since action was successful
+            // Clear any previous errors and show success message
             if (mounted) {
               setError(null);
+              // Show success message about checking email
+              alert('Invite sent! Please check your email (including spam/promotions folder) for the Slack invite link.');
             }
             
             // Refresh status after a delay
@@ -212,7 +214,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
     <div className="flex justify-end">
       <div className="flex items-center gap-3">
         <span className="text-sm text-gray-600">
-          Join the TPE Slack Community. For verified members only.
+          For verified members only: Join Slack Community
         </span>
         
         {/* Error state - only show critical errors */}
@@ -234,7 +236,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
               alt="Slack" 
               className="w-5 h-5"
             />
-            {loading ? 'Connecting...' : 'Connect'}
+            {loading ? 'Sending invite...' : 'Join'}
           </button>
         ) : slackStatus?.isMember ? (
           <button
