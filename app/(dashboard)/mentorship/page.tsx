@@ -111,28 +111,38 @@ export default async function MentorshipPage() {
   // Fallback: Always fetch all mentors to show if matches are empty or few
   let allMentors: any[] = [];
   if (myPrefs && (myPrefs.is_open_to_mentor || myPrefs.is_seeking_mentor)) {
-    const { data: allCandidates } = await supabase
-      .from("profiles")
-      .select(`
-        id, first_name, last_name, headline, firm_name, credential_type, slug,
-        mentorship_preferences:mentorship_preferences(is_open_to_mentor, is_seeking_mentor, topics)
-      `)
-      .eq("is_listed", true)
-      .eq("visibility_state", "verified")
-      .neq("id", profile.id);
+    // Fetch mentorship preferences directly
+    const { data: mentorPrefs } = await supabase
+      .from("mentorship_preferences")
+      .select("profile_id, is_open_to_mentor, is_seeking_mentor, topics");
 
-    // Filter to only show mentors if user is seeking, or mentees if user is open to mentor
-    allMentors = (allCandidates ?? []).filter((c: any) => {
-      const prefs = c.mentorship_preferences?.[0];
-      if (!prefs) return false;
-      
-      const wantMentors = !!myPrefs?.is_seeking_mentor;
-      const wantMentees = !!myPrefs?.is_open_to_mentor;
-      
-      if (wantMentors && prefs.is_open_to_mentor) return true;
-      if (wantMentees && prefs.is_seeking_mentor) return true;
-      return false;
-    });
+    // Filter for mentors if seeking, or mentees if open to mentor
+    const wantMentors = !!myPrefs?.is_seeking_mentor;
+    const wantMentees = !!myPrefs?.is_open_to_mentor;
+    
+    const relevantProfileIds = (mentorPrefs ?? [])
+      .filter((mp: any) => {
+        if (wantMentors && mp.is_open_to_mentor) return true;
+        if (wantMentees && mp.is_seeking_mentor) return true;
+        return false;
+      })
+      .map((mp: any) => mp.profile_id);
+
+    if (relevantProfileIds.length > 0) {
+      const { data: allCandidates } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, headline, firm_name, credential_type, slug")
+        .eq("is_listed", true)
+        .eq("visibility_state", "verified")
+        .in("id", relevantProfileIds)
+        .neq("id", profile.id);
+
+      // Combine profiles with their mentorship preferences
+      allMentors = (allCandidates ?? []).map((c: any) => ({
+        ...c,
+        mentorship_preferences: mentorPrefs?.filter((mp: any) => mp.profile_id === c.id) || []
+      }));
+    }
   }
 
   return (
