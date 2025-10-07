@@ -108,11 +108,40 @@ export default async function MentorshipPage() {
     matches.sort((a: any, b: any) => score(b) - score(a));
   }
 
+  // Fallback: If no matches, show all mentors (same logic as events)
+  let allMentors: any[] = [];
+  if (myPrefs && (myPrefs.is_open_to_mentor || myPrefs.is_seeking_mentor) && matches.length === 0) {
+    const { data: allCandidates } = await supabase
+      .from("profiles")
+      .select(`
+        id, first_name, last_name, headline, firm_name, credential_type, slug,
+        profile_locations:profile_locations(location_id, locations(state, city)),
+        mentorship_preferences:mentorship_preferences(is_open_to_mentor, is_seeking_mentor, topics, software, specializations, mentoring_message)
+      `)
+      .eq("is_listed", true)
+      .eq("visibility_state", "verified")
+      .neq("id", profile.id);
+
+    // Filter to only show mentors if user is seeking, or mentees if user is open to mentor
+    allMentors = (allCandidates ?? []).filter((c: any) => {
+      const prefs = c.mentorship_preferences?.[0];
+      if (!prefs) return false;
+      
+      const wantMentors = !!myPrefs?.is_seeking_mentor;
+      const wantMentees = !!myPrefs?.is_open_to_mentor;
+      
+      if (wantMentors && prefs.is_open_to_mentor) return true;
+      if (wantMentees && prefs.is_seeking_mentor) return true;
+      return false;
+    });
+  }
+
   return (
     <MentorshipPageClient 
       profile={profile}
       preferences={myPrefs}
       matches={matches}
+      allMentors={allMentors}
     />
   );
 }
