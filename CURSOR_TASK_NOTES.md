@@ -1,5 +1,163 @@
 # Cursor Task Notes
 
+## HubSpot CRM Integration (2025-10-07) ✅
+
+**Goal**: Sync all TPE profiles to HubSpot for marketing automation with consent tracking based on email preferences.
+
+**Problem**: Need to maintain a synced contact database in HubSpot to:
+- Segment users by marketing consent (`marketing_updates` preference)
+- Send newsletters and platform updates to opted-in users
+- Track contact lifecycle and engagement
+- Maintain compliance with user opt-in/opt-out preferences
+
+**Solution Applied**: Server-side HubSpot sync with one-time backfill, ongoing updates, and nightly reconciliation.
+
+### Implementation Details
+
+#### 1. HubSpot Helper Library (`lib/hubspot.ts`)
+- **upsertHubSpotContact()**: Core function to create/update contacts
+  - Search by email → update if found, create if not
+  - Sets custom property `tpe_marketing_opt_in` for list segmentation
+  - Includes name fields (first_name, last_name) when available
+- **Retry Logic**: Automatic exponential backoff for rate limits (429) and server errors (5xx)
+- **Error Handling**: Returns structured results with operation type (create/update) and failure reasons
+- **Environment**: Uses `HUBSPOT_TOKEN` (Private App token with CRM scope)
+
+#### 2. API Endpoints
+
+**`app/api/hubspot/sync-contact/route.ts`**
+- **Purpose**: Sync a single contact (called by settings + onboarding)
+- **Method**: POST
+- **Payload**: `{ email, first_name, last_name, marketing_opt_in }`
+- **Auth**: None (server-side only, called from trusted routes)
+- **Usage**: Fire-and-forget calls from profile updates
+
+**`app/api/hubspot/backfill/route.ts`**
+- **Purpose**: One-time backfill of all existing profiles
+- **Method**: POST
+- **Auth**: `Authorization: Bearer <CRON_SECRET>`
+- **Process**: Fetches all profiles, syncs each to HubSpot with 100ms delays
+- **Returns**: Summary with synced/failed/skipped counts
+- **Usage**: Run once after deployment via curl or admin tool
+
+**`app/api/hubspot/reconcile/route.ts`**
+- **Purpose**: Nightly CRON job to catch missed updates
+- **Method**: POST (called by Vercel CRON)
+- **Auth**: `Authorization: Bearer <CRON_SECRET>`
+- **Process**: Syncs profiles updated in last 24 hours
+- **Schedule**: Daily at 09:00 UTC (configured in `vercel.json`)
+- **Returns**: Summary with synced/failed/skipped counts
+
+#### 3. Integration Points
+
+**`app/api/profile/route.ts` (PUT handler)**
+- **Hook**: After successful email preferences update
+- **Trigger**: When `isEmailPreferencesUpdate` is true
+- **Action**: Fire-and-forget call to `/api/hubspot/sync-contact`
+- **Data Source**: Uses `email_preferences.marketing_updates` from JSONB column
+- **Non-blocking**: Doesn't slow down user response, logs errors without failing request
+
+**`vercel.json`**
+- **CRON Job**: Daily reconciliation at 09:00 UTC
+- **Path**: `/api/hubspot/reconcile`
+- **Auth**: Vercel automatically includes `Authorization: Bearer <CRON_SECRET>` header
+
+#### 4. Data Model (No Schema Changes)
+
+**Reuses Existing Columns**:
+- `profiles.email_preferences` (JSONB) → `marketing_updates` boolean
+- `profiles.public_email` → primary contact email
+- `profiles.first_name`, `profiles.last_name` → contact name fields
+
+**HubSpot Properties**:
+- `email` (standard) → from `public_email`
+- `firstname` (standard) → from `first_name`
+- `lastname` (standard) → from `last_name`
+- `tpe_marketing_opt_in` (custom) → from `email_preferences.marketing_updates`
+
+**Note**: Create custom property `tpe_marketing_opt_in` in HubSpot portal (Type: Boolean)
+
+#### 5. Environment Variables
+
+Required in Vercel:
+- `HUBSPOT_TOKEN` → Private App token with CRM scope (Contacts: Read/Write)
+- `CRON_SECRET` → Random string for protecting backfill/reconcile endpoints
+- `NEXT_PUBLIC_APP_URL` → Base URL for internal API calls
+
+#### 6. Deployment Checklist
+
+- [x] Create HubSpot Private App in portal
+- [x] Add custom property `tpe_marketing_opt_in` (Boolean) to Contacts
+- [ ] Set env vars in Vercel: `HUBSPOT_TOKEN`, `CRON_SECRET`
+- [ ] Deploy code to Vercel
+- [ ] Run backfill: `curl -X POST https://www.taxproexchange.com/api/hubspot/backfill -H "Authorization: Bearer <CRON_SECRET>"`
+- [ ] Verify contacts appear in HubSpot
+- [ ] Create HubSpot Active List: `tpe_marketing_opt_in is true`
+- [ ] Test opt-in/opt-out flow in Settings page
+
+#### 7. HubSpot Portal Configuration
+
+**Active List for Newsletter**:
+- Name: "TPE Marketing Opted-In"
+- Filter: `tpe_marketing_opt_in is true`
+- Use this list for newsletter campaigns
+
+**Optional Workflow** (if using Marketing Contacts feature):
+- Trigger: `tpe_marketing_opt_in` becomes true
+- Action: Set contact as "Marketing Contact"
+- Trigger: `tpe_marketing_opt_in` becomes false
+- Action: Set contact as "Non-Marketing Contact"
+
+#### 8. Testing & QA
+
+**Opt-In Flow**:
+1. Go to Settings → Email Notifications
+2. Check "Platform updates & newsletters"
+3. Save preferences
+4. Verify contact appears/updates in HubSpot with `tpe_marketing_opt_in = true`
+
+**Opt-Out Flow**:
+1. Uncheck "Platform updates & newsletters"
+2. Save preferences
+3. Verify `tpe_marketing_opt_in = false` in HubSpot
+
+**Backfill Test**:
+```bash
+curl -X POST https://www.taxproexchange.com/api/hubspot/backfill \
+  -H "Authorization: Bearer <CRON_SECRET>"
+```
+
+**CRON Test** (manual trigger):
+```bash
+curl -X POST https://www.taxproexchange.com/api/hubspot/reconcile \
+  -H "Authorization: Bearer <CRON_SECRET>"
+```
+
+#### 9. Edge Cases Handled
+
+- **Missing email**: Skipped with logged warning
+- **Duplicate contacts**: Search by email ensures upsert (not duplicate)
+- **Rate limits**: Automatic retry with exponential backoff
+- **API failures**: Non-blocking, logged, doesn't fail user requests
+- **Token missing**: Gracefully skips sync with warning
+
+#### 10. Files Changed
+
+**New Files** (6):
+- `lib/hubspot.ts`
+- `app/api/hubspot/sync-contact/route.ts`
+- `app/api/hubspot/backfill/route.ts`
+- `app/api/hubspot/reconcile/route.ts`
+
+**Modified Files** (3):
+- `app/api/profile/route.ts` (added HubSpot sync call after email prefs update)
+- `vercel.json` (added CRON job)
+- `CURSOR_TASK_NOTES.md` (this documentation)
+
+**Total**: 9 files touched, ~400 lines of code
+
+---
+
 ## Slack Community Integration (2025-01-05) ✅
 
 **Goal**: Add Slack community invite/signup/log-in for authenticated and verified users with gated access and rate limiting.
