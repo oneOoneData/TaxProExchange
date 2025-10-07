@@ -111,7 +111,10 @@ export default async function MentorshipPage() {
   // Fallback: If no matches, show all mentors (same logic as events)
   let allMentors: any[] = [];
   if (myPrefs && (myPrefs.is_open_to_mentor || myPrefs.is_seeking_mentor) && matches.length === 0) {
-    const { data: allCandidates } = await supabase
+    console.log('🔍 Fetching all mentors as fallback...');
+    console.log('🔍 myPrefs:', myPrefs);
+    
+    const { data: allCandidates, error: fetchError } = await supabase
       .from("profiles")
       .select(`
         id, first_name, last_name, headline, firm_name, credential_type, slug,
@@ -121,6 +124,9 @@ export default async function MentorshipPage() {
       .eq("is_listed", true)
       .eq("visibility_state", "verified")
       .neq("id", profile.id);
+
+    console.log('🔍 All candidates fetched:', allCandidates?.length);
+    console.log('🔍 Fetch error:', fetchError);
 
     // Filter to only show mentors if user is seeking, or mentees if user is open to mentor
     allMentors = (allCandidates ?? []).filter((c: any) => {
@@ -134,6 +140,10 @@ export default async function MentorshipPage() {
       if (wantMentees && prefs.is_seeking_mentor) return true;
       return false;
     });
+    
+    console.log('🔍 Filtered allMentors:', allMentors.length);
+  } else {
+    console.log('🔍 Not fetching fallback mentors. myPrefs:', myPrefs, 'matches:', matches.length);
   }
 
   return (
