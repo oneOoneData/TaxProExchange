@@ -38,7 +38,7 @@ export async function GET() {
     .from("profiles")
     .select(`
       id, first_name, last_name, headline, firm_name, credential_type, slug,
-      mentorship_preferences:mentorship_preferences(is_open_to_mentor, is_seeking_mentor, topics, software, specializations, mentoring_message)
+      mentorship_preferences:mentorship_preferences(is_open_to_mentor, is_seeking_mentor, topics)
     `)
     .eq("is_listed", true)
     .eq("visibility_state", "verified")

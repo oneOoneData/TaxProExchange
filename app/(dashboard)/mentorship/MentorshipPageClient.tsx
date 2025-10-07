@@ -173,59 +173,6 @@ export default function MentorshipPageClient({ profile, preferences, matches, al
                         </div>
                       )}
 
-                      {/* Software */}
-                      {match.mentorship_preferences?.[0]?.software && match.mentorship_preferences[0].software.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-500 mb-1">Software:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {match.mentorship_preferences[0].software.slice(0, 3).map((software: string) => (
-                              <span
-                                key={software}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                              >
-                                {software.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                              </span>
-                            ))}
-                            {match.mentorship_preferences[0].software.length > 3 && (
-                              <span className="text-xs text-gray-500">
-                                +{match.mentorship_preferences[0].software.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Specializations */}
-                      {match.mentorship_preferences?.[0]?.specializations && match.mentorship_preferences[0].specializations.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-500 mb-1">Expertise:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {match.mentorship_preferences[0].specializations.slice(0, 3).map((spec: string) => (
-                              <span
-                                key={spec}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                              >
-                                {spec}
-                              </span>
-                            ))}
-                            {match.mentorship_preferences[0].specializations.length > 3 && (
-                              <span className="text-xs text-gray-500">
-                                +{match.mentorship_preferences[0].specializations.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Mentoring Message */}
-                      {match.mentorship_preferences?.[0]?.mentoring_message && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-500 mb-1">Message:</p>
-                          <p className="text-sm text-gray-700 italic">
-                            "{match.mentorship_preferences[0].mentoring_message}"
-                          </p>
-                        </div>
-                      )}
 
 
                       {/* Connect Button */}
@@ -297,59 +244,6 @@ export default function MentorshipPageClient({ profile, preferences, matches, al
                         </div>
                       )}
 
-                      {/* Software */}
-                      {match.mentorship_preferences?.[0]?.software && match.mentorship_preferences[0].software.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-500 mb-1">Software:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {match.mentorship_preferences[0].software.slice(0, 3).map((software: string) => (
-                              <span
-                                key={software}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                              >
-                                {software.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
-                              </span>
-                            ))}
-                            {match.mentorship_preferences[0].software.length > 3 && (
-                              <span className="text-xs text-gray-500">
-                                +{match.mentorship_preferences[0].software.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Specializations */}
-                      {match.mentorship_preferences?.[0]?.specializations && match.mentorship_preferences[0].specializations.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-500 mb-1">Expertise:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {match.mentorship_preferences[0].specializations.slice(0, 3).map((spec: string) => (
-                              <span
-                                key={spec}
-                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                              >
-                                {spec}
-                              </span>
-                            ))}
-                            {match.mentorship_preferences[0].specializations.length > 3 && (
-                              <span className="text-xs text-gray-500">
-                                +{match.mentorship_preferences[0].specializations.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Mentoring Message */}
-                      {match.mentorship_preferences?.[0]?.mentoring_message && (
-                        <div className="mt-4">
-                          <p className="text-xs text-gray-500 mb-1">Message:</p>
-                          <p className="text-sm text-gray-700 italic">
-                            "{match.mentorship_preferences[0].mentoring_message}"
-                          </p>
-                        </div>
-                      )}
 
 
                       {/* Connect Button */}
