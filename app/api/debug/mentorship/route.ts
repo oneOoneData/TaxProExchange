@@ -47,10 +47,15 @@ export async function GET() {
   // Filter mentors
   const allMentors = (allCandidates ?? []).filter((c: any) => {
     const prefs = c.mentorship_preferences?.[0];
-    if (!prefs) return false;
+    if (!prefs) {
+      console.log('No prefs for', c.first_name, c.last_name, 'prefs:', c.mentorship_preferences);
+      return false;
+    }
     
     const wantMentors = !!myPrefs?.is_seeking_mentor;
     const wantMentees = !!myPrefs?.is_open_to_mentor;
+    
+    console.log('Checking', c.first_name, c.last_name, 'is_open_to_mentor:', prefs.is_open_to_mentor, 'wantMentors:', wantMentors);
     
     if (wantMentors && prefs.is_open_to_mentor) return true;
     if (wantMentees && prefs.is_seeking_mentor) return true;
