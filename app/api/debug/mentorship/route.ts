@@ -44,22 +44,36 @@ export async function GET() {
     .eq("visibility_state", "verified")
     .neq("id", profile.id);
 
-  // Filter mentors
+  // Filter mentors and collect debug info
+  const debugInfo: any[] = [];
   const allMentors = (allCandidates ?? []).filter((c: any) => {
     const prefs = c.mentorship_preferences?.[0];
+    
     if (!prefs) {
-      console.log('No prefs for', c.first_name, c.last_name, 'prefs:', c.mentorship_preferences);
+      debugInfo.push({
+        name: `${c.first_name} ${c.last_name}`,
+        reason: 'No mentorship_preferences',
+        prefs_array: c.mentorship_preferences
+      });
       return false;
     }
     
     const wantMentors = !!myPrefs?.is_seeking_mentor;
     const wantMentees = !!myPrefs?.is_open_to_mentor;
     
-    console.log('Checking', c.first_name, c.last_name, 'is_open_to_mentor:', prefs.is_open_to_mentor, 'wantMentors:', wantMentors);
+    const passes = (wantMentors && prefs.is_open_to_mentor) || (wantMentees && prefs.is_seeking_mentor);
     
-    if (wantMentors && prefs.is_open_to_mentor) return true;
-    if (wantMentees && prefs.is_seeking_mentor) return true;
-    return false;
+    debugInfo.push({
+      name: `${c.first_name} ${c.last_name}`,
+      has_prefs: true,
+      is_open_to_mentor: prefs.is_open_to_mentor,
+      is_seeking_mentor: prefs.is_seeking_mentor,
+      wantMentors,
+      wantMentees,
+      passes
+    });
+    
+    return passes;
   });
 
   return NextResponse.json({
@@ -80,7 +94,8 @@ export async function GET() {
       name: `${m.first_name} ${m.last_name}`,
       has_prefs: !!m.mentorship_preferences?.[0],
       is_open_to_mentor: m.mentorship_preferences?.[0]?.is_open_to_mentor
-    }))
+    })),
+    debugFirstTen: debugInfo.slice(0, 10)
   });
 }
 
