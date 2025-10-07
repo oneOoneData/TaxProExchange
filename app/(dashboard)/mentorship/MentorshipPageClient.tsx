@@ -257,7 +257,10 @@ export default function MentorshipPageClient({ profile, preferences, matches, al
               <div className="space-y-6">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                   <p className="text-sm text-yellow-800">
-                    <strong>No exact matches found.</strong> Showing all available {currentPreferences?.is_seeking_mentor ? "mentors" : "mentees"} instead.
+                    <strong>No exact matches found based on your topics and location.</strong>
+                  </p>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Here are all available {currentPreferences?.is_seeking_mentor ? "mentors" : "mentees"}:
                   </p>
                 </div>
 
