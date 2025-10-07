@@ -675,6 +675,26 @@ export async function PUT(request: Request) {
       }
     }
 
+    // Sync to HubSpot if email preferences were updated
+    if (isEmailPreferencesUpdate && profile) {
+      // Fire-and-forget: don't block the response
+      const emailPrefs = profile.email_preferences as any;
+      const marketingOptIn = emailPrefs?.marketing_updates ?? false;
+      
+      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/hubspot/sync-contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: profile.public_email || userEmail,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          marketing_opt_in: marketingOptIn,
+        }),
+      }).catch(error => {
+        console.error('HubSpot sync failed (non-blocking):', error);
+      });
+    }
+
     // Profile saved successfully
     
     // Return updated profile

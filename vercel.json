@@ -1,3 +1,8 @@
 {
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/hubspot/reconcile",
+      "schedule": "0 9 * * *"
+    }
+  ]
 }
