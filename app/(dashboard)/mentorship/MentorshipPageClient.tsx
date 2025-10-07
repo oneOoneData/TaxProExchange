@@ -11,9 +11,10 @@ interface MentorshipPageClientProps {
   profile: Profile;
   preferences: MentorshipPrefs | null;
   matches: any[];
+  allMentors?: any[];
 }
 
-export default function MentorshipPageClient({ profile, preferences, matches }: MentorshipPageClientProps) {
+export default function MentorshipPageClient({ profile, preferences, matches, allMentors = [] }: MentorshipPageClientProps) {
   const [currentPreferences, setCurrentPreferences] = useState<MentorshipPrefs | null>(preferences);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [modalType, setModalType] = useState<'mentor' | 'mentee'>('mentor');
@@ -252,6 +253,139 @@ export default function MentorshipPageClient({ profile, preferences, matches }: 
                   ))}
                 </div>
               </div>
+            ) : allMentors.length > 0 ? (
+              <div className="space-y-6">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-yellow-800">
+                    <strong>No exact matches found.</strong> Showing all available {currentPreferences?.is_seeking_mentor ? "mentors" : "mentees"} instead.
+                  </p>
+                </div>
+
+                <h2 className="text-xl font-semibold text-gray-900">
+                  All {currentPreferences?.is_seeking_mentor ? "Available Mentors" : "Available Mentees"}
+                </h2>
+                
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {allMentors.map((match: any) => (
+                    <div key={match.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {match.first_name} {match.last_name}
+                          </h3>
+                          {match.headline && (
+                            <p className="text-sm text-gray-600 mt-1">{match.headline}</p>
+                          )}
+                          {match.firm_name && (
+                            <p className="text-sm text-gray-500 mt-1">{match.firm_name}</p>
+                          )}
+                          <p className="text-sm text-gray-500 mt-1">
+                            {match.credential_type}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Topics */}
+                      {match.mentorship_preferences?.[0]?.topics && (
+                        <div className="mt-4">
+                          <div className="flex flex-wrap gap-1">
+                            {match.mentorship_preferences[0].topics.slice(0, 4).map((topic: string) => (
+                              <span
+                                key={topic}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                              >
+                                {topic.replace("software_", "").replace(/_/g, " ").toUpperCase()}
+                              </span>
+                            ))}
+                            {match.mentorship_preferences[0].topics.length > 4 && (
+                              <span className="text-xs text-gray-500">
+                                +{match.mentorship_preferences[0].topics.length - 4} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Software */}
+                      {match.mentorship_preferences?.[0]?.software && match.mentorship_preferences[0].software.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-xs text-gray-500 mb-1">Software:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {match.mentorship_preferences[0].software.slice(0, 3).map((software: string) => (
+                              <span
+                                key={software}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              >
+                                {software.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
+                              </span>
+                            ))}
+                            {match.mentorship_preferences[0].software.length > 3 && (
+                              <span className="text-xs text-gray-500">
+                                +{match.mentorship_preferences[0].software.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Specializations */}
+                      {match.mentorship_preferences?.[0]?.specializations && match.mentorship_preferences[0].specializations.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-xs text-gray-500 mb-1">Expertise:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {match.mentorship_preferences[0].specializations.slice(0, 3).map((spec: string) => (
+                              <span
+                                key={spec}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                              >
+                                {spec}
+                              </span>
+                            ))}
+                            {match.mentorship_preferences[0].specializations.length > 3 && (
+                              <span className="text-xs text-gray-500">
+                                +{match.mentorship_preferences[0].specializations.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mentoring Message */}
+                      {match.mentorship_preferences?.[0]?.mentoring_message && (
+                        <div className="mt-4">
+                          <p className="text-xs text-gray-500 mb-1">Message:</p>
+                          <p className="text-sm text-gray-700 italic">
+                            "{match.mentorship_preferences[0].mentoring_message}"
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Location */}
+                      {match.profile_locations && match.profile_locations.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-600">
+                            {match.profile_locations
+                              .map((pl: any) => pl.locations?.state)
+                              .filter(Boolean)
+                              .join(", ")
+                            }
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Connect Button */}
+                      <div className="mt-6">
+                        <Link
+                          href={`/p/${match.slug || match.id}`}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                          View Profile & Connect
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : (
               <div className="text-center py-12">
                 <div className="mx-auto h-12 w-12 text-gray-400">
@@ -259,23 +393,10 @@ export default function MentorshipPageClient({ profile, preferences, matches }: 
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                   </svg>
                 </div>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No matches found</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No mentors available yet</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  We couldn't find any mentorship matches based on your preferences. Try updating your topics or locations.
+                  Check back later for new mentorship opportunities.
                 </p>
-                <div className="mt-6">
-                  <button
-                    onClick={() => {
-                      // Determine which type to show based on current preferences
-                      const type = currentPreferences?.is_open_to_mentor ? 'mentor' : 'mentee';
-                      setModalType(type);
-                      setShowDetailsModal(true);
-                    }}
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    Update Topics
-                  </button>
-                </div>
               </div>
             )}
           </>
