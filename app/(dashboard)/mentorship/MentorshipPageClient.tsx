@@ -227,18 +227,6 @@ export default function MentorshipPageClient({ profile, preferences, matches, al
                         </div>
                       )}
 
-                      {/* Location */}
-                      {match.profile_locations && match.profile_locations.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-sm text-gray-600">
-                            {match.profile_locations
-                              .map((pl: any) => pl.locations?.state)
-                              .filter(Boolean)
-                              .join(", ")
-                            }
-                          </p>
-                        </div>
-                      )}
 
                       {/* Connect Button */}
                       <div className="mt-6">
@@ -363,18 +351,6 @@ export default function MentorshipPageClient({ profile, preferences, matches, al
                         </div>
                       )}
 
-                      {/* Location */}
-                      {match.profile_locations && match.profile_locations.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-sm text-gray-600">
-                            {match.profile_locations
-                              .map((pl: any) => pl.locations?.state)
-                              .filter(Boolean)
-                              .join(", ")
-                            }
-                          </p>
-                        </div>
-                      )}
 
                       {/* Connect Button */}
                       <div className="mt-6">
