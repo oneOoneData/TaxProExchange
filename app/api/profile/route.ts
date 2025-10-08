@@ -474,7 +474,15 @@ export async function PUT(request: Request) {
           works_international: works_international ?? false,
           countries: countries || [],
           other_software: other_software || [],
-          email_preferences: email_preferences || null,
+          email_preferences: email_preferences || {
+            job_notifications: true,
+            application_updates: true,
+            connection_requests: true,
+            verification_emails: true,
+            message_notifications: true,
+            marketing_updates: true,
+            frequency: 'immediate'
+          },
           primary_location: primary_location || null,
           location_radius: location_radius || 50,
           years_experience: years_experience || null,
