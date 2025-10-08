@@ -146,7 +146,7 @@ export const EmailPreferencesUpdateSchema = z.object({
   email_preferences: z.object({
     frequency: z.enum(["immediate", "daily", "weekly"]).default("immediate"),
     job_notifications: z.boolean().default(true),
-    marketing_updates: z.boolean().default(false),
+    marketing_updates: z.boolean().default(true),
     application_updates: z.boolean().default(true),
     connection_requests: z.boolean().default(true),
     verification_emails: z.boolean().default(true),

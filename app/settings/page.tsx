@@ -29,7 +29,7 @@ export default function SettingsPage() {
     connection_requests: true,
     message_notifications: true,
     verification_emails: true,
-    marketing_updates: false,
+    marketing_updates: true,
     frequency: 'immediate'
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -62,7 +62,7 @@ export default function SettingsPage() {
           connection_requests: data.connection_email_notifications ?? true,
           message_notifications: emailPrefs.message_notifications ?? true,
           verification_emails: emailPrefs.verification_emails ?? true,
-          marketing_updates: emailPrefs.marketing_updates ?? false,
+          marketing_updates: emailPrefs.marketing_updates ?? true,
           frequency: emailPrefs.frequency || 'immediate'
         });
       } else {
