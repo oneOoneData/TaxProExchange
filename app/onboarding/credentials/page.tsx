@@ -13,6 +13,7 @@ export default function CredentialsPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [credentialData, setCredentialData] = useState({
     credential_type: 'Student' as CredentialType,
     licenses: [] as License[]
@@ -33,7 +34,57 @@ export default function CredentialsPage() {
     );
   }
 
+  const validateCredentials = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    // Validate credential type
+    if (!credentialData.credential_type) {
+      errors.credential_type = 'Please select your credential type';
+    }
+    
+    // Validate licenses for non-Student and non-Other credentials
+    if (credentialData.credential_type && 
+        credentialData.credential_type !== 'Student' && 
+        credentialData.credential_type !== 'Other') {
+      
+      const validLicenses = credentialData.licenses?.filter(license => 
+        license.license_number && 
+        license.license_number.trim().length >= 2 && 
+        license.issuing_authority && 
+        license.issuing_authority.trim().length >= 2
+      ) || [];
+      
+      if (validLicenses.length === 0) {
+        errors.license_number = 'License number is required for professional credentials';
+      }
+      
+      // Check if CPA needs state
+      if (credentialData.credential_type === 'CPA') {
+        credentialData.licenses?.forEach((license, index) => {
+          if (!license.state || !license.state.trim()) {
+            errors[`license_state_${index}`] = 'State is required for CPA licenses';
+          }
+        });
+      }
+    }
+    
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleNext = async () => {
+    // Validate before submitting
+    if (!validateCredentials()) {
+      setError('Please fix the errors above before continuing');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -107,12 +158,46 @@ export default function CredentialsPage() {
 
 
 
+          {/* Validation Errors Summary */}
+          {Object.keys(validationErrors).length > 0 && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <h3 className="font-medium text-red-900 mb-1">Please fix the following errors:</h3>
+                  <ul className="text-sm text-red-800 list-disc list-inside space-y-1">
+                    {Object.entries(validationErrors).map(([key, value]) => (
+                      <li key={key}>{value}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Credential Form */}
           <div className="mb-8">
             <CredentialSection
               value={credentialData}
-              onChange={setCredentialData}
-              errors={error ? { general: error } : undefined}
+              onChange={(newData) => {
+                setCredentialData(newData);
+                // Clear validation errors when changing credentials
+                const newErrors = { ...validationErrors };
+                delete newErrors.credential_type;
+                delete newErrors.license_number;
+                Object.keys(newErrors).forEach(key => {
+                  if (key.startsWith('license_state_')) {
+                    delete newErrors[key];
+                  }
+                });
+                setValidationErrors(newErrors);
+              }}
+              errors={{
+                ...validationErrors,
+                general: error || undefined
+              }}
             />
           </div>
 

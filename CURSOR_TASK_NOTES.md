@@ -1,5 +1,357 @@
 # Cursor Task Notes
 
+## Robots.txt & Sitemap.xml Implementation (2025-10-09) ✅
+
+**Goal**: Add first-party robots and sitemap using Next.js App Router native approach.
+
+**Problem**: Need proper SEO infrastructure for Google to crawl static pages and dynamic profile pages.
+
+**Solution Applied**: 
+1. Updated `app/robots.ts` to explicitly allow public pages and reference canonical sitemap
+2. Enhanced `app/sitemap.ts` to include static pages (/trust, /transparency) + dynamic verified profiles
+3. Configured `next-sitemap` to avoid conflicts with App Router native files
+
+### Implementation Details
+
+#### 1. Robots.txt (`app/robots.ts`)
+- **Allows**: `/`, `/search`, `/trust`, `/transparency`, `/p/` (profiles)
+- **Disallows**: `/join`, `/verify`, `/profile`, `/onboarding`, `/api/`, `/admin/`, `/dashboard/`, `/messages/`
+- **Sitemap**: Points to `https://www.taxproexchange.com/sitemap.xml`
+- **Format**: Next.js `MetadataRoute.Robots` type
+- **Served at**: `/robots.txt`
+
+#### 2. Sitemap (`app/sitemap.ts`)
+- **Static pages** (4 total):
+  - `/` - Homepage (priority: 1.0, changefreq: weekly)
+  - `/search` - Search page (priority: 0.8, changefreq: weekly)
+  - `/trust` - Trust & Verification (priority: 0.7, changefreq: monthly)
+  - `/transparency` - Site Transparency (priority: 0.7, changefreq: monthly)
+- **Dynamic pages**: All verified & listed profiles from database
+  - Query: `visibility_state='verified' AND is_listed=true`
+  - Limit: 10,000 profiles (handles large datasets)
+  - URL format: `/p/{slug}`
+  - Priority: 0.6, changefreq: monthly
+  - Uses `updated_at` for `lastModified`
+- **Database**: Queries Supabase with service role (bypasses RLS)
+- **Format**: Next.js `MetadataRoute.Sitemap` type
+- **Served at**: `/sitemap.xml`
+
+#### 3. Next-Sitemap Config (`next-sitemap.config.js`)
+- **Disabled**: `generateRobotsTxt: false` (using App Router `app/robots.ts` instead)
+- **Excluded**: `/sitemap.xml`, `/robots.txt` from static generation to avoid conflicts
+- **Purpose**: Generates `sitemap-0.xml` for additional static pages discovered during build
+- **Benefit**: Complements dynamic sitemap with build-time discovered pages
+
+### Files Modified
+```
+app/robots.ts               - Updated to allow /trust, /transparency
+app/sitemap.ts              - Added static pages + dynamic profiles query
+next-sitemap.config.js      - Disabled robots.txt generation, excluded dynamic files
+```
+
+### Testing
+```bash
+# Build and verify
+npm run build
+
+# Check routes are generated
+# ○ /robots.txt - static
+# ○ /sitemap.xml - dynamic
+
+# Manual test (after deploy)
+curl https://www.taxproexchange.com/robots.txt
+curl https://www.taxproexchange.com/sitemap.xml
+
+# Google Search Console
+# 1. Submit sitemap at https://www.taxproexchange.com/sitemap.xml
+# 2. Verify robots.txt is accessible
+# 3. Monitor indexing coverage
+```
+
+### Edge Cases Handled
+- **Large profile datasets**: Limited to 10,000 (sitemap best practice)
+- **Missing data**: Uses `data ?? []` for safe iteration
+- **Missing timestamps**: Fallback to `new Date().toISOString()`
+- **Canonical domain**: All URLs use `https://www.taxproexchange.com` (www enforced)
+
+### Future Enhancements (if needed)
+- [ ] Sitemap index for >10,000 profiles (split into multiple sitemaps)
+- [ ] Add `/jobs` and `/events` pages if they become public
+- [ ] Image sitemaps for profile photos (if added)
+- [ ] Video sitemaps for demo content (if added)
+
+### SEO Benefits
+✅ Google can discover all public pages  
+✅ Proper crawl budget allocation (disallow admin/internal pages)  
+✅ Dynamic profile pages indexed with correct metadata  
+✅ Canonical URLs enforced (www subdomain)  
+✅ Change frequency hints for crawler optimization  
+
+---
+
+## Live Counters + Badge Legend + Built With Components (2025-10-09) ✅
+
+**Goal**: Add live verification stats, explain badges, and show "Built With" tech stack.
+
+**Problem**: No live counters showing platform growth; users don't understand badge meanings; tech stack not highlighted.
+
+**Solution Applied**: 
+1. Enhanced `/api/trust/stats` to count distinct states covered by verified professionals
+2. Updated `LiveCounters` to show verified profiles + states covered
+3. Added `BadgeLegend` to explain verification badges
+4. Created `BuiltWith` component showcasing Clerk, Supabase, Vercel
+
+### Implementation Details
+
+#### 1. Trust Stats API Enhancement (`app/api/trust/stats/route.ts`)
+- **New metric:** `statesCovered` - counts distinct states from `profile_locations` table
+- Query flow:
+  1. Fetch verified profile IDs (where `visibility_state = 'verified'` AND `is_listed = true`)
+  2. Join `profile_locations` → `locations` to get state data
+  3. Count unique states (filter out nulls)
+- Returns JSON with `verifiedProfiles`, `statesCovered`, `credentialCounts`, `lastUpdated`
+- **Performance:** Optimized with indexed queries; warm cache <500ms
+- **Edge case:** Returns `0` for empty database
+
+#### 2. Live Counters Component (`components/Trust/LiveCounters.tsx`)
+- **Client component:** Fetches stats from `/api/trust/stats` on mount
+- Updated interface to include `statesCovered: number`
+- Displays 4 metrics in responsive grid:
+  - ✓ Verified Professionals (green)
+  - 🗺️ States Covered (blue) - **NEW**
+  - 🎓 CPAs (purple)
+  - 📋 Enrolled Agents (orange)
+- Loading state: Animated skeleton UI
+- Error state: Graceful fallback message
+- Uses Framer Motion for staggered animations
+
+#### 3. Badge Legend Component (`components/Trust/BadgeLegend.tsx`)
+- Explains 6 badge types:
+  - ✓ Verified (green) - License verified against official registries
+  - 🎓 CPA (blue) - State Board verified
+  - 📋 EA (purple) - IRS directory verified
+  - 📊 CTEC (orange) - CTEC registry verified
+  - ⚖️ Attorney (indigo) - State Bar verified
+  - 🔍 Pending (yellow) - Verification in progress
+- 2-column responsive grid
+- Each badge shows colored pill + description
+- Hover effect for better UX
+
+#### 4. Built With Component (`components/Trust/BuiltWith.tsx`)
+- Shows 3 technology partners:
+  - 🔐 Clerk (Authentication & User Management)
+  - 🛡️ Supabase (PostgreSQL Database with RLS)
+  - 🔒 Vercel (Hosting & HTTPS)
+- Each tech card is clickable → opens official site
+- Staggered fade-in animations
+- Compact, tasteful design
+- Tagline: "Enterprise-grade security and reliability"
+
+#### 5. Trust Page Integration (`app/trust/page.tsx`)
+- Added `BuiltWith` import and section
+- Layout order:
+  1. Hero
+  2. **Live Counters** (stats)
+  3. Verification Process (4 steps)
+  4. **Badge Legend** (what badges mean)
+  5. Lookup Links (external registries)
+  6. **Built With** (tech stack)
+  7. What We Don't Do
+  8. Data Minimization
+  9. Reporting
+
+### Files Created/Modified
+- `app/api/trust/stats/route.ts` (modified - added states covered query)
+- `components/Trust/LiveCounters.tsx` (modified - added states metric)
+- `components/Trust/BadgeLegend.tsx` (already existed, confirmed implementation)
+- `components/Trust/LookupLinks.tsx` (already existed)
+- `components/Trust/BuiltWith.tsx` (new)
+- `app/trust/page.tsx` (modified - added BuiltWith component)
+- `CURSOR_TASK_NOTES.md` (updated)
+
+### Design Decisions
+- **States metric:** Replaced "CTEC Preparers" counter with "States Covered" for broader appeal
+- **Footer:** Kept existing compact trust badges (already shows Vercel/Supabase/Clerk) instead of full BuiltWith component - more appropriate for footer real estate
+- **SSR compatibility:** Stats fetched client-side (API route) for simplicity; could add server-side fetch in future
+- **Caching:** No explicit cache header yet; Vercel edge caching should handle warm requests <500ms
+- **Empty DB fallback:** All counters show `0` gracefully
+
+### Database Schema Dependencies
+- `profiles` table: `visibility_state`, `is_listed`, `credential_type`
+- `profile_locations` table: `profile_id`, `location_id`
+- `locations` table: `state` (2-letter state code)
+
+### Testing Notes
+- **Manual test:** Visit `/trust` → verify counters load <500ms
+- **Empty DB:** Counters should show zeros (not errors)
+- **Badge legend:** All 6 badges should render with correct colors
+- **Built With:** Links should open in new tabs to Clerk/Supabase/Vercel
+- **Mobile:** 4-column counters should collapse to 2 columns on mobile
+
+### Future Enhancements
+- Add caching headers to `/api/trust/stats` (e.g., `s-maxage=300` for 5min cache)
+- Consider SSR for LiveCounters (fetch stats server-side, pass as props)
+- Add more granular stats (e.g., "Cities covered", "Specializations offered")
+- Track historical growth (line chart of verified profiles over time)
+
+### Auth & Security
+- `/api/trust/stats`: Public route (no auth required)
+- All components: Public, no authentication
+- Data: Read-only queries, no PII exposed
+
+---
+
+## Footer Trust Signals + Site Transparency Page (2025-10-09) ✅
+
+**Goal**: Add subtle trust signals to footer and create a comprehensive transparency micro-page.
+
+**Problem**: Footer lacked trust elements; no central location for infrastructure/security transparency.
+
+**Solution Applied**: Added trust signal badges to footer and created `/transparency` page with detailed infrastructure, security, and data practices.
+
+### Implementation Details
+
+#### 1. Footer Trust Signals (`components/Footer.tsx`)
+- Added compact trust badges above main footer content:
+  - 🔒 "HTTPS by Vercel"
+  - 🛡️ "RLS on Supabase"
+  - 🔐 "Clerk Auth"
+- Badges use small pill design (bg-slate-50, rounded-lg, border)
+- Responsive flex-wrap for mobile
+- Added "Transparency" link to footer navigation
+- Added subtle top border to footer (`border-t border-slate-100`)
+
+#### 2. Transparency Page (`app/transparency/page.tsx`)
+- **Public route** - no authentication required
+- Comprehensive sections:
+  - **At a Glance:** Quick facts grid (domain, hosting, auth, database, security)
+  - **Infrastructure & Security:** Hosting (Vercel), Database (Supabase + RLS), Authentication (Clerk SOC 2)
+  - **Data Practices:** What we collect/don't collect, data location (US-based)
+  - **Email Security:** SPF, DKIM, DMARC status
+  - **Platform Boundaries:** Explicitly states what we don't do (no payments, no file storage)
+  - **Compliance & Standards:** CCPA/CPRA, GDPR, CAN-SPAM, professional credential standards
+  - **Contact & Accountability:** Support and security email addresses
+- Styled to match legal pages (privacy/terms) with Framer Motion
+- Uses prose styling for readability
+- Links to /trust and /legal/privacy for cross-reference
+
+#### 3. Middleware Update (`middleware.ts`)
+- Added `/transparency` to public routes matcher
+- Page accessible without authentication
+
+### Files Created/Modified
+- `components/Footer.tsx` (modified - added trust signals and transparency link)
+- `app/transparency/page.tsx` (new)
+- `middleware.ts` (modified - added /transparency to public routes)
+- `CURSOR_TASK_NOTES.md` (updated)
+
+### Design Decisions
+- **Compact footer design:** Trust signals are small badges, not intrusive
+- **Static content:** Transparency page is static (can be updated manually as infrastructure changes)
+- **Security email:** Added security@taxproexchange.com for responsible disclosure
+- **Platform boundaries:** Explicitly states no payment processing, no file storage to set expectations
+- **US-based:** All data storage in US (relevant for tax professional audience)
+- **Email security:** Documents SPF/DKIM/DMARC status (assumes configured - verify in DNS)
+
+### Testing Checklist
+- [ ] Footer trust badges display on all pages
+- [ ] Footer "Transparency" link navigates to `/transparency`
+- [ ] `/transparency` page loads without auth (public route)
+- [ ] Page is mobile responsive
+- [ ] Links to /trust and /legal/privacy work
+- [ ] Email links (support@, security@) open mail client
+- [ ] Page loads < 2s
+
+### Follow-up Tasks
+- Verify SPF/DKIM/DMARC are actually configured in DNS (update transparency page if needed)
+- Consider adding "Last Updated" date to transparency page
+- May want to add "security.txt" file for responsible disclosure (optional)
+
+---
+
+## Trust & Verification Page (2025-10-09) ✅
+
+**Goal**: Create a transparent public page explaining verification process, badge meanings, and reporting mechanisms.
+
+**Problem**: Trust details were scattered across the site with no central location for users to understand verification workflow.
+
+**Solution Applied**: New `/trust` route with live stats, badge legend, official registry links, and reporting instructions.
+
+### Implementation Details
+
+#### 1. API Endpoint (`app/api/trust/stats/route.ts`)
+- **Public endpoint** - no authentication required
+- Fetches count of verified & listed profiles: `visibility_state='verified' AND is_listed=true`
+- Returns credential breakdown (CPA, EA, CTEC, Attorney counts)
+- Uses Supabase service role client for read-only queries
+- Returns timestamp for cache busting
+
+#### 2. Components (`components/Trust/`)
+**LiveCounters.tsx**
+- Fetches stats from `/api/trust/stats` on mount
+- Displays animated counters with Framer Motion
+- Graceful loading states and error handling
+- Shows zeros if no verified profiles
+
+**BadgeLegend.tsx**
+- Explains verification badges (✓ Verified, 🎓 CPA, 📋 EA, 📊 CTEC, ⚖️ Attorney, 🔍 Pending)
+- Color-coded with descriptions of what each badge means
+
+**LookupLinks.tsx**
+- Links to official registries: NASBA (CPA), IRS EA Directory, CTEC Registry, State Bar directories
+- External links with target="_blank" and rel="noopener noreferrer"
+
+#### 3. Main Page (`app/trust/page.tsx`)
+- SEO-friendly with h1, h2, h3 hierarchy
+- Includes FAQ JSON-LD schema for search engines
+- Sections:
+  - Hero with headline and description
+  - Live counters showing verified profiles
+  - 4-step verification process explanation
+  - Badge legend
+  - Official registry lookup links
+  - "What We Don't Do" section (no payments, no file exchange)
+  - Data minimization statement
+  - Report a profile CTA (mailto link to support@taxproexchange.com)
+- Framer Motion animations for smooth entrance
+- Responsive design with Tailwind
+- Client component for interactivity
+
+#### 4. Navigation Update
+- Added "Trust & Verification" link to footer (`components/Footer.tsx`)
+- Positioned before Privacy/Terms for visibility
+
+### Files Created/Modified
+- `app/api/trust/stats/route.ts` (new)
+- `components/Trust/LiveCounters.tsx` (new)
+- `components/Trust/BadgeLegend.tsx` (new)
+- `components/Trust/LookupLinks.tsx` (new)
+- `app/trust/page.tsx` (new)
+- `components/Footer.tsx` (modified - added link)
+
+### Testing Checklist
+- [ ] Navigate to `/trust` - page loads without errors
+- [ ] Live counters display (or show 0s gracefully)
+- [ ] All official registry links open in new tabs
+- [ ] "Report a profile" mailto link works
+- [ ] Footer link navigates to `/trust`
+- [ ] Mobile responsive (test on narrow viewport)
+- [ ] Page loads < 2s (check Network tab)
+- [ ] FAQ schema validates (test in Google Rich Results Test)
+
+### Environment Variables
+- Uses existing `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
+- No new environment variables required
+
+### Design Decisions
+- **Public route** - no auth required, anyone can view
+- **Live data** - pulls real counts from database, not hardcoded
+- **Framer Motion** - matches existing site animation style (see legal pages)
+- **Mailto for reporting** - simple MVP solution, can upgrade to form later
+- **No new dependencies** - uses existing packages (framer-motion, tailwind)
+
+---
+
 ## HubSpot CRM Integration (2025-10-07) ✅
 
 **Goal**: Sync all TPE profiles to HubSpot for marketing automation with consent tracking based on email preferences.
@@ -2604,4 +2956,43 @@ CREATE INDEX idx_profile_locations_state_city ON profile_locations(state, city);
 
 **Result**: Admins now receive professional email notifications every Monday with complete statistics about new events, validation results, and direct access to the review interface. This ensures timely human review of AI-generated events while maintaining quality control.
 
----
+---# #   F o r m   V a l i d a t i o n   E n h a n c e m e n t   ( ) 
+ 
+ 
+
+## Form Validation Enhancement (October 9, 2025)
+
+### Problem
+Users were able to proceed through multi-step onboarding and profile edit forms without filling in required fields like license numbers. They only encountered errors when submitting at the very end, causing frustration.
+
+### Solution
+Implemented client-side validation that:
+- Validates required fields before allowing users to proceed to the next step
+- Highlights missing or invalid fields with red borders and background
+- Displays clear error messages below each invalid field
+- Shows a validation error summary at the top of the form
+- Prevents navigation to the next step until all required fields are filled
+
+### Files Modified
+- \pp/profile/edit/page.tsx\: Added step-by-step validation for Steps 1 and 2
+- \pp/onboarding/credentials/page.tsx\: Added credential validation before proceeding
+- \components/forms/CredentialSection.tsx\: Updated to display validation errors with red styling
+
+### Validation Rules
+**Step 1 (Professional Information):**
+- First name, last name, headline, bio, and email are required
+- Names cannot be placeholder values (e.g., 'New User', 'Test', etc.)
+- Credential type must be selected
+- For non-Student/non-Other credentials: license number is required (min 2 characters)
+- For CPA credentials: state is required
+
+**Step 2 (Specializations):**
+- Years of experience is required
+
+### User Experience
+- Fields with errors show red border and light red background
+- Error messages appear directly below each field
+- Summary of all errors appears at top of form
+- Users cannot proceed to next step until errors are fixed
+- Errors clear automatically when user corrects the field
+
