@@ -89,12 +89,41 @@ export default function CredentialsPage() {
     setError(null);
 
     try {
-      // Update the profile with credential data only
-      const updateData = {
-        clerk_id: user.id,
-        credential_type: credentialData.credential_type,
-        licenses: credentialData.licenses
-      };
+      // Check if profile exists first
+      const checkResponse = await fetch(`/api/profile?clerk_id=${user.id}`);
+      const profileExists = checkResponse.ok;
+
+      let updateData: any;
+      
+      if (!profileExists) {
+        // Create new profile with basic info from Clerk + credentials
+        updateData = {
+          clerk_id: user.id,
+          first_name: user.firstName || 'New',
+          last_name: user.lastName || 'User',
+          public_email: user.primaryEmailAddress?.emailAddress || '',
+          credential_type: credentialData.credential_type,
+          licenses: credentialData.licenses,
+          // Add required fields for validation
+          accepting_work: true,
+          public_contact: false,
+          works_multistate: false,
+          works_international: false,
+          countries: [],
+          other_software: [],
+          specializations: [],
+          locations: [],
+          software: []
+        };
+      } else {
+        // Update existing profile with credentials only
+        updateData = {
+          clerk_id: user.id,
+          credential_type: credentialData.credential_type,
+          licenses: credentialData.licenses
+        };
+      }
+      
       console.log('Sending update data:', updateData);
       
       const response = await fetch('/api/profile', {
@@ -120,9 +149,54 @@ export default function CredentialsPage() {
     }
   };
 
-  const handleSkip = () => {
-    // Allow users to skip and add credentials later
-    router.push('/profile/edit');
+  const handleSkip = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Check if profile exists first
+      const checkResponse = await fetch(`/api/profile?clerk_id=${user.id}`);
+      const profileExists = checkResponse.ok;
+
+      if (!profileExists) {
+        // Create new profile with basic info from Clerk
+        const createData = {
+          clerk_id: user.id,
+          first_name: user.firstName || 'New',
+          last_name: user.lastName || 'User',
+          public_email: user.primaryEmailAddress?.emailAddress || '',
+          credential_type: 'Student', // Default to Student when skipping
+          licenses: [],
+          accepting_work: true,
+          public_contact: false,
+          works_multistate: false,
+          works_international: false,
+          countries: [],
+          other_software: [],
+          specializations: [],
+          locations: [],
+          software: []
+        };
+
+        const response = await fetch('/api/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(createData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create profile');
+        }
+      }
+
+      // Redirect to profile edit
+      router.push('/profile/edit');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setIsSubmitting(false);
+    }
   };
 
   return (
