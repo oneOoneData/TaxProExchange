@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import 'stream-chat-react/dist/css/v2/index.css';
 import DomainAwareLayout from '@/components/DomainAwareLayout';
-import { defaultTitle, defaultDescription, generateOrganizationJsonLd, generateWebSiteJsonLd } from '@/lib/seo';
+import { defaultTitle, defaultDescription } from '@/lib/seo';
 
 // This layout will be replaced by DomainAwareLayout
 // Keeping minimal metadata for Next.js
@@ -61,7 +61,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <DomainAwareLayout>{children}</DomainAwareLayout>
-  );
+  return <DomainAwareLayout>{children}</DomainAwareLayout>;
 }

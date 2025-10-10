@@ -242,7 +242,8 @@ export async function PUT(request: Request) {
     let specializations, locations, software, other_software, public_contact, 
         works_multistate, works_international, countries, email_preferences, 
         primary_location, location_radius, credential_type, licenses, 
-        years_experience, entity_revenue_range, connection_email_notifications, profileData;
+        years_experience, entity_revenue_range, firm_size, annual_returns_range,
+        connection_email_notifications, profileData;
     
     if (isCredentialUpdate) {
       // For credential-only updates
@@ -263,6 +264,8 @@ export async function PUT(request: Request) {
       location_radius = 50;
       years_experience = undefined;
       entity_revenue_range = undefined;
+      firm_size = undefined;
+      annual_returns_range = undefined;
       profileData = {};
     } else if (isEmailPreferencesUpdate) {
       // For email preferences updates
@@ -284,6 +287,8 @@ export async function PUT(request: Request) {
       licenses = undefined;
       years_experience = undefined;
       entity_revenue_range = undefined;
+      firm_size = undefined;
+      annual_returns_range = undefined;
       profileData = {};
     } else {
       // For full profile updates
@@ -304,11 +309,18 @@ export async function PUT(request: Request) {
         licenses,
         years_experience,
         entity_revenue_range,
+        firm_size,
+        annual_returns_range,
         connection_email_notifications,
         ...profileData 
       } = fullProfileData);
       
-      console.log('🔍 Experience fields being saved:', { years_experience, entity_revenue_range });
+      console.log('🔍 Experience and firm fields being saved:', { 
+        years_experience, 
+        entity_revenue_range,
+        firm_size,
+        annual_returns_range 
+      });
     }
     
     // Extract clerk_id from the original body since it's not in the validated schema
@@ -324,6 +336,8 @@ export async function PUT(request: Request) {
       email_preferences,
       years_experience,
       entity_revenue_range,
+      firm_size,
+      annual_returns_range,
       profileData
     });
 
@@ -426,6 +440,8 @@ export async function PUT(request: Request) {
           location_radius: location_radius || 50,
           years_experience: years_experience || null,
           entity_revenue_range: entity_revenue_range || null,
+          firm_size: firm_size ?? null,
+          annual_returns_range: annual_returns_range ?? null,
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           credential_type,
@@ -487,6 +503,8 @@ export async function PUT(request: Request) {
           location_radius: location_radius || 50,
           years_experience: years_experience || null,
           entity_revenue_range: entity_revenue_range || null,
+          firm_size: firm_size ?? null,
+          annual_returns_range: annual_returns_range ?? null,
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           referrer_profile_id: referrerProfileId,
@@ -736,6 +754,8 @@ export async function PUT(request: Request) {
       location_radius: Number(profile?.location_radius) || 50,
       years_experience: String(profile?.years_experience || ''),
       entity_revenue_range: String(profile?.entity_revenue_range || ''),
+      firm_size: profile?.firm_size || null,
+      annual_returns_range: profile?.annual_returns_range || null,
       onboarding_complete: Boolean(profile?.onboarding_complete),
       created_at: String(profile?.created_at || ''),
       updated_at: String(profile?.updated_at || '')

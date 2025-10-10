@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase/server';
-import { jsonLd, professionalServiceLD, breadcrumbsLD } from '@/lib/seo';
+import { jsonLd, personLD, breadcrumbsLD } from '@/lib/seo';
 import ProfilePageClient from './ProfilePageClient';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -134,7 +134,7 @@ export default async function ProfilePage({ params }: Props) {
     profile_locations: []
   };
 
-  const professionalServiceJsonLd = professionalServiceLD({
+  const personJsonLd = personLD({
     slug: p.slug,
     first_name: p.first_name,
     last_name: p.last_name,
@@ -144,15 +144,15 @@ export default async function ProfilePage({ params }: Props) {
     headline: p.headline,
     firm_name: p.firm_name,
     linkedin_url: p.linkedin_url,
-    locations: []
+    website_url: p.website_url
   });
 
   return (
     <>
-      {/* JSON-LD: ProfessionalService + BreadcrumbList */}
+      {/* JSON-LD: Person + BreadcrumbList */}
       <script 
         type="application/ld+json" 
-        dangerouslySetInnerHTML={jsonLd(professionalServiceJsonLd)} 
+        dangerouslySetInnerHTML={jsonLd(personJsonLd)} 
       />
       <script 
         type="application/ld+json" 

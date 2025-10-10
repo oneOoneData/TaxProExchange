@@ -13,6 +13,25 @@ import MentorshipTopicPicker from '@/components/MentorshipTopicPicker';
 
 export const dynamic = 'force-dynamic';
 
+type FirmSize = 'solo_1' | '2_5' | '6_10' | '11_20' | '21_50' | '50_plus';
+type AnnualReturnsRange = 'lt_100' | '100_999' | '1000_4999' | '5000_plus';
+
+const FIRM_SIZE_OPTIONS: { label: string; value: FirmSize }[] = [
+  { label: 'Solo (1)', value: 'solo_1' },
+  { label: '2–5', value: '2_5' },
+  { label: '6–10', value: '6_10' },
+  { label: '11–20', value: '11_20' },
+  { label: '21–50', value: '21_50' },
+  { label: '50+', value: '50_plus' },
+];
+
+const RETURNS_RANGE_OPTIONS: { label: string; value: AnnualReturnsRange }[] = [
+  { label: '< 100', value: 'lt_100' },
+  { label: '100–999', value: '100_999' },
+  { label: '1,000–4,999', value: '1000_4999' },
+  { label: '5,000+', value: '5000_plus' },
+];
+
 interface ProfileForm {
   first_name: string;
   last_name: string;
@@ -38,6 +57,8 @@ interface ProfileForm {
   other_software_raw?: string;
   years_experience?: string;
   entity_revenue_range?: string;
+  firm_size?: FirmSize | null;
+  annual_returns_range?: AnnualReturnsRange | null;
   // Mentorship preferences
   is_open_to_mentor: boolean;
   is_seeking_mentor: boolean;
@@ -208,6 +229,7 @@ export default function EditProfilePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [stateSearchTerm, setStateSearchTerm] = useState('');
   const [showWrapUp, setShowWrapUp] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Redirect unauthenticated users to home
   useEffect(() => {
@@ -296,6 +318,10 @@ export default function EditProfilePage() {
               states:     p.states     || [],
               software:   p.software   || [],
               other_software: p.other_software || [],
+              years_experience: p.years_experience,
+              entity_revenue_range: p.entity_revenue_range,
+              firm_size: p.firm_size ?? null,
+              annual_returns_range: p.annual_returns_range ?? null,
               primary_location: p.primary_location || {
                 country: 'US',
                 state: null,
@@ -375,6 +401,10 @@ export default function EditProfilePage() {
           states: profileForm.states,
           software: profileForm.software,
           other_software: profileForm.other_software,
+          years_experience: profileForm.years_experience,
+          entity_revenue_range: profileForm.entity_revenue_range,
+          firm_size: profileForm.firm_size ?? null,
+          annual_returns_range: profileForm.annual_returns_range ?? null,
           primary_location: profileForm.primary_location
         }),
       });
@@ -560,8 +590,111 @@ export default function EditProfilePage() {
 
 
 
+  const validateStep1 = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    // Validate names
+    if (!profileForm.first_name.trim()) {
+      errors.first_name = 'First name is required';
+    } else if (['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.first_name.trim())) {
+      errors.first_name = 'Please enter your actual first name';
+    }
+    
+    if (!profileForm.last_name.trim()) {
+      errors.last_name = 'Last name is required';
+    } else if (['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.last_name.trim())) {
+      errors.last_name = 'Please enter your actual last name';
+    }
+    
+    // Validate headline
+    if (!profileForm.headline.trim()) {
+      errors.headline = 'Professional headline is required';
+    }
+    
+    // Validate bio
+    if (!profileForm.bio.trim()) {
+      errors.bio = 'Professional bio is required';
+    }
+    
+    // Validate public email
+    if (!profileForm.public_email.trim()) {
+      errors.public_email = 'Email is required';
+    }
+    
+    // Validate credential type
+    if (!profileForm.credential_type) {
+      errors.credential_type = 'Please select your credential type';
+    }
+    
+    // Validate licenses for non-Student and non-Other credentials
+    if (profileForm.credential_type && 
+        profileForm.credential_type !== 'Student' && 
+        profileForm.credential_type !== 'Other') {
+      
+      const validLicenses = profileForm.licenses?.filter(license => 
+        license.license_number && 
+        license.license_number.trim().length >= 2 && 
+        license.issuing_authority && 
+        license.issuing_authority.trim().length >= 2
+      ) || [];
+      
+      if (validLicenses.length === 0) {
+        errors.license_number = 'License number is required for professional credentials';
+      }
+      
+      // Check if CPA needs state
+      if (profileForm.credential_type === 'CPA') {
+        profileForm.licenses?.forEach((license, index) => {
+          if (!license.state || !license.state.trim()) {
+            errors[`license_state_${index}`] = 'State is required for CPA licenses';
+          }
+        });
+      }
+    }
+    
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+    
+    return true;
+  };
+
+  const validateStep2 = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    // Validate years of experience
+    if (!profileForm.years_experience) {
+      errors.years_experience = 'Years of experience is required';
+    }
+    
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+    
+    return true;
+  };
+
   const nextStep = () => {
     if (currentStep < 4) {
+      // Clear previous validation errors
+      setValidationErrors({});
+      
+      // Validate current step before proceeding
+      if (currentStep === 1 && !validateStep1()) {
+        return;
+      }
+      
+      if (currentStep === 2 && !validateStep2()) {
+        return;
+      }
+      
       setCurrentStep(currentStep + 1);
     }
   };
@@ -615,6 +748,25 @@ export default function EditProfilePage() {
 
   const renderSpecializationsStep = () => (
     <div className="space-y-6">
+      {/* Validation Errors Summary */}
+      {Object.keys(validationErrors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <h3 className="font-medium text-red-900 mb-1">Please fix the following errors:</h3>
+              <ul className="text-sm text-red-800 list-disc list-inside space-y-1">
+                {Object.entries(validationErrors).map(([key, value]) => (
+                  <li key={key}>{value}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Years of Experience */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -622,8 +774,19 @@ export default function EditProfilePage() {
         </label>
         <select
           value={profileForm.years_experience || ''}
-          onChange={(e) => updateForm('years_experience', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          onChange={(e) => {
+            updateForm('years_experience', e.target.value);
+            if (validationErrors.years_experience) {
+              const newErrors = { ...validationErrors };
+              delete newErrors.years_experience;
+              setValidationErrors(newErrors);
+            }
+          }}
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
+            validationErrors.years_experience
+              ? 'border-red-300 focus:ring-red-300 bg-red-50'
+              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+          }`}
           required
         >
           <option value="">Select years of experience</option>
@@ -636,6 +799,9 @@ export default function EditProfilePage() {
           <option value="26-30">26-30 years</option>
           <option value="31+">31+ years</option>
         </select>
+        {validationErrors.years_experience && (
+          <p className="text-red-600 text-xs mt-1">{validationErrors.years_experience}</p>
+        )}
       </div>
 
       {/* Entity Revenue Range */}
@@ -659,6 +825,50 @@ export default function EditProfilePage() {
         </select>
         <p className="mt-1 text-sm text-gray-500">
           This helps clients understand the size of entities you typically work with
+        </p>
+      </div>
+
+      {/* Firm Size */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Total number of members in your firm
+        </label>
+        <select
+          value={profileForm.firm_size || ''}
+          onChange={(e) => updateForm('firm_size', e.target.value || null)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Select firm size (optional)</option>
+          {FIRM_SIZE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-sm text-gray-500">
+          This helps clients understand the scale of your practice
+        </p>
+      </div>
+
+      {/* Annual Returns Range */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Total number of returns per year
+        </label>
+        <select
+          value={profileForm.annual_returns_range || ''}
+          onChange={(e) => updateForm('annual_returns_range', e.target.value || null)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Select returns range (optional)</option>
+          {RETURNS_RANGE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-sm text-gray-500">
+          This helps clients understand your practice volume
         </p>
       </div>
 
@@ -841,6 +1051,25 @@ export default function EditProfilePage() {
         <div className="bg-white rounded-3xl border border-slate-200 p-8">
           {currentStep === 1 && (
             <div className="space-y-6">
+              {/* Validation Errors Summary */}
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                      <h3 className="font-medium text-red-900 mb-1">Please fix the following errors:</h3>
+                      <ul className="text-sm text-red-800 list-disc list-inside space-y-1">
+                        {Object.entries(validationErrors).map(([key, value]) => (
+                          <li key={key}>{value}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Basic Info */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
@@ -849,16 +1078,23 @@ export default function EditProfilePage() {
                     type="text"
                     required
                     value={profileForm.first_name}
-                    onChange={(e) => updateForm('first_name', e.target.value)}
+                    onChange={(e) => {
+                      updateForm('first_name', e.target.value);
+                      if (validationErrors.first_name) {
+                        const newErrors = { ...validationErrors };
+                        delete newErrors.first_name;
+                        setValidationErrors(newErrors);
+                      }
+                    }}
                     className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${
-                      ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.first_name.trim()) 
+                      validationErrors.first_name
                         ? 'border-red-300 focus:ring-red-300 bg-red-50' 
                         : 'border-slate-300 focus:ring-slate-300'
                     }`}
                     placeholder="Enter your first name"
                   />
-                  {['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.first_name.trim()) && (
-                    <p className="text-red-600 text-xs mt-1">Please enter your actual first name</p>
+                  {validationErrors.first_name && (
+                    <p className="text-red-600 text-xs mt-1">{validationErrors.first_name}</p>
                   )}
                 </div>
                 <div>
@@ -867,16 +1103,23 @@ export default function EditProfilePage() {
                     type="text"
                     required
                     value={profileForm.last_name}
-                    onChange={(e) => updateForm('last_name', e.target.value)}
+                    onChange={(e) => {
+                      updateForm('last_name', e.target.value);
+                      if (validationErrors.last_name) {
+                        const newErrors = { ...validationErrors };
+                        delete newErrors.last_name;
+                        setValidationErrors(newErrors);
+                      }
+                    }}
                     className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${
-                      ['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.last_name.trim()) 
+                      validationErrors.last_name
                         ? 'border-red-300 focus:ring-red-300 bg-red-50' 
                         : 'border-slate-300 focus:ring-slate-300'
                     }`}
                     placeholder="Enter your last name"
                   />
-                  {['New User', 'Unknown', 'User', 'New', 'Test', 'Demo'].includes(profileForm.last_name.trim()) && (
-                    <p className="text-red-600 text-xs mt-1">Please enter your actual last name</p>
+                  {validationErrors.last_name && (
+                    <p className="text-red-600 text-xs mt-1">{validationErrors.last_name}</p>
                   )}
                 </div>
               </div>
@@ -888,10 +1131,24 @@ export default function EditProfilePage() {
                   type="text"
                   required
                   value={profileForm.headline}
-                  onChange={(e) => updateForm('headline', e.target.value)}
+                  onChange={(e) => {
+                    updateForm('headline', e.target.value);
+                    if (validationErrors.headline) {
+                      const newErrors = { ...validationErrors };
+                      delete newErrors.headline;
+                      setValidationErrors(newErrors);
+                    }
+                  }}
                   placeholder="e.g., Senior Tax Consultant, S-Corp Specialist"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                  className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${
+                    validationErrors.headline
+                      ? 'border-red-300 focus:ring-red-300 bg-red-50'
+                      : 'border-slate-300 focus:ring-slate-300'
+                  }`}
                 />
+                {validationErrors.headline && (
+                  <p className="text-red-600 text-xs mt-1">{validationErrors.headline}</p>
+                )}
               </div>
 
               {/* Bio */}
@@ -900,11 +1157,25 @@ export default function EditProfilePage() {
                 <textarea
                   required
                   value={profileForm.bio}
-                  onChange={(e) => updateForm('bio', e.target.value)}
+                  onChange={(e) => {
+                    updateForm('bio', e.target.value);
+                    if (validationErrors.bio) {
+                      const newErrors = { ...validationErrors };
+                      delete newErrors.bio;
+                      setValidationErrors(newErrors);
+                    }
+                  }}
                   placeholder="Tell us about your experience, expertise, and what you're looking for..."
                   rows={4}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
+                  className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 resize-none ${
+                    validationErrors.bio
+                      ? 'border-red-300 focus:ring-red-300 bg-red-50'
+                      : 'border-slate-300 focus:ring-slate-300'
+                  }`}
                 />
+                {validationErrors.bio && (
+                  <p className="text-red-600 text-xs mt-1">{validationErrors.bio}</p>
+                )}
               </div>
 
               {/* Opportunities */}
@@ -933,6 +1204,23 @@ export default function EditProfilePage() {
                   onChange={(credentialData) => {
                     updateForm('credential_type', credentialData.credential_type);
                     updateForm('licenses', credentialData.licenses);
+                    // Clear validation errors when changing credentials
+                    const newErrors = { ...validationErrors };
+                    delete newErrors.credential_type;
+                    delete newErrors.license_number;
+                    Object.keys(newErrors).forEach(key => {
+                      if (key.startsWith('license_state_')) {
+                        delete newErrors[key];
+                      }
+                    });
+                    setValidationErrors(newErrors);
+                  }}
+                  errors={{
+                    credential_type: validationErrors.credential_type,
+                    license_number: validationErrors.license_number,
+                    ...Object.keys(validationErrors)
+                      .filter(key => key.startsWith('license_state_'))
+                      .reduce((acc, key) => ({ ...acc, [key]: validationErrors[key] }), {})
                   }}
                 />
               </div>
@@ -957,10 +1245,24 @@ export default function EditProfilePage() {
                     type="email"
                     required
                     value={profileForm.public_email}
-                    onChange={(e) => updateForm('public_email', e.target.value)}
+                    onChange={(e) => {
+                      updateForm('public_email', e.target.value);
+                      if (validationErrors.public_email) {
+                        const newErrors = { ...validationErrors };
+                        delete newErrors.public_email;
+                        setValidationErrors(newErrors);
+                      }
+                    }}
                     placeholder="Email for professional inquiries"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${
+                      validationErrors.public_email
+                        ? 'border-red-300 focus:ring-red-300 bg-red-50'
+                        : 'border-slate-300 focus:ring-slate-300'
+                    }`}
                   />
+                  {validationErrors.public_email && (
+                    <p className="text-red-600 text-xs mt-1">{validationErrors.public_email}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>

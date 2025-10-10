@@ -256,3 +256,73 @@ export function breadcrumbsLD(items: { name: string; url: string }[]) {
     }))
   };
 }
+
+/**
+ * Generate site-wide ProfessionalService JSON-LD for TaxProExchange
+ */
+export function siteProfessionalServiceLD() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    name: 'TaxProExchange',
+    url: siteUrl,
+    description: defaultDescription,
+    logo: `${siteUrl}/logo-black.png`,
+    founder: {
+      '@type': 'Person',
+      name: 'TaxProExchange Team'
+    },
+    sameAs: [
+      'https://www.linkedin.com/company/taxproexchange'
+    ]
+  };
+}
+
+/**
+ * Generate Person JSON-LD for individual tax professional profiles
+ */
+export function personLD(p: {
+  slug: string;
+  first_name: string;
+  last_name: string;
+  credential_type: string;
+  bio?: string | null;
+  avatar_url?: string | null;
+  headline?: string | null;
+  firm_name?: string | null;
+  linkedin_url?: string | null;
+  website_url?: string | null;
+}) {
+  const jsonLd: any = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: `${p.first_name} ${p.last_name}`,
+    jobTitle: p.credential_type,
+    url: `${siteUrl}/p/${p.slug}`,
+  };
+
+  if (p.bio || p.headline) {
+    jsonLd.description = p.bio ?? p.headline;
+  }
+
+  if (p.avatar_url) {
+    jsonLd.image = p.avatar_url.startsWith('http') ? p.avatar_url : `${siteUrl}${p.avatar_url}`;
+  }
+
+  if (p.firm_name) {
+    jsonLd.worksFor = {
+      '@type': 'Organization',
+      name: p.firm_name
+    };
+  }
+
+  // Add sameAs for LinkedIn and website if provided
+  const sameAs = [];
+  if (p.linkedin_url) sameAs.push(p.linkedin_url);
+  if (p.website_url) sameAs.push(p.website_url);
+  if (sameAs.length > 0) {
+    jsonLd.sameAs = sameAs;
+  }
+
+  return jsonLd;
+}

@@ -190,7 +190,11 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
         <select
           value={value.credential_type || ''}
           onChange={(e) => updateCredentialType(e.target.value as CredentialType)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+            errors?.credential_type
+              ? 'border-red-300 focus:ring-red-300 bg-red-50'
+              : 'border-gray-300 focus:ring-blue-500'
+          }`}
         >
           <option value="">Please select your credential type</option>
           {CREDENTIAL_TYPES.map((type) => (
@@ -252,11 +256,22 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                     value={license.license_number || ''}
                     onChange={(e) => updateLicense(index, 'license_number', e.target.value)}
                     placeholder="Enter your license number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      errors?.license_number && (!license.license_number || license.license_number.trim().length < 2)
+                        ? 'border-red-300 focus:ring-red-300 bg-red-50'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    This will never be shown publicly
-                  </p>
+                  {errors?.license_number && (!license.license_number || license.license_number.trim().length < 2) && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.license_number}
+                    </p>
+                  )}
+                  {!errors?.license_number && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      This will never be shown publicly
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -290,7 +305,11 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                     <select
                       value={license.state || ''}
                       onChange={(e) => updateLicense(index, 'state', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                        errors?.[`license_state_${index}`]
+                          ? 'border-red-300 focus:ring-red-300 bg-red-50'
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                     >
                       <option value="">Select State</option>
                       {US_STATES.map((state) => (
@@ -299,6 +318,11 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                         </option>
                       ))}
                     </select>
+                    {errors?.[`license_state_${index}`] && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {errors[`license_state_${index}`]}
+                      </p>
+                    )}
                   </div>
                 )}
 

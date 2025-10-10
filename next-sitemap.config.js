@@ -1,8 +1,8 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: 'https://www.taxproexchange.com',
-  generateRobotsTxt: true,
-  exclude: ['/app/*', '/api/*', '/admin/*', '/onboarding/*', '/profile/*', '/messages/*', '/settings/*', '/feedback/*', '/test-*', '/cleanup-*', '/reddit/*', '/refer/*', '/join/*', '/sign-in/*', '/sign-up/*'],
+  generateRobotsTxt: false, // Using app/robots.ts instead
+  exclude: ['/app/*', '/api/*', '/admin/*', '/onboarding/*', '/profile/*', '/messages/*', '/settings/*', '/feedback/*', '/test-*', '/cleanup-*', '/reddit/*', '/refer/*', '/join/*', '/sign-in/*', '/sign-up/*', '/sitemap.xml', '/robots.txt'],
   transform: async (config, path) => {
     // Set priority for important pages
     let priority = 0.7;
