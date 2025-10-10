@@ -36,14 +36,28 @@ export async function GET(request: NextRequest) {
     // Check if user has admin role
     console.log('🔍 Checking admin status for userId:', userId);
     
-    // Check for user with matching Clerk ID and get their admin status
-    const { data: profile, error } = await supabase
+    // Try clerk_id first
+    let { data: profile, error } = await supabase
       .from('profiles')
       .select('is_admin, clerk_id, first_name, last_name')
       .eq('clerk_id', userId)
       .single();
 
-    console.log('🔍 Profile query result:', { profile, error });
+    console.log('🔍 Profile query result (clerk_id):', { profile, error });
+
+    // Fallback to user_id if clerk_id didn't find anything
+    if (error || !profile) {
+      console.log('🔍 Trying user_id fallback...');
+      const result = await supabase
+        .from('profiles')
+        .select('is_admin, clerk_id, first_name, last_name')
+        .eq('user_id', userId)
+        .single();
+      
+      profile = result.data;
+      error = result.error;
+      console.log('🔍 Profile query result (user_id):', { profile, error: result.error });
+    }
 
     if (error || !profile) {
       // If profile not found, user is not admin

@@ -1,5 +1,67 @@
 # Cursor Task Notes
 
+## Onboarding Flow Streamlining (2025-10-10) ✅
+
+**Goal**: Remove legal consent step from onboarding and fix credential issues.
+
+**Problem**: 
+1. Legal consent step added friction to onboarding
+2. "Other Professional" credential type was showing license fields and causing validation errors
+3. License numbers weren't being retained between onboarding credentials screen and profile edit screen
+
+**Solution Applied**:
+1. Removed legal consent as a separate onboarding step - now auto-accepted on profile creation
+2. Fixed "Other" credential type to not require licenses (same as "Student")
+3. Included `license_number` in GET endpoint for users viewing their own profile
+
+### Implementation Details
+
+#### 1. Removed Legal Consent Onboarding Step
+- `app/onboarding/page.tsx`: Redirects new users directly to `/onboarding/credentials` (not `/onboarding/consent`)
+- `app/onboarding/create-profile/page.tsx`: Updated messaging from "Legal Documents Accepted" to "Create Your Profile"
+- `app/api/profile/route.ts`: Auto-accepts legal terms (TOS v1, Privacy v1) when creating new profiles
+- Legal documents still accessible via footer links at `/legal/terms` and `/legal/privacy`
+
+#### 2. Fixed "Other Professional" Credential Type
+- `components/forms/CredentialSection.tsx`: 
+  - Now treats "Other" same as "Student" - no license fields required
+  - Added informative message: "Other professionals can join without credentials"
+  - Updated all logic to check for both `credential_type === 'Student'` and `credential_type === 'Other'`
+- `app/api/profile/route.ts`: 
+  - Excludes "Other" from license saving (line 614)
+  - Removes any existing licenses when switching to "Other" (line 657-664)
+
+#### 3. License Number Retention
+- `app/api/profile/route.ts` GET endpoint (line 156): 
+  - Now includes `license_number` in query when user fetches their own profile
+  - This allows license data to persist between onboarding credentials → profile edit
+  - Users can see and edit their own license numbers
+  - Note: Public profile views (via `/p/[slug]`) still exclude `license_number` for privacy
+
+#### 4. Updated Step Counter
+- `app/onboarding/credentials/page.tsx`: Changed from "Step 2 of 3" → "Step 1 of 2"
+
+### Files Modified
+```
+app/onboarding/page.tsx                    - Removed legal check, redirect to credentials
+app/onboarding/create-profile/page.tsx     - Updated messaging (removed "legal accepted")
+app/onboarding/credentials/page.tsx        - Updated step counter to 1 of 2
+app/api/profile/route.ts                   - Auto-accept legal terms, include license_number in GET, exclude "Other" from licenses
+components/forms/CredentialSection.tsx     - Fixed "Other" to not require licenses
+```
+
+### Testing Checklist
+- [x] New user signup → directly to credentials (skips consent)
+- [x] Select "Other Professional" → no license fields shown ✅
+- [x] Select "CPA" → enter license → save → navigate to profile edit → license number retained ✅
+- [x] Check database: new profiles have `tos_version='v1'` and `privacy_version='v1'`
+
+### Database Impact
+- New profiles automatically get `tos_version`, `tos_accepted_at`, `privacy_version`, `privacy_accepted_at` on creation
+- "Other" credential type profiles will have any existing licenses removed
+
+---
+
 ## Robots.txt & Sitemap.xml Implementation (2025-10-09) ✅
 
 **Goal**: Add first-party robots and sitemap using Next.js App Router native approach.

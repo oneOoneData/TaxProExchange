@@ -11,29 +11,49 @@ async function checkAdmin() {
   }
 
   const supabase = createServerClient();
-  const { data: profile } = await supabase
+  // Try both clerk_id and user_id for compatibility
+  let { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
-    .eq('user_id', userId)
+    .eq('clerk_id', userId)
     .single();
+  
+  // Fallback to user_id if clerk_id didn't find anything
+  if (!profile) {
+    const result = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('user_id', userId)
+      .single();
+    profile = result.data;
+  }
 
   return { isAdmin: profile?.is_admin === true, userId };
 }
 
 // POST /api/admin/enrich - Run enrichment on selected/filtered firms
 export async function POST(request: NextRequest) {
+  console.log('🔍 [Enrich API] POST /api/admin/enrich called');
+  
   try {
+    console.log('🔍 [Enrich API] Checking admin...');
     const { isAdmin } = await checkAdmin();
+    console.log('🔍 [Enrich API] Admin check result:', isAdmin);
+    
     if (!isAdmin) {
+      console.log('🔍 [Enrich API] Unauthorized - not admin');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    console.log('🔍 [Enrich API] Parsing request body...');
     const body = await request.json();
-    const { ids, query, sort, all } = body as {
+    console.log('🔍 [Enrich API] Request body:', body);
+    const { ids, query, sort, all, unenrichedOnly } = body as {
       ids?: string[];
       query?: string;
       sort?: string;
       all?: boolean;
+      unenrichedOnly?: boolean;
     };
 
     const supabase = createServerClient();
@@ -41,6 +61,7 @@ export async function POST(request: NextRequest) {
 
     if (ids && ids.length > 0) {
       // Enrich specific IDs
+      console.log('🔍 [Enrich API] Fetching profiles for IDs:', ids);
       const { data, error } = await supabase
         .from('profiles')
         .select('id, website_url')
@@ -49,21 +70,34 @@ export async function POST(request: NextRequest) {
         .not('website_url', 'is', null);
 
       if (error) {
+        console.error('❌ [Enrich API] Database error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
       }
       profiles = data || [];
+      console.log(`🔍 [Enrich API] Found ${profiles.length} profiles with website URLs:`, profiles);
     } else if (all) {
       // Enrich all non-deleted profiles with websites
-      const { data, error } = await supabase
+      console.log('🔍 [Enrich API] Fetching all profiles with websites...');
+      let queryBuilder = supabase
         .from('profiles')
         .select('id, website_url')
         .eq('is_deleted', false)
         .not('website_url', 'is', null);
+      
+      // Only enrich unenriched profiles if requested
+      if (unenrichedOnly) {
+        console.log('🔍 [Enrich API] Filtering to only unenriched profiles...');
+        queryBuilder = queryBuilder.is('last_verified_on', null);
+      }
+
+      const { data, error } = await queryBuilder;
 
       if (error) {
+        console.error('❌ [Enrich API] Database error:', error);
         return NextResponse.json({ error: 'Database error' }, { status: 500 });
       }
       profiles = data || [];
+      console.log(`🔍 [Enrich API] Found ${profiles.length} profiles to enrich`);
     } else if (query !== undefined || sort !== undefined) {
       // Enrich filtered set
       let queryBuilder = supabase
@@ -121,11 +155,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Run enrichment with concurrency limit of 4
+    console.log(`🔍 [Enrich API] Starting enrichment for ${profiles.length} profiles`);
     const result = await enrichProfiles(profiles, 4);
+    console.log(`🔍 [Enrich API] Enrichment complete:`, result);
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error running enrichment:', error);
+    console.error('❌ [Enrich API] Error running enrichment:', error);
+    console.error('❌ [Enrich API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

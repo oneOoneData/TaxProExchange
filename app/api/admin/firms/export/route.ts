@@ -10,11 +10,22 @@ async function checkAdmin() {
   }
 
   const supabase = createServerClient();
-  const { data: profile } = await supabase
+  // Try both clerk_id and user_id for compatibility
+  let { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
-    .eq('user_id', userId)
+    .eq('clerk_id', userId)
     .single();
+  
+  // Fallback to user_id if clerk_id didn't find anything
+  if (!profile) {
+    const result = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('user_id', userId)
+      .single();
+    profile = result.data;
+  }
 
   return { isAdmin: profile?.is_admin === true, userId };
 }

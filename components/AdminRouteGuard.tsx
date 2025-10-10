@@ -16,22 +16,29 @@ export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (!isLoaded || isLoading) return;
+    console.log('🔍 AdminRouteGuard: Checking access', { isLoaded, isLoading, user: !!user, isAdmin });
+    
+    // Wait for both Clerk and admin status to load
+    if (!isLoaded || isLoading) {
+      return;
+    }
 
     if (!user) {
       // No user, redirect to sign in
+      console.log('🔍 AdminRouteGuard: No user, redirecting to sign-in');
       router.push('/sign-in');
       return;
     }
 
-    if (!isAdmin) {
-      // User is not admin, redirect to home
+    if (isAdmin) {
+      // User is admin, allow access
+      console.log('🔍 AdminRouteGuard: Admin verified, showing content');
+      setIsChecking(false);
+    } else {
+      // User is not admin, redirect to home (only after loading is complete)
+      console.log('🔍 AdminRouteGuard: Not admin, redirecting to home');
       router.push('/');
-      return;
     }
-
-    // User is admin, allow access
-    setIsChecking(false);
   }, [user, isLoaded, isAdmin, isLoading, router]);
 
   // Show loading while checking

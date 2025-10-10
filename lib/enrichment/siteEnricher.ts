@@ -4,13 +4,15 @@ import { createServerClient } from '@/lib/supabase/server';
 
 // Normalize URL to ensure proper format
 export function normalizeUrl(url: string): string {
-  if (!url) return '';
+  if (!url || url.trim() === '') return '';
   let normalized = url.trim().toLowerCase();
   if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
     normalized = 'https://' + normalized;
   }
   // Remove trailing slash
   normalized = normalized.replace(/\/$/, '');
+  // If it's just the protocol, return empty
+  if (normalized === 'https://' || normalized === 'http://') return '';
   return normalized;
 }
 
@@ -60,14 +62,14 @@ export function discoverTeamUrls(baseUrl: string, homepage$?: ReturnType<typeof 
   const candidates = [
     '/team',
     '/our-team',
+    '/meet-the-team',
     '/who-we-are',
     '/about',
     '/about-us',
     '/staff',
     '/leadership',
-    '/company',
-    '/meet-the-team',
-    '/people'
+    '/people',
+    '/company'
   ];
   
   const discovered = new Set<string>(candidates);
@@ -104,15 +106,24 @@ export async function fetchHtml(url: string, browser: Browser): Promise<string> 
   let page: Page | null = null;
   try {
     page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
     
-    // Wait a bit for JS to render
-    await page.waitForTimeout(3000);
+    // Try networkidle first, fallback to domcontentloaded
+    try {
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 10000 });
+    } catch (timeoutError) {
+      console.log(`⚠️ Network idle timeout for ${url}, trying domcontentloaded...`);
+      // If networkidle times out, try with domcontentloaded
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 5000 });
+    }
+    
+    // Wait a bit for JS to render (shorter wait)
+    await page.waitForTimeout(1500);
     
     const html = await page.content();
+    console.log(`✅ Fetched ${url} successfully (${html.length} chars)`);
     return html;
   } catch (error) {
-    console.error(`Error fetching ${url}:`, error);
+    console.error(`❌ Error fetching ${url}:`, error instanceof Error ? error.message : error);
     throw error;
   } finally {
     if (page) {
@@ -258,9 +269,14 @@ export async function enrichOne(profile: { id: string; website_url: string }, br
   specialty_verified?: string;
   confidence_level?: string;
 }> {
+  console.log(`🔍 [enrichOne] Processing profile ${profile.id}, website: ${profile.website_url}`);
+  
   try {
     const websiteUrl = normalizeUrl(profile.website_url);
+    console.log(`🔍 [enrichOne] Normalized URL: ${websiteUrl}`);
+    
     if (!websiteUrl) {
+      console.log(`⚠️ [enrichOne] Skipping ${profile.id}: No website URL`);
       return { id: profile.id, updated: false, reason: 'No website URL' };
     }
     
@@ -375,7 +391,17 @@ export async function enrichProfiles(
   skipped: number;
   errors: Array<{ id: string; reason: string }>;
 }> {
-  const browser = await chromium.launch({ headless: true });
+  console.log('🔍 [enrichProfiles] Starting enrichment for', profiles.length, 'profiles');
+  console.log('🔍 [enrichProfiles] Launching Playwright browser...');
+  
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+    console.log('🔍 [enrichProfiles] Browser launched successfully');
+  } catch (error) {
+    console.error('❌ [enrichProfiles] Failed to launch browser:', error);
+    throw new Error(`Failed to launch Playwright browser: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
   
   try {
     const results: Awaited<ReturnType<typeof enrichOne>>[] = [];

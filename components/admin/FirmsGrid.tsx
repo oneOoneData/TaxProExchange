@@ -165,17 +165,24 @@ export default function FirmsGrid() {
     }
   };
 
-  const handleEnrichment = async () => {
+  const handleEnrichment = async (unenrichedOnly = false) => {
     setEnriching(true);
     setEnrichResult(null);
 
     try {
-      const selectedIds = Object.keys(rowSelection).filter(key => rowSelection[key]);
+      // Get actual profile IDs from selected row indices
+      const selectedRowIndices = Object.keys(rowSelection).filter(key => rowSelection[key]);
+      const selectedIds = selectedRowIndices.map(index => data[parseInt(index)]?.id).filter(Boolean);
 
       let body: any;
       if (selectedIds.length > 0) {
         // Enrich selected rows
+        console.log('🔍 [FirmsGrid] Enriching selected IDs:', selectedIds);
         body = { ids: selectedIds };
+      } else if (unenrichedOnly) {
+        // Enrich all unenriched profiles
+        console.log('🔍 [FirmsGrid] Enriching all unenriched profiles...');
+        body = { all: true, unenrichedOnly: true };
       } else {
         // Enrich current filtered set
         body = {
@@ -398,11 +405,18 @@ export default function FirmsGrid() {
             Export ALL CSV
           </button>
           <button
-            onClick={handleEnrichment}
+            onClick={() => handleEnrichment(false)}
             disabled={enriching}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium disabled:opacity-50"
           >
             {enriching ? 'Enriching...' : selectedCount > 0 ? `Enrich ${selectedCount} Selected` : 'Run Enrichment'}
+          </button>
+          <button
+            onClick={() => handleEnrichment(true)}
+            disabled={enriching}
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium disabled:opacity-50"
+          >
+            {enriching ? 'Enriching...' : 'Enrich All New'}
           </button>
         </div>
       </div>
