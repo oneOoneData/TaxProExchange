@@ -97,11 +97,15 @@ export default function CredentialsPage() {
       
       if (!profileExists) {
         // Create new profile with basic info from Clerk + credentials
+        // Use Clerk data or extract from email if not available
+        const email = user.primaryEmailAddress?.emailAddress || '';
+        const emailPrefix = email.split('@')[0] || 'professional';
+        
         updateData = {
           clerk_id: user.id,
-          first_name: user.firstName || 'New',
-          last_name: user.lastName || 'User',
-          public_email: user.primaryEmailAddress?.emailAddress || '',
+          first_name: user.firstName || emailPrefix,
+          last_name: user.lastName || 'Professional',
+          public_email: email,
           credential_type: credentialData.credential_type,
           licenses: credentialData.licenses,
           // Add required fields for validation
@@ -160,11 +164,15 @@ export default function CredentialsPage() {
 
       if (!profileExists) {
         // Create new profile with basic info from Clerk
+        // Use Clerk data or extract from email if not available
+        const email = user.primaryEmailAddress?.emailAddress || '';
+        const emailPrefix = email.split('@')[0] || 'professional';
+        
         const createData = {
           clerk_id: user.id,
-          first_name: user.firstName || 'New',
-          last_name: user.lastName || 'User',
-          public_email: user.primaryEmailAddress?.emailAddress || '',
+          first_name: user.firstName || emailPrefix,
+          last_name: user.lastName || 'Professional',
+          public_email: email,
           credential_type: 'Student', // Default to Student when skipping
           licenses: [],
           accepting_work: true,
