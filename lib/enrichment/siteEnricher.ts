@@ -56,7 +56,7 @@ export async function isAllowedByRobots(domainUrl: string, candidatePath: string
 }
 
 // Discover candidate team/about URLs
-export function discoverTeamUrls(baseUrl: string, homepage$?: cheerio.CheerioAPI): string[] {
+export function discoverTeamUrls(baseUrl: string, homepage$?: ReturnType<typeof cheerio.load>): string[] {
   const candidates = [
     '/team',
     '/our-team',
