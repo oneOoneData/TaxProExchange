@@ -5,18 +5,39 @@ import { auth } from '@clerk/nextjs/server';
 // Check if user is admin
 async function checkAdmin() {
   const { userId } = await auth();
+  console.log('🔍 [Firms API] Checking admin for userId:', userId);
+  
   if (!userId) {
+    console.log('🔍 [Firms API] No userId found');
     return { isAdmin: false, userId: null };
   }
 
   const supabase = createServerClient();
-  const { data: profile } = await supabase
+  // Try both clerk_id and user_id for compatibility
+  let { data: profile, error: clerkError } = await supabase
     .from('profiles')
     .select('is_admin')
-    .eq('user_id', userId)
+    .eq('clerk_id', userId)
     .single();
+  
+  console.log('🔍 [Firms API] clerk_id check:', { profile, clerkError });
+  
+  // Fallback to user_id if clerk_id didn't find anything
+  if (!profile) {
+    console.log('🔍 [Firms API] Trying user_id fallback...');
+    const result = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('user_id', userId)
+      .single();
+    profile = result.data;
+    console.log('🔍 [Firms API] user_id check:', { profile, error: result.error });
+  }
 
-  return { isAdmin: profile?.is_admin === true, userId };
+  const isAdmin = profile?.is_admin === true;
+  console.log('🔍 [Firms API] Final admin status:', isAdmin);
+  
+  return { isAdmin, userId };
 }
 
 // GET /api/admin/firms - List firms with search, sort, pagination

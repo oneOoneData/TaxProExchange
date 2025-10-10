@@ -28,21 +28,11 @@ export default async function Onboarding() {
   console.log('[onboarding] existingProfile:', existingProfile);
 
   if (existingProfile) {
-    // Check if user has accepted current legal versions
-    const { LEGAL_VERSIONS } = await import('@/lib/legal');
-    
-    if (existingProfile.tos_version !== LEGAL_VERSIONS.TOS || 
-        existingProfile.privacy_version !== LEGAL_VERSIONS.PRIVACY) {
-      console.log('[onboarding] redirecting to legal consent');
-      // Redirect to legal consent if versions don't match
-      redirect('/legal/consent');
-    }
-    
     // User has completed onboarding, redirect to profile edit
     console.log('[onboarding] redirecting to profile edit');
     redirect('/profile/edit');
   }
 
-  // New user - redirect to consent page first
-  redirect('/onboarding/consent');
+  // New user - redirect directly to credentials step
+  redirect('/onboarding/credentials');
 }

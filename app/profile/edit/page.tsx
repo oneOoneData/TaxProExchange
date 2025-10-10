@@ -402,7 +402,7 @@ export default function EditProfilePage() {
           software: profileForm.software,
           other_software: profileForm.other_software,
           years_experience: profileForm.years_experience,
-          entity_revenue_range: profileForm.entity_revenue_range,
+          entity_revenue_range: profileForm.entity_revenue_range || null,
           firm_size: profileForm.firm_size ?? null,
           annual_returns_range: profileForm.annual_returns_range ?? null,
           primary_location: profileForm.primary_location
@@ -811,7 +811,7 @@ export default function EditProfilePage() {
         </label>
         <select
           value={profileForm.entity_revenue_range || ''}
-          onChange={(e) => updateForm('entity_revenue_range', e.target.value)}
+          onChange={(e) => updateForm('entity_revenue_range', e.target.value || null)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">Select revenue range (optional)</option>

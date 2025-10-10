@@ -153,7 +153,7 @@ export async function GET(request: Request) {
         .eq('profile_id', profile.id),
       supabase
         .from('licenses')
-        .select('id, license_kind, issuing_authority, state, expires_on, board_profile_url, status')
+        .select('id, license_kind, license_number, issuing_authority, state, expires_on, board_profile_url, status')
         .eq('profile_id', profile.id)
     ]);
 
@@ -164,7 +164,7 @@ export async function GET(request: Request) {
       licenses: licensesResult
     });
 
-    // Process licenses (never include full license_number)
+    // Process licenses - include license_number since this is the user's own profile
     const processedLicenses = licensesResult.data || [];
 
     // Debug logging
@@ -477,6 +477,10 @@ export async function PUT(request: Request) {
         }
       }
 
+      // Auto-accept legal terms for new profiles
+      const { LEGAL_VERSIONS } = await import('@/lib/legal');
+      const now = new Date().toISOString();
+
       // Insert new profile
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
@@ -508,7 +512,12 @@ export async function PUT(request: Request) {
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           referrer_profile_id: referrerProfileId,
-          updated_at: new Date().toISOString(),
+          // Auto-accept legal terms
+          tos_version: LEGAL_VERSIONS.TOS,
+          tos_accepted_at: now,
+          privacy_version: LEGAL_VERSIONS.PRIVACY,
+          privacy_accepted_at: now,
+          updated_at: now,
         })
         .select()
         .single();
@@ -602,7 +611,7 @@ export async function PUT(request: Request) {
       }
       
       // Handle licenses with privacy protection
-      if (credential_type && credential_type !== "Student" && licenses && licenses.length > 0) {
+      if (credential_type && credential_type !== "Student" && credential_type !== "Other" && licenses && licenses.length > 0) {
         console.log('🔍 SAVING LICENSES:', {
           profileId,
           credential_type,
@@ -645,9 +654,9 @@ export async function PUT(request: Request) {
         } else {
           console.log('✅ Licenses saved successfully');
         }
-      } else if (credential_type === "Student") {
-        // Students don't have licenses - remove any existing ones
-        console.log('🔍 Removing licenses for student profile');
+      } else if (credential_type === "Student" || credential_type === "Other") {
+        // Students and "Other" don't have licenses - remove any existing ones
+        console.log('🔍 Removing licenses for student/other profile');
         await supabase
           .from('licenses')
           .delete()

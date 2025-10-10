@@ -49,7 +49,11 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
 
   // Initialize license when credential type is set but no licenses exist
   useEffect(() => {
-    if (value.credential_type && value.credential_type !== 'Student' && (!value.licenses || value.licenses.length === 0)) {
+    // Students and "Other" don't need licenses
+    if (value.credential_type && 
+        value.credential_type !== 'Student' && 
+        value.credential_type !== 'Other' && 
+        (!value.licenses || value.licenses.length === 0)) {
       const licenseKind = getLicenseKindForCredential(value.credential_type);
       const issuingAuthority = getIssuingAuthorityForCredential(value.credential_type);
       
@@ -96,12 +100,12 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
   };
 
   const updateCredentialType = (credential_type: CredentialType) => {
-    if (credential_type === 'Student') {
-      // Students don't need licenses
+    if (credential_type === 'Student' || credential_type === 'Other') {
+      // Students and "Other" don't need licenses
       setLicenses([]);
       onChange({ credential_type, licenses: [] });
     } else {
-      // Non-students need at least one license
+      // Professional credentials need at least one license
       const licenseKind = getLicenseKindForCredential(credential_type);
       const issuingAuthority = getIssuingAuthorityForCredential(credential_type);
       
@@ -212,6 +216,12 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
           <p className="text-sm text-blue-800">
             <strong>Student profiles</strong> aren't verified or listed until a professional credential is added and approved.
+          </p>
+        </div>
+      ) : value.credential_type === 'Other' ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Other professionals</strong> can join without credentials. You can add specific credentials later in your profile settings if applicable.
           </p>
         </div>
       ) : (

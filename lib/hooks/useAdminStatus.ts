@@ -32,7 +32,14 @@ export function useAdminStatus() {
   }, [isLoaded, user, hasChecked]);
 
   useEffect(() => {
-    if (!isLoaded || !user) {
+    if (!isLoaded) {
+      // Keep loading true while Clerk loads
+      setIsLoading(true);
+      return;
+    }
+    
+    if (!user) {
+      // No user, not admin, but done loading
       setIsAdmin(false);
       setIsLoading(false);
       setHasChecked(false);

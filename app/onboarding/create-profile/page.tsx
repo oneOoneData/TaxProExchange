@@ -105,16 +105,16 @@ export default function CreateProfilePage() {
           className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 text-center"
         >
           <div className="mb-8">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
             <h1 className="text-3xl font-semibold text-slate-900 mb-4">
-              Legal Documents Accepted
+              Create Your Profile
             </h1>
             <p className="text-slate-600">
-              Great! Now let's create your professional profile on TaxProExchange.
+              Let's set up your professional profile on TaxProExchange.
             </p>
           </div>
 
