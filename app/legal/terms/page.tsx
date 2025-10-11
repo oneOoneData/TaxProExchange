@@ -21,18 +21,6 @@ export default function TermsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-3xl border border-slate-200 p-8"
         >
-          {/* Beta Notice */}
-          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                BETA
-              </span>
-              <p className="text-sm text-blue-700">
-                This is a beta service. These terms may be updated as we improve our platform.
-              </p>
-            </div>
-          </div>
-
           <div className="prose prose-slate max-w-none">
             <h1 className="text-4xl font-bold text-slate-900 mb-2">Terms of Use</h1>
             <p className="text-slate-600 mb-8">

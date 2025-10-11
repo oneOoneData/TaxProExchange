@@ -1,0 +1,6 @@
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M2 10H18V22H2V10Z" fill="currentColor" opacity="0.3"/>
+  <path d="M10 4V28" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+  <text x="24" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="currentColor" opacity="0.7">ProLedger</text>
+</svg>
+
