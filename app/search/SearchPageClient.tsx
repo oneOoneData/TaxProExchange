@@ -463,6 +463,7 @@ export default function SearchPageClient() {
         <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
+            <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/search" className="hover:text-slate-900 font-medium text-slate-900">Directory</Link>
             <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
             <Link href="/dashboard" className="hover:text-slate-900">Dashboard</Link>
@@ -526,19 +527,17 @@ export default function SearchPageClient() {
       </header>
 
       <div className="container-mobile py-8">
+        {/* Simple, user-focused header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-slate-900 mb-2">Search Verified Tax Professionals</h1>
-          <p className="text-slate-600 text-lg mb-2">
-            Find qualified CPAs, Enrolled Agents (EAs), and CTEC preparers by credential, state, specialization, and availability. 
-            All professionals are verified through state boards and licensing authorities.
-          </p>
-          <p className="text-slate-600 mb-2">
-            Use the filters below to narrow your search by location, years of experience, software expertise, and specific tax specializations 
-            like S-Corporation returns, IRS representation, or international tax work.
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+            Find Verified Tax Professionals
+          </h1>
+          <p className="text-slate-600 text-lg mb-4">
+            Search {pagination.total || '200+'} verified CPAs, EAs, and tax preparers. Filter by credential, location, and specialization.
           </p>
           <p className="text-sm text-slate-500">
             {filters.verified_only 
-              ? "Only verified and listed professionals are shown to ensure quality and accessibility."
+              ? "✓ Only verified professionals shown"
               : "Showing all profiles. Unverified profiles are visible but cannot be viewed until verification is complete."
             }
           </p>

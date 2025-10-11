@@ -47,6 +47,9 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
           const data = await response.json();
           setHasUnreadMessages(data.hasUnreadMessages);
           setUnreadCount(data.unreadCount);
+        } else if (response.status === 404) {
+          // User doesn't have a profile yet - silently ignore
+          return;
         } else {
           console.error('Failed to fetch unread messages:', response.status, response.statusText);
         }

@@ -6,6 +6,29 @@ import ProfilePageClient from './ProfilePageClient';
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Generate static params for top 500 newest verified profiles
+export async function generateStaticParams() {
+  const { createServerClient } = await import('@/lib/supabase/server');
+  const supabase = createServerClient();
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('slug')
+    .eq('is_listed', true)
+    .eq('visibility_state', 'verified')
+    .order('created_at', { ascending: false })
+    .limit(500);
+
+  if (error || !data) {
+    console.error('Error fetching profiles for static generation:', error);
+    return [];
+  }
+
+  return data.map((profile) => ({
+    slug: profile.slug,
+  }));
+}
+
 async function getProfile(slug: string) {
   const supabase = createServerClient();
   const { data, error } = await supabase

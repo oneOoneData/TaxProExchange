@@ -4,7 +4,7 @@
 
 export const siteUrl = 'https://www.taxproexchange.com';
 export const defaultTitle = 'Find Verified CPAs, EAs, and Tax Preparers – TaxProExchange';
-export const defaultDescription = 'A trusted directory where CPAs, EAs, and CTEC preparers connect for referrals, overflow work, and representation. Free to join during beta.';
+export const defaultDescription = 'A trusted directory where CPAs, EAs, and CTEC preparers connect for referrals, overflow work, and representation. Free to join for founding members.';
 
 /**
  * Generate absolute canonical URL for a given pathname

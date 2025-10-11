@@ -6,11 +6,11 @@ import BuyMeACoffee from '@/components/BuyMeACoffee';
 export const metadata: Metadata = {
   title: "TaxProExchange - For Reddit Tax Pros",
   description:
-    "A verified directory + matchmaking platform for CPAs, EAs, and CTEC preparers to offload overflow work and find trusted pros. Free during beta.",
+    "A verified directory + matchmaking platform for CPAs, EAs, and CTEC preparers to offload overflow work and find trusted pros. Free for founding members.",
   openGraph: {
     title: "TaxProExchange - For Reddit Tax Pros",
     description:
-      "Verified profiles, simple job posts, and direct connections. Free during beta.",
+      "Verified profiles, simple job posts, and direct connections. Free for founding members.",
     url: "https://www.taxproexchange.com/reddit",
     siteName: "TaxProExchange",
     type: "website",
@@ -19,12 +19,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TaxProExchange - For Reddit Tax Pros",
     description:
-      "Verified profiles, simple job posts, and direct connections. Free during beta.",
+      "Verified profiles, simple job posts, and direct connections. Free for founding members.",
   },
 };
 
 export default function RedditLanding() {
-  const joinHref = "/join?utm_source=reddit&utm_medium=landing&utm_campaign=beta";
+  const joinHref = "/join?utm_source=reddit&utm_medium=landing&utm_campaign=launch";
   const homeHref = "/?utm_source=reddit&utm_medium=landing";
 
   return (
@@ -37,7 +37,7 @@ export default function RedditLanding() {
             alt="Reddit" 
             className="h-4 w-4"
           />
-          Built for Reddit tax pros plain, transparent, and free during beta. Will stay free for founding members.
+          Built for Reddit tax pros — plain, transparent, and free for founding members.
         </div>
       </div>
 
@@ -46,7 +46,7 @@ export default function RedditLanding() {
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-              Beta • Founding Member badges available
+              Founding Member badges available
             </span>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -63,7 +63,7 @@ export default function RedditLanding() {
               href={joinHref}
               className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-3 text-white hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
-              Join free (beta)
+              Join free
             </Link>
             <Link
               href={homeHref}
@@ -120,7 +120,7 @@ export default function RedditLanding() {
         <div className="mx-auto max-w-5xl px-4 py-10 sm:py-12">
           <h2 className="text-xl font-semibold text-slate-900">Why join now?</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <Card title="Free during beta">
+            <Card title="Free for founding members">
               No cost to try it with your real workflow.
             </Card>
             <Card title="Founding Member badge">
@@ -174,7 +174,7 @@ export default function RedditLanding() {
               href={joinHref}
               className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-3 text-white hover:bg-slate-800"
             >
-              Get started - free beta
+              Get started free
             </Link>
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function RedditLanding() {
             href={joinHref}
             className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-3 text-white hover:bg-slate-800"
           >
-            Join the beta
+            Join now
           </Link>
         </div>
       </section>

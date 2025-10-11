@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  // Add Google Search Console verification when you get the code
+  // verification: {
+  //   google: 'YOUR_VERIFICATION_CODE_HERE',
+  // },
   openGraph: {
     title: defaultTitle,
     description: defaultDescription,
