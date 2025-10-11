@@ -104,7 +104,7 @@ All CPAs and EAs on TaxProExchange are credential-verified, so you know they hav
 
 IRS representation is time-sensitive. Our platform lets you quickly identify and connect with qualified professionals, discuss case details, and make referrals without delay. No file uploads, no platform middleman—just direct, professional connections.`,
     whenToUse: [
-      'Your firm doesn't handle IRS representation in-house and needs trusted referral partners',
+      'Your firm doesn\'t handle IRS representation in-house and needs trusted referral partners',
       'A client has received an audit notice or collections letter and needs immediate representation',
       'You want to expand your referral network with verified CPAs and EAs who specialize in IRS cases'
     ],
@@ -115,7 +115,7 @@ IRS representation is time-sensitive. Our platform lets you quickly identify and
         answer: 'CPAs and EAs have unlimited practice rights before the IRS. They can represent clients in audits, appeals, collections, penalty abatement, and other tax matters at all administrative levels.'
       },
       {
-        question: 'How do I verify someone's IRS representation authority?',
+        question: 'How do I verify someone\'s IRS representation authority?',
         answer: 'All EA credentials are verified against the IRS Enrolled Agent database. CPA credentials are verified with state boards. You can also confirm active status with the IRS Office of Professional Responsibility.'
       },
       {
@@ -127,7 +127,7 @@ IRS representation is time-sensitive. Our platform lets you quickly identify and
         answer: 'No. TaxProExchange is a directory and connection platform only. The professional you connect with will handle POA, client communication, and case management directly.'
       },
       {
-        question: 'What if my client's case is in a specific state?',
+        question: 'What if my client\'s case is in a specific state?',
         answer: 'IRS representation authority is federal, but many professionals also have state tax experience. Use our state filter to find professionals licensed and experienced in the jurisdictions you need.'
       }
     ]
@@ -144,7 +144,7 @@ Our directory includes professionals with deep experience in state income tax, s
 Search by state, specialization (SALT, 1120-S, partnership, nexus), and availability to find the right expert for your engagement. Reach out directly to discuss case details, scope, and fees—no platform fees, no barriers to connection.`,
     whenToUse: [
       'Your client operates in multiple states and you need expertise in nexus, apportionment, or state-specific rules',
-      'You're handling a complex S-corp or partnership with multi-state activities and need a second set of eyes',
+      'You\'re handling a complex S-corp or partnership with multi-state activities and need a second set of eyes',
       'Your firm wants to expand SALT capabilities without hiring a full-time specialist'
     ],
     searchQuery: '/search?accepting_work=true&specialization=multi_state',
@@ -159,7 +159,7 @@ Search by state, specialization (SALT, 1120-S, partnership, nexus), and availabi
       },
       {
         question: 'Do you verify state licenses in addition to CPA credentials?',
-        answer: 'Yes. We verify CPA licenses with state boards of accountancy. Professionals list all states where they're licensed, and we spot-check state credentials during verification.'
+        answer: 'Yes. We verify CPA licenses with state boards of accountancy. Professionals list all states where they\'re licensed, and we spot-check state credentials during verification.'
       },
       {
         question: 'What if I need help with a SALT controversy or audit?',
@@ -182,7 +182,7 @@ Our directory includes professionals experienced in crypto cost basis tracking, 
 
 Crypto tax is still evolving, and expertise matters. Search by specialization (crypto tax, digital assets) and credential type to find professionals who stay current with IRS guidance, software tools, and reporting best practices.`,
     whenToUse: [
-      'Your client has significant cryptocurrency trading activity, staking income, or DeFi transactions you're not equipped to handle',
+      'Your client has significant cryptocurrency trading activity, staking income, or DeFi transactions you\'re not equipped to handle',
       'You need an expert to review crypto cost basis calculations, tax lot tracking, or Form 8949 reporting',
       'Your firm wants to refer crypto clients to a specialist rather than turn them away'
     ],
@@ -201,7 +201,7 @@ Crypto tax is still evolving, and expertise matters. Search by specialization (c
         answer: 'Yes. Many professionals on TaxProExchange specialize exclusively in crypto tax. They can handle the entire return or just the crypto component if you prefer to retain the client relationship.'
       },
       {
-        question: 'What if the client's transactions span multiple years?',
+        question: 'What if the client\'s transactions span multiple years?',
         answer: 'Crypto specialists are experienced in multi-year cost basis reconstruction, amended returns, and prior-year corrections. Discuss the scope during your initial outreach.'
       },
       {
@@ -221,9 +221,9 @@ Whether you need help with a complex estate return, a trust with multiple benefi
 
 Search by specialization (trusts, estates, fiduciary returns) and state to find professionals who match your engagement. Reach out directly to discuss case complexity, deadlines, and fees—no platform barriers, just professional connections.`,
     whenToUse: [
-      'Your firm handles individual returns but doesn't have in-house expertise for trust and estate filings',
+      'Your firm handles individual returns but doesn\'t have in-house expertise for trust and estate filings',
       'You need a specialist to review a complex 1041 or 706 return before filing',
-      'A client's trust or estate administration requires fiduciary accounting expertise you don't have on staff'
+      'A client\'s trust or estate administration requires fiduciary accounting expertise you don\'t have on staff'
     ],
     searchQuery: '/search?accepting_work=true&specialization=trusts_estates',
     faqs: [
@@ -261,7 +261,7 @@ Our directory includes professionals experienced in 1065 preparation, K-1 genera
 Partnership taxation is detail-intensive and error-prone. Work with professionals who understand the rules, use the right software, and can deliver accurate K-1s on deadline.`,
     whenToUse: [
       'Your firm has a surge of partnership returns during busy season and needs qualified help',
-      'You're handling a complex partnership with special allocations, tiered structures, or multi-state issues',
+      'You\'re handling a complex partnership with special allocations, tiered structures, or multi-state issues',
       'You need a reviewer to check K-1s and partner basis before issuing to clients'
     ],
     searchQuery: '/search?accepting_work=true&specialization=partnership',
@@ -300,14 +300,14 @@ Our directory includes professionals who understand white-label engagements: cle
 White-label arrangements are common during busy season, when launching a new service line, or when expanding into a new market. Search by credential type, specialization, and availability to find professionals who match your firm's standards and client mix.`,
     whenToUse: [
       'Your firm wants to scale capacity during busy season without hiring full-time staff',
-      'You're expanding into a new service area (trusts, crypto, SALT) and need back-end technical support',
+      'You\'re expanding into a new service area (trusts, crypto, SALT) and need back-end technical support',
       'You want to maintain your client relationships while outsourcing preparation and review work'
     ],
     searchQuery: '/search?accepting_work=true',
     faqs: [
       {
         question: 'What is white-label tax preparation?',
-        answer: 'White-label means the professional prepares returns under your firm's brand. You maintain the client relationship, they handle the technical work. You review and sign (or they sign, depending on your arrangement).'
+        answer: 'White-label means the professional prepares returns under your firm\'s brand. You maintain the client relationship, they handle the technical work. You review and sign (or they sign, depending on your arrangement).'
       },
       {
         question: 'Can I maintain confidentiality with white-label work?',
@@ -328,4 +328,3 @@ White-label arrangements are common during busy season, when launching a new ser
     ]
   }
 ];
-
