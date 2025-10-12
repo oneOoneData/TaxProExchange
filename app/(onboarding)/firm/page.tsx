@@ -69,7 +69,7 @@ export default function FirmOnboardingPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => router.push('/join')}
+                onClick={() => router.push('/join?redirect_url=/firm')}
                 className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-md transition-colors"
               >
                 Sign Up to Get Started

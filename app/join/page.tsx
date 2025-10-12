@@ -27,6 +27,9 @@ function JoinPageContent() {
     }
   }, [searchParams]);
 
+  // Get redirect URL from query params or default to /onboarding
+  const redirectUrl = searchParams.get('redirect_url') || '/onboarding';
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
@@ -59,7 +62,7 @@ function JoinPageContent() {
             {!isBuildTime ? (
               <SignUpButton 
                 mode="modal" 
-                forceRedirectUrl="/onboarding" 
+                forceRedirectUrl={redirectUrl} 
                 fallbackRedirectUrl="/"
               >
                 <button 
