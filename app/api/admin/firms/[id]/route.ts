@@ -36,7 +36,7 @@ async function checkAdmin() {
 // DELETE /api/admin/firms/[id] - Delete a firm
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await checkAdmin();
@@ -44,7 +44,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const firmId = params.id;
+    const { id: firmId } = await params;
 
     if (!firmId) {
       return NextResponse.json({ error: 'Firm ID is required' }, { status: 400 });
