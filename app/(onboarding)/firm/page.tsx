@@ -7,19 +7,13 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 
 export default function FirmOnboardingPage() {
-  // Early return if feature is disabled (server-safe)
-  if (!FEATURE_FIRM_WORKSPACES) {
-    return null;
-  }
-
   const router = useRouter();
   const { isLoaded, userId } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,13 +26,6 @@ export default function FirmOnboardingPage() {
     returns_band: '',
   });
 
-  // Guard: redirect to home (client-side only)
-  useEffect(() => {
-    if (!FEATURE_FIRM_WORKSPACES) {
-      router.push('/');
-    }
-  }, [router]);
-
   // Loading state
   if (!isLoaded) {
     return (
@@ -48,7 +35,7 @@ export default function FirmOnboardingPage() {
     );
   }
 
-  // Not signed in - show landing page
+  // Not signed in - show landing page (always visible, no feature flag needed)
   if (!userId) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">

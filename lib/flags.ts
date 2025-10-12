@@ -5,7 +5,7 @@
  * Set via environment variables (NEXT_PUBLIC_* for client-side access).
  */
 
-export const FEATURE_FIRM_WORKSPACES =
-  process.env.NEXT_PUBLIC_FEATURE_FIRM_WORKSPACES === 'true';
+// Firm workspaces are now live for all users
+export const FEATURE_FIRM_WORKSPACES = true;
 
 
