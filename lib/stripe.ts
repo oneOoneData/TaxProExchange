@@ -59,6 +59,7 @@ export async function createFirmCheckoutSession({
 }): Promise<Stripe.Checkout.Session> {
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
+    payment_method_types: ['card'], // Explicitly enable card payments
     customer_email: customerEmail,
     line_items: [
       {
