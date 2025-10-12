@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     },
     {
       question: 'Is it free?',
-      answer: 'Yes, for as long as we can keep it free. Costs will run up at some point but our goal is to create value not become the next TaxFyle.'
+      answer: 'Yes for individuals — forever. Tax professionals can join free, create profiles, and connect with others at no cost. Firms pay $10/month to access team workspace features and build their trusted bench.'
     },
     {
       question: 'Can clients use this?',

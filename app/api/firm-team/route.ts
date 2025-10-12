@@ -74,7 +74,12 @@ export async function GET(request: NextRequest) {
           image_url,
           headline,
           is_listed,
-          visibility_state
+          visibility_state,
+          primary_location,
+          years_experience,
+          specializations,
+          software,
+          accepting_work
         )
       `)
       .eq('firm_id', firmId)
@@ -159,7 +164,33 @@ export async function POST(request: NextRequest) {
         visibility_public: validatedData.visibility_public,
         priority,
       })
-      .select()
+      .select(`
+        id,
+        custom_title,
+        categories,
+        note,
+        priority,
+        visibility_public,
+        created_at,
+        profiles:trusted_profile_id (
+          id,
+          first_name,
+          last_name,
+          credential_type,
+          slug,
+          firm_name,
+          avatar_url,
+          image_url,
+          headline,
+          is_listed,
+          visibility_state,
+          primary_location,
+          years_experience,
+          specializations,
+          software,
+          accepting_work
+        )
+      `)
       .single();
 
     if (error) {

@@ -62,6 +62,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <a href="#features" className="hover:text-slate-900">Features</a>
+            <a href="#pricing" className="hover:text-slate-900">Pricing</a>
             <a href="#how" className="hover:text-slate-900">How it works</a>
             <a href="#faq" className="hover:text-slate-900">FAQ</a>
             <a href="/search" className="hover:text-slate-900">Directory</a>
@@ -76,7 +77,20 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 userEmail={user.primaryEmailAddress?.emailAddress}
               />
             ) : (
-              <JoinButton />
+              <div className="hidden md:flex items-center gap-3">
+                <a href="/sign-in" className="text-sm font-medium text-slate-700 hover:text-slate-900">
+                  Sign In
+                </a>
+                <a href="/join" className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors">
+                  Join Free
+                </a>
+                <a href="/firm" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                  For Firms
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
             )}
             {/* Mobile Menu Button */}
             <button
@@ -98,34 +112,49 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900">
-                Scale Your Firm Without Full-Time Hires
+                Connect with Verified Tax Professionals
               </h1>
               <p className="mt-4 text-slate-600 text-lg">
-                Verified CPAs & EAs for overflow, reviews, and niche work. TaxProExchange connects tax firms with licensed professionals for seasonal staffing, review & sign-off, IRS representation, multi-state SALT, crypto tax, trusts & estates, K-1 surge support, and more.
+                The trusted network for CPAs, EAs, and tax professionals. Find collaborators for overflow work, niche expertise, mentorship, and review & sign-off.
               </p>
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 {!user && (
                   <a href="/join" className="rounded-2xl bg-slate-900 text-white px-6 py-3 sm:px-8 text-sm font-medium shadow-lg hover:shadow-xl transition-all">
-                    Create Firm Account
+                    Join Free
                   </a>
                 )}
                 <a href="/search" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-6 py-3 sm:px-8 text-sm font-medium hover:bg-slate-50 shadow-sm hover:shadow-md transition-all">
-                  Browse Verified Professionals
+                  Browse Directory
                 </a>
               </div>
               <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>Manual credential checks</span>
+                  <span>Verified credentials</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>Free to list</span>
+                  <span>Free forever</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>Hundreds of verified profiles</span>
+                  <span>Hundreds of professionals</span>
                 </span>
+              </div>
+              
+              {/* For Firms Callout */}
+              <div className="mt-8 p-4 rounded-2xl border-2 border-blue-200 bg-blue-50">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-blue-900 mb-1">For Firms</h3>
+                    <p className="text-sm text-blue-800">
+                      Build your trusted bench of professionals for $10/month. <a href="#pricing" className="underline font-medium hover:text-blue-900">Learn more</a>
+                    </p>
+                  </div>
+                </div>
               </div>
             </motion.div>
 
@@ -194,6 +223,258 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
       <section className="py-16 bg-slate-50">
         <div className="container-mobile">
           <FeaturedProfiles />
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-16 bg-gradient-to-b from-white to-slate-50">
+        <div className="container-mobile">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-slate-900">Simple, Transparent Pricing</h2>
+            <p className="mt-4 text-lg text-slate-600">Free for individual tax professionals. Affordable for firms.</p>
+          </motion.div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Individual Plan */}
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }} className="rounded-3xl border-2 border-slate-200 bg-white p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-2xl font-semibold text-slate-900">Individual</h3>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                  Free
+                </span>
+              </div>
+              <div className="mb-6">
+                <div className="text-4xl font-bold text-slate-900">$0</div>
+                <div className="text-slate-600">Forever free</div>
+              </div>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-700">Create your verified professional profile</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-700">Search and connect with other professionals</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-700">Access mentorship opportunities</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-700">Join curated events and workshops</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-700">Direct messaging with professionals</span>
+                </li>
+              </ul>
+              <a href="/join" className="block text-center rounded-2xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:shadow-md transition-all">
+                Join Free
+              </a>
+            </motion.div>
+
+            {/* Firm Plan */}
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }} className="rounded-3xl border-2 border-blue-500 bg-gradient-to-br from-blue-50 to-white p-8 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-bl-full opacity-10"></div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-semibold text-slate-900">Firm Workspace</h3>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    Scale Your Team
+                  </span>
+                </div>
+                <div className="mb-6">
+                  <div className="text-4xl font-bold text-slate-900">$10</div>
+                  <div className="text-slate-600">per month</div>
+                </div>
+                <div className="mb-6 p-4 rounded-2xl bg-white border border-blue-100">
+                  <div className="text-sm font-medium text-blue-900 mb-2">Everything in Individual, plus:</div>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-slate-700 font-medium">Build your trusted bench of professionals</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-slate-700">Add team members to manage your bench</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-slate-700">Categorize professionals by specialty</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-slate-700">Send invitations to verified professionals</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-slate-700">Public firm profile page (optional)</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-slate-700">Collaborative team management</span>
+                  </li>
+                </ul>
+                <a href="/firm" className="block text-center rounded-2xl bg-blue-600 text-white px-6 py-3 text-sm font-medium shadow-lg hover:shadow-xl transition-all hover:bg-blue-700">
+                  Start Firm Workspace
+                </a>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Preview of Team Dashboard */}
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.3 }} className="mt-16 max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-semibold text-slate-900">See How Firms Build Their Bench</h3>
+              <p className="mt-2 text-slate-600">Organize and manage your trusted professionals in one place</p>
+            </div>
+            <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-8 shadow-lg">
+              {/* Mock Team Dashboard Screenshot */}
+              <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                  <div>
+                    <h4 className="text-xl font-semibold text-slate-900">Smith & Associates CPA Extended Team</h4>
+                    <p className="text-sm text-slate-600">Manage your trusted bench of professionals</p>
+                  </div>
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add from Directory
+                  </button>
+                </div>
+                
+                {/* Categories */}
+                <div className="space-y-4">
+                  {/* Category: S-Corp / Partnership */}
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h5 className="text-md font-semibold text-purple-900 bg-purple-100 px-3 py-1 rounded-lg">S-Corp / Partnership</h5>
+                      <div className="h-px flex-1 bg-purple-200"></div>
+                      <span className="text-sm text-slate-500">2 members</span>
+                    </div>
+                    <div className="space-y-3 pl-4">
+                      {/* Team Member 1 */}
+                      <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold flex-shrink-0">JC</div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-slate-900">Jordan Chen, CPA</div>
+                              <div className="text-sm text-slate-600">Los Angeles, CA • Drake Tax</div>
+                              <div className="text-sm text-blue-600 font-medium mt-1">Senior Review Partner</div>
+                            </div>
+                          </div>
+                          <button className="px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 flex-shrink-0">
+                            Message
+                          </button>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <p className="text-xs text-slate-600 italic">Team note: Goes through returns quickly, great for Q1 surge. Prefers complex K-1s.</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Team Member 2 */}
+                      <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div className="w-12 h-12 rounded-full bg-emerald-200 flex items-center justify-center text-emerald-700 font-semibold flex-shrink-0">AP</div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-slate-900">Alex Park, CPA</div>
+                              <div className="text-sm text-slate-600">San Francisco, CA • ProConnect</div>
+                              <div className="text-sm text-blue-600 font-medium mt-1">K-1 Specialist</div>
+                            </div>
+                          </div>
+                          <button className="px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 flex-shrink-0">
+                            Message
+                          </button>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <p className="text-xs text-slate-600 italic">Team note: Available Tue-Fri. Excellent with multi-state apportionment. Usually responds within 2 hours.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category: IRS Representation */}
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h5 className="text-md font-semibold text-purple-900 bg-purple-100 px-3 py-1 rounded-lg">IRS Representation</h5>
+                      <div className="h-px flex-1 bg-purple-200"></div>
+                      <span className="text-sm text-slate-500">1 member</span>
+                    </div>
+                    <div className="space-y-3 pl-4">
+                      {/* Team Member 3 */}
+                      <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div className="w-12 h-12 rounded-full bg-amber-200 flex items-center justify-center text-amber-700 font-semibold flex-shrink-0">MR</div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-slate-900">Maya Rodriguez, EA</div>
+                              <div className="text-sm text-slate-600">Austin, TX • Tax Resolution Pro</div>
+                              <div className="text-sm text-blue-600 font-medium mt-1">IRS Appeals Specialist</div>
+                            </div>
+                          </div>
+                          <button className="px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 flex-shrink-0">
+                            Message
+                          </button>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <p className="text-xs text-slate-600 italic">Team note: Our go-to for audit defense. Former IRS agent. Expensive but worth it for high-stakes cases.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Note */}
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-900">
+                    <strong>💡 Preview:</strong> This is how your firm's team dashboard will look. Organize professionals by category, add custom titles, and manage your bench efficiently.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -273,12 +554,6 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 <div key={i}>
                   <h4 className="font-medium text-slate-900">{faq.question}</h4>
                   <p className="mt-2 text-sm text-slate-600">{faq.answer}</p>
-                  {i === 2 && (
-                    <>
-                      <p className="mt-2 text-sm text-slate-600">Having said that, we can always use more coffee so we can keep coding.</p>
-                      <BuyMeACoffee />
-                    </>
-                  )}
                 </div>
               ))}
               <div>

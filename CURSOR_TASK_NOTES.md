@@ -1,5 +1,65 @@
 # Cursor Task Notes
 
+## Firm Admin Profile Type (2025-10-11) ✅
+
+**Goal**: Allow firm creation without requiring tax professional credentials.
+
+**Problem**: 
+Firm admins (office managers, non-practicing owners, operations staff) couldn't create firm workspaces because they were required to complete tax professional onboarding first.
+
+**Solution Applied**:
+Added `profile_type` field to distinguish between `tax_professional` and `firm_admin` users. Firm admins are auto-created when someone creates a firm without an existing profile, and they're excluded from the searchable directory.
+
+### Implementation Details
+
+#### 1. Database Migration
+- **File**: `database/2025-10-11_profile_type.sql`
+- Added `profile_type` column to profiles table
+- Values: `'tax_professional'` (default) | `'firm_admin'`
+- Backfilled existing profiles as `'tax_professional'`
+- Added constraint and index for filtering
+
+#### 2. Auto-Create Firm Admin Profiles
+- **File**: `app/api/firms/route.ts` (POST endpoint)
+- When user creates firm without existing profile:
+  - Fetches user info from Clerk (name, email)
+  - Auto-creates minimal `firm_admin` profile
+  - Sets `profile_type: 'firm_admin'`
+  - Sets `is_listed: false` and `visibility_state: 'unlisted'`
+  - Marks `onboarding_complete: true` (skip credential requirements)
+- Profile is linked to firm as admin member
+
+#### 3. Exclude Firm Admins from Search
+- **File**: `app/api/search/route.ts`
+- Added filter: `.neq('profile_type', 'firm_admin')`
+- Firm admins never appear in directory/search results
+- Only tax professionals with credentials are searchable
+
+### User Flow
+
+**For Tax Professionals** (existing flow):
+1. Sign up → Complete tax pro onboarding → Create firm (optional)
+
+**For Firm Admins** (new flow):
+1. Sign up → Go to `/firm` → Create firm workspace
+2. System auto-creates `firm_admin` profile behind the scenes
+3. Can immediately manage firm team roster
+4. Won't appear in public directory
+
+### Files Changed
+1. `database/2025-10-11_profile_type.sql` - New migration
+2. `app/api/firms/route.ts` - Auto-create firm_admin profiles
+3. `app/api/search/route.ts` - Exclude firm_admin from search
+4. `app/(onboarding)/firm/page.tsx` - Already works (no profile check needed)
+
+### Notes
+- Firm admins capture: name, email, Clerk ID
+- No credential requirements for firm_admin type
+- Can still convert to tax_professional later if desired (future enhancement)
+- Maintains referential integrity (all firm members must have profiles)
+
+---
+
 ## Onboarding Flow Streamlining (2025-10-10) ✅
 
 **Goal**: Remove legal consent step from onboarding and fix credential issues.

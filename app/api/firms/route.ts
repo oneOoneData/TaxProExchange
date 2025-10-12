@@ -56,16 +56,63 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = CreateFirmSchema.parse(body);
 
-    // Get user's profile ID
-    const profileId = await getProfileIdFromClerkId(userId);
-    if (!profileId) {
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      );
-    }
-
     const supabase = createServerClient();
+
+    // Get user's profile ID, or create firm_admin profile if none exists
+    let profileId = await getProfileIdFromClerkId(userId);
+    
+    if (!profileId) {
+      // Auto-create a minimal firm_admin profile
+      console.log('No profile found, creating firm_admin profile for:', userId);
+      
+      // Get user info from Clerk
+      const { currentUser } = await import('@clerk/nextjs/server');
+      const user = await currentUser();
+      
+      if (!user) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 404 }
+        );
+      }
+
+      const userEmail = user.emailAddresses[0]?.emailAddress;
+      const firstName = user.firstName || '';
+      const lastName = user.lastName || '';
+      
+      // Generate slug
+      const slugBase = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const profileSlug = `${slugBase}-${userId.substring(0, 8)}`;
+
+      // Create firm_admin profile
+      const { data: newProfile, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          clerk_user_id: userId,
+          clerk_id: userId,
+          first_name: firstName,
+          last_name: lastName,
+          public_email: userEmail,
+          profile_type: 'firm_admin',
+          slug: profileSlug,
+          onboarding_complete: true,
+          is_listed: false, // Never list firm admins
+          visibility_state: 'unlisted',
+        })
+        .select('id')
+        .single();
+
+      if (profileError || !newProfile) {
+        console.error('Error creating firm_admin profile:', profileError);
+        return NextResponse.json(
+          { error: 'Failed to create admin profile' },
+          { status: 500 }
+        );
+      }
+
+      profileId = newProfile.id;
+      console.log('Created firm_admin profile:', profileId);
+    }
 
     // Generate unique slug
     let slug = generateSlug(validatedData.name);
@@ -198,7 +245,11 @@ export async function GET(request: NextRequest) {
           returns_band,
           verified,
           slug,
-          created_at
+          created_at,
+          subscription_status,
+          stripe_customer_id,
+          subscription_current_period_end,
+          trial_ends_at
         )
       `)
       .eq('profile_id', profileId)

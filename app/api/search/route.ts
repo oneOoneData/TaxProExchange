@@ -60,9 +60,11 @@ export async function GET(request: NextRequest) {
         primary_location,
         years_experience,
         software,
-        created_at
+        created_at,
+        profile_type
 `, { count: 'exact' })
-      .eq('is_listed', true);
+      .eq('is_listed', true)
+      .neq('profile_type', 'firm_admin'); // Exclude firm admins from search
 
     // Apply verified filter based on user preference
     if (verified_only === 'true') {
