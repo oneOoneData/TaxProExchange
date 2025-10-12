@@ -264,11 +264,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Transform data
-    const firms = (data || []).map((item: any) => ({
-      ...item.firms,
-      user_role: item.role,
-    }));
+    // Transform data and deduplicate by firm ID
+    const firmMap = new Map();
+    (data || []).forEach((item: any) => {
+      if (item.firms && !firmMap.has(item.firms.id)) {
+        firmMap.set(item.firms.id, {
+          ...item.firms,
+          user_role: item.role,
+        });
+      }
+    });
+    
+    const firms = Array.from(firmMap.values());
 
     return NextResponse.json({
       success: true,
