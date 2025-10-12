@@ -78,7 +78,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
               />
             ) : (
               <div className="hidden md:flex items-center gap-3">
-                <a href="/sign-in" className="text-sm font-medium text-slate-700 hover:text-slate-900">
+                <a href="/sign-in?redirect_url=/profile/edit" className="text-sm font-medium text-slate-700 hover:text-slate-900">
                   Sign In
                 </a>
                 <a href="/join" className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors">
