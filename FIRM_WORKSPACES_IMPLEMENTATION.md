@@ -217,3 +217,4 @@ If you encounter issues:
 4. Review server logs for API errors
 5. Test with Clerk user that has a profile
 
+
