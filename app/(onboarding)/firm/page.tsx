@@ -24,13 +24,6 @@ export default function FirmOnboardingPage() {
     returns_band: '',
   });
 
-  // Redirect unauthenticated users to join
-  useEffect(() => {
-    if (isLoaded && !userId) {
-      router.push('/join');
-    }
-  }, [isLoaded, userId, router]);
-
   // Loading state
   if (!isLoaded) {
     return (
@@ -40,11 +33,56 @@ export default function FirmOnboardingPage() {
     );
   }
 
-  // Still loading auth
+  // Show landing page for unauthenticated users
   if (!userId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Redirecting...</div>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center px-4">
+        <div className="max-w-2xl w-full text-center">
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 sm:p-12">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Create Your Firm Workspace
+            </h1>
+            <p className="text-lg text-gray-600 mb-8">
+              Build and manage your trusted bench of verified tax professionals. $10/month, cancel anytime.
+            </p>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start gap-3 text-left">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700">Invite unlimited verified professionals to your team</span>
+              </div>
+              <div className="flex items-start gap-3 text-left">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700">Organize by specialty and manage internal notes</span>
+              </div>
+              <div className="flex items-start gap-3 text-left">
+                <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700">Optional public profile to showcase your team</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => router.push('/join')}
+                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-md transition-colors"
+              >
+                Sign Up to Get Started
+              </button>
+              <button
+                onClick={() => router.push('/sign-in')}
+                className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+              >
+                Already have an account? Log In
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
