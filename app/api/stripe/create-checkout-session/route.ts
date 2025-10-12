@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     // Verify user is a member of this firm
     const { data: profile } = await supabase
       .from('profiles')
-      .select('id, email')
+      .select('id, public_email')
       .eq('clerk_user_id', userId)
       .single();
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     const session = await createFirmCheckoutSession({
       firmId: firm.id,
       firmName: firm.name,
-      customerEmail: profile.email || '',
+      customerEmail: profile.public_email || '',
       successUrl,
       cancelUrl,
     });
