@@ -41,15 +41,31 @@ function InvitationsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [respondingId, setRespondingId] = useState<string | null>(null);
 
-  // Handle action from email link
+  // Redirect to sign-in if not authenticated and coming from email link
   useEffect(() => {
+    if (!isLoaded) return;
+    
+    const inviteId = searchParams.get('id');
+    const action = searchParams.get('action');
+    
+    // If there's an invitation action but user is not logged in, redirect to sign-in
+    if (inviteId && action && !userId) {
+      router.push(`/sign-in?redirect_url=${encodeURIComponent(`/invitations?id=${inviteId}&action=${action}`)}`);
+      return;
+    }
+  }, [isLoaded, userId, searchParams, router]);
+
+  // Handle action from email link (after authentication)
+  useEffect(() => {
+    if (!isLoaded || !userId) return;
+    
     const inviteId = searchParams.get('id');
     const action = searchParams.get('action');
     
     if (inviteId && action && (action === 'accept' || action === 'decline')) {
       handleRespond(inviteId, action);
     }
-  }, [searchParams]);
+  }, [isLoaded, userId, searchParams]);
 
   // Load invitations
   useEffect(() => {
