@@ -62,57 +62,81 @@ export async function POST(request: NextRequest) {
     let profileId = await getProfileIdFromClerkId(userId);
     
     if (!profileId) {
-      // Auto-create a minimal firm_admin profile
-      console.log('No profile found, creating firm_admin profile for:', userId);
-      
-      // Get user info from Clerk
-      const { currentUser } = await import('@clerk/nextjs/server');
-      const user = await currentUser();
-      
-      if (!user) {
-        return NextResponse.json(
-          { error: 'User not found' },
-          { status: 404 }
-        );
-      }
-
-      const userEmail = user.emailAddresses[0]?.emailAddress;
-      const firstName = user.firstName || '';
-      const lastName = user.lastName || '';
-      
-      // Generate slug
-      const slugBase = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const profileSlug = `${slugBase}-${userId.substring(0, 8)}`;
-
-      // Create firm_admin profile
-      const { data: newProfile, error: profileError } = await supabase
+      // Check if profile exists with this clerk_id (sometimes getProfileIdFromClerkId misses it)
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .insert({
-          clerk_user_id: userId,
-          clerk_id: userId,
-          first_name: firstName,
-          last_name: lastName,
-          public_email: userEmail,
-          credential_type: 'Other', // Firm admins may not be tax professionals
-          profile_type: 'firm_admin',
-          slug: profileSlug,
-          onboarding_complete: true,
-          is_listed: false, // Never list firm admins
-          visibility_state: 'hidden', // Firm admins are not public profiles
-        })
         .select('id')
+        .eq('clerk_id', userId)
         .single();
+      
+      if (existingProfile) {
+        profileId = existingProfile.id;
+        console.log('Found existing profile:', profileId);
+      } else {
+        // Auto-create a minimal firm_admin profile
+        console.log('No profile found, creating firm_admin profile for:', userId);
+        
+        // Get user info from Clerk
+        const { currentUser } = await import('@clerk/nextjs/server');
+        const user = await currentUser();
+        
+        if (!user) {
+          return NextResponse.json(
+            { error: 'User not found' },
+            { status: 404 }
+          );
+        }
 
-      if (profileError || !newProfile) {
-        console.error('Error creating firm_admin profile:', profileError);
-        return NextResponse.json(
-          { error: 'Failed to create admin profile' },
-          { status: 500 }
-        );
+        const userEmail = user.emailAddresses[0]?.emailAddress;
+        const firstName = user.firstName || '';
+        const lastName = user.lastName || '';
+        
+        // Generate unique slug with timestamp to avoid collisions
+        const slugBase = firstName && lastName 
+          ? `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+          : `user`;
+        const uniqueSuffix = `${userId.substring(0, 8)}-${Date.now().toString(36)}`;
+        const profileSlug = `${slugBase}-${uniqueSuffix}`;
+
+        // Create firm_admin profile
+        const { data: newProfile, error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            clerk_user_id: userId,
+            clerk_id: userId,
+            first_name: firstName,
+            last_name: lastName,
+            public_email: userEmail,
+            credential_type: 'Other', // Firm admins may not be tax professionals
+            profile_type: 'firm_admin',
+            slug: profileSlug,
+            onboarding_complete: true,
+            is_listed: false, // Never list firm admins
+            visibility_state: 'hidden', // Firm admins are not public profiles
+          })
+          .select('id')
+          .single();
+
+        if (profileError || !newProfile) {
+          console.error('Error creating firm_admin profile:', profileError);
+          
+          // If it's a duplicate slug error, show a better message
+          if (profileError?.code === '23505') {
+            return NextResponse.json(
+              { error: 'A profile already exists for this account. Please contact support if you continue to see this error.' },
+              { status: 409 }
+            );
+          }
+          
+          return NextResponse.json(
+            { error: 'Failed to create admin profile' },
+            { status: 500 }
+          );
+        }
+
+        profileId = newProfile.id;
+        console.log('Created firm_admin profile:', profileId);
       }
-
-      profileId = newProfile.id;
-      console.log('Created firm_admin profile:', profileId);
     }
 
     // Generate unique slug
