@@ -61,6 +61,7 @@ export async function createFirmCheckoutSession({
     mode: 'subscription',
     payment_method_types: ['card'], // Explicitly enable card payments
     customer_email: customerEmail,
+    allow_promotion_codes: true, // Enable coupon/promo code field
     line_items: [
       {
         price: STRIPE_CONFIG.FIRM_WORKSPACE_PRICE_ID,
