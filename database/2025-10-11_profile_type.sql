@@ -36,3 +36,4 @@ create index if not exists idx_profiles_profile_type on profiles (profile_type);
 comment on column profiles.profile_type is 
   'Type of profile: tax_professional (appears in directory) or firm_admin (firm management only)';
 
+

@@ -8,3 +8,4 @@
 export const FEATURE_FIRM_WORKSPACES =
   process.env.NEXT_PUBLIC_FEATURE_FIRM_WORKSPACES === 'true';
 
+
