@@ -75,6 +75,18 @@ export interface VerifiedListedEmailData {
   year: number;
 }
 
+export interface BenchInvitationEmailData {
+  professionalFirstName: string;
+  professionalEmail: string;
+  firmName: string;
+  inviterName: string;
+  customTitleOffer?: string;
+  message?: string;
+  acceptLink: string;
+  declineLink: string;
+  viewInvitationLink: string;
+}
+
 export interface EmailTemplate {
   subject: string;
   html: string;
@@ -323,6 +335,86 @@ export const emailTemplates = {
     text: `New message from ${data.senderName}\n\nFrom: ${data.senderName}\nFirm: ${data.senderFirm || 'Not specified'}\n\nMessage: "${data.messagePreview}"\n\nView Message: ${data.messageLink}`
   }),
 
+  benchInvitation: (data: BenchInvitationEmailData): EmailTemplate => ({
+    subject: `Team Invitation from ${data.firmName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Team Invitation</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">🤝 Team Invitation</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Hi ${data.professionalFirstName}!</h2>
+            
+            <p style="color: #4a5568; font-size: 16px; margin: 20px 0;">
+              <strong>${data.firmName}</strong> would like to add you to their extended team on TaxProExchange.
+            </p>
+
+            ${data.customTitleOffer ? `
+              <div style="background: #e0e7ff; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #6366f1;">
+                <p style="margin: 0; color: #312e81;">
+                  <strong>Suggested Role:</strong> ${data.customTitleOffer}
+                </p>
+              </div>
+            ` : ''}
+
+            ${data.message ? `
+              <div style="background: white; padding: 20px; border-radius: 6px; border-left: 4px solid #667eea; margin: 20px 0;">
+                <p style="margin: 0; color: #4a5568; font-style: italic;">"${data.message}"</p>
+                <p style="margin: 10px 0 0 0; color: #718096; font-size: 14px;">— ${data.inviterName}</p>
+              </div>
+            ` : ''}
+
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
+              <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
+                <strong>What this means:</strong> By accepting, you'll be added to ${data.firmName}'s trusted bench. 
+                They may reach out when they have overflow work or need your expertise. You're not committing to any specific work—just signaling you're open to opportunities from this firm.
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.acceptLink}" style="background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; margin-right: 10px; font-size: 16px;">✓ Accept Invitation</a>
+            <a href="${data.declineLink}" style="background: #6b7280; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 16px;">Decline</a>
+          </div>
+
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${data.viewInvitationLink}" style="color: #4299e1; text-decoration: none; font-size: 14px;">View full invitation details</a>
+          </div>
+          
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
+            <p>You're receiving this because ${data.firmName} invited you to their extended team.</p>
+            <p>TaxProExchange - Connecting verified tax professionals</p>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `Team Invitation from ${data.firmName}
+
+Hi ${data.professionalFirstName}!
+
+${data.firmName} would like to add you to their extended team on TaxProExchange.
+
+${data.customTitleOffer ? `Suggested Role: ${data.customTitleOffer}\n\n` : ''}${data.message ? `Message from ${data.inviterName}:\n"${data.message}"\n\n` : ''}
+What this means: By accepting, you'll be added to ${data.firmName}'s trusted bench. They may reach out when they have overflow work or need your expertise. You're not committing to any specific work—just signaling you're open to opportunities from this firm.
+
+Accept Invitation: ${data.acceptLink}
+Decline: ${data.declineLink}
+
+View full details: ${data.viewInvitationLink}
+
+---
+You're receiving this because ${data.firmName} invited you to their extended team.
+TaxProExchange - Connecting verified tax professionals`
+  }),
+
   adminEventsNotification: (data: AdminEventsNotificationData): EmailTemplate => ({
     subject: `📅 Weekly Events Update - ${data.ingestedEvents} New Events Ready for Review`,
     html: `
@@ -532,6 +624,12 @@ export async function sendConnectionRequestNotification(data: ConnectionRequestE
 export async function sendMessageNotification(data: MessageNotificationEmailData) {
   const template = emailTemplates.messageNotification(data);
   return sendEmailLegacy(data.recipientEmail, template);
+}
+
+// Send bench invitation notification
+export async function sendBenchInvitationEmail(data: BenchInvitationEmailData) {
+  const template = emailTemplates.benchInvitation(data);
+  return sendEmailLegacy(data.professionalEmail, template);
 }
 
 // Send verified + listed notification
