@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 
 interface LogoProps {
   className?: string;
@@ -6,9 +9,14 @@ interface LogoProps {
 }
 
 export default function Logo({ className = '', showText = true }: LogoProps) {
+  const { isLoaded, isSignedIn } = useUser();
+  
+  // Authenticated users go to dashboard, unauthenticated go to homepage
+  const href = isLoaded && isSignedIn ? '/dashboard' : '/';
+  
   return (
     <Link 
-      href="/" 
+      href={href} 
       className={`flex items-center gap-2 hover:opacity-80 transition-opacity ${className}`}
     >
       {/* Logo Icon */}

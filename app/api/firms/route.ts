@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
           first_name: firstName,
           last_name: lastName,
           public_email: userEmail,
+          credential_type: 'Other', // Firm admins may not be tax professionals
           profile_type: 'firm_admin',
           slug: profileSlug,
           onboarding_complete: true,

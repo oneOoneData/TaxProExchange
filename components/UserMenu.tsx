@@ -21,6 +21,7 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [hasPendingConnections, setHasPendingConnections] = useState(false);
   const [pendingConnectionCount, setPendingConnectionCount] = useState(0);
+  const [firms, setFirms] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const menuRef = useRef<HTMLDivElement>(null);
   const { isAdmin, isLoading: isAdminLoading } = useAdminStatus();
   
@@ -107,6 +108,28 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
     return () => clearInterval(interval);
   }, [isLoaded, user]);
 
+  // Check if user belongs to any firms
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    const checkFirms = async () => {
+      try {
+        const response = await fetch('/api/firms');
+        if (response.ok) {
+          const data = await response.json();
+          setFirms(data.firms || []);
+        } else {
+          setFirms([]);
+        }
+      } catch (error) {
+        console.error('Failed to check firms:', error);
+        setFirms([]);
+      }
+    };
+
+    checkFirms();
+  }, [isLoaded, user]);
+
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleSignOut = () => {
@@ -182,6 +205,27 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
                 </svg>
                 My Profile
               </Link>
+
+              {/* Firm Dashboards - Only show if user belongs to firms */}
+              {firms.length > 0 && (
+                <>
+                  <div className="border-t border-slate-100 my-1"></div>
+                  {firms.map((firm) => (
+                    <Link
+                      key={firm.id}
+                      href="/team"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4 mr-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      {firm.name} Dashboard
+                    </Link>
+                  ))}
+                  <div className="border-t border-slate-100 my-1"></div>
+                </>
+              )}
 
               <Link
                 href="/jobs"
