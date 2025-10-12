@@ -41,6 +41,7 @@ export default function FirmsGrid() {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [enriching, setEnriching] = useState(false);
   const [enrichResult, setEnrichResult] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -162,6 +163,33 @@ export default function FirmsGrid() {
       }
     } catch (error) {
       console.error('Error exporting firms:', error);
+    }
+  };
+
+  const handleDelete = async (firmId: string, firmName: string | null) => {
+    if (!confirm(`Are you sure you want to delete "${firmName || 'this firm'}"? This action cannot be undone and will remove all associated data.`)) {
+      return;
+    }
+
+    setDeleting(firmId);
+    
+    try {
+      const response = await fetch(`/api/admin/firms/${firmId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setEnrichResult(`✅ Successfully deleted "${firmName}"`);
+        // Refresh data
+        fetchFirms();
+      } else {
+        const error = await response.json();
+        setEnrichResult(`❌ Error deleting firm: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setEnrichResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -353,8 +381,22 @@ export default function FirmsGrid() {
         ),
         size: 110,
       }),
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => (
+          <button
+            onClick={() => handleDelete(row.original.id, row.original.firm_name)}
+            disabled={deleting === row.original.id}
+            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-medium disabled:opacity-50"
+          >
+            {deleting === row.original.id ? 'Deleting...' : 'Delete'}
+          </button>
+        ),
+        size: 100,
+      }),
     ],
-    []
+    [deleting]
   );
 
   const table = useReactTable({

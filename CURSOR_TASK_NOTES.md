@@ -1,5 +1,47 @@
 # Cursor Task Notes
 
+## Admin Firm Management & Deletion (2025-10-12) ✅
+
+**Goal**: Allow TPE admins to view and delete firms from the admin dashboard.
+
+**Implementation**:
+
+### Files Created/Modified
+
+1. **`app/api/admin/firms/[id]/route.ts`** (NEW)
+   - DELETE endpoint to remove a firm by ID
+   - Checks admin authorization via Clerk
+   - Deletes firm record (cascades to related tables via foreign keys)
+
+2. **`components/admin/FirmsGrid.tsx`**
+   - Added `deleting` state to track deletion in progress
+   - Added `handleDelete` function with confirmation dialog
+   - Added "Actions" column with "Delete" button for each firm
+   - Shows success/error messages in enrichment result area
+
+3. **`app/admin/page.tsx`**
+   - Added "Firms" link to admin header navigation
+   - Added new "Manage Firms" card to admin dashboard
+   - Links to `/admin/firms` page
+
+### User Flow
+
+1. Admin navigates to `/admin` dashboard
+2. Clicks "Manage Firms" or uses header link to go to `/admin/firms`
+3. Views table of all firms with search, sort, and pagination
+4. Clicks "Delete" button for any firm
+5. Confirms deletion in confirmation dialog
+6. Firm is deleted along with all related data (firm_members, firm_trusted_bench)
+
+### Related Database Tables
+
+- `firms` - Main firm records
+- `firm_members` - Members of firms (cascades on firm deletion)
+- `firm_trusted_bench` - Firm's trusted contacts (cascades on firm deletion)
+- `firm_subscription_events` - Subscription history (cascades on firm deletion)
+
+---
+
 ## Firm Admin Profile Type (2025-10-11) ✅
 
 **Goal**: Allow firm creation without requiring tax professional credentials.
