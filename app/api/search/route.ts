@@ -63,8 +63,7 @@ export async function GET(request: NextRequest) {
         created_at,
         profile_type
 `, { count: 'exact' })
-      .eq('is_listed', true)
-      .neq('profile_type', 'firm_admin'); // Exclude firm admins from search
+      .eq('is_listed', true); // Show all profiles where is_listed = true (user controls this)
 
     // Apply verified filter based on user preference
     if (verified_only === 'true') {
