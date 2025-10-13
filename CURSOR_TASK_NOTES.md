@@ -66,17 +66,35 @@ Changed firm admins from "hidden" to "verified but unlisted":
 - Firm admin creates firm → gets verified profile → can participate fully → one account does everything 🎉
 
 **Visibility**:
-- **Search**: Firm admins still excluded from `/search` (filter: `profile_type != 'firm_admin'`)
-- **Direct profile view**: Now works! Anyone can view `/p/{firm-admin-slug}`
+- **Search**: Firm admins CAN appear in search if they set `is_listed: true`
+- **Direct profile view**: Works! Anyone can view `/p/{firm-admin-slug}`
 - **Badge**: Premium "🏢 Firm Member" badge distinguishes them
 - **Firm link**: Their profile shows clickable link to their firm page
 
-### Future Enhancements (Not Implemented)
+### Update (2025-10-13 Part 2): Search Toggle Implemented ✅
 
-- **TODO**: Add toggle in `/profile/edit` to let firm admins control `is_listed`
-  - If they want to be searchable, they can opt in
-  - Default stays `false` to avoid directory clutter
-  - Simple checkbox: "Include me in search directory"
+**Additional Changes**:
+
+8. **`app/api/search/route.ts`**
+   - Removed hardcoded `profile_type != 'firm_admin'` filter
+   - Now relies solely on `is_listed` field for search visibility
+   - Both tax_professional AND firm_admin can be searchable if they choose
+
+9. **`app/profile/edit/page.tsx`**
+   - Added `is_listed` to ProfileForm interface
+   - Added "Include my profile in the searchable directory" checkbox
+   - Located in Visibility & Availability section (after public_contact)
+   - Includes helpful explanation text
+   - Saves to database on profile update
+
+10. **`database/2025-10-13_enable_firm_admin_search_toggle.sql`** (NEW)
+    - Migration to enable search for specific firm admins
+    - Example: Kellan Johnson (recruiter who wants to be discoverable)
+
+**New Default Behavior**:
+- **tax_professional**: `is_listed: true` by default (searchable)
+- **firm_admin**: `is_listed: false` by default (private, can opt-in)
+- **User control**: Anyone can toggle their search visibility in profile settings
 
 ---
 

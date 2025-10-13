@@ -46,6 +46,7 @@ interface ProfileForm {
   website_url: string;
   linkedin_url: string;
   accepting_work: boolean;
+  is_listed: boolean;
   public_contact: boolean;
   works_multistate: boolean;
   works_international: boolean;
@@ -206,6 +207,7 @@ export default function EditProfilePage() {
     website_url: '',
     linkedin_url: '',
     accepting_work: true,
+    is_listed: true,
     public_contact: false,
     works_multistate: false,
     works_international: false,
@@ -306,6 +308,7 @@ export default function EditProfilePage() {
               website_url: p.website_url || '',
               linkedin_url: p.linkedin_url || '',
               accepting_work: p.accepting_work ?? true,
+              is_listed: p.is_listed ?? true,
               public_contact: p.public_contact ?? false,
               works_multistate: p.works_multistate ?? false,
               works_international: p.works_international ?? false,
@@ -393,6 +396,7 @@ export default function EditProfilePage() {
           website_url: profileForm.website_url.trim(),
           linkedin_url: profileForm.linkedin_url.trim(),
           accepting_work: profileForm.accepting_work,
+          is_listed: profileForm.is_listed,
           public_contact: profileForm.public_contact,
           works_multistate: profileForm.works_multistate,
           works_international: profileForm.works_international,
@@ -1389,6 +1393,23 @@ export default function EditProfilePage() {
               </div>
               <p className="text-xs text-slate-500 ml-6">
                 When enabled, your email, phone, and LinkedIn will be visible to all visitors. When disabled, only signed-in users can see your contact information.
+              </p>
+
+              {/* Include in Search Directory */}
+              <div className="flex items-center gap-3 pt-4">
+                <input
+                  type="checkbox"
+                  id="is_listed"
+                  checked={profileForm.is_listed}
+                  onChange={(e) => updateForm('is_listed', e.target.checked)}
+                  className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                />
+                <label htmlFor="is_listed" className="text-sm font-medium text-slate-700">
+                  Include my profile in the searchable directory
+                </label>
+              </div>
+              <p className="text-xs text-slate-500 ml-6">
+                When enabled, your profile appears in search results and is discoverable by others. When disabled, your profile is still viewable by direct link, but won't appear in searches.
               </p>
 
               {/* Mentorship Section */}
