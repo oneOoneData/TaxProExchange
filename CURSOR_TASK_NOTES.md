@@ -1,42 +1,69 @@
 # Cursor Task Notes
 
-## Admin Firm Management & Deletion (2025-10-12) ✅
+## Admin Firm Workspace Management & Deletion (2025-10-12) ✅
 
-**Goal**: Allow TPE admins to view and delete firms from the admin dashboard.
+**Goal**: Allow TPE admins to view and delete actual firm workspace accounts (separate from profile enrichment data).
 
-**Implementation**:
+**Problem**: 
+Initial implementation confused two different concepts:
+- **`/admin/firms`** - Shows individual tax pro profiles with firm information (for enrichment/analytics)
+- **What was needed** - A view of actual firm workspace accounts from the `firms` table (real signups with teams)
 
-### Files Created/Modified
+**Solution Applied**:
+Created a separate admin interface for managing actual firm workspaces at `/admin/firm-workspaces`.
 
-1. **`app/api/admin/firms/[id]/route.ts`** (NEW)
-   - DELETE endpoint to remove a firm by ID
+### Files Created
+
+1. **`app/api/admin/firm-workspaces/route.ts`** (NEW)
+   - GET endpoint to list firms from `firms` table (not `profiles`)
+   - Includes member counts via join with `firm_members`
+   - Supports search, sort, and pagination
+   - Shows subscription status, size band, returns band
+
+2. **`app/api/admin/firm-workspaces/[id]/route.ts`** (NEW)
+   - DELETE endpoint to remove a firm workspace by ID
    - Checks admin authorization via Clerk
    - Deletes firm record (cascades to related tables via foreign keys)
 
-2. **`components/admin/FirmsGrid.tsx`**
-   - Added `deleting` state to track deletion in progress
-   - Added `handleDelete` function with confirmation dialog
-   - Added "Actions" column with "Delete" button for each firm
-   - Shows success/error messages in enrichment result area
+3. **`components/admin/FirmWorkspacesGrid.tsx`** (NEW)
+   - Table view of actual firm workspace accounts
+   - Shows: name, website, member count, size, returns, subscription status, verified status
+   - Delete button with confirmation dialog
+   - Search and pagination
 
-3. **`app/admin/page.tsx`**
-   - Added "Firms" link to admin header navigation
-   - Added new "Manage Firms" card to admin dashboard
-   - Links to `/admin/firms` page
+4. **`app/admin/firm-workspaces/page.tsx`** (NEW)
+   - Admin page for managing firm workspaces
+   - Clear description: "actual firm workspace accounts that have signed up"
+
+### Files Modified
+
+1. **`app/admin/page.tsx`**
+   - Renamed "Manage Firms" → "Firm Enrichment" (clarified it's for profile data)
+   - Added new "Firm Workspaces" card
+   - Updated navigation to include both links: "Enrichment" and "Workspaces"
+
+2. **`app/api/admin/firms/[id]/route.ts`** (from previous commit)
+   - Fixed Next.js 15 async params compatibility
 
 ### User Flow
 
-1. Admin navigates to `/admin` dashboard
-2. Clicks "Manage Firms" or uses header link to go to `/admin/firms`
-3. Views table of all firms with search, sort, and pagination
-4. Clicks "Delete" button for any firm
-5. Confirms deletion in confirmation dialog
-6. Firm is deleted along with all related data (firm_members, firm_trusted_bench)
+**For Profile Enrichment** (`/admin/firms`):
+1. Admin → "Firm Enrichment"
+2. Views profiles with firm information
+3. Can enrich with live website data
+4. Used for analytics and data quality
+
+**For Firm Workspaces** (`/admin/firm-workspaces`):
+1. Admin → "Firm Workspaces"
+2. Views actual firm accounts that signed up
+3. Can see member counts and subscription status
+4. Can delete firm workspaces
+5. Deletes cascade to all related data
 
 ### Related Database Tables
 
-- `firms` - Main firm records
-- `firm_members` - Members of firms (cascades on firm deletion)
+- `firms` - Main firm workspace records
+- `firm_members` - Team members (cascades on firm deletion)
 - `firm_trusted_bench` - Firm's trusted contacts (cascades on firm deletion)
 - `firm_subscription_events` - Subscription history (cascades on firm deletion)
 
