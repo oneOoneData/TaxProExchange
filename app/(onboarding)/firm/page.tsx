@@ -75,7 +75,7 @@ export default function FirmOnboardingPage() {
                 Sign Up to Get Started
               </button>
               <button
-                onClick={() => router.push('/sign-in?redirect_url=/firm')}
+                onClick={() => router.push('/sign-in?redirect_url=/team')}
                 className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
               >
                 Already have an account? Log In
