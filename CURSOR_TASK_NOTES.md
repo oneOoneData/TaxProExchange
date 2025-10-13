@@ -1,5 +1,85 @@
 # Cursor Task Notes
 
+## Firm Admin Full Participation (2025-10-13) ✅
+
+**Goal**: Allow firm admins to fully participate in the platform without creating a separate tax pro profile.
+
+**Problem**: 
+Firm admins were created with `visibility_state: 'hidden'` and `is_listed: false`, which meant:
+- Their profiles couldn't be viewed by anyone (404 errors)
+- They couldn't receive connection requests
+- They couldn't participate in networking, jobs, or mentorship
+- **Result**: Firm admins were creating duplicate tax pro accounts just to participate
+
+**Solution Applied**:
+Changed firm admins from "hidden" to "verified but unlisted":
+- ✅ **Verified** visibility state (profiles are viewable)
+- ✅ **Not listed** by default (won't clutter search results)
+- ✅ **Premium badge** shows "🏢 Firm Member" on profile
+- ✅ **Linked firm** displays on their profile page
+- ✅ **Can toggle listing** (future: allow them to opt into search)
+
+### Files Changed
+
+1. **`database/2025-10-13_upgrade_firm_admins.sql`** (NEW)
+   - Migration to upgrade existing firm_admin profiles from `hidden` to `verified`
+   - Preserves `is_listed: false` (they stay out of search)
+   - Updates comment documentation
+
+2. **`app/api/firms/route.ts`**
+   - Changed new firm_admin creation: `visibility_state: 'verified'` (was `'hidden'`)
+   - Updated comment: "Not listed in search by default (but can toggle on)"
+   - Firm admins can now be viewed and participate fully
+
+3. **`lib/db/profile.ts`**
+   - Added `profile_type` field to `Profile` interface
+   - Added `isFirmMember()` helper function
+   - Added `getFirmMemberBadgeColor()` for premium gold/amber badge styling
+
+4. **`app/api/profile-firm/route.ts`** (NEW)
+   - Public endpoint to fetch firm info for a profile
+   - Used to show linked firm on profile pages
+   - Returns firm name, slug, website, verified status
+
+5. **`app/api/profile/[slug]/route.ts`**
+   - Added `profile_type` to SELECT query
+   - Now includes profile type in API response
+
+6. **`app/p/[slug]/ProfilePageClient.tsx`**
+   - Added `profile_type` to Profile interface
+   - Added `userFirm` state to store linked firm
+   - Added useEffect to fetch firm info for firm_admin profiles
+   - Added "🏢 Firm Member" premium badge next to verified badge
+   - Added clickable firm link (with icon) that navigates to `/f/{slug}`
+
+7. **`components/dashboard/ProfileStatusCard.tsx`**
+   - Imported `isFirmMember` and `getFirmMemberBadgeColor` helpers
+   - Added "🏢 Firm Member" badge display for firm admins
+   - Badge appears on dashboard profile status card
+
+### Behavior Changes
+
+**Before**:
+- Firm admin creates firm → gets hidden profile → can't participate → creates 2nd tax pro profile 😞
+
+**After**:
+- Firm admin creates firm → gets verified profile → can participate fully → one account does everything 🎉
+
+**Visibility**:
+- **Search**: Firm admins still excluded from `/search` (filter: `profile_type != 'firm_admin'`)
+- **Direct profile view**: Now works! Anyone can view `/p/{firm-admin-slug}`
+- **Badge**: Premium "🏢 Firm Member" badge distinguishes them
+- **Firm link**: Their profile shows clickable link to their firm page
+
+### Future Enhancements (Not Implemented)
+
+- **TODO**: Add toggle in `/profile/edit` to let firm admins control `is_listed`
+  - If they want to be searchable, they can opt in
+  - Default stays `false` to avoid directory clutter
+  - Simple checkbox: "Include me in search directory"
+
+---
+
 ## Admin Firm Workspace Management & Deletion (2025-10-12) ✅
 
 **Goal**: Allow TPE admins to view and delete actual firm workspace accounts (separate from profile enrichment data).

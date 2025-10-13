@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Profile, VerificationRequest, getProfileDisplayName, getCredentialBadgeColor, getVisibilityBadgeColor, getPublicProfileUrl } from '@/lib/db/profile';
+import { Profile, VerificationRequest, getProfileDisplayName, getCredentialBadgeColor, getVisibilityBadgeColor, getPublicProfileUrl, isFirmMember, getFirmMemberBadgeColor } from '@/lib/db/profile';
 
 interface ProfileStatusCardProps {
   profile: Profile | null;
@@ -31,7 +31,7 @@ export default function ProfileStatusCard({ profile, verificationRequest }: Prof
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             {displayName}
           </h2>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCredentialBadgeColor(profile.credential_type)}`}>
               {profile.credential_type}
             </span>
@@ -40,6 +40,11 @@ export default function ProfileStatusCard({ profile, verificationRequest }: Prof
                profile.visibility_state === 'pending_verification' ? 'Pending verification' : 
                profile.visibility_state === 'rejected' ? 'Rejected' : 'Hidden'}
             </span>
+            {isFirmMember(profile) && (
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getFirmMemberBadgeColor()}`}>
+                🏢 Firm Member
+              </span>
+            )}
           </div>
         </div>
         {profile.avatar_url && (

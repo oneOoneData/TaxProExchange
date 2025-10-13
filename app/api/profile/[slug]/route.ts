@@ -119,7 +119,8 @@ export async function GET(
         entity_revenue_range,
         avatar_url,
         primary_location,
-        created_at
+        created_at,
+        profile_type
       `)
       .eq('slug', slug);
 

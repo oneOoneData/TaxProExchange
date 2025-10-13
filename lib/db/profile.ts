@@ -23,6 +23,7 @@ export interface Profile {
   accepting_work: boolean;
   slug?: string;
   onboarding_complete: boolean;
+  profile_type?: 'tax_professional' | 'firm_admin';
   created_at: string;
   updated_at: string;
 }
@@ -163,4 +164,18 @@ export function getVisibilityBadgeColor(visibilityState: string): string {
     default:
       return 'bg-gray-100 text-gray-800';
   }
+}
+
+/**
+ * Check if profile is a firm member (firm_admin type)
+ */
+export function isFirmMember(profile: Profile | null): boolean {
+  return profile?.profile_type === 'firm_admin';
+}
+
+/**
+ * Get firm member badge color (premium gold/amber)
+ */
+export function getFirmMemberBadgeColor(): string {
+  return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200';
 }

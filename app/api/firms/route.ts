@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
             profile_type: 'firm_admin',
             slug: profileSlug,
             onboarding_complete: true,
-            is_listed: false, // Never list firm admins
-            visibility_state: 'hidden', // Firm admins are not public profiles
+            is_listed: false, // Not listed in search by default (but can toggle on)
+            visibility_state: 'verified', // Verified so they can participate fully
           })
           .select('id')
           .single();

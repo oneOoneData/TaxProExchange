@@ -59,6 +59,7 @@ interface Profile {
   is_listed?: boolean;
   created_at?: string;
   profile_locations?: any[];
+  profile_type?: 'tax_professional' | 'firm_admin';
 }
 
 interface Specialization {
@@ -85,6 +86,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   const [connectionState, setConnectionState] = useState<{ status: string; connectionId?: string; isRequester?: boolean } | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [userFirm, setUserFirm] = useState<{ name: string; slug: string } | null>(null);
 
   // Helper function to format date as MM/YYYY
   const formatMMYYYY = (dateString: string) => {
@@ -141,6 +143,27 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
       checkConnectionStatus(profile.id);
     }
   }, [profile.id, isSignedIn, user]);
+
+  // Fetch firm information if user is a firm member
+  useEffect(() => {
+    const fetchFirmInfo = async () => {
+      if (profile.profile_type === 'firm_admin') {
+        try {
+          const response = await fetch(`/api/profile-firm?profile_id=${profile.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.firm) {
+              setUserFirm({ name: data.firm.name, slug: data.firm.slug });
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching firm info:', error);
+        }
+      }
+    };
+
+    fetchFirmInfo();
+  }, [profile.id, profile.profile_type]);
 
   const fetchSpecializations = async () => {
     try {
@@ -426,6 +449,11 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                     ✓ Verified
                   </span>
                 )}
+                {profile.profile_type === 'firm_admin' && (
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200">
+                    🏢 Firm Member
+                  </span>
+                )}
                 <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-slate-100 text-slate-700">
                   {profile.credential_type}
                 </span>
@@ -443,8 +471,20 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
 
               <p className="text-lg sm:text-xl text-slate-600 font-medium mb-2">{profile.headline}</p>
               
-              {profile.firm_name && (
+              {profile.firm_name && !userFirm && (
                 <p className="text-slate-500 mb-3">{profile.firm_name}</p>
+              )}
+              
+              {userFirm && (
+                <Link 
+                  href={`/f/${userFirm.slug}`}
+                  className="inline-flex items-center gap-1 text-slate-700 hover:text-amber-700 font-medium mb-3 transition-colors"
+                >
+                  🏢 {userFirm.name}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
               )}
 
               <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-sm text-slate-500 mb-6">
