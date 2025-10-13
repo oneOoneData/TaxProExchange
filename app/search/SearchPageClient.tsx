@@ -34,6 +34,7 @@ interface Profile {
   works_multistate?: boolean;
   works_international?: boolean;
   countries?: string[];
+  profile_type?: 'tax_professional' | 'firm_admin';
 }
 
 interface SearchFilters {
@@ -880,13 +881,18 @@ export default function SearchPageClient() {
                     >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <h3 className="text-lg font-semibold text-slate-900">
                             {profile.first_name} {profile.last_name}
                           </h3>
                           {profile.verified && (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
                               Verified
+                            </span>
+                          )}
+                          {profile.profile_type === 'firm_admin' && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200">
+                              🏢 Firm Member
                             </span>
                           )}
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
