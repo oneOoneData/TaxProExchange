@@ -1,53 +1,82 @@
-import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { createServerClient } from "@/lib/supabase/server";
+/**
+ * Debug Profile API - Temporary debugging endpoint
+ * GET /api/debug-profile?id={profile_id}
+ */
 
-export async function GET() {
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@/lib/supabase/server';
+
+export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { searchParams } = new URL(request.url);
+    const profileId = searchParams.get('id');
+
+    if (!profileId) {
+      return NextResponse.json(
+        { error: 'profile_id parameter required' },
+        { status: 400 }
+      );
+    }
 
     const supabase = createServerClient();
 
-    // Get profile
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id, clerk_id, first_name, last_name")
-      .eq("clerk_id", userId)
+    // Get the profile with all relevant search fields
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        slug,
+        credential_type,
+        is_listed,
+        visibility_state,
+        profile_type,
+        accepting_work,
+        headline,
+        bio,
+        firm_name,
+        created_at
+      `)
+      .eq('id', profileId)
       .single();
 
-    if (profileError || !profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    if (error) {
+      return NextResponse.json(
+        { error: 'Profile not found', details: error },
+        { status: 404 }
+      );
     }
 
-    // Get all profile data
-    const [
-      { data: specs },
-      { data: soft },
-      { data: locs },
-      { data: events }
-    ] = await Promise.all([
-      supabase.from("profile_specializations").select("specializations(label, slug)").eq("profile_id", profile.id),
-      supabase.from("profile_software").select("software(slug)").eq("profile_id", profile.id),
-      supabase.from("profile_locations").select("state").eq("profile_id", profile.id),
-      supabase.from("events").select("*").gte("start_date", new Date().toISOString()).limit(5)
-    ]);
+    // Test if this profile would pass search filters
+    const searchFilters = {
+      is_listed: profile.is_listed === true,
+      not_firm_admin: profile.profile_type !== 'firm_admin',
+      is_verified: profile.visibility_state === 'verified',
+      has_credential: !!profile.credential_type,
+    };
+
+    const shouldAppearInSearch = 
+      searchFilters.is_listed && 
+      searchFilters.not_firm_admin;
 
     return NextResponse.json({
-      profile: {
-        id: profile.id,
-        name: `${profile.first_name} ${profile.last_name}`,
-        clerk_id: profile.clerk_id
-      },
-      specialties: (specs ?? []).map((r:any)=> r.specializations?.slug).filter(Boolean),
-      software: (soft ?? []).map((r:any)=> r.software?.slug).filter(Boolean),
-      states: (locs ?? []).map((r:any)=> r.state).filter(Boolean),
-      eventsCount: events?.length || 0,
-      rawData: { specs, soft, locs, events }
+      profile,
+      searchFilters,
+      shouldAppearInSearch,
+      recommendation: shouldAppearInSearch 
+        ? 'Profile SHOULD appear in search' 
+        : `Profile excluded because: ${
+            !searchFilters.is_listed ? 'is_listed is false' :
+            !searchFilters.not_firm_admin ? 'profile_type is firm_admin' :
+            'unknown reason'
+          }`
     });
-
-  } catch (error) {
-    console.error("Error in profile debug API:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error in GET /api/debug-profile:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
