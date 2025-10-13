@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
+import { getServerStreamClient } from '@/lib/stream';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -52,10 +53,44 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch connections' }, { status: 500 });
     }
 
-    // For now, we'll return a simple response since we don't have real-time unread tracking
-    // In a full implementation, you'd track unread messages in the database
-    const hasUnreadMessages = false;
-    const unreadCount = 0;
+    // Query Stream Chat for actual unread messages
+    let hasUnreadMessages = false;
+    let unreadCount = 0;
+
+    try {
+      // Check if Stream is configured
+      if (!process.env.STREAM_KEY || !process.env.STREAM_SECRET) {
+        console.warn('Stream Chat not configured - skipping unread count');
+      } else {
+        const streamClient = getServerStreamClient();
+        
+        // Query channels where this user is a member
+        const channelsResponse = await streamClient.queryChannels(
+          {
+            members: { $in: [profile.id] },
+            type: 'messaging'
+          },
+          {},
+          {
+            state: true,
+            watch: false,
+            presence: false
+          }
+        );
+
+        // Count unread messages across all channels
+        for (const channel of channelsResponse) {
+          const unread = channel.state?.read?.[profile.id]?.unread_messages || 0;
+          unreadCount += unread;
+        }
+
+        hasUnreadMessages = unreadCount > 0;
+      }
+    } catch (streamError) {
+      console.error('Error fetching unread from Stream:', streamError);
+      // Don't fail the whole request if Stream is unavailable
+      // Just return 0 unread messages
+    }
 
     return NextResponse.json({
       hasUnreadMessages,
