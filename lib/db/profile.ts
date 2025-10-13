@@ -174,8 +174,8 @@ export function isFirmMember(profile: Profile | null): boolean {
 }
 
 /**
- * Get firm member badge color (premium gold/amber)
+ * Get firm member badge color (premium gold with shine effect)
  */
 export function getFirmMemberBadgeColor(): string {
-  return 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200';
+  return 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-amber-900 border border-yellow-600 shadow-md font-semibold';
 }
