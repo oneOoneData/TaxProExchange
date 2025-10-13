@@ -451,7 +451,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                 )}
                 {profile.profile_type === 'firm_admin' && (
                   <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-amber-900 border border-yellow-600 shadow-md">
-                    ⭐ PREMIUM
+                    ⭐ Firm
                   </span>
                 )}
                 <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-slate-100 text-slate-700">

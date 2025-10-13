@@ -892,7 +892,7 @@ export default function SearchPageClient() {
                           )}
                           {profile.profile_type === 'firm_admin' && (
                             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-amber-900 border border-yellow-600 shadow-md">
-                              ⭐ PREMIUM
+                              ⭐ Firm
                             </span>
                           )}
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
