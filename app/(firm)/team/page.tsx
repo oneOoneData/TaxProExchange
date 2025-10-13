@@ -397,18 +397,30 @@ function TeamDashboardContent() {
                   <button
                     onClick={async () => {
                       try {
+                        console.log('Opening billing portal for firm:', selectedFirmId);
                         const response = await fetch('/api/stripe/customer-portal', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ firmId: selectedFirmId }),
                         });
                         
+                        console.log('Response status:', response.status);
+                        const data = await response.json();
+                        console.log('Response data:', data);
+                        
                         if (response.ok) {
-                          const { url } = await response.json();
-                          if (url) window.location.href = url;
+                          if (data.url) {
+                            console.log('Redirecting to:', data.url);
+                            window.location.href = data.url;
+                          } else {
+                            alert('No portal URL returned. Please contact support.');
+                          }
+                        } else {
+                          alert(`Error: ${data.error || 'Failed to open billing portal'}`);
                         }
                       } catch (error) {
                         console.error('Error opening portal:', error);
+                        alert(`Error opening billing portal: ${error instanceof Error ? error.message : 'Unknown error'}`);
                       }
                     }}
                     className="px-6 py-3 border border-red-600 text-red-600 rounded-lg font-semibold hover:bg-red-50"
@@ -476,18 +488,30 @@ function TeamDashboardContent() {
             <button
               onClick={async () => {
                 try {
+                  console.log('Opening billing portal for firm:', selectedFirmId);
                   const response = await fetch('/api/stripe/customer-portal', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ firmId: selectedFirmId }),
                   });
                   
+                  console.log('Response status:', response.status);
+                  const data = await response.json();
+                  console.log('Response data:', data);
+                  
                   if (response.ok) {
-                    const { url } = await response.json();
-                    if (url) window.location.href = url;
+                    if (data.url) {
+                      console.log('Redirecting to:', data.url);
+                      window.location.href = data.url;
+                    } else {
+                      alert('No portal URL returned. Please contact support.');
+                    }
+                  } else {
+                    alert(`Error: ${data.error || 'Failed to open billing portal'}`);
                   }
                 } catch (error) {
                   console.error('Error opening portal:', error);
+                  alert(`Error opening billing portal: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 }
               }}
               className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
