@@ -41,8 +41,8 @@ export default function ProfileStatusCard({ profile, verificationRequest }: Prof
                profile.visibility_state === 'rejected' ? 'Rejected' : 'Hidden'}
             </span>
             {isFirmMember(profile) && (
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getFirmMemberBadgeColor()}`}>
-                🏢 Firm Member
+              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs ${getFirmMemberBadgeColor()}`}>
+                ⭐ PREMIUM
               </span>
             )}
           </div>
