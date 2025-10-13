@@ -25,6 +25,10 @@ type FirmWorkspaceRow = {
   trial_ends_at: string | null;
   created_at: string;
   member_count: number;
+  bench_invites_pending: number;
+  bench_invites_accepted: number;
+  team_invites_pending: number;
+  bench_pros_count: number;
 };
 
 const columnHelper = createColumnHelper<FirmWorkspaceRow>();
@@ -142,13 +146,53 @@ export default function FirmWorkspacesGrid() {
         size: 200,
       }),
       columnHelper.accessor('member_count', {
-        header: 'Members',
+        header: 'Team',
         cell: (info) => (
           <span className="text-sm font-medium text-slate-900">
             {info.getValue()}
           </span>
         ),
-        size: 80,
+        size: 60,
+      }),
+      columnHelper.accessor('bench_pros_count', {
+        header: 'Bench',
+        cell: (info) => {
+          const count = info.getValue();
+          return (
+            <span className={`text-sm font-medium ${count > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+              {count}
+            </span>
+          );
+        },
+        size: 60,
+      }),
+      columnHelper.accessor('bench_invites_pending', {
+        header: 'Bench Invites',
+        cell: (info) => {
+          const pending = info.getValue();
+          const accepted = info.row.original.bench_invites_accepted;
+          if (pending === 0 && accepted === 0) return <span className="text-slate-400 text-sm">—</span>;
+          return (
+            <div className="flex items-center gap-1 text-xs">
+              {pending > 0 && <span className="text-amber-600 font-medium">{pending} pending</span>}
+              {accepted > 0 && <span className="text-emerald-600">{accepted} ✓</span>}
+            </div>
+          );
+        },
+        size: 120,
+      }),
+      columnHelper.accessor('team_invites_pending', {
+        header: 'Team Invites',
+        cell: (info) => {
+          const count = info.getValue();
+          if (count === 0) return <span className="text-slate-400 text-sm">—</span>;
+          return (
+            <span className="text-amber-600 font-medium text-xs">
+              {count} pending
+            </span>
+          );
+        },
+        size: 100,
       }),
       columnHelper.accessor('size_band', {
         header: 'Size',

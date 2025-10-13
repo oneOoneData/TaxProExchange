@@ -28,9 +28,13 @@ export default function AdminFirmWorkspacesPage() {
           {/* Page Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-semibold text-slate-900 mb-2">Firm Workspaces</h1>
-            <p className="text-slate-600">
+            <p className="text-slate-600 mb-2">
               Manage actual firm workspace accounts that have signed up. These are firms with team members,
               not individual profiles with firm information.
+            </p>
+            <p className="text-sm text-slate-500">
+              <strong>Activity columns:</strong> Team = active team members · Bench = tax pros added to their bench · 
+              Bench Invites = invitations to tax pros (pending/accepted) · Team Invites = pending invitations to team members
             </p>
           </div>
 

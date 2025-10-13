@@ -82,27 +82,79 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
-    // Get member counts for each firm
+    // Get activity stats for each firm
     const firmIds = firms?.map(f => f.id) || [];
     
     let memberCounts: Record<string, number> = {};
+    let benchInvitesPending: Record<string, number> = {};
+    let benchInvitesAccepted: Record<string, number> = {};
+    let teamInvitesPending: Record<string, number> = {};
+    let benchProsAdded: Record<string, number> = {};
+    
     if (firmIds.length > 0) {
+      // Active team members
       const { data: memberData } = await supabase
         .from('firm_members')
         .select('firm_id')
         .in('firm_id', firmIds)
         .eq('status', 'active');
       
-      // Count members per firm
       memberData?.forEach((m: any) => {
         memberCounts[m.firm_id] = (memberCounts[m.firm_id] || 0) + 1;
       });
+
+      // Bench invitations sent (pending)
+      const { data: benchPendingData } = await supabase
+        .from('bench_invitations')
+        .select('firm_id')
+        .in('firm_id', firmIds)
+        .eq('status', 'pending');
+      
+      benchPendingData?.forEach((b: any) => {
+        benchInvitesPending[b.firm_id] = (benchInvitesPending[b.firm_id] || 0) + 1;
+      });
+
+      // Bench invitations accepted
+      const { data: benchAcceptedData } = await supabase
+        .from('bench_invitations')
+        .select('firm_id')
+        .in('firm_id', firmIds)
+        .eq('status', 'accepted');
+      
+      benchAcceptedData?.forEach((b: any) => {
+        benchInvitesAccepted[b.firm_id] = (benchInvitesAccepted[b.firm_id] || 0) + 1;
+      });
+
+      // Team member invitations sent (pending)
+      const { data: teamInviteData } = await supabase
+        .from('firm_member_invitations')
+        .select('firm_id')
+        .in('firm_id', firmIds)
+        .eq('status', 'pending');
+      
+      teamInviteData?.forEach((t: any) => {
+        teamInvitesPending[t.firm_id] = (teamInvitesPending[t.firm_id] || 0) + 1;
+      });
+
+      // Tax pros added to bench
+      const { data: benchData } = await supabase
+        .from('firm_trusted_bench')
+        .select('firm_id')
+        .in('firm_id', firmIds);
+      
+      benchData?.forEach((b: any) => {
+        benchProsAdded[b.firm_id] = (benchProsAdded[b.firm_id] || 0) + 1;
+      });
     }
 
-    // Enhance firms with member count
+    // Enhance firms with activity stats
     const enhancedFirms = firms?.map(firm => ({
       ...firm,
-      member_count: memberCounts[firm.id] || 0
+      member_count: memberCounts[firm.id] || 0,
+      bench_invites_pending: benchInvitesPending[firm.id] || 0,
+      bench_invites_accepted: benchInvitesAccepted[firm.id] || 0,
+      team_invites_pending: teamInvitesPending[firm.id] || 0,
+      bench_pros_count: benchProsAdded[firm.id] || 0,
     }));
 
     return NextResponse.json({
