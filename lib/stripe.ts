@@ -97,10 +97,19 @@ export async function createCustomerPortalSession({
   customerId: string;
   returnUrl: string;
 }): Promise<Stripe.BillingPortal.Session> {
-  const session = await stripe.billingPortal.sessions.create({
+  // Create session with optional configuration
+  // If STRIPE_PORTAL_CONFIG_ID is set, use it. Otherwise, use default configuration.
+  const sessionParams: Stripe.BillingPortal.SessionCreateParams = {
     customer: customerId,
     return_url: returnUrl,
-  });
+  };
+
+  // Add configuration if provided (optional - defaults to your Stripe dashboard default)
+  if (process.env.STRIPE_PORTAL_CONFIG_ID) {
+    sessionParams.configuration = process.env.STRIPE_PORTAL_CONFIG_ID;
+  }
+
+  const session = await stripe.billingPortal.sessions.create(sessionParams);
 
   return session;
 }
