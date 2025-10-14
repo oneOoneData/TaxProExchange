@@ -15,6 +15,8 @@ import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
 import BenchCard from '@/components/bench/BenchCard';
 import AddFromDirectory from '@/components/bench/AddFromDirectory';
 
+export const dynamic = 'force-dynamic';
+
 interface Firm {
   id: string;
   name: string;
