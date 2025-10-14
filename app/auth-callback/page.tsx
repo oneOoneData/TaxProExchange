@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
  * before redirecting to the target page. This prevents hydration errors
  * caused by redirecting during auth initialization.
  */
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -59,6 +59,38 @@ export default function AuthCallbackPage() {
         </style>
       </div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: '#f9fafb'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            border: '3px solid #e5e7eb',
+            borderTop: '3px solid #3b82f6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 8px'
+          }} />
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading...</p>
+          <style>
+            {`@keyframes spin { to { transform: rotate(360deg); } }`}
+          </style>
+        </div>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
 
