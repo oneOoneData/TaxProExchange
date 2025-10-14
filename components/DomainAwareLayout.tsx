@@ -3,12 +3,12 @@
 import { Inter } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import dynamic from 'next/dynamic';
-import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
 import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 import { useEffect, useState } from 'react';
 
-// Disable SSR for components that might cause hydration issues
+// Disable SSR for ALL components that might cause hydration issues
+const Footer = dynamic(() => import('@/components/Footer'), { ssr: false });
 const CanonicalUrl = dynamic(() => import('@/components/CanonicalUrl'), { ssr: false });
 const AppNavigation = dynamic(() => import('@/components/AppNavigation'), { ssr: false });
 const MobileBottomNav = dynamic(() => import('@/components/MobileBottomNav'), { ssr: false });
@@ -110,27 +110,19 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
       </head>
       <body className={inter.className}>
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          {/* App navigation - always render wrapper to prevent hydration mismatch */}
-          <div style={{ display: shouldShowAppNavigation ? 'block' : 'none' }}>
-            {shouldShowAppNavigation && <AppNavigation />}
-          </div>
+          {/* App navigation - client only */}
+          {shouldShowAppNavigation && <AppNavigation />}
           
-          {/* Canonical URL - always render wrapper */}
-          <div style={{ display: isClient && !isApp ? 'block' : 'none' }}>
-            {isClient && !isApp && <CanonicalUrl />}
-          </div>
+          {/* Canonical URL - client only */}
+          {isClient && !isApp && <CanonicalUrl />}
           
-          {/* Main content - always same wrapper */}
-          <div className="pb-16 md:pb-0">
-            {children}
-          </div>
+          {/* Main content */}
+          {children}
           
-          {/* Mobile navigation - always render wrapper */}
-          <div style={{ display: isClient && isApp ? 'block' : 'none' }}>
-            {isClient && isApp && <MobileBottomNav />}
-          </div>
+          {/* Mobile navigation - client only */}
+          {isClient && isApp && <MobileBottomNav />}
           
-          {/* Footer - always visible */}
+          {/* Footer - client only to avoid hydration issues */}
           <Footer />
         </ClerkProvider>
       </body>
