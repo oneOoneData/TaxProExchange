@@ -2,13 +2,16 @@
 
 import { Inter } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import dynamic from 'next/dynamic';
 import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
-import CanonicalUrl from '@/components/CanonicalUrl';
-import AppNavigation from '@/components/AppNavigation';
-import MobileBottomNav from '@/components/MobileBottomNav';
 import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 import { useEffect, useState } from 'react';
+
+// Disable SSR for components that might cause hydration issues
+const CanonicalUrl = dynamic(() => import('@/components/CanonicalUrl'), { ssr: false });
+const AppNavigation = dynamic(() => import('@/components/AppNavigation'), { ssr: false });
+const MobileBottomNav = dynamic(() => import('@/components/MobileBottomNav'), { ssr: false });
 
 // Real viewport height hook for mobile browsers
 function useRealVH() {
