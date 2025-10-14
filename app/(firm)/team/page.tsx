@@ -63,7 +63,23 @@ function TeamDashboardContent() {
   const [error, setError] = useState<string | null>(null);
   const [checkoutStatus, setCheckoutStatus] = useState<string | null>(null);
 
-  // Feature flag check removed - FEATURE_FIRM_WORKSPACES is always true
+  // Early return while auth is loading to prevent hydration issues
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!userId) {
+    router.push('/sign-in');
+    return null;
+  }
 
   // Handle checkout success/cancel status
   useEffect(() => {
@@ -231,18 +247,23 @@ function TeamDashboardContent() {
     });
   };
 
-  if (!isLoaded || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
+  // Loading handled by early return above
+  
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading firms...</p>
+        </div>
       </div>
     );
   }
