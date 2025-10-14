@@ -5,6 +5,7 @@ const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/si
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit', '/feedback']);
 const isDashboard = createRouteMatcher(['/dashboard']);
 const isFirmArea = createRouteMatcher(['/team(.*)', '/firm(.*)']);
+const isAuthCallback = createRouteMatcher(['/auth-callback']);
 const isAdmin = createRouteMatcher(['/admin(.*)']);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
@@ -47,6 +48,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Dashboard routes always allowed for signed-in users
   if (isDashboard(req)) {
     response.headers.set('x-debug-redirect', 'none (dashboard)');
+    return response;
+  }
+
+  // Auth callback always allowed (handles post-login redirects)
+  if (isAuthCallback(req)) {
+    response.headers.set('x-debug-redirect', 'none (auth callback)');
     return response;
   }
 
