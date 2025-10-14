@@ -50,37 +50,8 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
     }
   }, []);
 
-  // Prevent hydration mismatches by not rendering until client-side
-  if (!isClient) {
-    return (
-      <html lang="en" data-scroll-behavior="smooth">
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-          <link rel="canonical" href="https://www.taxproexchange.com" />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(getOrganizationJsonLd()),
-            }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(getWebsiteJsonLd()),
-            }}
-          />
-          <Analytics measurementId={GA_MEASUREMENT_ID_SITE} />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        </head>
-        <body className={inter.className}>
-          <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-            {children}
-            <Footer />
-          </ClerkProvider>
-        </body>
-      </html>
-    );
-  }
+  // Remove early return to prevent hydration mismatch
+  // Always render the same structure on server and client
 
   // Pages that have their own headers and shouldn't get AppNavigation
   const pagesWithOwnHeaders = [
