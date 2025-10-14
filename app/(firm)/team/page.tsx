@@ -11,7 +11,6 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
-import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
 import BenchCard from '@/components/bench/BenchCard';
 import AddFromDirectory from '@/components/bench/AddFromDirectory';
 
@@ -64,12 +63,7 @@ function TeamDashboardContent() {
   const [error, setError] = useState<string | null>(null);
   const [checkoutStatus, setCheckoutStatus] = useState<string | null>(null);
 
-  // Guard: redirect if flag is off (client-side only)
-  useEffect(() => {
-    if (!FEATURE_FIRM_WORKSPACES) {
-      router.push('/');
-    }
-  }, [router]);
+  // Feature flag check removed - FEATURE_FIRM_WORKSPACES is always true
 
   // Handle checkout success/cancel status
   useEffect(() => {
@@ -752,11 +746,6 @@ function TeamDashboardContent() {
 }
 
 export default function TeamDashboardPage() {
-  // Early return if feature is disabled (server-safe)
-  if (!FEATURE_FIRM_WORKSPACES) {
-    return null;
-  }
-
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
