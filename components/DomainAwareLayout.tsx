@@ -37,47 +37,11 @@ interface DomainAwareLayoutProps {
 }
 
 export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) {
-  const [isApp, setIsApp] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [currentPath, setCurrentPath] = useState('');
-
   // Set up real viewport height for mobile browsers
   useRealVH();
 
-  useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const isAppDomain = window.location.hostname === 'app.taxproexchange.com';
-      setIsApp(isAppDomain);
-      setCurrentPath(window.location.pathname);
-    }
-  }, []);
-
-  // Remove early return to prevent hydration mismatch
-  // Always render the same structure on server and client
-
-  // Pages that have their own headers and shouldn't get AppNavigation
-  const pagesWithOwnHeaders = [
-    '/profile/',
-    '/onboarding/',
-    '/sign-in',
-    '/sign-up',
-    '/refer',
-    '/feedback',
-    '/settings',
-    '/messages',
-    '/jobs/',
-    '/search',
-    '/p/',
-    '/legal',
-    '/privacy',
-    '/terms',
-    '/admin'
-  ];
-  
-  const shouldShowAppNavigation = isClient && isApp && !pagesWithOwnHeaders.some(path => 
-    currentPath.startsWith(path)
-  );
+  // Simplified: No domain-based conditional rendering
+  // All components render unconditionally to prevent hydration issues
 
   // Always render the same structure to prevent hydration mismatch
   return (
@@ -110,19 +74,10 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
       </head>
       <body className={inter.className}>
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          {/* App navigation - client only */}
-          {shouldShowAppNavigation && <AppNavigation />}
-          
-          {/* Canonical URL - client only */}
-          {isClient && !isApp && <CanonicalUrl />}
-          
-          {/* Main content */}
+          {/* Main content - no conditional wrappers */}
           {children}
           
-          {/* Mobile navigation - client only */}
-          {isClient && isApp && <MobileBottomNav />}
-          
-          {/* Footer - client only to avoid hydration issues */}
+          {/* Footer - always render */}
           <Footer />
         </ClerkProvider>
       </body>
