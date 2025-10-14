@@ -107,21 +107,27 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
       </head>
       <body className={inter.className}>
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
-          {/* Conditional navigation - only show after client hydration */}
-          {shouldShowAppNavigation && <AppNavigation />}
+          {/* App navigation - always render wrapper to prevent hydration mismatch */}
+          <div style={{ display: shouldShowAppNavigation ? 'block' : 'none' }}>
+            {shouldShowAppNavigation && <AppNavigation />}
+          </div>
           
-          {/* Canonical URL component - only for marketing site */}
-          {isClient && !isApp && <CanonicalUrl />}
+          {/* Canonical URL - always render wrapper */}
+          <div style={{ display: isClient && !isApp ? 'block' : 'none' }}>
+            {isClient && !isApp && <CanonicalUrl />}
+          </div>
           
-          {/* Main content */}
-          <div className={isClient && isApp ? "pb-16 md:pb-0" : ""}>
+          {/* Main content - always same wrapper */}
+          <div className="pb-16 md:pb-0">
             {children}
           </div>
           
-          {/* Conditional mobile navigation - only for app */}
-          {isClient && isApp && <MobileBottomNav />}
+          {/* Mobile navigation - always render wrapper */}
+          <div style={{ display: isClient && isApp ? 'block' : 'none' }}>
+            {isClient && isApp && <MobileBottomNav />}
+          </div>
           
-          {/* Footer */}
+          {/* Footer - always visible */}
           <Footer />
         </ClerkProvider>
       </body>
