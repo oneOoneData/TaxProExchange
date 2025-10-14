@@ -1,3 +1,5 @@
+'use client';
+
 import dynamic from 'next/dynamic';
 
 // Temporarily disable SSR for entire dashboard to isolate hydration issue
