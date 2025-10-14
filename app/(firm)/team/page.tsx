@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
@@ -755,14 +755,6 @@ export default function TeamDashboardPage() {
     return null;
   }
 
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600">Loading team dashboard...</div>
-      </div>
-    }>
-      <TeamDashboardContent />
-    </Suspense>
-  );
+  return <TeamDashboardContent />;
 }
 
