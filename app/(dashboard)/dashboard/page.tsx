@@ -46,8 +46,8 @@ export default async function DashboardPage() {
 
   const onboardingComplete = isOnboardingComplete(profile);
   
-  // Debug logging - v2
-  console.log('🔍 Dashboard Debug v2:', {
+  // Debug logging - server-side only (this is a Server Component)
+  console.log('🔍 Dashboard Debug:', {
     userId,
     profile: profile ? {
       id: profile.id,
@@ -60,21 +60,6 @@ export default async function DashboardPage() {
     onboardingComplete
   });
 
-  // Client-side debug logging
-  if (typeof window !== 'undefined') {
-    console.log('🔍 Client-side Dashboard Debug:', {
-      userId,
-      profile: profile ? {
-        id: profile.id,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        onboarding_complete: profile.onboarding_complete,
-        clerk_id: profile.clerk_id,
-        clerk_user_id: profile.clerk_user_id
-      } : null,
-      onboardingComplete
-    });
-  }
   const canPostJobs = profile?.visibility_state === 'verified' && Boolean(profile?.firm_name);
 
   return (
