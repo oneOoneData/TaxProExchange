@@ -4,6 +4,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/search', '/jobs', '/p/(.*)', '/legal(.*)', '/trust', '/transparency']);
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit', '/feedback']);
 const isDashboard = createRouteMatcher(['/dashboard']);
+const isFirmArea = createRouteMatcher(['/team(.*)', '/firm(.*)']);
 const isAdmin = createRouteMatcher(['/admin(.*)']);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
@@ -58,6 +59,13 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Admin routes always allowed for signed-in users (bypass onboarding check)
   if (isAdmin(req)) {
     response.headers.set('x-debug-redirect', 'none (admin)');
+    return response;
+  }
+
+  // Firm area routes always allowed for signed-in users (bypass onboarding check)
+  // Firm admins have their own onboarding flow
+  if (isFirmArea(req)) {
+    response.headers.set('x-debug-redirect', 'none (firm area)');
     return response;
   }
 
