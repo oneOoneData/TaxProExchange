@@ -400,6 +400,8 @@ export default function AdminDashboard() {
             <Link href="/admin" className="hover:text-slate-900 font-medium">Admin</Link>
             <Link href="/admin/verify" className="hover:text-slate-900">Verify</Link>
             <Link href="/admin/profiles" className="hover:text-slate-900">Profiles</Link>
+            <Link href="/admin/jobs" className="hover:text-slate-900">Jobs</Link>
+            <Link href="/admin/job-applications" className="hover:text-slate-900">Applications</Link>
             <Link href="/admin/firms" className="hover:text-slate-900">Enrichment</Link>
             <Link href="/admin/firm-workspaces" className="hover:text-slate-900">Workspaces</Link>
           </nav>
@@ -659,6 +661,48 @@ export default function AdminDashboard() {
               className="inline-flex items-center justify-center rounded-xl bg-teal-600 text-white px-4 py-2 text-sm font-medium hover:bg-teal-700 transition-colors"
             >
               Manage Workspaces
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Job Applications</h3>
+            <p className="text-slate-600 mb-4">View and manage all job applications across the platform.</p>
+            <Link
+              href="/admin/job-applications"
+              className="inline-flex items-center justify-center rounded-xl bg-rose-600 text-white px-4 py-2 text-sm font-medium hover:bg-rose-700 transition-colors"
+            >
+              View Applications
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3 }}
+            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Manage Jobs</h3>
+            <p className="text-slate-600 mb-4">View, edit, and manage all job postings on the platform.</p>
+            <Link
+              href="/admin/jobs"
+              className="inline-flex items-center justify-center rounded-xl bg-amber-600 text-white px-4 py-2 text-sm font-medium hover:bg-amber-700 transition-colors"
+            >
+              Manage Jobs
             </Link>
           </motion.div>
         </div>
