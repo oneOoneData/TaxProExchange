@@ -7,6 +7,9 @@ import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
 import AppMobileNav from '@/components/AppMobileNav';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import HydrationGuard from '@/components/HydrationGuard';
+
+export const dynamic = 'force-dynamic';
 
 export default function DashboardLayout({
   children,
@@ -32,45 +35,47 @@ export default function DashboardLayout({
           </nav>
           
           <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                {/* Feedback Icon */}
-                <Link
-                  href="/feedback"
-                  className="relative p-2 text-slate-600 hover:text-slate-900 transition-colors"
-                  aria-label="Log an improvement or issue"
-                  title="Log an improvement or issue"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                </Link>
+            <HydrationGuard fallback={<div style={{ width: 200, height: 40 }} />}>
+              {user ? (
+                <>
+                  {/* Feedback Icon */}
+                  <Link
+                    href="/feedback"
+                    className="relative p-2 text-slate-600 hover:text-slate-900 transition-colors"
+                    aria-label="Log an improvement or issue"
+                    title="Log an improvement or issue"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </Link>
 
-                {/* Messages Icon */}
+                  {/* Messages Icon */}
+                  <Link
+                    href="/messages"
+                    className="relative p-2 text-slate-600 hover:text-slate-900 transition-colors"
+                    aria-label="Messages"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    {/* TODO: Add notification badge here */}
+                  </Link>
+                  
+                  <UserMenu 
+                    userName={user.fullName || undefined}
+                    userEmail={user.primaryEmailAddress?.emailAddress}
+                  />
+                </>
+              ) : (
                 <Link
-                  href="/messages"
-                  className="relative p-2 text-slate-600 hover:text-slate-900 transition-colors"
-                  aria-label="Messages"
+                  href="/join"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  {/* TODO: Add notification badge here */}
+                  Join Now
                 </Link>
-                
-                <UserMenu 
-                  userName={user.fullName || undefined}
-                  userEmail={user.primaryEmailAddress?.emailAddress}
-                />
-              </>
-            ) : (
-              <Link
-                href="/join"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800"
-              >
-                Join Now
-              </Link>
-            )}
+              )}
+            </HydrationGuard>
             
             {/* Mobile Menu Button */}
             <button
