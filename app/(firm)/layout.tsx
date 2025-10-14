@@ -8,6 +8,8 @@ import UserMenu from '@/components/UserMenu';
 import AppMobileNav from '@/components/AppMobileNav';
 import MobileBottomNav from '@/components/MobileBottomNav';
 
+export const dynamic = 'force-dynamic';
+
 export default function FirmLayout({
   children,
 }: {
