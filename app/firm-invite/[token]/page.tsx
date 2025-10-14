@@ -68,9 +68,9 @@ export default function FirmInvitePage({ params }: { params: Promise<{ token: st
 
       if (action === 'accept') {
         setSuccess(true);
-        // Redirect to dashboard after 2 seconds
+        // Redirect to firm team page after 2 seconds
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push(`/team?firmId=${data.firm.id}`);
         }, 2000);
       } else {
         // Declined - redirect to dashboard
