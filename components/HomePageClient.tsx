@@ -73,6 +73,10 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             <a href="/jobs" className="hover:text-slate-900">Jobs</a>
             <a href="/events" className="hover:text-slate-900">Events</a>
             <a href="/mentorship" className="hover:text-slate-900">Mentorship</a>
+            <a href="/partners" className="hover:text-slate-900 flex items-center gap-1.5">
+              <span className="text-base">🤝</span>
+              Partners
+            </a>
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
