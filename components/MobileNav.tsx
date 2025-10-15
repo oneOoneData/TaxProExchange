@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 
 interface MobileNavProps {
@@ -12,16 +13,31 @@ interface MobileNavProps {
 
 export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const { user } = useUser();
+  const pathname = usePathname();
+  const [isCommunityOpen, setIsCommunityOpen] = useState(false);
 
-  const navItems = [
+  const topNavItems = user ? [
+    { href: '/dashboard', label: 'Dashboard' },
+  ] : [
     { href: '#features', label: 'Features' },
     { href: '#how', label: 'How it works' },
     { href: '#faq', label: 'FAQ' },
+  ];
+
+  const communityItems = user ? [
+    { href: '/search', label: 'Directory' },
+    { href: '/jobs', label: 'Jobs' },
+    { href: '/partners', label: '🤝 Partners', icon: true },
+  ] : [
     { href: '/search', label: 'Directory' },
     { href: '/jobs', label: 'Jobs' },
     { href: '/events', label: 'Events' },
     { href: '/mentorship', label: 'Mentorship' },
-    ...(!user ? [{ href: '/join', label: 'Join' }] : []),
+    { href: '/partners', label: '🤝 Partners', icon: true },
+  ];
+
+  const bottomNavItems = user ? [] : [
+    { href: '/join', label: 'Join' },
   ];
 
   return (
@@ -61,19 +77,97 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
               </div>
 
               {/* Navigation Items */}
-              <nav className="flex-1 p-6">
-                <ul className="space-y-4">
-                  {navItems.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={onClose}
-                        className="block py-3 px-4 rounded-lg text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-lg"
+              <nav className="flex-1 p-6 overflow-y-auto">
+                <ul className="space-y-2">
+                  {/* Top Nav Items */}
+                  {topNavItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={onClose}
+                          className={`block py-3 px-4 rounded-lg transition-colors text-lg ${
+                            isActive 
+                              ? 'bg-slate-100 text-slate-900 font-medium' 
+                              : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+
+                  {/* Community Dropdown */}
+                  <li>
+                    <button
+                      onClick={() => setIsCommunityOpen(!isCommunityOpen)}
+                      className="w-full flex items-center justify-between py-3 px-4 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors text-lg"
+                    >
+                      <span className="font-medium">Community</span>
+                      <svg
+                        className={`w-5 h-5 transition-transform ${isCommunityOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    
+                    {/* Community Items */}
+                    <AnimatePresence>
+                      {isCommunityOpen && (
+                        <motion.ul
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="ml-4 mt-2 space-y-1 overflow-hidden"
+                        >
+                          {communityItems.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                              <li key={item.href}>
+                                <Link
+                                  href={item.href}
+                                  onClick={onClose}
+                                  className={`block py-2 px-4 rounded-lg transition-colors ${
+                                    isActive 
+                                      ? 'bg-slate-100 text-slate-900 font-medium' 
+                                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                  }`}
+                                >
+                                  {item.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </li>
+
+                  {/* Bottom Nav Items */}
+                  {bottomNavItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={onClose}
+                          className={`block py-3 px-4 rounded-lg transition-colors text-lg ${
+                            isActive 
+                              ? 'bg-slate-100 text-slate-900 font-medium' 
+                              : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </nav>
 

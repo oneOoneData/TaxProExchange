@@ -1,0 +1,33 @@
+[
+  {
+    "id": "bluej",
+    "name": "BlueJ",
+    "slug": "bluej",
+    "tagline": "AI-powered tax research and compliance platform",
+    "description": "BlueJ leverages artificial intelligence to streamline tax research, automate compliance workflows, and provide real-time guidance for tax professionals.",
+    "logo": "/partners/bluej-logo.svg",
+    "website": "https://bluej.com",
+    "category": "AI Tax Technology"
+  },
+  {
+    "id": "truss",
+    "name": "Truss",
+    "slug": "truss",
+    "tagline": "Intelligent document processing for tax firms",
+    "description": "Truss uses advanced AI to extract, classify, and organize tax documents, reducing manual data entry and accelerating tax preparation workflows.",
+    "logo": "/partners/truss-logo.svg",
+    "website": "https://truss.works",
+    "category": "AI Tax Technology"
+  },
+  {
+    "id": "taxgpt",
+    "name": "TaxGPT",
+    "slug": "taxgpt",
+    "tagline": "Conversational AI for tax guidance",
+    "description": "TaxGPT provides instant, AI-powered answers to complex tax questions, helping professionals research efficiently and serve clients faster.",
+    "logo": "/partners/taxgpt-logo.svg",
+    "website": "https://taxgpt.com",
+    "category": "AI Tax Technology"
+  }
+]
+

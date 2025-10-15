@@ -3,6 +3,7 @@
 import { useUser } from '@clerk/nextjs';
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
 import { JoinButton } from '@/components/JoinButton';
@@ -10,25 +11,43 @@ import MobileNav from '@/components/MobileNav';
 
 export default function AppNavigation() {
   const { user } = useUser();
+  const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  const isActive = (path: string) => {
+    return pathname === path ? 'text-slate-900 font-medium' : 'text-slate-600 hover:text-slate-900';
+  };
 
   return (
     <>
       {/* Navigation Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <Link href="/">
-            <Logo />
-          </Link>
+          <Logo />
           
-          <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <Link href="/search" className="hover:text-slate-900">Directory</Link>
-            <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
-            <Link href="/events" className="hover:text-slate-900">Events</Link>
-            <Link href="/mentorship" className="hover:text-slate-900">Mentorship</Link>
-            <Link href="/dashboard" className="hover:text-slate-900">Dashboard</Link>
-            {!user && (
-              <Link href="/join" className="hover:text-slate-900">Join</Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            {user ? (
+              <>
+                <Link href="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+                <Link href="/search" className={isActive('/search')}>Directory</Link>
+                <Link href="/jobs" className={isActive('/jobs')}>Jobs</Link>
+                <Link href="/partners" className={`${isActive('/partners')} flex items-center gap-1.5`}>
+                  <span className="text-base">🤝</span>
+                  Partners
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/search" className={isActive('/search')}>Directory</Link>
+                <Link href="/jobs" className={isActive('/jobs')}>Jobs</Link>
+                <Link href="/events" className={isActive('/events')}>Events</Link>
+                <Link href="/mentorship" className={isActive('/mentorship')}>Mentorship</Link>
+                <Link href="/partners" className={`${isActive('/partners')} flex items-center gap-1.5`}>
+                  <span className="text-base">🤝</span>
+                  Partners
+                </Link>
+                <Link href="/join" className={isActive('/join')}>Join</Link>
+              </>
             )}
           </nav>
           

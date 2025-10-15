@@ -3285,3 +3285,151 @@ Implemented client-side validation that:
 - Users cannot proceed to next step until errors are fixed
 - Errors clear automatically when user corrects the field
 
+
+---
+
+## Partners Navigation Link Addition (October 15, 2025)
+
+### Problem
+The main navigation did not include a 'Partners' link, and there was no /partners page for partnership opportunities. Additionally, logged-in and logged-out users saw the same navigation items.
+
+### Solution
+Added 'Partners' link to both desktop and mobile navigation with responsive behavior and active route highlighting. Created a new /partners page with hero section, partnership opportunity cards, and CTAs.
+
+### Files Modified
+- **components/AppNavigation.tsx**: Added Partners link with conditional nav items based on auth state; implemented active route highlighting using usePathname
+- **components/MobileNav.tsx**: Added Partners link to mobile nav with active route highlighting
+- **app/partners/page.tsx**: New page showcasing partnership opportunities (Technology Partners, Professional Organizations, Educational Partners)
+
+### Navigation Behavior
+**Logged-in users see:**
+- Dashboard, Directory, Jobs, Partners
+
+**Logged-out users see:**
+- Directory, Jobs, Events, Mentorship, Partners, Join
+
+### Features
+- Active route highlighting: Current page link appears in dark slate with medium font weight
+- Responsive design: Desktop horizontal nav, mobile slide-out menu
+- Partners page includes:
+  - Hero section with CTA to partnerships@taxproexchange.com
+  - 3 partnership types (Technology, Professional Organizations, Educational)
+  - Benefits section with 4 key value props
+  - Final CTA section
+
+### Technical Details
+- Uses Next.js usePathname() hook for active route detection
+- Preserves existing Tailwind styling conventions
+- No new dependencies added
+- SEO metadata included for /partners page
+
+---
+
+## Partners Landing Page with AI Technology Partners (October 15, 2025)
+
+### Problem
+The /partners page needed to showcase specific AI technology partners with individual detail pages rather than just general partnership information.
+
+### Solution
+Enhanced the Partners page to feature AI-focused technology partners (BlueJ, Truss, TaxGPT) with a responsive grid layout and dynamic detail pages. Created a data-driven approach using JSON for easy partner management.
+
+### Files Created
+- **data/partners.json**: Partner data with id, name, slug, tagline, description, logo path, website, and category
+- **app/partners/components/PartnerCard.tsx**: Reusable partner card component with Framer Motion hover animations
+- **app/partners/[slug]/page.tsx**: Dynamic partner detail pages with 'Coming Soon' placeholder content
+
+### Files Modified
+- **app/partners/page.tsx**: Updated hero messaging to focus on AI partnerships; added partner grid pulling from JSON data
+
+### Features
+**Partners Index Page (/partners):**
+- Hero section emphasizing AI-forward partnerships in tax/accounting/wealth management
+- Responsive grid (1 col mobile, 2 col tablet, 3 col desktop)
+- Partner cards with:
+  - Logo placeholder with partner name
+  - Category badge (AI Tax Technology)
+  - Tagline and description with line-clamp
+  - Hover animation (lift effect)
+  - Click-through to detail page
+- 'Why Partner' section with 4 value props
+
+**Partner Detail Pages (/partners/[slug]):**
+- Breadcrumb navigation
+- Hero with logo, category, name, tagline, description
+- External website link with icon
+- 'Coming Soon' section with construction emoji and CTA
+- Related partners section showing other partners
+- Full SEO metadata per partner
+- Static generation for all partner slugs
+
+### Current Partners
+1. **BlueJ**: AI-powered tax research and compliance platform
+2. **Truss**: Intelligent document processing for tax firms
+3. **TaxGPT**: Conversational AI for tax guidance
+
+### Technical Details
+- Uses Next.js 15 App Router with dynamic routes
+- generateStaticParams() for pre-rendering all partner pages
+- Framer Motion for card animations (opacity, y-offset, hover lift)
+- TypeScript interfaces for type safety
+- Responsive Tailwind grid system
+- Logo placeholders (ready for actual SVG logos in /public/partners/)
+- Consistent with site design patterns (rounded-2xl cards, slate color scheme)
+
+### Adding New Partners
+To add a new partner, simply add an entry to data/partners.json following the schema. No code changes required.
+
+---
+
+## Partners Navigation Enhancement - Icon and Mobile Dropdown (October 15, 2025)
+
+### Problem
+The Partners link needed a visual identifier (handshake icon) and mobile navigation needed better organization with a collapsible 'Community' section for related links.
+
+### Solution
+Added handshake emoji () to Partners links across all navigation components and created a collapsible 'Community' dropdown in mobile navigation that groups Directory, Jobs, Events, Mentorship, and Partners together.
+
+### Files Modified
+- **components/AppNavigation.tsx**: Added  emoji to Partners link with flex layout for proper icon/text alignment
+- **components/HomePageClient.tsx**: Added  emoji to Partners link in homepage navigation
+- **components/MobileNav.tsx**: Complete restructure with collapsible Community dropdown
+
+### Desktop Navigation
+**Partners link now displays:**
+-  Partners (with handshake emoji)
+- Icon and text aligned with gap-1.5 spacing
+- Active route highlighting still works
+- Consistent hover effects
+
+### Mobile Navigation Structure
+**Logged-out users:**
+- Features, How it works, FAQ (top level)
+- **Community** (expandable dropdown)
+  - Directory
+  - Jobs
+  - Events
+  - Mentorship
+  -  Partners
+- Join (bottom level)
+
+**Logged-in users:**
+- Dashboard (top level)
+- **Community** (expandable dropdown)
+  - Directory
+  - Jobs
+  -  Partners
+
+### Features
+- Expandable/collapsible Community section with chevron rotation animation
+- Smooth height/opacity transitions using Framer Motion
+- Indented sub-items for visual hierarchy
+- Active route highlighting throughout
+- Partners link includes handshake emoji in dropdown too
+
+### Technical Details
+- Uses React state (isCommunityOpen) to manage dropdown toggle
+- Framer Motion AnimatePresence for smooth expand/collapse
+- Chevron rotates 180 when open
+- Smaller text/padding for dropdown items vs top-level items
+- Overflow-y-auto on nav for long lists
+- Maintains existing active route highlighting logic
