@@ -42,7 +42,7 @@ export default function PartnersPage() {
               </p>
               <div className="mt-8">
                 <a
-                  href="mailto:partnerships@taxproexchange.com?subject=Partnership Inquiry"
+                  href="mailto:support@taxproexchange.com?subject=Partnership Inquiry"
                   className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-slate-900 bg-white hover:bg-slate-100 shadow-lg transition-all"
                 >
                   Become a Partner
@@ -119,7 +119,7 @@ export default function PartnersPage() {
               Interested in partnering with TaxProExchange? We&apos;re looking for AI-forward firms building the future of tax, accounting, and wealth management.
             </p>
             <a
-              href="mailto:partnerships@taxproexchange.com?subject=Partnership Inquiry"
+              href="mailto:support@taxproexchange.com?subject=Partnership Inquiry"
               className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-slate-900 bg-white hover:bg-slate-100 shadow-lg transition-all"
             >
               Contact Partnerships Team
