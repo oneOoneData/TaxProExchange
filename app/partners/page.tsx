@@ -32,7 +32,17 @@ export default function PartnersPage() {
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
         {/* Hero */}
         <section className="relative overflow-hidden bg-slate-900 text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+            style={{ backgroundImage: 'url(/bg/skyline.png)' }}
+          />
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-900/70" />
+          
+          {/* Content */}
+          <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
             <div className="max-w-4xl">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
                 Building the Future of Tax & Accounting
