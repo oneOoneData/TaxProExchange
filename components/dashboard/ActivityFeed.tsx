@@ -126,13 +126,7 @@ export default function ActivityFeed({ connections, recentlyVerified, currentPro
                         )}
                       </div>
                       
-                      {mentor.mentoring_message && (
-                        <p className="text-xs text-gray-600 italic line-clamp-2">
-                          "{mentor.mentoring_message}"
-                        </p>
-                      )}
-                      
-                      {(mentor.topics.length > 0 || mentor.software.length > 0 || mentor.specializations.length > 0) && (
+                      {(mentor.topics && mentor.topics.length > 0) && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {mentor.topics.slice(0, 2).map((topic) => (
                             <span
@@ -140,22 +134,6 @@ export default function ActivityFeed({ connections, recentlyVerified, currentPro
                               className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                             >
                               {topic.replace(/_/g, ' ').toUpperCase()}
-                            </span>
-                          ))}
-                          {mentor.software.slice(0, 1).map((soft) => (
-                            <span
-                              key={soft}
-                              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                            >
-                              {soft.replace(/_/g, ' ')}
-                            </span>
-                          ))}
-                          {mentor.specializations.slice(0, 1).map((spec) => (
-                            <span
-                              key={spec}
-                              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
-                            >
-                              {spec}
                             </span>
                           ))}
                         </div>
