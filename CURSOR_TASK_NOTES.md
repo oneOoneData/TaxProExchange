@@ -32,6 +32,8 @@ Jeremy's profile was likely created via the firms endpoint (which sets `clerk_us
 
 **Recommended**: See `CLERK_ID_CLEANUP_PLAN.md` for full migration strategy to consolidate to a single column.
 
+**Prevention (2025-10-16)**: Enhanced existing Clerk webhook to auto-sync clerk_id on user.created/user.updated events. This prevents future mismatches when users recreate accounts. See `app/api/webhooks/clerk/route.ts`.
+
 ---
 
 ## Firm Admin Full Participation (2025-10-13) ✅

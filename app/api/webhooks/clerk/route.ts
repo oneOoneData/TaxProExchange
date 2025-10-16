@@ -149,15 +149,43 @@ export async function POST(request: Request) {
       console.log('🔍 Final email for user:', email);
       console.log('🔍 User data structure:', JSON.stringify(u, null, 2));
 
-      // If no email, use a placeholder or skip the insert
+      // If no email, skip processing
       if (!email) {
-        console.log('🔍 No email found for user, skipping profile creation');
+        console.log('🔍 No email found for user, skipping');
         return NextResponse.json({ ok: true, message: "User created but no email available" });
       }
 
-      // Don't create profile automatically - user must complete profile edit first
-      console.log('🔍 User authenticated, profile will be created when user completes profile edit');
-      return NextResponse.json({ ok: true, message: "User authenticated - profile creation deferred to user action" });
+      // Sync clerk_id for existing profiles (prevents mismatches when users recreate accounts)
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id, clerk_id')
+        .eq('public_email', email)
+        .maybeSingle();
+
+      if (existingProfile) {
+        if (existingProfile.clerk_id !== u.id) {
+          // Clerk ID has changed - sync it
+          console.log(`🔄 Syncing clerk_id for ${email}: ${existingProfile.clerk_id} → ${u.id}`);
+          
+          const { error: syncError } = await supabase
+            .from('profiles')
+            .update({ clerk_id: u.id })
+            .eq('id', existingProfile.id);
+
+          if (syncError) {
+            console.error('🔍 Error syncing clerk_id:', syncError);
+          } else {
+            console.log('✅ Clerk ID synced successfully');
+          }
+        } else {
+          console.log('✅ Clerk ID already in sync for', email);
+        }
+      } else {
+        // Profile doesn't exist yet - will be created when user completes onboarding
+        console.log('🔍 No profile found for', email, '- will be created on onboarding');
+      }
+
+      return NextResponse.json({ ok: true, message: "Clerk ID synced if profile exists" });
     } else {
       console.log('🔍 Webhook event type not handled:', evt.type);
     }
