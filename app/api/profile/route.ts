@@ -413,9 +413,10 @@ export async function PUT(request: Request) {
     let profile;
     let profileError;
 
-    if (existingProfile) {
+      if (existingProfile) {
       // Update existing profile
       let updateData: any = {
+        clerk_id, // Ensure clerk_id is updated in case profile was found by email
         updated_at: new Date().toISOString(),
       };
       
@@ -451,7 +452,7 @@ export async function PUT(request: Request) {
       const { data: updatedProfile, error: updateError } = await supabase
         .from('profiles')
         .update(updateData)
-        .eq('clerk_id', clerk_id)
+        .eq('id', existingProfile.id)
         .select()
         .single();
       

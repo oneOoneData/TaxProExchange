@@ -1,5 +1,39 @@
 # Cursor Task Notes
 
+## Profile Update Bug Fix (2025-10-16) ✅
+
+**Bug**: User Jeremy Wells (jeremy@steadfastbookkeeping.com) getting error "Cannot coerce the result to a single JSON object" when completing profile.
+
+**Root Cause**: 
+- Profile lookup was finding the profile by email (returns profile ID)
+- But the UPDATE query was using `.eq('clerk_id', clerk_id)` instead of `.eq('id', existingProfile.id)`
+- If the profile had a different/null clerk_id, the UPDATE would affect 0 rows
+- The `.single()` call expects exactly 1 row, causing PGRST116 error
+
+**Fix Applied**:
+1. Changed UPDATE query to use profile ID instead of clerk_id (line 455)
+2. Added `clerk_id` to updateData to ensure it's synced when profile found by email (line 419)
+
+### Files Changed
+
+1. **`app/api/profile/route.ts`**
+   - Line 455: Changed `.eq('clerk_id', clerk_id)` → `.eq('id', existingProfile.id)`
+   - Line 419: Added `clerk_id` to updateData to sync clerk_id when profile found by email
+
+**Impact**: Users with profiles found by email (but with missing/different clerk_id) can now successfully complete their profiles.
+
+**Root Cause Deep Dive**:
+The `profiles` table has BOTH `clerk_id` and `clerk_user_id` columns from an incomplete migration. Different endpoints use different columns:
+- Old: `app/api/firms/route.ts` and `app/api/profile/create/route.ts` use `clerk_user_id`
+- New: `app/api/profile/route.ts` uses `clerk_id`
+- Some code uses OR logic to check both (e.g., `lib/db/profile.ts`)
+
+Jeremy's profile was likely created via the firms endpoint (which sets `clerk_user_id`) but his `clerk_id` was NULL/different, causing the UPDATE to match 0 rows.
+
+**Recommended**: See `CLERK_ID_CLEANUP_PLAN.md` for full migration strategy to consolidate to a single column.
+
+---
+
 ## Firm Admin Full Participation (2025-10-13) ✅
 
 **Goal**: Allow firm admins to fully participate in the platform without creating a separate tax pro profile.
