@@ -16,17 +16,16 @@ export async function GET() {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("id, credential_type, profile_locations(state, city), profile_specializations(specialization_slug), profile_software(software_slug)")
-      .eq("clerk_user_id", userId)
+      .eq("clerk_id", userId)
       .single();
 
     console.log('🔍 Opportunities API: Profile query result:', { profile, profileError });
 
-    if (profileError) {
-      console.error('🔍 Opportunities API: Profile query error:', profileError);
-      return NextResponse.json({ error: "Database error: " + profileError.message }, { status: 500 });
+    if (profileError || !profile) {
+      console.log('🔍 Opportunities API: Profile not found yet - returning empty opportunities');
+      // Profile doesn't exist yet (user just signed up) - return empty array
+      return NextResponse.json({ opportunities: [] });
     }
-
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
     // Get user's locations, specializations, and software
     const userStates = (profile.profile_locations || [])
