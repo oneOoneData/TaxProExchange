@@ -12,7 +12,6 @@ import JobsPreview from '@/components/dashboard/JobsPreview';
 import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
 import ProfileHealth from '@/components/dashboard/ProfileHealth';
 import { DashboardDebug } from '@/components/debug/DashboardDebug';
-import NblPromoBanner from '@/components/NblPromoBanner';
 import DashboardTopEventCard from '@/components/DashboardTopEventCard';
 import SlackIntegration from '@/components/dashboard/SlackIntegration';
 import Link from 'next/link';
@@ -64,7 +63,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="py-8">
-      <NblPromoBanner />
       <DashboardDebug 
         userId={userId} 
         profile={profile} 
