@@ -9,9 +9,11 @@ export const CredentialTypeEnum = z.enum([
   "CTEC", 
   "OR_Tax_Preparer",
   "OR_Tax_Consultant",
+  "Tax Lawyer (JD)",
+  "Accountant",
+  "Financial Planner",
+  "PTIN Only",
   "Student", 
-  "Tax Lawyer (JD)", 
-  "PTIN Only", 
   "Other"
 ]);
 

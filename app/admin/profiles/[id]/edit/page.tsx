@@ -448,6 +448,12 @@ export default function AdminProfileEditPage({ params }: { params: Promise<{ id:
                       <option value="CPA">CPA</option>
                       <option value="EA">EA</option>
                       <option value="CTEC">CTEC</option>
+                      <option value="OR_Tax_Preparer">OR Tax Preparer</option>
+                      <option value="OR_Tax_Consultant">OR Tax Consultant</option>
+                      <option value="Tax Lawyer (JD)">Tax Lawyer (JD)</option>
+                      <option value="Accountant">Accountant</option>
+                      <option value="Financial Planner">Financial Planner</option>
+                      <option value="PTIN Only">PTIN Only</option>
                       <option value="Student">Student</option>
                       <option value="Other">Other</option>
                     </select>

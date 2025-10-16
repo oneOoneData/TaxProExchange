@@ -654,9 +654,9 @@ export async function PUT(request: Request) {
         } else {
           console.log('✅ Licenses saved successfully');
         }
-      } else if (credential_type === "Student" || credential_type === "Other") {
-        // Students and "Other" don't have licenses - remove any existing ones
-        console.log('🔍 Removing licenses for student/other profile');
+      } else if (credential_type === "Student" || credential_type === "Other" || credential_type === "Accountant" || credential_type === "Financial Planner") {
+        // Students, "Other", "Accountant", and "Financial Planner" don't require tax licenses - remove any existing ones
+        console.log('🔍 Removing licenses for non-tax-credential profile type:', credential_type);
         await supabase
           .from('licenses')
           .delete()

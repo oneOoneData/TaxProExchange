@@ -19,6 +19,8 @@ const CREDENTIAL_TYPES = [
   { value: 'OR_Tax_Preparer', label: 'OR Tax Preparer (Oregon Board of Tax Practitioners)' },
   { value: 'OR_Tax_Consultant', label: 'OR Tax Consultant (Oregon Board of Tax Practitioners)' },
   { value: 'Tax Lawyer (JD)', label: 'Tax Lawyer (JD)' },
+  { value: 'Accountant', label: 'Accountant' },
+  { value: 'Financial Planner', label: 'Financial Planner / Advisor' },
   { value: 'PTIN Only', label: 'PTIN Only' },
   { value: 'Other', label: 'Other Professional' },
   { value: 'Student', label: 'Student' }
@@ -49,10 +51,12 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
 
   // Initialize license when credential type is set but no licenses exist
   useEffect(() => {
-    // Students and "Other" don't need licenses
+    // Students, "Other", "Accountant", and "Financial Planner" don't need licenses
     if (value.credential_type && 
         value.credential_type !== 'Student' && 
-        value.credential_type !== 'Other' && 
+        value.credential_type !== 'Other' &&
+        value.credential_type !== 'Accountant' &&
+        value.credential_type !== 'Financial Planner' &&
         (!value.licenses || value.licenses.length === 0)) {
       const licenseKind = getLicenseKindForCredential(value.credential_type);
       const issuingAuthority = getIssuingAuthorityForCredential(value.credential_type);
@@ -222,6 +226,18 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
           <p className="text-sm text-blue-800">
             <strong>Other professionals</strong> can join without credentials. You can add specific credentials later in your profile settings if applicable.
+          </p>
+        </div>
+      ) : value.credential_type === 'Accountant' ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Accountant profiles</strong> can join without specific tax credentials. You can add credentials like CPA later in your profile settings if applicable.
+          </p>
+        </div>
+      ) : value.credential_type === 'Financial Planner' ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Financial Planner / Advisor profiles</strong> can join without tax-specific credentials. You can add credentials like CFP or CPA later in your profile settings if applicable.
           </p>
         </div>
       ) : (
