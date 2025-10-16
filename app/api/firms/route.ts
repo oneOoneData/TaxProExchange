@@ -247,10 +247,11 @@ export async function GET(request: NextRequest) {
     // Get user's profile ID
     const profileId = await getProfileIdFromClerkId(userId);
     if (!profileId) {
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      );
+      // Profile doesn't exist yet - return empty firms array
+      return NextResponse.json({
+        success: true,
+        firms: [],
+      });
     }
 
     const supabase = createServerClient();
