@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
+import { useEffect, useState } from 'react';
 
 interface MessageThread {
   id: string;
@@ -16,13 +19,45 @@ interface MessagesPreviewProps {
 }
 
 export default function MessagesPreview({ threads = [], unreadTotal = 0 }: MessagesPreviewProps) {
+  const [actualUnreadCount, setActualUnreadCount] = useState(unreadTotal);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch('/api/messages/unread');
+        if (response.ok) {
+          const data = await response.json();
+          setActualUnreadCount(data.unreadCount || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch unread message count:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Poll every 30 seconds for updates
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Use real data if provided, otherwise show empty state
   const messageThreads: MessageThread[] = threads;
+  const displayUnreadCount = actualUnreadCount;
 
   return (
     <Card 
       title="Messages" 
-      description={unreadTotal > 0 ? `You have ${unreadTotal} unread message${unreadTotal > 1 ? 's' : ''}` : 'No unread messages'}
+      description={
+        isLoading 
+          ? 'Loading...' 
+          : displayUnreadCount > 0 
+            ? `You have ${displayUnreadCount} unread message${displayUnreadCount > 1 ? 's' : ''}` 
+            : 'No unread messages'
+      }
       action={
         <Link 
           href="/messages"
