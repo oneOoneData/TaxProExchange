@@ -20,33 +20,59 @@ interface MessagesPreviewProps {
 
 export default function MessagesPreview({ threads = [], unreadTotal = 0 }: MessagesPreviewProps) {
   const [actualUnreadCount, setActualUnreadCount] = useState(unreadTotal);
+  const [messageThreads, setMessageThreads] = useState<MessageThread[]>(threads);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUnreadCount = async () => {
+    const fetchMessages = async () => {
       try {
         const response = await fetch('/api/messages/unread');
         if (response.ok) {
           const data = await response.json();
           setActualUnreadCount(data.unreadCount || 0);
+          
+          // Format threads with relative time
+          if (data.threads && data.threads.length > 0) {
+            const formattedThreads = data.threads.map((thread: any) => ({
+              ...thread,
+              lastMessageTime: formatRelativeTime(thread.lastMessageTime)
+            }));
+            setMessageThreads(formattedThreads);
+          } else {
+            setMessageThreads([]);
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch unread message count:', error);
+        console.error('Failed to fetch messages:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUnreadCount();
+    fetchMessages();
     
     // Poll every 30 seconds for updates
-    const interval = setInterval(fetchUnreadCount, 30000);
+    const interval = setInterval(fetchMessages, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Use real data if provided, otherwise show empty state
-  const messageThreads: MessageThread[] = threads;
   const displayUnreadCount = actualUnreadCount;
+
+  // Helper to format relative time
+  function formatRelativeTime(timestamp: string): string {
+    const now = new Date();
+    const messageTime = new Date(timestamp);
+    const diffMs = now.getTime() - messageTime.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return messageTime.toLocaleDateString();
+  }
 
   return (
     <Card 

@@ -53,9 +53,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch connections' }, { status: 500 });
     }
 
-    // Query Stream Chat for actual unread messages
+    // Query Stream Chat for actual unread messages and threads
     let hasUnreadMessages = false;
     let unreadCount = 0;
+    const threads: any[] = [];
 
     try {
       // Check if Stream is configured
@@ -70,18 +71,52 @@ export async function GET() {
             members: { $in: [profile.id] },
             type: 'messaging'
           },
-          {},
+          [{ last_message_at: -1 }], // Sort by most recent message
           {
             state: true,
             watch: false,
-            presence: false
+            presence: false,
+            limit: 10 // Get up to 10 recent conversations
           }
         );
 
-        // Count unread messages across all channels
+        // Process channels to get threads and count unread
         for (const channel of channelsResponse) {
           const unread = channel.state?.read?.[profile.id]?.unread_messages || 0;
           unreadCount += unread;
+
+          // Get the other member(s) in the channel
+          const otherMembers = Object.keys(channel.state?.members || {})
+            .filter(memberId => memberId !== profile.id);
+          
+          // Get the last message
+          const messages = channel.state?.messages || [];
+          const lastMessage = messages[messages.length - 1];
+
+          if (lastMessage && otherMembers.length > 0) {
+            // Get other member's profile
+            const otherMemberId = otherMembers[0];
+            const otherMember = channel.state?.members?.[otherMemberId];
+
+            // Fetch profile details from database
+            const { data: counterpartProfile } = await supabase
+              .from('profiles')
+              .select('id, first_name, last_name, avatar_url')
+              .eq('id', otherMemberId)
+              .single();
+
+            if (counterpartProfile) {
+              threads.push({
+                id: channel.id || '',
+                counterpartId: counterpartProfile.id,
+                counterpartName: `${counterpartProfile.first_name} ${counterpartProfile.last_name}`,
+                counterpartAvatar: counterpartProfile.avatar_url,
+                lastMessage: lastMessage.text || '(message)',
+                lastMessageTime: lastMessage.created_at,
+                unreadCount: unread
+              });
+            }
+          }
         }
 
         hasUnreadMessages = unreadCount > 0;
@@ -95,7 +130,8 @@ export async function GET() {
     return NextResponse.json({
       hasUnreadMessages,
       unreadCount,
-      connectionsCount: connections?.length || 0
+      connectionsCount: connections?.length || 0,
+      threads: threads.slice(0, 5) // Return top 5 threads
     });
 
   } catch (error) {
