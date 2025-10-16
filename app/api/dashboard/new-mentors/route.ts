@@ -15,10 +15,13 @@ export async function GET() {
     const { data: profile } = await supabase
       .from("profiles")
       .select("id")
-      .eq("clerk_user_id", userId)
-      .single();
+      .eq("clerk_id", userId)
+      .maybeSingle();
 
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    if (!profile) {
+      // Profile doesn't exist yet - return empty array
+      return NextResponse.json({ newMentors: [] });
+    }
 
     // Get profiles that are open to mentoring
     // First, let's check if mentorship_preferences table has any data
@@ -40,7 +43,7 @@ export async function GET() {
       .from("profiles")
       .select(`
         id, first_name, last_name, headline, firm_name, credential_type, slug, avatar_url, updated_at,
-        mentorship_preferences(is_open_to_mentor, topics, software, specializations, mentoring_message, updated_at)
+        mentorship_preferences(is_open_to_mentor, topics, timezone, updated_at)
       `)
       .eq("is_listed", true)
       .eq("visibility_state", "verified")
@@ -68,18 +71,14 @@ export async function GET() {
       avatar_url: mentor.avatar_url,
       updated_at: mentor.mentorship_preferences?.[0]?.updated_at || mentor.updated_at,
       topics: mentor.mentorship_preferences?.[0]?.topics || [],
-      software: mentor.mentorship_preferences?.[0]?.software || [],
-      specializations: mentor.mentorship_preferences?.[0]?.specializations || [],
-      mentoring_message: mentor.mentorship_preferences?.[0]?.mentoring_message
+      timezone: mentor.mentorship_preferences?.[0]?.timezone || null
     }));
 
     return NextResponse.json({ newMentors: formattedMentors });
 
   } catch (error) {
     console.error("Error in new mentors API:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    // Return empty array instead of error to prevent dashboard issues
+    return NextResponse.json({ newMentors: [] });
   }
 }

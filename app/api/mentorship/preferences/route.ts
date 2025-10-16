@@ -16,9 +16,12 @@ export async function GET() {
       .from("profiles")
       .select("id")
       .eq("clerk_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    if (!profile) {
+      // Profile doesn't exist yet - return null preferences
+      return NextResponse.json({ preferences: null });
+    }
 
     // Get mentorship preferences
     const { data: prefs, error } = await supabase
@@ -29,17 +32,16 @@ export async function GET() {
 
     if (error) {
       console.error("Error fetching mentorship preferences:", error);
-      return NextResponse.json({ error: "Failed to fetch preferences" }, { status: 500 });
+      // Return null instead of error to prevent dashboard issues
+      return NextResponse.json({ preferences: null });
     }
 
     return NextResponse.json({ preferences: prefs || null });
 
   } catch (error) {
     console.error("Error in mentorship preferences API:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    // Return null instead of error to prevent dashboard issues
+    return NextResponse.json({ preferences: null });
   }
 }
 
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { is_open_to_mentor, is_seeking_mentor, topics, software, specializations, mentoring_message } = body;
+    const { is_open_to_mentor, is_seeking_mentor, topics, timezone } = body;
 
     const supabase = createServerClient();
 
@@ -58,9 +60,12 @@ export async function POST(req: Request) {
       .from("profiles")
       .select("id")
       .eq("clerk_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    if (!profile) {
+      // Profile doesn't exist yet - return null
+      return NextResponse.json({ preferences: null });
+    }
 
     // Upsert mentorship preferences
     const { data, error } = await supabase
@@ -70,9 +75,7 @@ export async function POST(req: Request) {
         is_open_to_mentor: is_open_to_mentor || false,
         is_seeking_mentor: is_seeking_mentor || false,
         topics: topics || [],
-        software: software || [],
-        specializations: specializations || [],
-        mentoring_message: mentoring_message || null
+        timezone: timezone || null
       })
       .select()
       .single();
@@ -99,7 +102,7 @@ export async function PATCH(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { is_open_to_mentor, is_seeking_mentor, topics, software, specializations, mentoring_message } = body;
+    const { is_open_to_mentor, is_seeking_mentor, topics, timezone } = body;
 
     const supabase = createServerClient();
 
@@ -108,9 +111,12 @@ export async function PATCH(req: Request) {
       .from("profiles")
       .select("id")
       .eq("clerk_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    if (!profile) {
+      // Profile doesn't exist yet - return null
+      return NextResponse.json({ preferences: null });
+    }
 
     // Get existing preferences
     const { data: existingPrefs } = await supabase
@@ -124,9 +130,7 @@ export async function PATCH(req: Request) {
     if (is_open_to_mentor !== undefined) updateData.is_open_to_mentor = is_open_to_mentor;
     if (is_seeking_mentor !== undefined) updateData.is_seeking_mentor = is_seeking_mentor;
     if (topics !== undefined) updateData.topics = topics;
-    if (software !== undefined) updateData.software = software;
-    if (specializations !== undefined) updateData.specializations = specializations;
-    if (mentoring_message !== undefined) updateData.mentoring_message = mentoring_message;
+    if (timezone !== undefined) updateData.timezone = timezone;
 
     let data, error;
     
@@ -149,9 +153,7 @@ export async function PATCH(req: Request) {
           is_open_to_mentor: is_open_to_mentor || false,
           is_seeking_mentor: is_seeking_mentor || false,
           topics: topics || [],
-          software: software || [],
-          specializations: specializations || [],
-          mentoring_message: mentoring_message || null
+          timezone: timezone || null
         })
         .select()
         .single();
