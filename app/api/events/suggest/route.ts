@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    // Check if user is authenticated
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
-    }
-
     const body = await req.json();
     const {
       title,
@@ -22,8 +17,22 @@ export async function POST(req: Request) {
       locationState,
       eventUrl,
       organizer,
-      additionalInfo
+      additionalInfo,
+      recaptchaToken
     } = body;
+
+    // Verify reCAPTCHA token (with lower threshold for public forms)
+    if (recaptchaToken) {
+      const recaptchaResult = await verifyRecaptcha(recaptchaToken, 0.3);
+      if (!recaptchaResult.success) {
+        return NextResponse.json({ 
+          error: recaptchaResult.error || "Failed bot protection check" 
+        }, { status: 400 });
+      }
+    }
+
+    // Check if user is authenticated (optional for this endpoint)
+    const { userId } = await auth();
 
     // Validate required fields
     if (!title || !description || !startDate || !eventUrl || !organizer) {
@@ -45,21 +54,24 @@ export async function POST(req: Request) {
 
     const supabase = createServerClient();
 
-    // Get user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, email')
-      .eq('clerk_id', userId)
-      .single();
+    // Get user profile if authenticated
+    let profile = null;
+    let userName = 'Anonymous';
+    let userEmail = 'anonymous@taxproexchange.com';
 
-    if (profileError || !profile) {
-      return NextResponse.json({ 
-        error: "User profile not found" 
-      }, { status: 500 });
+    if (userId) {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .eq('clerk_id', userId)
+        .single();
+
+      if (userProfile) {
+        profile = userProfile;
+        userName = `${profile.first_name} ${profile.last_name}`.trim();
+        userEmail = profile.email;
+      }
     }
-
-    const userName = `${profile.first_name} ${profile.last_name}`.trim();
-    const userEmail = profile.email;
 
     // Create event suggestion
     const eventSuggestion = {
@@ -77,9 +89,9 @@ export async function POST(req: Request) {
       review_status: 'pending_review',
       
       // User suggestion metadata
-      suggested_by: profile.id,
+      suggested_by: profile?.id || null,
       suggested_at: new Date().toISOString(),
-      admin_notes: `Suggested by user: ${userName} (${userEmail}). ${additionalInfo ? `Additional info: ${additionalInfo}` : ''}`,
+      admin_notes: `Suggested by: ${userName} (${userEmail}). ${additionalInfo ? `Additional info: ${additionalInfo}` : ''}`,
       
       // Link health fields (will be validated later)
       canonical_url: null,
