@@ -7,6 +7,7 @@
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createServerClient } from '@/lib/supabase/server';
 import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
 
@@ -146,9 +147,11 @@ export default async function FirmProfilePage({ params }: PageProps) {
                   {/* Avatar */}
                   <div className="flex items-start gap-4 mb-4">
                     {avatarUrl ? (
-                      <img
+                      <Image
                         src={avatarUrl}
                         alt={`${profile.first_name} ${profile.last_name}`}
+                        width={64}
+                        height={64}
                         className="w-16 h-16 rounded-full object-cover"
                       />
                     ) : (

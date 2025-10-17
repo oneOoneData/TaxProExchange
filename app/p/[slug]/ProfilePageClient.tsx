@@ -570,7 +570,17 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                 )}
                 
                 <Link
-                  href="/search"
+                  href={(() => {
+                    const params = new URLSearchParams();
+                    if (profile.credential_type) params.set('credential_type', profile.credential_type);
+                    if (profile.states && profile.states.length > 0) params.set('state', profile.states[0]);
+                    if (profile.specializations && profile.specializations.length > 0) {
+                      profile.specializations.slice(0, 2).forEach(spec => params.append('specialization', spec));
+                    }
+                    params.set('accepting_work', 'true');
+                    const queryString = params.toString();
+                    return queryString ? `/search?${queryString}` : '/search';
+                  })()}
                   className="inline-flex items-center justify-center rounded-xl border border-slate-300 text-slate-700 px-4 sm:px-6 py-3 text-sm font-medium hover:bg-slate-50 transition-colors"
                 >
                   Find Similar
@@ -770,7 +780,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                       <a
                         href={profile.website_url.startsWith('http') ? profile.website_url : `https://${profile.website_url}`}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="text-slate-900 hover:text-slate-700 break-all flex items-center gap-1"
                       >
                         {profile.website_url.replace(/^https?:\/\//, '')}
@@ -787,7 +797,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                       <a
                         href={profile.linkedin_url}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="text-slate-900 hover:text-slate-700 flex items-center gap-1"
                       >
                         View Profile

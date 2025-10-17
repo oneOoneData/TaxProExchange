@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Connection, RecentlyVerifiedProfile, getConnectionDisplayName, getConnectionStatusText, getConnectionStatusColor, formatRelativeTime } from '@/lib/db/activity';
 import { useEffect, useState } from 'react';
 
@@ -92,9 +93,11 @@ export default function ActivityFeed({ connections, recentlyVerified, currentPro
                 >
                   <div className="flex items-start gap-3">
                     {mentor.avatar_url ? (
-                      <img
+                      <Image
                         src={mentor.avatar_url}
                         alt={`${mentor.first_name} ${mentor.last_name}`}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                     ) : (
