@@ -104,6 +104,11 @@ export async function executeRecaptcha(action: string): Promise<string> {
         clearInterval(checkRecaptcha);
         
         window.grecaptcha.ready(() => {
+          if (!window.grecaptcha) {
+            reject(new Error('reCAPTCHA not available'));
+            return;
+          }
+          
           window.grecaptcha
             .execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!, { action })
             .then(resolve)
