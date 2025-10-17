@@ -1,5 +1,62 @@
 # Cursor Task Notes
 
+## 2025-10-17: Google reCAPTCHA v3 Integration
+
+### Summary
+Implemented Google reCAPTCHA v3 protection for public forms and enhanced footer trust badges to improve security and user trust.
+
+### Changes Made
+1. **Environment Configuration** (`env.example`)
+   - Added `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` 
+   - Added `RECAPTCHA_SECRET_KEY`
+
+2. **reCAPTCHA Script Integration** (`components/DomainAwareLayout.tsx`)
+   - Added Next.js Script component for reCAPTCHA v3
+   - Preconnect to Google domains for performance
+   - Lazy load strategy to avoid blocking page load
+
+3. **reCAPTCHA Utilities** (`lib/recaptcha.ts`) - NEW FILE
+   - `verifyRecaptcha()` - Server-side token verification with configurable score threshold
+   - `executeRecaptcha()` - Client-side token generation helper
+   - TypeScript definitions for grecaptcha global
+
+4. **Suggest Event Form Protection** (`app/suggest-event/page.tsx`)
+   - Integrated reCAPTCHA execution before form submission
+   - Passes token to API for verification
+   - Graceful fallback if reCAPTCHA fails to load
+
+5. **API Verification** (`app/api/events/suggest/route.ts`)
+   - Verify reCAPTCHA token with 0.3 score threshold (public form)
+   - Made authentication optional (was previously required)
+   - Support both authenticated and anonymous submissions
+   - Bot protection via reCAPTCHA instead of auth requirement
+
+6. **Enhanced Footer Trust Badges** (`components/Footer.tsx`)
+   - Replaced emoji icons with professional SVG lock/shield icons
+   - Updated badges: SSL Secured, reCAPTCHA Protected, Secure Auth, RLS Security
+   - Improved visual consistency and professionalism
+
+### Security Implementation
+- **Score Threshold**: 0.3 for public forms (balanced between security and UX)
+- **Verification**: Server-side verification prevents client-side bypass
+- **Graceful Degradation**: Forms work even if reCAPTCHA fails to load
+- **Privacy**: reCAPTCHA v3 runs invisibly without user interaction
+
+### Forms Protected
+- ✅ `/suggest-event` - Public event suggestion form (primary use case)
+- Note: Other forms (feedback, jobs, applications) already protected by Clerk authentication
+
+### Next Steps
+1. Get reCAPTCHA v3 keys from Google reCAPTCHA Admin Console
+2. Add keys to Vercel Environment Variables:
+   - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
+   - `RECAPTCHA_SECRET_KEY`
+3. Test form submission at `/suggest-event`
+4. Monitor reCAPTCHA scores in Google Admin Console
+5. Adjust score threshold if needed based on bot traffic
+
+---
+
 ## Profile Update Bug Fix (2025-10-16) ✅
 
 **Bug**: User Jeremy Wells (jeremy@steadfastbookkeeping.com) getting error "Cannot coerce the result to a single JSON object" when completing profile.

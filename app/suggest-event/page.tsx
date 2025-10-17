@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { executeRecaptcha } from '@/lib/recaptcha';
 
 export default function SuggestEventPage() {
   const [formData, setFormData] = useState({
@@ -91,12 +92,24 @@ export default function SuggestEventPage() {
     setSubmitStatus('idle');
 
     try {
+      // Execute reCAPTCHA before submitting
+      let recaptchaToken = '';
+      try {
+        recaptchaToken = await executeRecaptcha('suggest_event');
+      } catch (recaptchaError) {
+        console.error('reCAPTCHA error:', recaptchaError);
+        // Continue without reCAPTCHA if it fails to load
+      }
+
       const response = await fetch('/api/events/suggest', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          recaptchaToken,
+        }),
       });
 
       if (response.ok) {

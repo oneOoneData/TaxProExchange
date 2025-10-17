@@ -3,6 +3,7 @@
 import { Inter } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import dynamic from 'next/dynamic';
+import Script from 'next/script';
 import Analytics from '@/components/Analytics';
 import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 import { useEffect, useState } from 'react';
@@ -71,8 +72,18 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
         
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google.com" />
+        <link rel="preconnect" href="https://www.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={inter.className}>
+        {/* Google reCAPTCHA v3 */}
+        {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+          <Script
+            src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+            strategy="lazyOnload"
+          />
+        )}
+        
         <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
           {/* Main content - no conditional wrappers */}
           {children}
