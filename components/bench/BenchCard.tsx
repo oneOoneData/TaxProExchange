@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Profile {
   id: string;
@@ -111,9 +112,11 @@ export default function BenchCard({
         {/* Avatar */}
         <div className="flex-shrink-0">
           {avatarUrl ? (
-            <img
+            <Image
               src={avatarUrl}
               alt={`${profile.first_name} ${profile.last_name}`}
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-full object-cover"
             />
           ) : (

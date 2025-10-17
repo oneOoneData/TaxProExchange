@@ -950,7 +950,7 @@ export default function SearchPageClient() {
                             href={`/p/${profile.slug || `${profile.first_name}-${profile.last_name}`.toLowerCase().replace(/\s+/g, '-')}`}
                             className="inline-flex items-center justify-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 transition-colors"
                           >
-                            View Profile
+                            {profile.first_name} {profile.last_name}, {profile.credential_type}
                           </Link>
                         ) : (
                           <button

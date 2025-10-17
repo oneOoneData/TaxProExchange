@@ -3,6 +3,26 @@ const nextConfig = {
   // appDir is now stable in Next.js 14, no need for experimental flag
   productionBrowserSourceMaps: true,
   
+  // Image optimization configuration
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.gravatar.com',
+        pathname: '/avatar/**',
+      },
+    ],
+  },
+  
   // Marketing site redirects
   async redirects() {
     return [
