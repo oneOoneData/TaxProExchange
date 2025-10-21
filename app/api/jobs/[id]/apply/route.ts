@@ -49,7 +49,13 @@ export async function POST(
     // Check if job exists and is open
     const { data: job, error: jobError } = await supabase
       .from('jobs')
-      .select('id, status, created_by, title, firm_name')
+      .select(`
+        id, 
+        status, 
+        created_by, 
+        title,
+        profiles!jobs_created_by_fkey(firm_name)
+      `)
       .eq('id', jobId)
       .single();
 
@@ -140,7 +146,7 @@ export async function POST(
         body: JSON.stringify({
           job_id: jobId,
           job_title: job.title,
-          firm_name: job.firm_name,
+          firm_name: (job.profiles as any)?.firm_name || null,
           applicant_name: applicantName,
           applicant_clerk_id: userId,
           cover_note: cover_note,
