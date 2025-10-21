@@ -42,6 +42,8 @@ export default function MessagesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'active'>('all');
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
+  const [markAllReadSuccess, setMarkAllReadSuccess] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -117,6 +119,32 @@ export default function MessagesPage() {
     }
   };
 
+  const handleMarkAllRead = async () => {
+    setMarkingAllRead(true);
+    setMarkAllReadSuccess(false);
+    
+    try {
+      const response = await fetch('/api/messages/mark-all-read', {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Marked all as read:', data);
+        setMarkAllReadSuccess(true);
+        setTimeout(() => setMarkAllReadSuccess(false), 3000);
+      } else {
+        console.error('Failed to mark all as read');
+        alert('Failed to mark messages as read. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setMarkingAllRead(false);
+    }
+  };
+
   const getCurrentUserProfile = (connection: ConnectionWithProfiles) => {
     if (!currentProfileId) return connection.requester_profile;
     return connection.requester_profile_id === currentProfileId 
@@ -152,17 +180,17 @@ export default function MessagesPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.1 }}
-        className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+        className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 hover:shadow-md transition-shadow"
       >
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-lg font-semibold text-slate-600">
                   {otherProfile.first_name[0]}{otherProfile.last_name[0]}
                 </span>
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <Link 
                   href={`/p/${otherProfile.slug || otherProfile.id}`}
                   className="group"
@@ -184,7 +212,7 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                 connection.status === 'pending' 
                   ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' 
@@ -206,9 +234,9 @@ export default function MessagesPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 ml-4">
+          <div className="flex flex-col gap-2 w-full md:w-auto md:min-w-fit">
             {connection.status === 'pending' && !isRequester && (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={() => handleConnectionDecision(connection.id, 'accepted')}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
@@ -231,8 +259,8 @@ export default function MessagesPage() {
             )}
 
             {connection.status === 'pending' && isRequester && (
-              <div className="flex gap-2">
-                <span className="text-sm text-slate-500 px-4 py-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <span className="text-sm text-slate-500 px-4 py-2 text-center sm:text-left">
                   Waiting for response
                 </span>
                 <button
@@ -246,13 +274,13 @@ export default function MessagesPage() {
 
             {connection.status === 'accepted' && (
               <div className="flex flex-col gap-2">
-                <div className="text-xs text-slate-500 text-right">
+                <div className="text-xs text-slate-500 text-left md:text-right">
                   Connected {new Date(connection.created_at).toLocaleDateString()}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Link
                     href={`/messages/${connection.id}`}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium text-center"
                   >
                     💬 Message
                   </Link>
@@ -267,8 +295,8 @@ export default function MessagesPage() {
             )}
 
             {connection.status === 'declined' && (
-              <div className="flex gap-2">
-                <span className="text-sm text-slate-500 px-4 py-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <span className="text-sm text-slate-500 px-4 py-2 text-center sm:text-left">
                   Connection declined
                 </span>
                 <button
@@ -386,28 +414,57 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-slate-100 rounded-lg p-1 mb-6">
-          {[
-            { key: 'all', label: 'All Connections', count: connections.length },
-            { key: 'pending', label: 'Pending Requests', count: connections.filter(c => c.status === 'pending').length },
-            { key: 'active', label: 'Connected', count: connections.filter(c => c.status === 'accepted').length }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              {tab.label}
-              <span className="ml-2 text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">
-                {tab.count}
+        {/* Tabs and Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex-1 flex gap-1 bg-slate-100 rounded-lg p-1">
+            {[
+              { key: 'all', label: 'All Connections', count: connections.length },
+              { key: 'pending', label: 'Pending Requests', count: connections.filter(c => c.status === 'pending').length },
+              { key: 'active', label: 'Connected', count: connections.filter(c => c.status === 'accepted').length }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+                <span className="ml-2 text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full">
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+          
+          {/* Mark All Read Button */}
+          <button
+            onClick={handleMarkAllRead}
+            disabled={markingAllRead}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              markAllReadSuccess
+                ? 'bg-green-100 text-green-700 border-2 border-green-500'
+                : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300'
+            }`}
+          >
+            {markingAllRead ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Marking...
               </span>
-            </button>
-          ))}
+            ) : markAllReadSuccess ? (
+              <span className="flex items-center gap-2">
+                ✓ All marked as read
+              </span>
+            ) : (
+              '✓ Mark All Read'
+            )}
+          </button>
         </div>
 
         {/* Content */}
