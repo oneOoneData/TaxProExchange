@@ -17,8 +17,6 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [hasPendingConnections, setHasPendingConnections] = useState(false);
   const [pendingConnectionCount, setPendingConnectionCount] = useState(0);
   const [firms, setFirms] = useState<Array<{ id: string; name: string; slug: string }>>([]);
@@ -36,48 +34,6 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Check for unread messages
-  useEffect(() => {
-    if (!isLoaded || !user) return;
-
-    const checkUnreadMessages = async () => {
-      try {
-        const response = await fetch('/api/messages/unread');
-        if (response.ok) {
-          const data = await response.json();
-          setHasUnreadMessages(data.hasUnreadMessages);
-          setUnreadCount(data.unreadCount);
-        } else if (response.status === 404) {
-          // User doesn't have a profile yet - silently ignore
-          return;
-        } else {
-          console.error('Failed to fetch unread messages:', response.status, response.statusText);
-        }
-      } catch (error) {
-        console.error('Failed to check unread messages:', error);
-      }
-    };
-
-    checkUnreadMessages();
-    
-    // Check every 30 seconds
-    const interval = setInterval(checkUnreadMessages, 30000);
-    
-    // Also check when the page becomes visible (user navigates back)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        checkUnreadMessages();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [isLoaded, user]);
 
   // Check for pending connection requests
   useEffect(() => {
@@ -161,15 +117,6 @@ export default function UserMenu({ userName, userEmail }: UserMenuProps) {
             </svg>
           )}
         </button>
-        
-        {/* Unread message indicator */}
-        {hasUnreadMessages && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-            <span className="text-xs text-white font-bold">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Dropdown Menu */}
