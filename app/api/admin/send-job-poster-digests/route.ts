@@ -40,6 +40,11 @@ function formatDaysOpen(days: number): string {
   return `${days} days`;
 }
 
+// Helper to delay between emails to respect Resend rate limit (2 emails/sec)
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verify admin access
@@ -311,6 +316,10 @@ ${testMode ? 'TEST MODE - This is a test email.' : 'Please do not reply to this 
         
         console.log(`✅ Job poster digest sent to ${posterEmail} for job ${job.id}`);
         emailsSent++;
+        
+        // Rate limit: Resend allows 2 emails/sec, so wait 600ms between sends
+        // This keeps us at ~1.67 emails/sec to be safe
+        await delay(600);
       } catch (emailError) {
         console.error(`❌ Failed to send email to ${posterEmail}:`, emailError);
         errors.push(`Failed to send email for job: ${job.title}`);
