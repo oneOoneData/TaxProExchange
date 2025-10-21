@@ -79,6 +79,18 @@ interface ProfilePageClientProps {
   profile: Profile;
 }
 
+interface RelatedProfile {
+  id: string;
+  slug: string;
+  first_name: string;
+  last_name: string;
+  credential_type: string;
+  headline: string;
+  bio: string;
+  avatar_url: string | null;
+  firm_name: string;
+}
+
 export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   const { user, isLoaded, isSignedIn } = useUser();
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
@@ -87,6 +99,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [userFirm, setUserFirm] = useState<{ name: string; slug: string } | null>(null);
+  const [relatedProfiles, setRelatedProfiles] = useState<RelatedProfile[]>([]);
 
   // Helper function to format date as MM/YYYY
   const formatMMYYYY = (dateString: string) => {
@@ -164,6 +177,25 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
 
     fetchFirmInfo();
   }, [profile.id, profile.profile_type]);
+
+  // Fetch related profiles for SEO internal linking
+  useEffect(() => {
+    const fetchRelatedProfiles = async () => {
+      try {
+        const response = await fetch(`/api/profiles/${profile.id}/related`);
+        if (response.ok) {
+          const data = await response.json();
+          setRelatedProfiles(data.relatedProfiles || []);
+        }
+      } catch (error) {
+        console.error('Error fetching related profiles:', error);
+      }
+    };
+
+    if (profile.visibility_state === 'verified') {
+      fetchRelatedProfiles();
+    }
+  }, [profile.id, profile.visibility_state]);
 
   const fetchSpecializations = async () => {
     try {
@@ -893,6 +925,59 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
           </div>
         </div>
       </div>
+
+      {/* Related Profiles Section - SEO Internal Linking */}
+      {relatedProfiles.length > 0 && profile.visibility_state === 'verified' && (
+        <div className="border-t border-slate-200 bg-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
+              Related Professionals
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedProfiles.map((relatedProfile) => (
+                <Link 
+                  key={relatedProfile.id}
+                  href={`/p/${relatedProfile.slug}`}
+                  className="block p-6 bg-white border border-slate-200 rounded-xl hover:shadow-lg hover:border-slate-300 transition-all"
+                >
+                  <div className="flex items-center gap-4 mb-3">
+                    {relatedProfile.avatar_url ? (
+                      <img
+                        src={relatedProfile.avatar_url}
+                        alt={`${relatedProfile.first_name} ${relatedProfile.last_name}`}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                        <span className="text-slate-600 font-medium text-lg">
+                          {relatedProfile.first_name.charAt(0)}{relatedProfile.last_name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-slate-900">
+                        {relatedProfile.first_name} {relatedProfile.last_name}
+                      </h3>
+                      <p className="text-sm text-slate-600">
+                        {relatedProfile.credential_type}
+                      </p>
+                    </div>
+                  </div>
+                  {relatedProfile.firm_name && (
+                    <p className="text-xs text-slate-500 mb-2">
+                      {relatedProfile.firm_name}
+                    </p>
+                  )}
+                  <p className="text-sm text-slate-600 line-clamp-2">
+                    {relatedProfile.headline || relatedProfile.bio || `${relatedProfile.credential_type} providing professional tax services`}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Navigation */}
       <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
     </div>
