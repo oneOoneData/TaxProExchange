@@ -32,6 +32,8 @@ export default function AdminJobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [editingJob, setEditingJob] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<Job>>({});
+  const [sendingDigests, setSendingDigests] = useState(false);
+  const [digestResult, setDigestResult] = useState<string | null>(null);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -140,6 +142,41 @@ export default function AdminJobsPage() {
     }
   };
 
+  const handleSendDigests = async () => {
+    if (!confirm('Send digest emails to all job posters with applications? This will send an email to each job poster summarizing their applications.')) {
+      return;
+    }
+
+    setSendingDigests(true);
+    setDigestResult(null);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/admin/send-job-poster-digests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ testMode: false }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send digests');
+      }
+
+      setDigestResult(`✅ Successfully sent ${data.emailsSent} digest email${data.emailsSent !== 1 ? 's' : ''} to job posters`);
+      if (data.errors && data.errors.length > 0) {
+        setError(`Some emails failed: ${data.errors.join(', ')}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send digests');
+    } finally {
+      setSendingDigests(false);
+    }
+  };
+
   if (!isLoaded) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -153,9 +190,38 @@ export default function AdminJobsPage() {
       <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Jobs Management</h1>
-          <p className="mt-2 text-gray-600">Manage all jobs on the platform</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Admin Jobs Management</h1>
+              <p className="mt-2 text-gray-600">Manage all jobs on the platform</p>
+            </div>
+            <button
+              onClick={handleSendDigests}
+              disabled={sendingDigests || loading}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {sendingDigests ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Send Job Poster Digests
+                </>
+              )}
+            </button>
+          </div>
         </div>
+
+        {digestResult && (
+          <div className="mb-4 bg-green-50 border border-green-200 rounded-md p-4">
+            <p className="text-sm text-green-600">{digestResult}</p>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">

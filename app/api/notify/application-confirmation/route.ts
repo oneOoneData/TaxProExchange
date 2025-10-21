@@ -34,12 +34,13 @@ export async function POST(request: NextRequest) {
       job_title,
       firm_name,
       applicant_name,
+      applicant_clerk_id,
       cover_note,
       proposed_rate,
       proposed_timeline
     } = body;
 
-    if (!job_id || !job_title || !applicant_name) {
+    if (!job_id || !job_title || !applicant_name || !applicant_clerk_id) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -60,20 +61,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
-    // Get applicant profile details
-    const { data: applicantProfile, error: applicantError } = await supabase
+    // Get applicant profile details for email preferences
+    const { data: applicantProfile } = await supabase
       .from('profiles')
-      .select('first_name, last_name, clerk_id, email_preferences')
-      .eq('clerk_id', job.created_by)
+      .select('email_preferences')
+      .eq('clerk_id', applicant_clerk_id)
       .single();
 
-    if (applicantError || !applicantProfile) {
-      console.error('Failed to get applicant profile:', applicantError);
-      return NextResponse.json({ error: 'Applicant profile not found' }, { status: 404 });
-    }
-
     // Check email preferences
-    const emailPrefs = applicantProfile.email_preferences || {};
+    const emailPrefs = applicantProfile?.email_preferences || {};
     if (emailPrefs.application_updates === false) {
       return NextResponse.json({ 
         success: true, 
@@ -83,14 +79,10 @@ export async function POST(request: NextRequest) {
 
     // Fetch real email from Clerk
     let applicantEmail = 'no-email@example.com';
-    if (applicantProfile.clerk_id) {
-      const realEmail = await getUserEmailFromClerk(applicantProfile.clerk_id);
-      if (realEmail) {
-        applicantEmail = realEmail;
-      }
+    const realEmail = await getUserEmailFromClerk(applicant_clerk_id);
+    if (realEmail) {
+      applicantEmail = realEmail;
     }
-
-    const applicantName = `${applicantProfile.first_name} ${applicantProfile.last_name}`;
 
     // Create email content
     const subject = `Application submitted for "${job_title}"`;

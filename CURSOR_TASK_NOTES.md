@@ -3560,3 +3560,68 @@ Added handshake emoji () to Partners links across all navigation components and 
 3. Verify redirects in production
 4. Monitor GSC for indexing status
 
+
+## 2025-10-21: Job Application Email Notifications
+
+**Issue**: No email notifications were being sent when someone applied to a job.
+
+**Changes Made**:
+1. Updated `app/api/jobs/[id]/apply/route.ts` to trigger email notifications after successful application submission
+   - Added notification to job poster (`/api/notify/job-application-received`)
+   - Added confirmation email to applicant (`/api/notify/application-confirmation`)
+   - Both notifications are non-blocking (won't fail application if emails fail)
+
+2. Fixed bug in `app/api/notify/application-confirmation/route.ts`
+   - Was incorrectly fetching job poster's profile instead of applicant's
+   - Now accepts `applicant_clerk_id` parameter and fetches correct profile
+   - Properly respects applicant's email preferences
+
+**Files Changed**:
+- app/api/jobs/[id]/apply/route.ts
+- app/api/notify/application-confirmation/route.ts
+
+
+## 2025-10-21: Admin Job Poster Digest Emails
+
+**Feature**: Added admin functionality to send digest emails to job posters summarizing their applications.
+
+**What It Does**:
+- Sends a digest email to each job poster who has open jobs with applications
+- Shows total application count and breakdown by status (applied, shortlisted, hired, rejected)
+- Displays how long the job has been open
+- Lists recent applicants with their details (name, title, proposed rate, cover note preview)
+- Provides direct link to review all applications
+- Skips jobs with zero applications
+
+**New Files**:
+- app/api/admin/send-job-poster-digests/route.ts - API endpoint for sending digest emails
+
+**Modified Files**:
+- app/admin/jobs/page.tsx - Added `Send Job Poster Digests` button to admin jobs page
+
+**Features**:
+- Admin authentication required
+- Test mode support (send to specific email for testing)
+- Error handling with detailed reporting
+- Only sends to jobs with applications
+- Fetches real email addresses from Clerk
+- Shows application status breakdown
+- Displays up to 3 recent applicants per job
+- Non-blocking errors (continues if some emails fail)
+
+**Usage**:
+1. Go to /admin/jobs
+2. Click `Send Job Poster Digests` button
+3. Confirm the action
+4. System sends digest to all job posters with applications
+5. Success message shows how many emails were sent
+
+**Test Mode** (for development):
+POST to /api/admin/send-job-poster-digests with body:
+```json
+{
+  `testMode`: true,
+  `testEmail`: `your-test@example.com`,
+  `specificJobId`: `optional-job-id` // Optional: test single job
+}
+```

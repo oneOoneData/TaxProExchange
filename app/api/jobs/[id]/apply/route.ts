@@ -32,7 +32,7 @@ export async function POST(
     // Get user's profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, visibility_state')
+      .select('id, first_name, last_name, visibility_state, professional_title')
       .eq('clerk_id', userId)
       .single();
 
@@ -49,7 +49,7 @@ export async function POST(
     // Check if job exists and is open
     const { data: job, error: jobError } = await supabase
       .from('jobs')
-      .select('id, status, created_by, title')
+      .select('id, status, created_by, title, firm_name')
       .eq('id', jobId)
       .single();
 
@@ -104,6 +104,55 @@ export async function POST(
     }
 
     console.log('🔍 Application created successfully:', application.id);
+
+    // Send notification emails (don't fail the application if emails fail)
+    const applicantName = `${profile.first_name} ${profile.last_name}`;
+    
+    // 1. Notify job poster about new application
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-application-received`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          job_id: jobId,
+          applicant_name: applicantName,
+          applicant_headline: profile.professional_title || 'Tax Professional',
+          proposed_rate: proposed_rate,
+          proposed_timeline: proposed_timeline,
+          cover_note: cover_note,
+        }),
+      });
+      console.log(`Job poster notification sent for application ${application.id}`);
+    } catch (notificationError) {
+      console.error('Failed to send job poster notification:', notificationError);
+      // Don't fail the application if notification fails
+    }
+
+    // 2. Send confirmation email to applicant
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/application-confirmation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          job_id: jobId,
+          job_title: job.title,
+          firm_name: job.firm_name,
+          applicant_name: applicantName,
+          applicant_clerk_id: userId,
+          cover_note: cover_note,
+          proposed_rate: proposed_rate,
+          proposed_timeline: proposed_timeline,
+        }),
+      });
+      console.log(`Applicant confirmation sent for application ${application.id}`);
+    } catch (notificationError) {
+      console.error('Failed to send applicant confirmation:', notificationError);
+      // Don't fail the application if notification fails
+    }
 
     return NextResponse.json({ application }, { status: 201 });
   } catch (error) {
