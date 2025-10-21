@@ -32,7 +32,7 @@ export async function POST(
     // Get user's profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, visibility_state, professional_title')
+      .select('id, first_name, last_name, visibility_state, headline')
       .eq('clerk_id', userId)
       .single();
 
@@ -124,7 +124,7 @@ export async function POST(
         body: JSON.stringify({
           job_id: jobId,
           applicant_name: applicantName,
-          applicant_headline: profile.professional_title || 'Tax Professional',
+          applicant_headline: profile.headline || 'Tax Professional',
           proposed_rate: proposed_rate,
           proposed_timeline: proposed_timeline,
           cover_note: cover_note,

@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
         profiles!job_applications_applicant_profile_id_fkey(
           first_name,
           last_name,
-          professional_title
+          headline
         )
       `)
       .in('job_id', jobIds)
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
             ${jobApplications.filter(a => a.status === 'applied').slice(0, 3).map(app => `
               <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 10px 0;">
                 <p style="margin: 0 0 5px 0;"><strong>${app.profiles?.first_name} ${app.profiles?.last_name}</strong></p>
-                ${app.profiles?.professional_title ? `<p style="margin: 0 0 5px 0; color: #6b7280; font-size: 14px;">${app.profiles.professional_title}</p>` : ''}
+                ${app.profiles?.headline ? `<p style="margin: 0 0 5px 0; color: #6b7280; font-size: 14px;">${app.profiles.headline}</p>` : ''}
                 ${app.proposed_rate ? `<p style="margin: 0 0 5px 0; color: #6b7280; font-size: 14px;">Proposed Rate: $${app.proposed_rate}${app.proposed_timeline ? ` (${app.proposed_timeline})` : ''}</p>` : ''}
                 ${app.cover_note ? `<p style="margin: 5px 0 0 0; font-size: 14px; font-style: italic;">"${app.cover_note.substring(0, 150)}${app.cover_note.length > 150 ? '...' : ''}"</p>` : ''}
               </div>
@@ -281,7 +281,7 @@ ${statusCounts.applied > 0 ? `
 Recent Applicants:
 ${jobApplications.filter(a => a.status === 'applied').slice(0, 3).map(app => `
 - ${app.profiles?.first_name} ${app.profiles?.last_name}
-  ${app.profiles?.professional_title || ''}
+  ${app.profiles?.headline || ''}
   ${app.proposed_rate ? `Proposed Rate: $${app.proposed_rate}${app.proposed_timeline ? ` (${app.proposed_timeline})` : ''}` : ''}
   ${app.cover_note ? `"${app.cover_note.substring(0, 150)}${app.cover_note.length > 150 ? '...' : ''}"` : ''}
 `).join('\n')}
