@@ -23,7 +23,7 @@ const nextConfig = {
     ],
   },
   
-  // Marketing site redirects
+  // SEO: Force canonical domain (https + www)
   async redirects() {
     return [
       // Redirect /app/* to app subdomain
@@ -32,21 +32,12 @@ const nextConfig = {
         destination: 'https://app.taxproexchange.com/:path*',
         permanent: true,
       },
-    ];
-  },
-
-  // Canonicalization redirect (only if not handled at Vercel level)
-  async rewrites() {
-    return [
+      // Force non-www to www (301 redirect)
       {
         source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'taxproexchange.com',
-          },
-        ],
+        has: [{ type: 'host', value: 'taxproexchange.com' }],
         destination: 'https://www.taxproexchange.com/:path*',
+        permanent: true,
       },
     ];
   },

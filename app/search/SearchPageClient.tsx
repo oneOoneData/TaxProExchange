@@ -533,12 +533,12 @@ export default function SearchPageClient() {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
             Find Verified Tax Professionals
           </h1>
-          <p className="text-slate-600 text-lg mb-4">
-            Search {pagination.total || '200+'} verified CPAs, EAs, and tax preparers. Filter by credential, location, and specialization.
+          <p className="text-slate-600 text-base mb-4 max-w-3xl">
+            Browse verified CPAs, EAs, and tax professionals. Filter by credential, specialty, and state to find the right fit for overflow work, reviews, or IRS representation. Every professional is manually verified before appearing in search results, ensuring you connect with trusted experts for handoffs and collaboration.
           </p>
           <p className="text-sm text-slate-500">
             {filters.verified_only 
-              ? "✓ Only verified professionals shown"
+              ? `✓ Showing ${pagination.total || '200+'} verified professionals`
               : "Showing all profiles. Unverified profiles are visible but cannot be viewed until verification is complete."
             }
           </p>

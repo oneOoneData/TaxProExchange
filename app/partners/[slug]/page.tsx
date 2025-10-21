@@ -25,23 +25,29 @@ export async function generateMetadata({ params }: PartnerPageProps): Promise<Me
   if (!partner) {
     return {
       title: 'Partner Not Found | TaxProExchange',
+      robots: { index: false, follow: false },
     };
   }
 
+  const title = `${partner.name} – Partner • TaxProExchange`;
+  const desc = partner.tagline?.slice(0, 155) || `Partner: ${partner.name} on TaxProExchange.`;
+  const canonical = `${siteUrl}/partners/${slug}`;
+
   return {
-    title: `${partner.name} - Technology Partner | TaxProExchange`,
-    description: partner.tagline,
-    alternates: { canonical: `${siteUrl}/partners/${partner.slug}` },
+    title,
+    description: desc,
+    alternates: { canonical },
+    robots: { index: true, follow: true },
     openGraph: {
-      title: `${partner.name} - Technology Partner`,
-      description: partner.tagline,
-      url: `${siteUrl}/partners/${partner.slug}`,
+      title,
+      description: desc,
+      url: canonical,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${partner.name} - Technology Partner`,
-      description: partner.tagline,
+      title,
+      description: desc,
     },
   };
 }
