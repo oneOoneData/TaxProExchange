@@ -8,8 +8,12 @@ import { defaultTitle, defaultDescription } from '@/lib/seo';
 // Keeping minimal metadata for Next.js
 
 export const metadata: Metadata = {
-  title: defaultTitle,
-  description: defaultDescription,
+  metadataBase: new URL('https://www.taxproexchange.com'),
+  title: {
+    default: 'TaxProExchange – Find Verified CPAs, EAs & Tax Pros',
+    template: '%s | TaxProExchange',
+  },
+  description: 'Verified directory of CPAs, EAs, and tax professionals. Find trusted experts by credential, specialty, and state.',
   keywords: 'tax professionals, CPA, EA, CTEC, tax preparation, collaboration, verified, directory, referrals, overflow work, IRS representation',
   authors: [{ name: 'TaxProExchange' }],
   creator: 'TaxProExchange',
@@ -19,34 +23,37 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://www.taxproexchange.com'),
   alternates: {
     canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   // Add Google Search Console verification when you get the code
   // verification: {
   //   google: 'YOUR_VERIFICATION_CODE_HERE',
   // },
   openGraph: {
-    title: defaultTitle,
-    description: defaultDescription,
-    url: 'https://www.taxproexchange.com',
     siteName: 'TaxProExchange',
+    type: 'website',
+    url: 'https://www.taxproexchange.com',
+    title: 'Find Verified CPAs, EAs & Tax Pros',
+    description: 'Build your trusted bench. Filter by credential, specialty, and state.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'TaxProExchange - Tax Professionals Directory',
+        alt: 'TaxProExchange - Verified Tax Professionals Directory',
       },
     ],
     locale: 'en_US',
-    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: defaultTitle,
-    description: defaultDescription,
+    title: 'TaxProExchange – Verified Tax Professionals',
+    description: 'Find CPAs, EAs, and tax pros you can trust for handoffs and overflow.',
     images: ['/og-image.png'],
   },
   icons: {

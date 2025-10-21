@@ -99,17 +99,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   
   const fullName = `${p.first_name} ${p.last_name}`;
-  const title = `${fullName}, ${p.credential_type} – ${p.headline ?? 'Verified Tax Pro'} | TaxProExchange`;
-  const desc = (p.bio && p.bio.length > 155) ? p.bio.slice(0, 152) + '…' : (p.bio || `${fullName} is a verified ${p.credential_type} on TaxProExchange.`);
+  const credential = p.credential_type || 'Tax Professional';
+  
+  // Include top specializations in title for better SEO
+  const specialties = (p.specializations || []).slice(0, 3).join(', ');
+  const title = specialties 
+    ? `${fullName}, ${credential} – ${specialties}`
+    : `${fullName}, ${credential} – ${p.headline ?? 'Verified Tax Pro'}`;
+  
+  // Enhanced description with specialties if bio is missing/short
+  const desc = p.bio && p.bio.length > 155 
+    ? p.bio.slice(0, 152) + '…'
+    : p.bio 
+      ? p.bio
+      : `${fullName} is a ${credential} on TaxProExchange.${specialties ? ' Specialties: ' + specialties + '.' : ''} Connect for verified help and overflow support.`;
+  
   const canonical = `https://www.taxproexchange.com/p/${slug}`;
 
   return {
     title,
-    description: desc,
+    description: desc.slice(0, 160), // Ensure description doesn't exceed recommended length
     alternates: { canonical },
+    robots: { index: true, follow: true },
     openGraph: {
       title,
-      description: desc,
+      description: desc.slice(0, 160),
       url: canonical,
       type: 'profile',
       images: [{ url: `/p/${slug}/opengraph-image` }]
@@ -117,7 +131,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: { 
       card: 'summary_large_image', 
       title, 
-      description: desc 
+      description: desc.slice(0, 160)
     }
   };
 }
