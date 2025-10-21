@@ -23,7 +23,7 @@ const nextConfig = {
     ],
   },
   
-  // SEO: Force canonical domain (https + www)
+  // SEO: Force canonical domain (https + www) and normalize trailing slashes
   async redirects() {
     return [
       // Redirect /app/* to app subdomain
@@ -39,8 +39,17 @@ const nextConfig = {
         destination: 'https://www.taxproexchange.com/:path*',
         permanent: true,
       },
+      // Remove trailing slashes (except root) to prevent canonical loops
+      {
+        source: '/:path+/',
+        destination: '/:path+',
+        permanent: true,
+      },
     ];
   },
+  
+  // Disable automatic trailing slash to prevent conflicts
+  trailingSlash: false,
 
   // Security headers
   async headers() {

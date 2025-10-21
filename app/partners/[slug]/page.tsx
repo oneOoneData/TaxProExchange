@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { siteUrl } from '@/lib/seo';
+import { siteUrl, partnerOrganizationLD, jsonLd } from '@/lib/seo';
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView';
 import AppNavigation from '@/components/AppNavigation';
 import partnersData from '@/data/partners.json';
@@ -60,8 +60,24 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
     notFound();
   }
 
+  // Generate JSON-LD for Organization schema
+  const organizationSchema = partnerOrganizationLD({
+    name: partner.name,
+    slug: partner.slug,
+    tagline: partner.tagline,
+    description: partner.description,
+    website: partner.website,
+    category: partner.category
+  });
+
   return (
     <>
+      {/* JSON-LD: Organization */}
+      <script 
+        type="application/ld+json" 
+        dangerouslySetInnerHTML={jsonLd(organizationSchema)} 
+      />
+      
       <AnalyticsPageView eventName="view_partner_detail" />
       <AppNavigation />
 
