@@ -72,9 +72,11 @@ export async function POST(request: NextRequest) {
         title,
         created_at,
         created_by,
-        firm_name,
         status,
-        deadline_date
+        deadline_date,
+        profiles!jobs_created_by_fkey(
+          firm_name
+        )
       `)
       .eq('status', 'open')
       .order('created_at', { ascending: false });
