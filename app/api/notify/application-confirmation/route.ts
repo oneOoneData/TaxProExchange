@@ -84,6 +84,9 @@ export async function POST(request: NextRequest) {
       applicantEmail = realEmail;
     }
 
+    // Use the applicant_name passed in from the request
+    const applicantName = applicant_name;
+
     // Create email content
     const subject = `Application submitted for "${job_title}"`;
     
