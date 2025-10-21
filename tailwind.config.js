@@ -5,6 +5,10 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  // Safelist commonly used classes to prevent purging
+  safelist: [
+    // Add patterns here if needed for dynamic classes
+  ],
   theme: {
     extend: {
       screens: {

@@ -8,11 +8,21 @@ export const defaultDescription = 'A trusted directory where CPAs, EAs, and CTEC
 
 /**
  * Generate absolute canonical URL for a given pathname
+ * Ensures no trailing slashes and proper www prefix
  */
 export function absoluteCanonical(pathname: string): string {
-  // Ensure pathname starts with / and handle root case
-  const normalizedPath = pathname === '/' ? '' : pathname.startsWith('/') ? pathname : `/${pathname}`;
-  return `${siteUrl}${normalizedPath}`;
+  // Normalize pathname: add leading slash, remove trailing slash
+  let normalizedPath = pathname === '/' ? '' : pathname.startsWith('/') ? pathname : `/${pathname}`;
+  
+  // Remove trailing slash (except for root)
+  if (normalizedPath.length > 1 && normalizedPath.endsWith('/')) {
+    normalizedPath = normalizedPath.slice(0, -1);
+  }
+  
+  // Remove query params from canonical (canonical should be clean)
+  const cleanPath = normalizedPath.split('?')[0].split('#')[0];
+  
+  return `${siteUrl}${cleanPath}`;
 }
 
 /**
@@ -255,6 +265,43 @@ export function breadcrumbsLD(items: { name: string; url: string }[]) {
       item: it.url
     }))
   };
+}
+
+/**
+ * Generate JSON-LD for Partner Organization schema
+ */
+export function partnerOrganizationLD(partner: {
+  name: string;
+  slug: string;
+  tagline?: string;
+  description?: string;
+  website?: string;
+  category?: string;
+}) {
+  const jsonLd: any = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: partner.name,
+    url: `${siteUrl}/partners/${partner.slug}`,
+  };
+
+  if (partner.tagline) {
+    jsonLd.slogan = partner.tagline;
+  }
+
+  if (partner.description) {
+    jsonLd.description = partner.description;
+  }
+
+  if (partner.website) {
+    jsonLd.sameAs = [partner.website];
+  }
+
+  if (partner.category) {
+    jsonLd.knowsAbout = partner.category;
+  }
+
+  return jsonLd;
 }
 
 /**
