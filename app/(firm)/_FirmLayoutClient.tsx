@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
@@ -14,8 +14,52 @@ export default function FirmLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Check for unread messages
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+
+    const checkUnreadMessages = async () => {
+      try {
+        const response = await fetch('/api/messages/unread');
+        if (response.ok) {
+          const data = await response.json();
+          setHasUnreadMessages(data.hasUnreadMessages);
+          setUnreadCount(data.unreadCount);
+        } else if (response.status === 404) {
+          // User doesn't have a profile yet - silently ignore
+          return;
+        } else {
+          console.error('Failed to fetch unread messages:', response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error('Failed to check unread messages:', error);
+      }
+    };
+
+    checkUnreadMessages();
+    
+    // Check every 30 seconds
+    const interval = setInterval(checkUnreadMessages, 30000);
+    
+    // Also check when the page becomes visible (user navigates back)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkUnreadMessages();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isLoaded, user]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,6 +102,14 @@ export default function FirmLayoutClient({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
+                    {/* Unread message indicator */}
+                    {hasUnreadMessages && (
+                      <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                        <span className="text-[10px] text-white font-bold leading-none">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      </div>
+                    )}
                   </Link>
                   
                   <UserMenu 
