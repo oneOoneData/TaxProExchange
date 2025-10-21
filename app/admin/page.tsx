@@ -727,6 +727,27 @@ export default function AdminDashboard() {
               Sync to HubSpot
             </Link>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.5 }}
+            className="bg-white rounded-2xl border border-amber-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Thin Profiles (SEO)</h3>
+            <p className="text-slate-600 mb-4">Find profiles with &lt;120 words and send optimization emails to help them improve.</p>
+            <Link
+              href="/admin/thin-profiles"
+              className="inline-flex items-center justify-center rounded-xl bg-amber-600 text-white px-4 py-2 text-sm font-medium hover:bg-amber-700 transition-colors"
+            >
+              Manage Thin Profiles
+            </Link>
+          </motion.div>
         </div>
 
         {/* Recent Activity */}
