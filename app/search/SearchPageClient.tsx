@@ -533,9 +533,14 @@ export default function SearchPageClient() {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
             Find Verified Tax Professionals
           </h1>
-          <p className="text-slate-600 text-base mb-4 max-w-3xl">
-            Browse verified CPAs, EAs, and tax professionals. Filter by credential, specialty, and state to find the right fit for overflow work, reviews, or IRS representation. Every professional is manually verified before appearing in search results, ensuring you connect with trusted experts for handoffs and collaboration.
-          </p>
+          <div className="mb-4 max-w-3xl">
+            <p className="text-slate-600 text-base mb-3">
+              Browse <strong>200+ verified CPAs, Enrolled Agents, and CTEC tax preparers</strong> for overflow staffing, second reviews, IRS representation, and specialized tax work. Every professional on TaxProExchange is manually verified—credentials confirmed directly with state boards and the IRS.
+            </p>
+            <p className="text-slate-600 text-base">
+              Filter by credential type, state, specialization (S-Corp, multi-state SALT, cryptocurrency, trusts & estates, partnership K-1), years of experience, and software proficiency. Whether you need help with peak season overflow, complex returns, or Circular 230 representation, find qualified professionals ready to collaborate.
+            </p>
+          </div>
           <p className="text-sm text-slate-500">
             {filters.verified_only 
               ? `✓ Showing ${pagination.total || '200+'} verified professionals`
