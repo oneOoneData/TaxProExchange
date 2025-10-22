@@ -25,6 +25,8 @@ interface EmailLog {
 
 export default function MarketingPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [customEmails, setCustomEmails] = useState<string>('');
   const [fromEmail, setFromEmail] = useState('TaxProExchange <support@taxproexchange.com>');
@@ -41,6 +43,20 @@ export default function MarketingPage() {
     loadUsers();
     loadEmailLogs();
   }, []);
+
+  useEffect(() => {
+    // Filter users based on search query
+    if (!searchQuery.trim()) {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter(user => 
+        user.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
+  }, [users, searchQuery]);
 
   const loadUsers = async () => {
     try {
@@ -81,10 +97,10 @@ export default function MarketingPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedUsers.length === users.length) {
+    if (selectedUsers.length === filteredUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(users.map(user => user.id));
+      setSelectedUsers(filteredUsers.map(user => user.id));
     }
   };
 
@@ -273,6 +289,13 @@ export default function MarketingPage() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => setBody(body + '{{FirstName}}')}
+                        className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                      >
+                        + FirstName
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setBody(body + '{{last_name}}')}
                         className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
                       >
@@ -305,19 +328,35 @@ export default function MarketingPage() {
                     Recipients ({getSelectedEmails().length} selected)
                   </label>
                   
+                  {/* Search Input */}
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      placeholder="Search contacts by name or email..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {searchQuery && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        Showing {filteredUsers.length} of {users.length} contacts
+                      </p>
+                    )}
+                  </div>
+                  
                   {/* Select All */}
                   <div className="mb-3">
                     <button
                       onClick={handleSelectAll}
                       className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                     >
-                      {selectedUsers.length === users.length ? 'Deselect All' : 'Select All'} Users
+                      {selectedUsers.length === filteredUsers.length ? 'Deselect All' : 'Select All'} Users
                     </button>
                   </div>
 
                   {/* User List */}
                   <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-2">
-                    {users.map(user => (
+                    {filteredUsers.map(user => (
                       <label key={user.id} className="flex items-center space-x-3 cursor-pointer hover:bg-slate-50 p-2 rounded">
                         <input
                           type="checkbox"
@@ -333,6 +372,11 @@ export default function MarketingPage() {
                         </div>
                       </label>
                     ))}
+                    {filteredUsers.length === 0 && (
+                      <p className="text-sm text-slate-500 text-center py-4">
+                        {searchQuery ? 'No contacts found matching your search' : 'No contacts available'}
+                      </p>
+                    )}
                   </div>
 
                   {/* Custom Emails */}

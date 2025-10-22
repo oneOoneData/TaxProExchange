@@ -14,9 +14,12 @@ function chunk<T>(array: T[], size: number): T[][] {
 // Helper function to personalize email content
 function personalizeEmail(content: string, userData: { first_name?: string; last_name?: string; email?: string }): string {
   return content
-    .replace(/\{\{first_name\}\}/g, userData.first_name || 'there')
-    .replace(/\{\{last_name\}\}/g, userData.last_name || '')
-    .replace(/\{\{email\}\}/g, userData.email || '');
+    .replace(/\{\{first_name\}\}/gi, userData.first_name || 'there')
+    .replace(/\{\{last_name\}\}/gi, userData.last_name || '')
+    .replace(/\{\{email\}\}/gi, userData.email || '')
+    .replace(/\{\{FirstName\}\}/gi, userData.first_name || 'there')
+    .replace(/\{\{LastName\}\}/gi, userData.last_name || '')
+    .replace(/\{\{Email\}\}/gi, userData.email || '');
 }
 
 export async function POST(req: NextRequest) {
