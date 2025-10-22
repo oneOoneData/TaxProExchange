@@ -251,7 +251,16 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                         <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        <span className="text-slate-500 italic">Contact email coming soon</span>
+                        {partner.slug === 'bluej' ? (
+                          <a 
+                            href="mailto:lara.bean@bluejlegal.com?subject=TaxProExchange Partnership Inquiry&body=Hi Lara,%0D%0A%0D%0AI'm reaching out from TaxProExchange regarding our partnership with BlueJ.%0D%0A%0D%0A[Please add your message here]%0D%0A%0D%0ABest regards,%0D%0A[Your Name]"
+                            className="hover:text-emerald-600 transition-colors"
+                          >
+                            lara.bean@bluejlegal.com
+                          </a>
+                        ) : (
+                          <span className="text-slate-500 italic">Contact email coming soon</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -280,15 +289,27 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                     TaxProExchange members get exclusive access to {partner.name}&apos;s platform with special pricing and onboarding support.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <button
-                      disabled
-                      className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl bg-white text-emerald-700 hover:bg-emerald-50 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Sign Up - Special Offer
-                      <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </button>
+                    {partner.slug === 'bluej' ? (
+                      <a
+                        href="mailto:lara.bean@bluejlegal.com?subject=TaxProExchange Partnership Inquiry&body=Hi Lara,%0D%0A%0D%0AI'm reaching out from TaxProExchange regarding our partnership with BlueJ.%0D%0A%0D%0A[Please add your message here]%0D%0A%0D%0ABest regards,%0D%0A[Your Name]"
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl bg-white text-emerald-700 hover:bg-emerald-50 shadow-lg transition-all"
+                      >
+                        Contact BlueJ
+                        <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl bg-white text-emerald-700 hover:bg-emerald-50 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Sign Up - Special Offer
+                        <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </button>
+                    )}
                     <a
                       href={partner.website}
                       target="_blank"
