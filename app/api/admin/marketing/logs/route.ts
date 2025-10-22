@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
     // Get email logs ordered by most recent first
+    const supabase = createServerClient();
     const { data: logs, error } = await supabase
       .from('email_log')
       .select('*')

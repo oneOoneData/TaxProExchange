@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email';
 
 // Helper function to chunk array into smaller batches
@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
 
     // Log the email send to database
     try {
+      const supabase = createServerClient();
       const { error: logError } = await supabase
         .from('email_log')
         .insert({

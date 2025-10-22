@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
     // Get all users with their email and name information
+    const supabase = createServerClient();
     const { data: users, error } = await supabase
       .from('users')
       .select(`
