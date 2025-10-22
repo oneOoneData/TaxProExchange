@@ -167,7 +167,7 @@ www.taxproexchange.com`);
         setResult(`✅ Success! Marketing email sent to ${data.emailsSent} recipients\n` +
           `Failed: ${data.emailsFailed}\n` +
           `Total recipients: ${recipients.length}\n` +
-          `Rate limit: 2 emails/second (${Math.ceil(recipients.length / 2)} seconds estimated)`);
+          `Rate limit: 1 email/second (${recipients.length} seconds estimated)`);
         
         // Clear form
         setSubject('');
@@ -422,8 +422,8 @@ www.taxproexchange.com`);
                         ></div>
                       </div>
                       <p className="text-xs text-slate-500 mt-1 text-center">
-                        Sending in batches of 25 - Rate limited to 2 emails/second<br/>
-                        Estimated time: {Math.ceil(sendingProgress.total / 2)} seconds
+                        Sending in batches of 25 - Rate limited to 1 email/second<br/>
+                        Estimated time: {Math.ceil(sendingProgress.total)} seconds
                       </p>
                     </div>
                   )}

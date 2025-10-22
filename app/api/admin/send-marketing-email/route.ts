@@ -120,14 +120,23 @@ export async function POST(req: NextRequest) {
             console.log(`📧 Progress: ${emailsSent}/${recipients.length} emails sent`);
           }
           
-          // Small delay between emails to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Small delay between emails to respect rate limits (1 email per second)
+          await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
-          console.error(`Failed to send email to ${recipientEmail}:`, error);
+          // Enhanced error logging
+          const errorDetails = {
+            email: recipientEmail,
+            error: error,
+            errorMessage: error instanceof Error ? error.message : String(error),
+            errorCode: error && typeof error === 'object' && 'statusCode' in error ? error.statusCode : 'unknown',
+            errorType: error && typeof error === 'object' && 'name' in error ? error.name : 'unknown'
+          };
+          
+          console.error(`❌ Failed to send email to ${recipientEmail}:`, errorDetails);
           
           // Check if it's a rate limit error
           if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 429) {
-            console.log(`Rate limit hit, waiting 1 second before retry for ${recipientEmail}`);
+            console.log(`⏳ Rate limit hit, waiting 1 second before retry for ${recipientEmail}`);
             await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Retry once after waiting
@@ -140,9 +149,15 @@ export async function POST(req: NextRequest) {
                 replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
               });
               emailsSent++;
-              console.log(`Retry successful for ${recipientEmail}`);
+              console.log(`✅ Retry successful for ${recipientEmail}`);
             } catch (retryError) {
-              console.error(`Retry failed for ${recipientEmail}:`, retryError);
+              const retryErrorDetails = {
+                email: recipientEmail,
+                error: retryError,
+                errorMessage: retryError instanceof Error ? retryError.message : String(retryError),
+                errorCode: retryError && typeof retryError === 'object' && 'statusCode' in retryError ? retryError.statusCode : 'unknown'
+              };
+              console.error(`❌ Retry failed for ${recipientEmail}:`, retryErrorDetails);
               emailsFailed++;
               failedEmails.push(recipientEmail);
             }
@@ -161,6 +176,14 @@ export async function POST(req: NextRequest) {
     }
     
     console.log(`📧 Batch email send complete: ${emailsSent} sent, ${emailsFailed} failed`);
+    
+    // Log failed emails for debugging
+    if (failedEmails.length > 0) {
+      console.log(`❌ Failed emails (${failedEmails.length}):`, failedEmails.slice(0, 10)); // Show first 10 failed emails
+      if (failedEmails.length > 10) {
+        console.log(`❌ ... and ${failedEmails.length - 10} more failed emails`);
+      }
+    }
 
     // Log the email send to database
     try {
@@ -184,10 +207,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      message: `Marketing email sent to ${emailsSent} recipients`,
       emailsSent,
       emailsFailed,
       totalRecipients: recipients.length,
-      failedEmails: failedEmails.length > 0 ? failedEmails : undefined,
+      failedEmails: failedEmails.length > 0 ? failedEmails.slice(0, 10) : [], // Show first 10 failed emails
+      failureRate: `${Math.round((emailsFailed / recipients.length) * 100)}%`
     });
 
   } catch (error) {
