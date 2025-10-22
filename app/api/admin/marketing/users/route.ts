@@ -30,8 +30,8 @@ export async function GET() {
     const transformedUsers = users?.map(user => ({
       id: user.id,
       email: user.email,
-      first_name: user.profiles?.first_name || '',
-      last_name: user.profiles?.last_name || '',
+      first_name: user.profiles?.[0]?.first_name || '',
+      last_name: user.profiles?.[0]?.last_name || '',
     })) || [];
 
     return NextResponse.json({
