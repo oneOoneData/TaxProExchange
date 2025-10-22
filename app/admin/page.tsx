@@ -404,6 +404,7 @@ export default function AdminDashboard() {
             <Link href="/admin/job-applications" className="hover:text-slate-900">Applications</Link>
             <Link href="/admin/firms" className="hover:text-slate-900">Enrichment</Link>
             <Link href="/admin/firm-workspaces" className="hover:text-slate-900">Workspaces</Link>
+            <Link href="/admin/marketing" className="hover:text-slate-900">Marketing</Link>
           </nav>
         </div>
       </header>
@@ -732,6 +733,27 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.5 }}
+            className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Marketing Email</h3>
+            <p className="text-slate-600 mb-4">Send broadcast emails to users via Resend. All sends are logged for tracking.</p>
+            <Link
+              href="/admin/marketing"
+              className="inline-flex items-center justify-center rounded-xl bg-pink-600 text-white px-4 py-2 text-sm font-medium hover:bg-pink-700 transition-colors"
+            >
+              Send Marketing Email
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.6 }}
             className="bg-white rounded-2xl border border-amber-200 p-6 hover:shadow-md transition-shadow"
           >
             <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
