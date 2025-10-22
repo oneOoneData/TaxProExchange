@@ -54,33 +54,31 @@ export async function POST(req: NextRequest) {
 
     // Get user data for personalization
     const supabase = createServerClient();
-    const { data: usersData, error: usersError } = await supabase
-      .from('users')
+    const { data: profilesData, error: profilesError } = await supabase
+      .from('profiles')
       .select(`
         id,
         email,
-        profiles!inner(
-          first_name,
-          last_name
-        )
+        first_name,
+        last_name
       `)
       .in('email', recipients);
 
-    if (usersError) {
-      console.error('Error fetching user data:', usersError);
+    if (profilesError) {
+      console.error('Error fetching profile data:', profilesError);
       return NextResponse.json(
-        { error: 'Failed to fetch user data for personalization' },
+        { error: 'Failed to fetch profile data for personalization' },
         { status: 500 }
       );
     }
 
-    // Create a map of email to user data for quick lookup
+    // Create a map of email to profile data for quick lookup
     const userDataMap = new Map();
-    usersData?.forEach(user => {
-      userDataMap.set(user.email, {
-        first_name: user.profiles?.[0]?.first_name || '',
-        last_name: user.profiles?.[0]?.last_name || '',
-        email: user.email
+    profilesData?.forEach(profile => {
+      userDataMap.set(profile.email, {
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        email: profile.email
       });
     });
 
