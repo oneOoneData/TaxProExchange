@@ -99,11 +99,34 @@ export async function POST(req: NextRequest) {
         emailsSent++;
         
         // Small delay between emails to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
         console.error(`Failed to send email to ${recipientEmail}:`, error);
-        emailsFailed++;
-        failedEmails.push(recipientEmail);
+        
+        // Check if it's a rate limit error
+        if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 429) {
+          console.log(`Rate limit hit, waiting 1 second before retry for ${recipientEmail}`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Retry once after waiting
+          try {
+            await sendEmail({
+              to: recipientEmail,
+              subject: personalizedSubject,
+              text: personalizedBody,
+              replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
+            });
+            emailsSent++;
+            console.log(`Retry successful for ${recipientEmail}`);
+          } catch (retryError) {
+            console.error(`Retry failed for ${recipientEmail}:`, retryError);
+            emailsFailed++;
+            failedEmails.push(recipientEmail);
+          }
+        } else {
+          emailsFailed++;
+          failedEmails.push(recipientEmail);
+        }
       }
     }
 
