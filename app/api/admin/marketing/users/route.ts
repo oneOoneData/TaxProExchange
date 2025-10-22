@@ -1,0 +1,48 @@
+import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
+
+export async function GET() {
+  try {
+    // Get all users with their email and name information
+    const { data: users, error } = await supabase
+      .from('users')
+      .select(`
+        id,
+        email,
+        profiles!inner(
+          first_name,
+          last_name
+        )
+      `)
+      .not('email', 'is', null)
+      .order('email');
+
+    if (error) {
+      console.error('Error fetching users:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch users' },
+        { status: 500 }
+      );
+    }
+
+    // Transform the data to flatten the profile information
+    const transformedUsers = users?.map(user => ({
+      id: user.id,
+      email: user.email,
+      first_name: user.profiles?.first_name || '',
+      last_name: user.profiles?.last_name || '',
+    })) || [];
+
+    return NextResponse.json({
+      users: transformedUsers,
+      count: transformedUsers.length,
+    });
+
+  } catch (error) {
+    console.error('Users API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
