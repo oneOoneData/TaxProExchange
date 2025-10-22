@@ -89,55 +89,78 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Send personalized emails individually
-    for (const recipientEmail of recipients) {
-      const userData = userDataMap.get(recipientEmail) || { email: recipientEmail };
-      const personalizedBody = personalizeEmail(body, userData);
-      const personalizedSubject = personalizeEmail(subject, userData);
+    // Send personalized emails in batches to avoid timeouts
+    const batchSize = 25; // Send 25 emails per batch
+    const batches = chunk(recipients, batchSize);
+    
+    console.log(`📧 Starting batch email send: ${recipients.length} recipients in ${batches.length} batches of ${batchSize}`);
+    
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+      console.log(`📧 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} emails)`);
       
-      try {
-        await sendEmail({
-          to: recipientEmail,
-          subject: personalizedSubject,
-          text: personalizedBody,
-          from: from,
-          replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
-        });
+      for (const recipientEmail of batch) {
+        const userData = userDataMap.get(recipientEmail) || { email: recipientEmail };
+        const personalizedBody = personalizeEmail(body, userData);
+        const personalizedSubject = personalizeEmail(subject, userData);
         
-        emailsSent++;
-        
-        // Small delay between emails to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error(`Failed to send email to ${recipientEmail}:`, error);
-        
-        // Check if it's a rate limit error
-        if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 429) {
-          console.log(`Rate limit hit, waiting 1 second before retry for ${recipientEmail}`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+          await sendEmail({
+            to: recipientEmail,
+            subject: personalizedSubject,
+            text: personalizedBody,
+            from: from,
+            replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
+          });
           
-          // Retry once after waiting
-          try {
-            await sendEmail({
-              to: recipientEmail,
-              subject: personalizedSubject,
-              text: personalizedBody,
-              from: from,
-              replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
-            });
-            emailsSent++;
-            console.log(`Retry successful for ${recipientEmail}`);
-          } catch (retryError) {
-            console.error(`Retry failed for ${recipientEmail}:`, retryError);
+          emailsSent++;
+          
+          // Log progress every 5 emails
+          if (emailsSent % 5 === 0) {
+            console.log(`📧 Progress: ${emailsSent}/${recipients.length} emails sent`);
+          }
+          
+          // Small delay between emails to respect rate limits
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error(`Failed to send email to ${recipientEmail}:`, error);
+          
+          // Check if it's a rate limit error
+          if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 429) {
+            console.log(`Rate limit hit, waiting 1 second before retry for ${recipientEmail}`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Retry once after waiting
+            try {
+              await sendEmail({
+                to: recipientEmail,
+                subject: personalizedSubject,
+                text: personalizedBody,
+                from: from,
+                replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
+              });
+              emailsSent++;
+              console.log(`Retry successful for ${recipientEmail}`);
+            } catch (retryError) {
+              console.error(`Retry failed for ${recipientEmail}:`, retryError);
+              emailsFailed++;
+              failedEmails.push(recipientEmail);
+            }
+          } else {
             emailsFailed++;
             failedEmails.push(recipientEmail);
           }
-        } else {
-          emailsFailed++;
-          failedEmails.push(recipientEmail);
         }
       }
+      
+      // Wait between batches to prevent overwhelming the system
+      if (batchIndex < batches.length - 1) {
+        console.log(`📧 Batch ${batchIndex + 1} complete. Waiting 2 seconds before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
+    
+    console.log(`📧 Batch email send complete: ${emailsSent} sent, ${emailsFailed} failed`);
 
     // Log the email send to database
     try {
