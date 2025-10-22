@@ -31,8 +31,17 @@ export default function MarketingPage() {
   const [customEmails, setCustomEmails] = useState<string>('');
   const [fromEmail, setFromEmail] = useState('TaxProExchange <support@taxproexchange.com>');
   const [replyToEmail, setReplyToEmail] = useState('koen@taxproexchange.com');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
+  const [subject, setSubject] = useState('Quick question about AI in tax');
+  const [body, setBody] = useState(`Hi {{FirstName}},
+
+I'm planning a few short sessions with TaxGPT, showing how firms are quietly using AI in real tax work.
+
+Would you be open to an early invite?
+
+Just reply "yes" and I'll add you to the list.
+
+– Koen
+www.taxproexchange.com`);
   const [sending, setSending] = useState(false);
   const [sendingProgress, setSendingProgress] = useState({ current: 0, total: 0 });
   const [result, setResult] = useState<string | null>(null);
