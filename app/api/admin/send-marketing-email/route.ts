@@ -84,11 +84,11 @@ export async function POST(req: NextRequest) {
 
     // Send personalized emails individually
     for (const recipientEmail of recipients) {
+      const userData = userDataMap.get(recipientEmail) || { email: recipientEmail };
+      const personalizedBody = personalizeEmail(body, userData);
+      const personalizedSubject = personalizeEmail(subject, userData);
+      
       try {
-        const userData = userDataMap.get(recipientEmail) || { email: recipientEmail };
-        const personalizedBody = personalizeEmail(body, userData);
-        const personalizedSubject = personalizeEmail(subject, userData);
-
         await sendEmail({
           to: recipientEmail,
           subject: personalizedSubject,
