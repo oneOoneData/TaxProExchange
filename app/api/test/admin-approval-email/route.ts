@@ -19,8 +19,11 @@ export async function POST(request: NextRequest) {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       credentialType: 'CPA',
+      ptin: 'P123456789',
       headline: 'Senior Tax Professional with 10+ years experience',
       firmName: 'Doe & Associates',
+      isListed: true,
+      visibilityState: 'pending_verification',
       adminViewLink: `${process.env.NEXT_PUBLIC_APP_URL}/p/test-profile?admin=true`,
       approveLink: `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profileId}&action=approve`,
       rejectLink: `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profileId}&action=reject`

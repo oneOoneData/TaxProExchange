@@ -22,11 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get profile slug for the admin view link
+    // Get profile slug and additional data for the admin view link
     const supabase = supabaseService();
     let { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('slug, first_name, last_name, visibility_state')
+      .select('slug, first_name, last_name, visibility_state, ptin, is_listed')
       .eq('id', profile_id)
       .single();
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       // Try to get profile by ID as fallback
       const { data: fallbackProfile, error: fallbackError } = await supabase
         .from('profiles')
-        .select('slug, first_name, last_name, visibility_state')
+        .select('slug, first_name, last_name, visibility_state, ptin, is_listed')
         .eq('id', profile_id)
         .single();
       
@@ -58,7 +58,9 @@ export async function POST(request: NextRequest) {
       slug: profile.slug,
       first_name: profile.first_name,
       last_name: profile.last_name,
-      visibility_state: profile.visibility_state
+      visibility_state: profile.visibility_state,
+      ptin: profile.ptin,
+      is_listed: profile.is_listed
     });
 
     // Create admin view link using the public profile route with admin parameter
@@ -78,8 +80,11 @@ export async function POST(request: NextRequest) {
         lastName: last_name,
         email: email,
         credentialType: credential_type || 'Not specified',
+        ptin: profile.ptin,
         headline: headline || '',
         firmName: firm_name || '',
+        isListed: profile.is_listed,
+        visibilityState: profile.visibility_state,
         adminViewLink: adminViewLink,
         approveLink: approveLink,
         rejectLink: rejectLink
