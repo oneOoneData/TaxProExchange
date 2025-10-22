@@ -11,9 +11,17 @@ function chunk<T>(array: T[], size: number): T[][] {
   return chunks;
 }
 
+// Helper function to personalize email content
+function personalizeEmail(content: string, userData: { first_name?: string; last_name?: string; email?: string }): string {
+  return content
+    .replace(/\{\{first_name\}\}/g, userData.first_name || 'there')
+    .replace(/\{\{last_name\}\}/g, userData.last_name || '')
+    .replace(/\{\{email\}\}/g, userData.email || '');
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { from, subject, body, recipients } = await req.json();
+    const { from, replyTo, subject, body, recipients } = await req.json();
 
     // Validate required fields
     if (!from || !subject || !body || !recipients || !Array.isArray(recipients)) {
@@ -44,34 +52,65 @@ export async function POST(req: NextRequest) {
     let emailsFailed = 0;
     const failedEmails: string[] = [];
 
-    // Send emails in batches of 50 to respect Resend rate limits
-    const batches = chunk(recipients, 50);
-    
-    for (const batch of batches) {
+    // Get user data for personalization
+    const supabase = createServerClient();
+    const { data: usersData, error: usersError } = await supabase
+      .from('users')
+      .select(`
+        id,
+        email,
+        profiles!inner(
+          first_name,
+          last_name
+        )
+      `)
+      .in('email', recipients);
+
+    if (usersError) {
+      console.error('Error fetching user data:', usersError);
+      return NextResponse.json(
+        { error: 'Failed to fetch user data for personalization' },
+        { status: 500 }
+      );
+    }
+
+    // Create a map of email to user data for quick lookup
+    const userDataMap = new Map();
+    usersData?.forEach(user => {
+      userDataMap.set(user.email, {
+        first_name: user.profiles?.[0]?.first_name || '',
+        last_name: user.profiles?.[0]?.last_name || '',
+        email: user.email
+      });
+    });
+
+    // Send personalized emails individually
+    for (const recipientEmail of recipients) {
       try {
+        const userData = userDataMap.get(recipientEmail) || { email: recipientEmail };
+        const personalizedBody = personalizeEmail(body, userData);
+        const personalizedSubject = personalizeEmail(subject, userData);
+
         await sendEmail({
-          to: batch,
-          subject,
-          text: body,
-          replyTo: process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
+          to: recipientEmail,
+          subject: personalizedSubject,
+          text: personalizedBody,
+          replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
         });
         
-        emailsSent += batch.length;
+        emailsSent++;
         
-        // Small delay between batches to respect rate limits
-        if (batches.indexOf(batch) < batches.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+        // Small delay between emails to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) {
-        console.error('Failed to send batch:', error);
-        emailsFailed += batch.length;
-        failedEmails.push(...batch);
+        console.error(`Failed to send email to ${recipientEmail}:`, error);
+        emailsFailed++;
+        failedEmails.push(recipientEmail);
       }
     }
 
     // Log the email send to database
     try {
-      const supabase = createServerClient();
       const { error: logError } = await supabase
         .from('email_log')
         .insert({
