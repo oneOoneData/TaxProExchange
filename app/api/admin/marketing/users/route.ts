@@ -16,9 +16,24 @@ export async function GET() {
         last_name
       `)
       .not('email', 'is', null)
-      .order('email');
+      .order('email')
+      .limit(1000); // Explicitly set high limit
     
-    console.log('🔍 Users API: Profiles query:', { profiles, error, count: profiles?.length });
+    // Also get total count for debugging
+    const { count: totalProfiles } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+    
+    const { count: profilesWithEmails } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .not('email', 'is', null);
+    
+    console.log('🔍 Users API: Profile counts:', { 
+      totalProfiles, 
+      profilesWithEmails, 
+      returnedProfiles: profiles?.length 
+    });
     
     if (error) {
       console.error('Error fetching profiles:', error);
