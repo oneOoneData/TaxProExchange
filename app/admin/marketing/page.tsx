@@ -422,7 +422,8 @@ www.taxproexchange.com`);
                         ></div>
                       </div>
                       <p className="text-xs text-slate-500 mt-1 text-center">
-                        Rate limited to 2 emails/second - Estimated time: {Math.ceil(sendingProgress.total / 2)} seconds
+                        Sending in batches of 25 - Rate limited to 2 emails/second<br/>
+                        Estimated time: {Math.ceil(sendingProgress.total / 2)} seconds
                       </p>
                     </div>
                   )}
