@@ -38,8 +38,11 @@ export interface ProfileCompletionEmailData {
   lastName: string;
   email: string;
   credentialType: string;
+  ptin?: string;
   headline: string;
   firmName: string;
+  isListed: boolean;
+  visibilityState: string;
   adminViewLink: string;
   approveLink: string;
   rejectLink: string;
@@ -208,8 +211,10 @@ export const emailTemplates = {
             <div style="margin: 20px 0;">
               <strong>Email:</strong> ${data.email}<br>
               <strong>Credential Type:</strong> ${data.credentialType}<br>
+              ${data.ptin ? `<strong>PTIN:</strong> ${data.ptin}<br>` : ''}
               <strong>Headline:</strong> ${data.headline || 'Not specified'}<br>
-              <strong>Firm:</strong> ${data.firmName || 'Not specified'}
+              <strong>Firm:</strong> ${data.firmName || 'Not specified'}<br>
+              <strong>Profile Status:</strong> ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}
             </div>
           </div>
           
@@ -242,7 +247,7 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\nHeadline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
+    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\n${data.ptin ? `PTIN: ${data.ptin}\n` : ''}Headline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\nProfile Status: ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
   }),
 
   connectionRequest: (data: ConnectionRequestEmailData): EmailTemplate => ({
