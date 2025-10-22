@@ -280,7 +280,7 @@ export default function MarketingPage() {
                       </button>
                     </div>
                     <p className="text-xs text-slate-500">
-                      Use placeholders like {{first_name}} to personalize emails. They will be replaced with actual user data.
+                      Use placeholders like {'{{first_name}}'} to personalize emails. They will be replaced with actual user data.
                     </p>
                   </div>
                   <textarea
