@@ -46,7 +46,11 @@ export default function MarketingPage() {
       const response = await fetch('/api/admin/marketing/users');
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 Marketing page: Users loaded:', data);
         setUsers(data.users || []);
+      } else {
+        const errorData = await response.json();
+        console.error('🔍 Marketing page: Error loading users:', errorData);
       }
     } catch (error) {
       console.error('Error loading users:', error);

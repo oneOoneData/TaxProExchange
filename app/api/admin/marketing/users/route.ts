@@ -10,7 +10,7 @@ export async function GET() {
       .select(`
         id,
         email,
-        profiles!inner(
+        profiles(
           first_name,
           last_name
         )
@@ -26,6 +26,8 @@ export async function GET() {
       );
     }
 
+    console.log('🔍 Users API: Raw data from Supabase:', { users, count: users?.length });
+
     // Transform the data to flatten the profile information
     const transformedUsers = users?.map(user => ({
       id: user.id,
@@ -33,6 +35,8 @@ export async function GET() {
       first_name: user.profiles?.[0]?.first_name || '',
       last_name: user.profiles?.[0]?.last_name || '',
     })) || [];
+
+    console.log('🔍 Users API: Transformed users:', { transformedUsers, count: transformedUsers.length });
 
     return NextResponse.json({
       users: transformedUsers,
