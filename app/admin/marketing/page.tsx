@@ -53,6 +53,37 @@ www.taxproexchange.com`);
     loadEmailLogs();
   }, []);
 
+  // Load predefined email list and pre-populate selected users
+  useEffect(() => {
+    const loadEmailList = async () => {
+      try {
+        const response = await fetch('/api/admin/marketing/email-list');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📧 Loaded email list:', data.count, 'emails');
+          
+          // Find matching users from the loaded list
+          const matchingUsers = users.filter(user => 
+            data.emails.includes(user.email.toLowerCase())
+          );
+          
+          if (matchingUsers.length > 0) {
+            const matchingUserIds = matchingUsers.map(user => user.id);
+            setSelectedUsers(matchingUserIds);
+            console.log('✅ Pre-selected', matchingUserIds.length, 'users from email list');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading email list:', error);
+      }
+    };
+
+    // Only load email list after users are loaded
+    if (users.length > 0) {
+      loadEmailList();
+    }
+  }, [users]);
+
   useEffect(() => {
     // Filter users based on search query
     if (!searchQuery.trim()) {
@@ -336,6 +367,15 @@ www.taxproexchange.com`);
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Recipients ({getSelectedEmails().length} selected)
                   </label>
+                  
+                  {/* Email List Status */}
+                  {selectedUsers.length > 0 && (
+                    <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        📧 Pre-populated from email list ({selectedUsers.length} contacts selected)
+                      </p>
+                    </div>
+                  )}
                   
                   {/* Search Input */}
                   <div className="mb-3">
