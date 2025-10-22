@@ -12,10 +12,11 @@ export async function GET() {
       .select(`
         id,
         email,
+        public_email,
         first_name,
         last_name
       `)
-      .not('email', 'is', null)
+      .or('email.not.is.null,public_email.not.is.null')
       .order('email')
       .limit(1000); // Explicitly set high limit
     
@@ -46,10 +47,10 @@ export async function GET() {
     // Transform the data to match expected format
     const transformedUsers = profiles?.map(profile => ({
       id: profile.id,
-      email: profile.email,
+      email: profile.email || profile.public_email || '', // Use email first, fallback to public_email
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
-    })) || [];
+    })).filter(user => user.email) || []; // Only include users with actual email addresses
 
     console.log('🔍 Users API: Transformed users:', { transformedUsers, count: transformedUsers.length });
 

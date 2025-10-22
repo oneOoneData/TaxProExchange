@@ -62,10 +62,11 @@ export async function POST(req: NextRequest) {
       .select(`
         id,
         email,
+        public_email,
         first_name,
         last_name
       `)
-      .in('email', recipients);
+      .or('email.not.is.null,public_email.not.is.null');
 
     if (profilesError) {
       console.error('Error fetching profile data:', profilesError);
@@ -78,11 +79,14 @@ export async function POST(req: NextRequest) {
     // Create a map of email to profile data for quick lookup
     const userDataMap = new Map();
     profilesData?.forEach(profile => {
-      userDataMap.set(profile.email, {
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        email: profile.email
-      });
+      const email = profile.email || profile.public_email;
+      if (email) {
+        userDataMap.set(email, {
+          first_name: profile.first_name || '',
+          last_name: profile.last_name || '',
+          email: email
+        });
+      }
     });
 
     // Send personalized emails individually
