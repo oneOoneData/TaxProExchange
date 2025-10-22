@@ -124,19 +124,31 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 {partner.description}
               </p>
 
-              {/* External Link */}
-              {partner.website && (
+              {/* Contact Button */}
+              {partner.slug === 'bluej' ? (
                 <a
-                  href={partner.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:lara.bean@bluejlegal.com?subject=TaxProExchange Partnership Inquiry&body=Hi Lara,%0D%0A%0D%0AI'm reaching out from TaxProExchange regarding our partnership with BlueJ.%0D%0A%0D%0A[Please add your message here]%0D%0A%0D%0ABest regards,%0D%0A[Your Name]"
                   className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-slate-900 hover:bg-slate-800 shadow-lg transition-all"
                 >
-                  Visit {partner.name} Website
+                  Contact BlueJ
                   <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </a>
+              ) : (
+                partner.website && (
+                  <a
+                    href={partner.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-slate-900 hover:bg-slate-800 shadow-lg transition-all"
+                  >
+                    Visit {partner.name} Website
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                )
               )}
             </div>
           </div>
@@ -239,29 +251,36 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                       Have questions about {partner.name} or want to learn more about their solutions for tax professionals? Reach out directly.
                     </p>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
-                        <a href={partner.website} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">
-                          {partner.website.replace('https://', '')}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        {partner.slug === 'bluej' ? (
+                      {partner.slug === 'bluej' ? (
+                        <div className="flex items-center gap-3 text-slate-700">
+                          <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
                           <a 
                             href="mailto:lara.bean@bluejlegal.com?subject=TaxProExchange Partnership Inquiry&body=Hi Lara,%0D%0A%0D%0AI'm reaching out from TaxProExchange regarding our partnership with BlueJ.%0D%0A%0D%0A[Please add your message here]%0D%0A%0D%0ABest regards,%0D%0A[Your Name]"
                             className="hover:text-emerald-600 transition-colors"
                           >
                             lara.bean@bluejlegal.com
                           </a>
-                        ) : (
-                          <span className="text-slate-500 italic">Contact email coming soon</span>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3 text-slate-700">
+                            <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                            </svg>
+                            <a href={partner.website} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-600 transition-colors">
+                              {partner.website.replace('https://', '')}
+                            </a>
+                          </div>
+                          <div className="flex items-center gap-3 text-slate-700">
+                            <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-slate-500 italic">Contact email coming soon</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
