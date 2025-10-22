@@ -28,6 +28,7 @@ export default function MarketingPage() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [customEmails, setCustomEmails] = useState<string>('');
   const [fromEmail, setFromEmail] = useState('TaxProExchange <support@taxproexchange.com>');
+  const [replyToEmail, setReplyToEmail] = useState('koen@taxproexchange.com');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
@@ -123,6 +124,7 @@ export default function MarketingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: fromEmail,
+          replyTo: replyToEmail,
           subject: subject.trim(),
           body: body.trim(),
           recipients
@@ -217,6 +219,23 @@ export default function MarketingPage() {
                   />
                 </div>
 
+                {/* Reply-To Email */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Reply-To Address
+                  </label>
+                  <input
+                    type="email"
+                    value={replyToEmail}
+                    onChange={(e) => setReplyToEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="koen@taxproexchange.com"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    This is where replies will be sent. Use koen@taxproexchange.com to receive responses.
+                  </p>
+                </div>
+
                 {/* Subject */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -236,12 +255,40 @@ export default function MarketingPage() {
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Email Body (Plain Text)
                   </label>
+                  <div className="mb-2">
+                    <div className="flex gap-2 mb-2">
+                      <button
+                        type="button"
+                        onClick={() => setBody(body + '{{first_name}}')}
+                        className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                      >
+                        + First Name
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBody(body + '{{last_name}}')}
+                        className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                      >
+                        + Last Name
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBody(body + '{{email}}')}
+                        className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                      >
+                        + Email
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Use placeholders like {{first_name}} to personalize emails. They will be replaced with actual user data.
+                    </p>
+                  </div>
                   <textarea
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
                     rows={8}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your email content here..."
+                    placeholder="Hi {{first_name}},\n\nI hope this email finds you well...\n\nBest regards,\nKoen"
                   />
                 </div>
 
