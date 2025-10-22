@@ -32,6 +32,7 @@ export default function MarketingPage() {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
+  const [sendingProgress, setSendingProgress] = useState({ current: 0, total: 0 });
   const [result, setResult] = useState<string | null>(null);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,6 +121,7 @@ export default function MarketingPage() {
     }
 
     setSending(true);
+    setSendingProgress({ current: 0, total: recipients.length });
     setResult(null);
 
     try {
@@ -139,7 +141,8 @@ export default function MarketingPage() {
         const data = await response.json();
         setResult(`✅ Success! Marketing email sent to ${data.emailsSent} recipients\n` +
           `Failed: ${data.emailsFailed}\n` +
-          `Total recipients: ${recipients.length}`);
+          `Total recipients: ${recipients.length}\n` +
+          `Rate limit: 2 emails/second (${Math.ceil(recipients.length / 2)} seconds estimated)`);
         
         // Clear form
         setSubject('');
@@ -354,8 +357,22 @@ export default function MarketingPage() {
                     disabled={sending}
                     className="w-full inline-flex items-center justify-center rounded-xl bg-blue-600 text-white px-6 py-3 text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
                   >
-                    {sending ? 'Sending...' : `Send to ${getSelectedEmails().length} Recipients`}
+                    {sending ? `Sending... (${sendingProgress.current}/${sendingProgress.total})` : `Send to ${getSelectedEmails().length} Recipients`}
                   </button>
+                  
+                  {sending && (
+                    <div className="mt-2">
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${(sendingProgress.current / sendingProgress.total) * 100}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1 text-center">
+                        Rate limited to 2 emails/second - Estimated time: {Math.ceil(sendingProgress.total / 2)} seconds
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Result */}
