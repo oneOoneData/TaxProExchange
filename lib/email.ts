@@ -519,6 +519,7 @@ type SendEmailArgs = {
   html?: string;
   text?: string;
   replyTo?: string;
+  from?: string; // Add from parameter
   listUnsubscribe?: string; // mailto:… or https://…
   headers?: Record<string, string>; // Custom email headers
 };
@@ -530,18 +531,19 @@ export async function sendEmail({
   html,
   text,
   replyTo = process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
+  from,
   listUnsubscribe = `mailto:${process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com'}?subject=unsubscribe`,
   headers: customHeaders = {},
 }: SendEmailArgs) {
   try {
-    const from = process.env.EMAIL_FROM || 'TaxProExchange <support@taxproexchange.com>';
+    const fromAddress = from || process.env.EMAIL_FROM || 'TaxProExchange <support@taxproexchange.com>';
     const headers: Record<string, string> = {
       'List-Unsubscribe': listUnsubscribe,
       ...customHeaders,
     };
 
     const result = await resend.emails.send({
-      from,
+      from: fromAddress,
       to,
       subject,
       html,

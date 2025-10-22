@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
           to: recipientEmail,
           subject: personalizedSubject,
           text: personalizedBody,
+          from: from,
           replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
         });
         
@@ -114,6 +115,7 @@ export async function POST(req: NextRequest) {
               to: recipientEmail,
               subject: personalizedSubject,
               text: personalizedBody,
+              from: from,
               replyTo: replyTo || process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com',
             });
             emailsSent++;
