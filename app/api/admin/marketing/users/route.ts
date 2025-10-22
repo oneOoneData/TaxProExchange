@@ -5,6 +5,17 @@ export async function GET() {
   try {
     // Get all users with their email and name information
     const supabase = createServerClient();
+    
+    // First, let's try a simple query to see if there are any users at all
+    const { data: allUsers, error: allUsersError } = await supabase
+      .from('users')
+      .select('id, email')
+      .not('email', 'is', null)
+      .limit(10);
+    
+    console.log('🔍 Users API: Simple users query:', { allUsers, allUsersError, count: allUsers?.length });
+    
+    // Now try the full query with profiles
     const { data: users, error } = await supabase
       .from('users')
       .select(`
@@ -19,7 +30,26 @@ export async function GET() {
       .order('email');
 
     if (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching users with profiles:', error);
+      console.log('🔍 Users API: Falling back to simple users query');
+      
+      // Fallback to simple users if the complex query fails
+      if (allUsers && !allUsersError) {
+        const transformedUsers = allUsers.map(user => ({
+          id: user.id,
+          email: user.email,
+          first_name: '',
+          last_name: '',
+        }));
+        
+        console.log('🔍 Users API: Fallback users:', { transformedUsers, count: transformedUsers.length });
+        
+        return NextResponse.json({
+          users: transformedUsers,
+          count: transformedUsers.length,
+        });
+      }
+      
       return NextResponse.json(
         { error: 'Failed to fetch users' },
         { status: 500 }
