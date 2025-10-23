@@ -102,12 +102,15 @@ export async function GET(request: NextRequest) {
       
       // Map software search terms to slugs for database lookup
       const softwareOptions = [
+        // Consumer tax prep
         { slug: 'turbotax', label: 'TurboTax' },
         { slug: 'hr_block', label: 'H&R Block Online' },
         { slug: 'taxact', label: 'TaxAct' },
         { slug: 'taxslayer', label: 'TaxSlayer' },
         { slug: 'freetaxusa', label: 'FreeTaxUSA' },
         { slug: 'cash_app_taxes', label: 'Cash App Taxes' },
+        
+        // Professional preparer suites
         { slug: 'lacerte', label: 'Intuit Lacerte' },
         { slug: 'proseries', label: 'Intuit ProSeries' },
         { slug: 'proconnect', label: 'Intuit ProConnect' },
@@ -121,58 +124,109 @@ export async function GET(request: NextRequest) {
         { slug: 'taxwise', label: 'TaxWise' },
         { slug: 'canopy', label: 'Canopy' },
         { slug: 'taxdome', label: 'TaxDome' },
+        
+        // Other tax prep software
         { slug: 'gosystem_taxrs', label: 'GoSystemTaxRS' },
         { slug: 'mytaxprepoffice', label: 'MyTaxPrepOffice' },
         { slug: 'crosslink', label: 'CrossLink' },
         { slug: 'wg', label: 'WG' },
+        
+        // Corporate & enterprise
         { slug: 'corptax', label: 'CSC Corptax' },
         { slug: 'onesource', label: 'Thomson Reuters ONESOURCE' },
         { slug: 'planner', label: 'Thomson Reuters Planner' },
         { slug: 'longview', label: 'Wolters Kluwer Longview Tax' },
         { slug: 'oracle_tax', label: 'Oracle Tax Reporting Cloud' },
+        
+        // Indirect tax & sales tax
         { slug: 'avalara', label: 'Avalara' },
         { slug: 'vertex', label: 'Vertex (O Series)' },
         { slug: 'sovos', label: 'Sovos' },
         { slug: 'taxjar', label: 'TaxJar' },
         { slug: 'stripe_tax', label: 'Stripe Tax' },
+        
+        // Accounting & bookkeeping
         { slug: 'quickbooks_online', label: 'QuickBooks Online' },
         { slug: 'xero', label: 'Xero' },
         { slug: 'freshbooks', label: 'FreshBooks' },
         { slug: 'sage', label: 'Sage' },
         { slug: 'wave', label: 'Wave' },
+        
+        // Payroll & employer
         { slug: 'adp', label: 'ADP' },
         { slug: 'paychex', label: 'Paychex' },
         { slug: 'gusto', label: 'Gusto' },
         { slug: 'quickbooks_payroll', label: 'QuickBooks Payroll' },
+        { slug: 'rippling', label: 'Rippling' },
+        
+        // Information returns
+        { slug: 'track1099', label: 'Track1099' },
+        { slug: 'tax1099', label: 'Tax1099 (Zenwork)' },
+        { slug: 'yearli', label: 'Yearli (Greatland)' },
+        { slug: 'efile4biz', label: 'efile4Biz' },
+        
+        // Crypto tax
+        { slug: 'cointracker', label: 'CoinTracker' },
+        { slug: 'koinly', label: 'Koinly' },
+        { slug: 'coinledger', label: 'CoinLedger' },
+        { slug: 'taxbit', label: 'TaxBit' },
+        { slug: 'zenledger', label: 'ZenLedger' },
+        
+        // Fixed assets & depreciation
+        { slug: 'bloomberg_fixed_assets', label: 'Bloomberg Tax Fixed Assets' },
+        { slug: 'sage_fixed_assets', label: 'Sage Fixed Assets' },
+        { slug: 'cch_fixed_assets', label: 'CCH ProSystem fx Fixed Assets' },
+        
+        // Tax research & content
         { slug: 'checkpoint', label: 'Thomson Reuters Checkpoint' },
         { slug: 'cch_intelliconnect', label: 'CCH IntelliConnect' },
-        { slug: 'bloomberg_tax', label: 'Bloomberg Tax' },
-        { slug: 'rja', label: 'RIA Checkpoint' },
-        { slug: 'westlaw', label: 'Westlaw' },
-        { slug: 'lexisnexis', label: 'LexisNexis' },
-        { slug: 'bna', label: 'BNA Tax Management' },
-        { slug: 'tax_analysts', label: 'Tax Analysts' },
-        { slug: 'other', label: 'Other' }
+        { slug: 'bloomberg_tax', label: 'Bloomberg Tax & Accounting' },
+        { slug: 'lexisnexis_tax', label: 'LexisNexis Tax' },
+        { slug: 'taxnotes', label: 'TaxNotes' },
+        
+        // Workpapers & engagement
+        { slug: 'caseware', label: 'CaseWare Working Papers' },
+        { slug: 'workiva', label: 'Workiva' },
+        { slug: 'sureprep', label: 'SurePrep' },
+        { slug: 'cch_workstream', label: 'CCH Axcess Workstream' },
+        
+        // Practice management & workflow
+        { slug: 'truss', label: 'Truss' }
       ];
       
       // Find matching software slugs based on the search query
+      const normalizedQuery = query.toLowerCase().trim();
       const matchingSlugs = softwareOptions
         .filter(option => 
-          option.label.toLowerCase().includes(query.toLowerCase()) ||
-          option.slug.toLowerCase().includes(query.toLowerCase())
+          option.label.toLowerCase().includes(normalizedQuery) ||
+          option.slug.toLowerCase().includes(normalizedQuery) ||
+          normalizedQuery.includes(option.label.toLowerCase()) ||
+          normalizedQuery.includes(option.slug.toLowerCase())
         )
         .map(option => option.slug);
       
+      console.log('🔍 Software search debug:', {
+        query: query,
+        matchingSlugs: matchingSlugs,
+        softwareOptionsCount: softwareOptions.length
+      });
+      
       let profileIdsFromSoftware: string[] = [];
       if (matchingSlugs.length > 0) {
+        console.log('🔍 Searching for profiles with software slugs:', matchingSlugs);
         const { data: matchingSoftware } = await supabase
           .from('profile_software')
           .select('profile_id')
           .in('software_slug', matchingSlugs);
         
+        console.log('🔍 Software query result:', { matchingSoftware, count: matchingSoftware?.length || 0 });
+        
         if (matchingSoftware && matchingSoftware.length > 0) {
           profileIdsFromSoftware = matchingSoftware.map(ps => ps.profile_id);
+          console.log('🔍 Found profile IDs from software:', profileIdsFromSoftware);
         }
+      } else {
+        console.log('🔍 No matching software slugs found for query:', query);
       }
       
       // If we found profiles with matching software, combine the results
