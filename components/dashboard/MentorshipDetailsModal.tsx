@@ -39,6 +39,7 @@ const softwareOptions = [
   { slug: 'wg', label: 'WG' },
   { slug: 'corptax', label: 'CSC Corptax' },
   { slug: 'onesource', label: 'Thomson Reuters ONESOURCE' },
+  { slug: 'planner', label: 'Thomson Reuters Planner' },
   { slug: 'longview', label: 'Wolters Kluwer Longview Tax' },
   { slug: 'oracle_tax', label: 'Oracle Tax Reporting Cloud' },
   { slug: 'avalara', label: 'Avalara' },
