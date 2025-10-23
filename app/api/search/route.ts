@@ -92,11 +92,95 @@ export async function GET(request: NextRequest) {
     // When verified_only is false, show all profiles (both verified and unverified)
     // Users can still only view verified profiles due to profile API restrictions
 
-    // Apply text search for names, firm names, headlines, and bios
+    // Apply text search for names, firm names, headlines, bios, and software
     if (query) {
       const searchTerm = `%${query}%`;
       console.log('🔍 Applying text search with term:', searchTerm);
-      supabaseQuery = supabaseQuery.or(`first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},headline.ilike.${searchTerm},bio.ilike.${searchTerm},firm_name.ilike.${searchTerm}`);
+      
+      // First, get profiles that match basic fields
+      const basicSearchQuery = supabaseQuery.or(`first_name.ilike.${searchTerm},last_name.ilike.${searchTerm},headline.ilike.${searchTerm},bio.ilike.${searchTerm},firm_name.ilike.${searchTerm}`);
+      
+      // Map software search terms to slugs for database lookup
+      const softwareOptions = [
+        { slug: 'turbotax', label: 'TurboTax' },
+        { slug: 'hr_block', label: 'H&R Block Online' },
+        { slug: 'taxact', label: 'TaxAct' },
+        { slug: 'taxslayer', label: 'TaxSlayer' },
+        { slug: 'freetaxusa', label: 'FreeTaxUSA' },
+        { slug: 'cash_app_taxes', label: 'Cash App Taxes' },
+        { slug: 'lacerte', label: 'Intuit Lacerte' },
+        { slug: 'proseries', label: 'Intuit ProSeries' },
+        { slug: 'proconnect', label: 'Intuit ProConnect' },
+        { slug: 'drake', label: 'Drake Tax' },
+        { slug: 'ultratax', label: 'Thomson Reuters UltraTax CS' },
+        { slug: 'cch_axcess', label: 'CCH Axcess Tax' },
+        { slug: 'axcess', label: 'Axcess' },
+        { slug: 'cch_prosystem', label: 'CCH ProSystem fx Tax' },
+        { slug: 'prosystemfx', label: 'ProSystemFX' },
+        { slug: 'atx', label: 'ATX' },
+        { slug: 'taxwise', label: 'TaxWise' },
+        { slug: 'canopy', label: 'Canopy' },
+        { slug: 'taxdome', label: 'TaxDome' },
+        { slug: 'gosystem_taxrs', label: 'GoSystemTaxRS' },
+        { slug: 'mytaxprepoffice', label: 'MyTaxPrepOffice' },
+        { slug: 'crosslink', label: 'CrossLink' },
+        { slug: 'wg', label: 'WG' },
+        { slug: 'corptax', label: 'CSC Corptax' },
+        { slug: 'onesource', label: 'Thomson Reuters ONESOURCE' },
+        { slug: 'planner', label: 'Thomson Reuters Planner' },
+        { slug: 'longview', label: 'Wolters Kluwer Longview Tax' },
+        { slug: 'oracle_tax', label: 'Oracle Tax Reporting Cloud' },
+        { slug: 'avalara', label: 'Avalara' },
+        { slug: 'vertex', label: 'Vertex (O Series)' },
+        { slug: 'sovos', label: 'Sovos' },
+        { slug: 'taxjar', label: 'TaxJar' },
+        { slug: 'stripe_tax', label: 'Stripe Tax' },
+        { slug: 'quickbooks_online', label: 'QuickBooks Online' },
+        { slug: 'xero', label: 'Xero' },
+        { slug: 'freshbooks', label: 'FreshBooks' },
+        { slug: 'sage', label: 'Sage' },
+        { slug: 'wave', label: 'Wave' },
+        { slug: 'adp', label: 'ADP' },
+        { slug: 'paychex', label: 'Paychex' },
+        { slug: 'gusto', label: 'Gusto' },
+        { slug: 'quickbooks_payroll', label: 'QuickBooks Payroll' },
+        { slug: 'checkpoint', label: 'Thomson Reuters Checkpoint' },
+        { slug: 'cch_intelliconnect', label: 'CCH IntelliConnect' },
+        { slug: 'bloomberg_tax', label: 'Bloomberg Tax' },
+        { slug: 'rja', label: 'RIA Checkpoint' },
+        { slug: 'westlaw', label: 'Westlaw' },
+        { slug: 'lexisnexis', label: 'LexisNexis' },
+        { slug: 'bna', label: 'BNA Tax Management' },
+        { slug: 'tax_analysts', label: 'Tax Analysts' },
+        { slug: 'other', label: 'Other' }
+      ];
+      
+      // Find matching software slugs based on the search query
+      const matchingSlugs = softwareOptions
+        .filter(option => 
+          option.label.toLowerCase().includes(query.toLowerCase()) ||
+          option.slug.toLowerCase().includes(query.toLowerCase())
+        )
+        .map(option => option.slug);
+      
+      let profileIdsFromSoftware: string[] = [];
+      if (matchingSlugs.length > 0) {
+        const { data: matchingSoftware } = await supabase
+          .from('profile_software')
+          .select('profile_id')
+          .in('software_slug', matchingSlugs);
+        
+        if (matchingSoftware && matchingSoftware.length > 0) {
+          profileIdsFromSoftware = matchingSoftware.map(ps => ps.profile_id);
+        }
+      }
+      
+      // If we found profiles with matching software, combine the results
+      if (profileIdsFromSoftware.length > 0) {
+        supabaseQuery = basicSearchQuery.or(`id.in.(${profileIdsFromSoftware.join(',')})`);
+      } else {
+        supabaseQuery = basicSearchQuery;
+      }
     }
 
     // Apply credential type filter
