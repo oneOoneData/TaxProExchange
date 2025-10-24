@@ -73,6 +73,10 @@ export default function DashboardLayoutClient({
             <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
             <Link href="/events" className="hover:text-slate-900">Events</Link>
             <Link href="/mentorship" className="hover:text-slate-900">Mentorship</Link>
+            <Link href="/partners" className="hover:text-slate-900 flex items-center gap-1.5">
+              <span className="text-base">🤝</span>
+              Partners
+            </Link>
             <Link href="/dashboard" className="hover:text-slate-900 font-medium text-slate-900">Dashboard</Link>
           </nav>
           
