@@ -90,6 +90,12 @@ export interface BenchInvitationEmailData {
   viewInvitationLink: string;
 }
 
+export interface JobPosterNotificationEmailData {
+  firstName: string;
+  email: string;
+  applicationsLink: string;
+}
+
 export interface EmailTemplate {
   subject: string;
   html: string;
@@ -510,6 +516,69 @@ Please review the URLs and event details before approving.
 This is an automated notification from TaxProExchange.
 Events are refreshed weekly on Mondays at 6 AM UTC.
     `
+  }),
+
+  jobPosterNotification: (data: JobPosterNotificationEmailData): EmailTemplate => ({
+    subject: 'You have new applicants waiting on TaxProExchange',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Applicants Waiting</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">New Applicants Waiting</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Hi ${data.firstName},</h2>
+            
+            <p style="color: #4a5568; font-size: 16px; margin: 20px 0;">
+              You have one or more applicants waiting to be reviewed for your job postings on TaxProExchange.
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${data.applicationsLink}" style="background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 16px;">
+                👉 View your applicants here
+              </a>
+            </div>
+            
+            <p style="color: #4a5568; font-size: 16px; margin: 20px 0;">
+              We recommend checking in soon so you don't miss out on top talent in the network.
+            </p>
+          </div>
+          
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 30px 0;">
+            <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
+              If you experience any issues, please reach out to support@taxproexchange.com or click the 💡 icon inside the app to contact us directly.
+            </p>
+          </div>
+          
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
+            <p>Thank you for helping build a trusted exchange for tax professionals.</p>
+            <p>– The TaxProExchange Team</p>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `You have new applicants waiting on TaxProExchange
+
+Hi ${data.firstName},
+
+You have one or more applicants waiting to be reviewed for your job postings on TaxProExchange.
+
+👉 View your applicants here: ${data.applicationsLink}
+
+We recommend checking in soon so you don't miss out on top talent in the network.
+
+If you experience any issues, please reach out to support@taxproexchange.com or click the 💡 icon inside the app to contact us directly.
+
+Thank you for helping build a trusted exchange for tax professionals.
+
+– The TaxProExchange Team`
   })
 };
 
@@ -688,5 +757,17 @@ export async function sendVerifiedListedEmail(opts: {
     headers: {
       'List-Unsubscribe': `<mailto:support@taxproexchange.com?subject=unsubscribe>, <${managePrefsUrl}>`,
     },
+  });
+}
+
+// Send job poster notification
+export async function sendJobPosterNotification(data: JobPosterNotificationEmailData) {
+  const template = emailTemplates.jobPosterNotification(data);
+  return sendEmail({
+    to: data.email,
+    subject: template.subject,
+    html: template.html,
+    text: template.text,
+    from: 'TaxProExchange <support@taxproexchange.com>',
   });
 }

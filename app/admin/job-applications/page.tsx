@@ -67,6 +67,8 @@ export default function AdminJobApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [total, setTotal] = useState(0);
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
+  const [notifying, setNotifying] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -123,6 +125,62 @@ export default function AdminJobApplicationsPage() {
     }).format(amount);
   };
 
+  const handleNotifyJobPosters = async () => {
+    try {
+      setNotifying(true);
+      const response = await fetch('/api/notify-job-posters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send notifications');
+      }
+
+      const result = await response.json();
+      
+      // Show success toast
+      alert(`Notifications sent! ${result.notificationsSent} job posters notified.`);
+      
+    } catch (err) {
+      console.error('Error sending notifications:', err);
+      alert(`Error: ${err instanceof Error ? err.message : 'Failed to send notifications'}`);
+    } finally {
+      setNotifying(false);
+    }
+  };
+
+  const handleTestEmail = async () => {
+    try {
+      setTestingEmail(true);
+      const response = await fetch('/api/notify-job-posters/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send test email');
+      }
+
+      const result = await response.json();
+      
+      // Show success toast
+      alert(`Test email sent successfully to ${result.recipient}!`);
+      
+    } catch (err) {
+      console.error('Error sending test email:', err);
+      alert(`Error: ${err instanceof Error ? err.message : 'Failed to send test email'}`);
+    } finally {
+      setTestingEmail(false);
+    }
+  };
+
   // Calculate stats
   const statusCounts = applications.reduce((acc, app) => {
     acc[app.status] = (acc[app.status] || 0) + 1;
@@ -143,8 +201,28 @@ export default function AdminJobApplicationsPage() {
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Job Applications</h1>
-            <p className="mt-2 text-gray-600">View and manage all job applications across the platform</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Job Applications</h1>
+                <p className="mt-2 text-gray-600">View and manage all job applications across the platform</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleTestEmail}
+                  disabled={testingEmail}
+                  className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                  {testingEmail ? 'Sending...' : 'Test Email'}
+                </button>
+                <button
+                  onClick={handleNotifyJobPosters}
+                  disabled={notifying}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                  {notifying ? 'Sending...' : 'Notify Job Posters'}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Stats */}
