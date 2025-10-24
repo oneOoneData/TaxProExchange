@@ -84,7 +84,8 @@ export async function POST(request: NextRequest) {
         profiles!jobs_created_by_fkey(
           first_name,
           last_name,
-          email
+          email,
+          public_email
         )
       `)
       .in('id', uniqueJobIds);
