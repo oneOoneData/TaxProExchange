@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getCurrentProfile } from '@/lib/db/profile';
 import { sendEmail } from '@/lib/email';
-import { createClient } from '@/lib/supabase/client';
+import { createServerClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin email addresses
-    const supabase = createClient();
+    const supabase = createServerClient();
     const { data: admins, error: adminError } = await supabase
       .from("profiles")
       .select("email, full_name")
