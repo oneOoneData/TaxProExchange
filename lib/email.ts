@@ -534,7 +534,9 @@ Events are refreshed weekly on Mondays at 6 AM UTC.
           </div>
           
           <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
-            <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Hi ${data.firstName},</h2>
+            <p style="color: #2d3748; font-size: 16px; margin: 0 0 20px 0;">
+              Hi <strong>${data.firstName}</strong>,
+            </p>
             
             <p style="color: #4a5568; font-size: 16px; margin: 20px 0;">
               You have one or more applicants waiting to be reviewed for your job postings on TaxProExchange.
@@ -549,11 +551,9 @@ Events are refreshed weekly on Mondays at 6 AM UTC.
             <p style="color: #4a5568; font-size: 16px; margin: 20px 0;">
               We recommend checking in soon so you don't miss out on top talent in the network.
             </p>
-          </div>
-          
-          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 30px 0;">
-            <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
-              If you experience any issues, please reach out to support@taxproexchange.com or click the 💡 icon inside the app to contact us directly.
+            
+            <p style="color: #4a5568; font-size: 16px; margin: 20px 0;">
+              If you experience any issues, reach out to <strong>support@taxproexchange.com</strong> or click the 💡 icon inside the app to contact us directly.
             </p>
           </div>
           
@@ -574,7 +574,7 @@ You have one or more applicants waiting to be reviewed for your job postings on 
 
 We recommend checking in soon so you don't miss out on top talent in the network.
 
-If you experience any issues, please reach out to support@taxproexchange.com or click the 💡 icon inside the app to contact us directly.
+If you experience any issues, reach out to support@taxproexchange.com or click the 💡 icon inside the app to contact us directly.
 
 Thank you for helping build a trusted exchange for tax professionals.
 
