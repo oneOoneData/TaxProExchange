@@ -103,7 +103,8 @@ export async function GET(request: NextRequest) {
         profiles!jobs_created_by_fkey(
           first_name,
           last_name,
-          email
+          email,
+          public_email
         )
       `)
       .in('id', uniqueJobIds);
@@ -115,6 +116,23 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Check for recent notifications (last 24 hours)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    
+    const { data: recentNotifications, error: notificationsError } = await supabase
+      .from('email_log')
+      .select('recipients, sent_at')
+      .eq('subject', 'You have new applicants waiting on TaxProExchange')
+      .gte('sent_at', twentyFourHoursAgo);
+
+    // Extract recent recipient emails
+    const recentEmails = new Set();
+    recentNotifications?.forEach(notification => {
+      if (Array.isArray(notification.recipients)) {
+        notification.recipients.forEach(email => recentEmails.add(email));
+      }
+    });
 
     // Analyze the data
     const analysis = {
@@ -135,6 +153,9 @@ export async function GET(request: NextRequest) {
       jobPostersWithoutEmail: 0,
       jobPostersWithoutPublicEmail: 0,
       jobPostersWithoutFirstName: 0,
+      recentNotificationsCount: recentNotifications?.length || 0,
+      recentRecipientsCount: recentEmails.size,
+      recentRecipients: Array.from(recentEmails),
       jobPostersDetails: [] as any[]
     };
 
@@ -153,7 +174,9 @@ export async function GET(request: NextRequest) {
         email: profile?.email || 'No email',
         publicEmail: profile?.public_email || 'No public email',
         firstName: profile?.first_name || 'No first name',
-        lastName: profile?.last_name || 'No last name'
+        lastName: profile?.last_name || 'No last name',
+        wouldReceiveNotification: !!(profile?.public_email && profile?.first_name && !recentEmails.has(profile.public_email)),
+        recentlyNotified: recentEmails.has(profile?.public_email || '')
       };
 
       analysis.jobPostersDetails.push(posterInfo);
