@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id')
-      .or(`email.eq.${email.toLowerCase()},public_email.eq.${email.toLowerCase()}`)
+      .eq('public_email', email.toLowerCase())
       .single();
 
     // Check if they're already a member
