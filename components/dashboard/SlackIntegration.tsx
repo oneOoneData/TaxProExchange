@@ -88,7 +88,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
         }
 
         try {
-          const response = await fetch('/api/slack/join', {
+          const response = await fetch('/api/slack/request-invite', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -98,57 +98,31 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.error || 'Failed to join Slack');
+            throw new Error(data.error || 'Failed to request Slack invite');
           }
 
-          if (data.workspaceId || data.url) {
-            // Track analytics event
-            if (typeof window !== 'undefined' && window.gtag) {
-              window.gtag('event', 'slack_join_success', {
-                event_category: 'engagement',
-                event_label: 'slack_community'
-              });
-            }
+          // Track analytics event
+          if (typeof window !== 'undefined' && window.gtag) {
+            window.gtag('event', 'slack_invite_request', {
+              event_category: 'engagement',
+              event_label: 'slack_community'
+            });
+          }
 
-            // Generate the appropriate URL based on device type
-            let slackUrl: string;
-            if (data.workspaceId) {
-              // New format: generate URL based on device
-              const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                              window.innerWidth <= 768;
-              
-              // Use the proper Slack workspace URL format for both mobile and desktop
-              // Format: https://taxproexchange.slack.com/
-              slackUrl = `https://taxproexchange.slack.com/`;
-            } else {
-              // Fallback to legacy URL format
-              slackUrl = data.url!;
-            }
-
-            // Open Slack
-            window.open(slackUrl, '_blank', 'noopener,noreferrer');
-            
-            // Clear any previous errors and show success message
-            if (mounted) {
-              setError(null);
-              // Show success message about checking email
-              alert('Invite sent! Please check your email (including spam/promotions folder) for the Slack invite link.');
-            }
-            
-            // Refresh status after a delay
-            setTimeout(() => {
-              fetchSlackStatus();
-            }, 1000);
+          // Show success message
+          if (mounted) {
+            setError(null);
+            alert('Invite request sent! An admin will manually send you a Slack invite via email.');
           }
         } catch (err) {
-          console.error('Error joining Slack:', err);
+          console.error('Error requesting Slack invite:', err);
           if (mounted) {
-            setError(err instanceof Error ? err.message : 'Failed to join Slack');
+            setError(err instanceof Error ? err.message : 'Failed to request Slack invite');
           }
           
           // Track analytics event
           if (typeof window !== 'undefined' && window.gtag) {
-            window.gtag('event', 'slack_join_error', {
+            window.gtag('event', 'slack_invite_error', {
               event_category: 'engagement',
               event_label: 'slack_community'
             });
@@ -236,7 +210,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
               alt="Slack" 
               className="w-5 h-5"
             />
-            {loading ? 'Sending invite...' : 'Join'}
+            {loading ? 'Sending request...' : 'Invite Me'}
           </button>
         ) : slackStatus?.isMember ? (
           <button
