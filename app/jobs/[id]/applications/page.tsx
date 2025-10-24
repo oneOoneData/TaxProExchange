@@ -69,15 +69,8 @@ export default function JobApplicationsPage() {
         const jobData = await jobResponse.json();
         setJob(jobData);
 
-        // Verify user owns this job using email-based lookup
-        const userEmail = user.primaryEmailAddress?.emailAddress;
-        if (!userEmail) {
-          setError('Could not verify your email address');
-          return;
-        }
-
-        // Check if the current user's email matches the job creator's email
-        const ownershipResponse = await fetch(`/api/jobs/${params.id}/check-ownership?email=${encodeURIComponent(userEmail)}`);
+        // Verify user owns this job using clerk_id-based lookup
+        const ownershipResponse = await fetch(`/api/jobs/${params.id}/check-ownership`);
         if (!ownershipResponse.ok) {
           setError('You can only view applications for jobs you created');
           return;
@@ -89,13 +82,15 @@ export default function JobApplicationsPage() {
           return;
         }
 
-        // Load applications
-        const applicationsResponse = await fetch(`/api/jobs/${params.id}/apply`);
+        // Load applications for this specific job
+        const applicationsResponse = await fetch(`/api/profile/applications-received`);
         if (!applicationsResponse.ok) {
           throw new Error('Failed to load applications');
         }
         const applicationsData = await applicationsResponse.json();
-        setApplications(applicationsData.applications || []);
+        // Filter applications to only show those for this specific job
+        const jobApplications = applicationsData.applications?.filter((app: any) => app.job?.id === params.id) || [];
+        setApplications(jobApplications);
 
       } catch (err) {
         console.error('Error loading data:', err);
