@@ -26,6 +26,22 @@ export interface Profile {
   profile_type?: 'tax_professional' | 'firm_admin';
   created_at: string;
   updated_at: string;
+  // Additional fields that exist in the database
+  states?: string[];
+  specializations?: string[];
+  software?: string[];
+  other_software?: string[];
+  works_multistate?: boolean;
+  works_international?: boolean;
+  countries?: string[];
+  years_experience?: string;
+  entity_revenue_range?: string;
+  primary_location?: any;
+  opportunities?: string;
+  public_contact?: boolean;
+  is_admin?: boolean;
+  full_name?: string;
+  email?: string;
 }
 
 export interface VerificationRequest {
