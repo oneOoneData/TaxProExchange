@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL || 'koen@cardifftax.com';
     
     // Get a sample job poster name for the test email
-    // We'll use a generic name since this is just for testing
-    const testFirstName = 'Tax Professional';
+    // We'll use a realistic name for testing purposes
+    const testFirstName = 'John';
 
     try {
       await sendJobPosterNotification({

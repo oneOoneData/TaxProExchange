@@ -100,14 +100,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Remove duplicates and filter out users without email
+    // Remove duplicates and filter out users without email or first name
     const uniquePosters = new Map();
     jobPosters.forEach(job => {
       const profile = Array.isArray(job.profiles) ? job.profiles[0] : job.profiles;
-      if (profile?.email && !uniquePosters.has(job.created_by)) {
+      if (profile?.email && profile?.first_name && !uniquePosters.has(job.created_by)) {
         uniquePosters.set(job.created_by, {
           userId: job.created_by,
-          firstName: profile.first_name || 'Tax Professional',
+          firstName: profile.first_name,
           email: profile.email
         });
       }
