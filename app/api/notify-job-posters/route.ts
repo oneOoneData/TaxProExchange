@@ -65,7 +65,11 @@ export async function POST(request: NextRequest) {
     if (!jobIds || jobIds.length === 0) {
       return NextResponse.json({
         message: 'No jobs found with pending applications',
-        notificationsSent: 0
+        notificationsSent: 0,
+        debug: {
+          totalApplicationsFound: jobIds?.length || 0,
+          statusesSearched: ['applied', 'pending']
+        }
       });
     }
 
@@ -96,7 +100,11 @@ export async function POST(request: NextRequest) {
     if (!jobPosters || jobPosters.length === 0) {
       return NextResponse.json({
         message: 'No job posters found with pending applications',
-        notificationsSent: 0
+        notificationsSent: 0,
+        debug: {
+          uniqueJobIdsFound: uniqueJobIds.length,
+          jobPostersFound: jobPosters?.length || 0
+        }
       });
     }
 
@@ -146,6 +154,13 @@ export async function POST(request: NextRequest) {
       notificationsSent: notificationsSent.length,
       totalPosters: uniquePosters.size,
       errors: errors.length,
+      debug: {
+        totalApplicationsFound: jobIds.length,
+        uniqueJobIdsFound: uniqueJobIds.length,
+        jobPostersFound: jobPosters.length,
+        postersWithValidData: uniquePosters.size,
+        postersSkipped: jobPosters.length - uniquePosters.size
+      },
       details: {
         sent: notificationsSent,
         failed: errors
