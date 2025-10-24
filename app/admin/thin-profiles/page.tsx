@@ -12,7 +12,7 @@ import AdminRouteGuard from '@/components/AdminRouteGuard';
 interface ThinProfile {
   id: string;
   name: string;
-  email: string;
+  email: string; // This is mapped from public_email in the API
   credential_type: string;
   firm_name: string;
   slug: string;
@@ -318,7 +318,7 @@ export default function ThinProfilesPage() {
                               {profile.firm_name && (
                                 <div className="text-xs text-slate-500">{profile.firm_name}</div>
                               )}
-                              <div className="text-xs text-slate-400">{profile.public_email}</div>
+                              <div className="text-xs text-slate-400">{profile.email}</div>
                             </div>
                           </td>
                           <td className="px-4 py-4">
