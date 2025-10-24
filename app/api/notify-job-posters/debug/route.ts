@@ -133,6 +133,7 @@ export async function GET(request: NextRequest) {
       }, {} as Record<string, number>) || {},
       jobPostersWithValidData: 0,
       jobPostersWithoutEmail: 0,
+      jobPostersWithoutPublicEmail: 0,
       jobPostersWithoutFirstName: 0,
       jobPostersDetails: [] as any[]
     };
@@ -147,18 +148,21 @@ export async function GET(request: NextRequest) {
         jobStatus: job.status,
         createdBy: job.created_by,
         hasEmail: !!profile?.email,
+        hasPublicEmail: !!profile?.public_email,
         hasFirstName: !!profile?.first_name,
         email: profile?.email || 'No email',
+        publicEmail: profile?.public_email || 'No public email',
         firstName: profile?.first_name || 'No first name',
         lastName: profile?.last_name || 'No last name'
       };
 
       analysis.jobPostersDetails.push(posterInfo);
 
-      if (profile?.email && profile?.first_name) {
+      if (profile?.public_email && profile?.first_name) {
         analysis.jobPostersWithValidData++;
       } else {
         if (!profile?.email) analysis.jobPostersWithoutEmail++;
+        if (!profile?.public_email) analysis.jobPostersWithoutPublicEmail++;
         if (!profile?.first_name) analysis.jobPostersWithoutFirstName++;
       }
     });
