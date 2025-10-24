@@ -112,11 +112,11 @@ export async function POST(request: NextRequest) {
     const uniquePosters = new Map();
     jobPosters.forEach(job => {
       const profile = Array.isArray(job.profiles) ? job.profiles[0] : job.profiles;
-      if (profile?.email && profile?.first_name && !uniquePosters.has(job.created_by)) {
+      if (profile?.public_email && profile?.first_name && !uniquePosters.has(job.created_by)) {
         uniquePosters.set(job.created_by, {
           userId: job.created_by,
           firstName: profile.first_name,
-          email: profile.email
+          email: profile.public_email
         });
       }
     });
