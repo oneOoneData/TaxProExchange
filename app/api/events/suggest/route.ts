@@ -62,14 +62,14 @@ export async function POST(req: Request) {
     if (userId) {
       const { data: userProfile } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email')
+        .select('id, first_name, last_name, public_email')
         .eq('clerk_id', userId)
         .single();
 
       if (userProfile) {
         profile = userProfile;
         userName = `${profile.first_name} ${profile.last_name}`.trim();
-        userEmail = profile.email;
+        userEmail = profile.public_email;
       }
     }
 

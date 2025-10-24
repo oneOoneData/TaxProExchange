@@ -47,7 +47,7 @@ export async function GET() {
     // Transform the data to match expected format
     const transformedUsers = profiles?.map(profile => ({
       id: profile.id,
-      email: profile.email || profile.public_email || '', // Use email first, fallback to public_email
+      email: profile.public_email || '', // Use public_email field
       first_name: profile.first_name || '',
       last_name: profile.last_name || '',
     })).filter(user => user.email) || []; // Only include users with actual email addresses
