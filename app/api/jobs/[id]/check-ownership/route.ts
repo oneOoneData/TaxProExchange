@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabaseService';
+import { auth } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/jobs/[id]/check-ownership - Check if a user owns a job by email
+// GET /api/jobs/[id]/check-ownership - Check if a user owns a job by clerk_id
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: jobId } = await params;
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
-
-    if (!email) {
-      return NextResponse.json({ error: 'Email parameter is required' }, { status: 400 });
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id: jobId } = await params;
     const supabase = supabaseService();
 
     // Get the job to find the creator
@@ -30,19 +30,8 @@ export async function GET(
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
-    // Check if the email matches the job creator's profile
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('public_email')
-      .eq('clerk_id', job.created_by)
-      .single();
-
-    if (profileError || !profile) {
-      return NextResponse.json({ isOwner: false });
-    }
-
-    // Check if the email matches
-    const isOwner = profile.public_email === email;
+    // Check if the current user's clerk_id matches the job creator's clerk_id
+    const isOwner = job.created_by === userId;
 
     return NextResponse.json({ isOwner });
   } catch (error) {
