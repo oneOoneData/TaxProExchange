@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     // Check profiles table for these users
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('clerk_id, user_id, first_name, last_name, email, public_email')
+      .select('clerk_id, user_id, first_name, last_name, public_email')
       .in('clerk_id', missingEmailUserIds);
 
     // Also check if they exist in the users table (if it exists)
@@ -79,8 +79,8 @@ export async function GET(request: NextRequest) {
         usersError: usersError?.message
       },
       analysis: {
-        profilesWithEmail: profiles?.filter(p => p.email || p.public_email).length || 0,
-        profilesWithoutEmail: profiles?.filter(p => !p.email && !p.public_email).length || 0
+        profilesWithEmail: profiles?.filter(p => p.public_email).length || 0,
+        profilesWithoutEmail: profiles?.filter(p => !p.public_email).length || 0
       }
     });
 

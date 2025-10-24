@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     // Create a map of email to profile data for quick lookup
     const userDataMap = new Map();
     profilesData?.forEach(profile => {
-      const email = profile.email || profile.public_email;
+      const email = profile.public_email;
       if (email) {
         userDataMap.set(email, {
           first_name: profile.first_name || '',
