@@ -121,11 +121,42 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Check for recent notifications to avoid duplicates
+    // Get notifications sent in the last 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    
+    const { data: recentNotifications, error: notificationsError } = await supabase
+      .from('email_log')
+      .select('recipients, sent_at')
+      .eq('subject', 'You have new applicants waiting on TaxProExchange')
+      .gte('sent_at', twentyFourHoursAgo);
+
+    if (notificationsError) {
+      console.warn('Could not check recent notifications:', notificationsError);
+    }
+
+    // Extract all recent recipient emails from the recipients array
+    const recentEmails = new Set();
+    recentNotifications?.forEach(notification => {
+      if (Array.isArray(notification.recipients)) {
+        notification.recipients.forEach(email => recentEmails.add(email));
+      }
+    });
+
+    // Filter out users who received notifications in the last 24 hours
+    const filteredPosters = new Map();
+    
+    uniquePosters.forEach((poster, userId) => {
+      if (!recentEmails.has(poster.email)) {
+        filteredPosters.set(userId, poster);
+      }
+    });
+
     const notificationsSent = [];
     const errors = [];
 
-    // Send notifications to each unique job poster
-    const postersArray = Array.from(uniquePosters.values());
+    // Send notifications to each unique job poster (excluding recent recipients)
+    const postersArray = Array.from(filteredPosters.values());
     for (const poster of postersArray) {
       try {
         await sendJobPosterNotification({
@@ -133,6 +164,18 @@ export async function POST(request: NextRequest) {
           email: poster.email,
           applicationsLink: 'https://www.taxproexchange.com/profile/applications'
         });
+        
+        // Log the email send to prevent duplicates
+        await supabase
+          .from('email_log')
+          .insert({
+            from_email: 'TaxProExchange <support@taxproexchange.com>',
+            subject: 'You have new applicants waiting on TaxProExchange',
+            recipients: [poster.email],
+            emails_sent: 1,
+            emails_failed: 0,
+            sent_at: new Date().toISOString()
+          });
         
         notificationsSent.push({
           userId: poster.userId,
@@ -153,13 +196,16 @@ export async function POST(request: NextRequest) {
       message: 'Job poster notifications sent',
       notificationsSent: notificationsSent.length,
       totalPosters: uniquePosters.size,
+      filteredPosters: filteredPosters.size,
+      skippedDueToRecentNotification: uniquePosters.size - filteredPosters.size,
       errors: errors.length,
       debug: {
         totalApplicationsFound: jobIds.length,
         uniqueJobIdsFound: uniqueJobIds.length,
         jobPostersFound: jobPosters.length,
         postersWithValidData: uniquePosters.size,
-        postersSkipped: jobPosters.length - uniquePosters.size
+        postersSkipped: jobPosters.length - uniquePosters.size,
+        recentNotificationsFound: recentNotifications?.length || 0
       },
       details: {
         sent: notificationsSent,
