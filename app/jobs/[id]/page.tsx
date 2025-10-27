@@ -36,6 +36,7 @@ interface Job {
   location_us_only: boolean;
   location_countries: string[];
   remote_ok: boolean;
+  created_by: string;
   created_at: string;
   firm: {
     name: string;
@@ -52,6 +53,8 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isClosingJob, setIsClosingJob] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -67,6 +70,10 @@ export default function JobDetailPage() {
 
       if (response.ok) {
         setJob(data.job);
+        // Check if user is the owner
+        if (isSignedIn && user) {
+          checkOwnership(jobId);
+        }
       } else {
         setError(data.error || 'Failed to load job');
       }
@@ -75,6 +82,48 @@ export default function JobDetailPage() {
       setError('Failed to load job');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkOwnership = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/check-ownership`);
+      const data = await response.json();
+      if (response.ok) {
+        setIsOwner(data.isOwner);
+      }
+    } catch (error) {
+      console.error('Error checking ownership:', error);
+    }
+  };
+
+  const handleCloseJob = async () => {
+    if (!job || !isOwner) return;
+    
+    if (!confirm('Are you sure you want to close this job? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsClosingJob(true);
+    try {
+      const response = await fetch(`/api/jobs/${job.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'closed' })
+      });
+
+      if (response.ok) {
+        // Update the local job state
+        setJob({ ...job, status: 'closed' });
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to close job');
+      }
+    } catch (error) {
+      console.error('Error closing job:', error);
+      alert('Failed to close job');
+    } finally {
+      setIsClosingJob(false);
     }
   };
 
@@ -216,6 +265,19 @@ export default function JobDetailPage() {
         {/* Job Header */}
         <div className="bg-white rounded-lg shadow mb-6">
           <div className="p-6">
+            {/* Closed Banner */}
+            {job.status === 'closed' && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <h2 className="text-lg font-semibold text-red-800">This position is closed</h2>
+                </div>
+                <p className="text-sm text-red-700 mt-1">This job is no longer accepting applications.</p>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
@@ -230,14 +292,26 @@ export default function JobDetailPage() {
                 </div>
               </div>
               
-              {isSignedIn && job.status === 'open' && (
-                <button
-                  onClick={() => setShowApplyDialog(true)}
-                  className="mt-4 sm:mt-0 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Apply Now
-                </button>
-              )}
+              <div className="flex gap-3 mt-4 sm:mt-0">
+                {isOwner && job.status === 'open' && (
+                  <button
+                    onClick={handleCloseJob}
+                    disabled={isClosingJob}
+                    className="inline-flex items-center px-6 py-3 border border-red-300 text-base font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                  >
+                    {isClosingJob ? 'Closing...' : 'Close Job'}
+                  </button>
+                )}
+                
+                {isSignedIn && job.status === 'open' && (
+                  <button
+                    onClick={() => setShowApplyDialog(true)}
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Apply Now
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Key Details */}
