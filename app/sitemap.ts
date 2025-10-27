@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import { SOLUTIONS } from '@/lib/constants/solutions';
 import { siteUrl } from '@/lib/seo';
+import { getAllPosts } from '@/lib/blog';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerClient();
@@ -112,6 +113,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     });
   }
+
+  // Blog posts
+  const blogPosts = getAllPosts();
+  blogPosts.forEach((post) => {
+    routes.push({
+      url: `${siteUrl}${post.data.slug || `/ai/${post.slug}`}`,
+      lastModified: new Date(post.data.date),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    });
+  });
+
+  // Add AI blog index page
+  routes.push({
+    url: `${siteUrl}/ai`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  });
 
   return routes;
 }

@@ -373,3 +373,47 @@ export function personLD(p: {
 
   return jsonLd;
 }
+
+/**
+ * Generate JSON-LD for Article/BlogPost schema
+ */
+export function articleJsonLd(post: {
+  title: string;
+  description: string;
+  date: string;
+  author: string;
+  image?: string;
+  url: string;
+  imageCaption?: string;
+}) {
+  const jsonLd: any = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'TaxProExchange',
+      url: siteUrl,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/logo-black.png`
+      }
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': post.url
+    }
+  };
+
+  if (post.image) {
+    jsonLd.image = post.image.startsWith('http') ? post.image : `${siteUrl}${post.image}`;
+  }
+
+  return jsonLd;
+}
