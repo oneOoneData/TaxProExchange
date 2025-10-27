@@ -41,8 +41,21 @@ export function getAllPosts(): BlogPost[] {
           content,
           data: {
             ...data,
-            keywords: data.keywords || [],
-          },
+            title: data.title || '',
+            description: data.description || '',
+            date: data.date || new Date().toISOString(),
+            author: data.author || '',
+            keywords: Array.isArray(data.keywords) ? data.keywords : [],
+            image: data.image,
+            imageCaption: data.imageCaption,
+            previewImage: data.previewImage,
+            category: data.category,
+            authorLinkedIn: data.authorLinkedIn,
+            authorReddit: data.authorReddit,
+            authorTPE: data.authorTPE,
+            authorBio: data.authorBio,
+            authorImage: data.authorImage,
+          } as BlogPost['data'],
         };
       })
       .sort((a, b) => {
@@ -67,8 +80,21 @@ export function getPostBySlug(slug: string): BlogPost | null {
       content,
       data: {
         ...data,
-        keywords: data.keywords || [],
-      },
+        title: data.title || '',
+        description: data.description || '',
+        date: data.date || new Date().toISOString(),
+        author: data.author || '',
+        keywords: Array.isArray(data.keywords) ? data.keywords : [],
+        image: data.image,
+        imageCaption: data.imageCaption,
+        previewImage: data.previewImage,
+        category: data.category,
+        authorLinkedIn: data.authorLinkedIn,
+        authorReddit: data.authorReddit,
+        authorTPE: data.authorTPE,
+        authorBio: data.authorBio,
+        authorImage: data.authorImage,
+      } as BlogPost['data'],
     };
   } catch (error) {
     console.error(`Error reading post ${slug}:`, error);
