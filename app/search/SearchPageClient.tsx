@@ -80,6 +80,7 @@ export default function SearchPageClient() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isCommunityOpen, setIsCommunityOpen] = useState(false);
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
@@ -508,12 +509,42 @@ export default function SearchPageClient() {
         <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <Link href="/" className="hover:text-slate-900">Home</Link>
             <Link href="/search" className="hover:text-slate-900 font-medium text-slate-900">Directory</Link>
-            <Link href="/jobs" className="hover:text-slate-900">Jobs</Link>
-            <Link href="/dashboard" className="hover:text-slate-900">Dashboard</Link>
-            <Link href="/messages" className="hover:text-slate-900">Messages</Link>
-            <Link href="/profile/edit" className="hover:text-slate-900">Profile</Link>
+            
+            {/* Community Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsCommunityOpen(!isCommunityOpen)}
+                onBlur={() => setTimeout(() => setIsCommunityOpen(false), 200)}
+                className="flex items-center gap-1 hover:text-slate-900 transition-colors"
+              >
+                Community
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isCommunityOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                  <Link href="/jobs" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Jobs
+                  </Link>
+                  <Link href="/events" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Events
+                  </Link>
+                  <Link href="/mentorship" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Mentorship
+                  </Link>
+                </div>
+              )}
+            </div>
+            
+            <Link href="/partners" className="hover:text-slate-900 flex items-center gap-1.5">
+              <span className="text-base">🤝</span>
+              Partners
+            </Link>
+            
+            <Link href="/ai" className="hover:text-slate-900">AI</Link>
           </nav>
           <div className="flex items-center gap-4">
             {user ? (

@@ -15,6 +15,7 @@ export default function AppNavigation() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isCommunityOpen, setIsCommunityOpen] = useState(false);
 
   const isActive = (path: string) => {
     return pathname === path ? 'text-slate-900 font-medium' : 'text-slate-600 hover:text-slate-900';
@@ -70,29 +71,42 @@ export default function AppNavigation() {
           <Logo />
           
           <nav className="hidden md:flex items-center gap-6 text-sm">
-            {user ? (
-              <>
-                <Link href="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
-                <Link href="/search" className={isActive('/search')}>Directory</Link>
-                <Link href="/jobs" className={isActive('/jobs')}>Jobs</Link>
-                <Link href="/partners" className={`${isActive('/partners')} flex items-center gap-1.5`}>
-                  <span className="text-base">🤝</span>
-                  Partners
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/search" className={isActive('/search')}>Directory</Link>
-                <Link href="/jobs" className={isActive('/jobs')}>Jobs</Link>
-                <Link href="/events" className={isActive('/events')}>Events</Link>
-                <Link href="/mentorship" className={isActive('/mentorship')}>Mentorship</Link>
-                <Link href="/partners" className={`${isActive('/partners')} flex items-center gap-1.5`}>
-                  <span className="text-base">🤝</span>
-                  Partners
-                </Link>
-                <Link href="/join" className={isActive('/join')}>Join</Link>
-              </>
-            )}
+            <Link href="/search" className={isActive('/search')}>Directory</Link>
+            
+            {/* Community Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsCommunityOpen(!isCommunityOpen)}
+                onBlur={() => setTimeout(() => setIsCommunityOpen(false), 200)}
+                className="flex items-center gap-1 text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Community
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              {isCommunityOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                  <Link href="/jobs" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Jobs
+                  </Link>
+                  <Link href="/events" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Events
+                  </Link>
+                  <Link href="/mentorship" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Mentorship
+                  </Link>
+                </div>
+              )}
+            </div>
+            
+            <Link href="/partners" className={`${isActive('/partners')} flex items-center gap-1.5`}>
+              <span className="text-base">🤝</span>
+              Partners
+            </Link>
+            
+            <Link href="/ai" className={isActive('/ai')}>AI</Link>
           </nav>
           
           <div className="flex items-center gap-4">
