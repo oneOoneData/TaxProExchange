@@ -16,28 +16,19 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const pathname = usePathname();
   const [isCommunityOpen, setIsCommunityOpen] = useState(false);
 
-  const topNavItems = user ? [
-    { href: '/dashboard', label: 'Dashboard' },
-  ] : [
-    { href: '#features', label: 'Features' },
-    { href: '#how', label: 'How it works' },
-    { href: '#faq', label: 'FAQ' },
+  const topNavItems = [
+    { href: '/search', label: 'Directory' },
   ];
 
-  const communityItems = user ? [
-    { href: '/search', label: 'Directory' },
-    { href: '/jobs', label: 'Jobs' },
-    { href: '/partners', label: '🤝 Partners', icon: true },
-  ] : [
-    { href: '/search', label: 'Directory' },
+  const communityItems = [
     { href: '/jobs', label: 'Jobs' },
     { href: '/events', label: 'Events' },
     { href: '/mentorship', label: 'Mentorship' },
-    { href: '/partners', label: '🤝 Partners', icon: true },
   ];
 
-  const bottomNavItems = user ? [] : [
-    { href: '/join', label: 'Join' },
+  const bottomNavItems = [
+    { href: '/partners', label: '🤝 Partners', icon: true },
+    { href: '/ai', label: 'AI' },
   ];
 
   return (
