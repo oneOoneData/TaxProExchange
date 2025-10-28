@@ -10,11 +10,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin
-    const { clerkClient } = await import('@clerk/nextjs/server');
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
-    const isAdmin = user.publicMetadata?.role === 'admin';
+    // Check if user is admin via Supabase
+    const supabase = supabaseService();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('clerk_id', userId)
+      .single();
+
+    const isAdmin = profile?.is_admin || false;
 
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 });
@@ -30,9 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = supabaseService();
-
-    // Update submission status to published
+    // Update submission status to published (supabase already initialized above)
     const { error } = await supabase
       .from('contributor_submissions')
       .update({

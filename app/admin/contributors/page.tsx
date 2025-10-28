@@ -36,10 +36,16 @@ export default function AdminContributorsPage() {
       const response = await fetch(`/api/admin/contributors?status=${filter}`);
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Loaded submissions:', data);
         setSubmissions(data.submissions || []);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ API Error:', response.status, errorData);
+        alert(`Error loading submissions: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error loading submissions:', error);
+      console.error('❌ Error loading submissions:', error);
+      alert(`Failed to load submissions: ${error}`);
     } finally {
       setLoading(false);
     }
