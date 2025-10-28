@@ -11,11 +11,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin
-    const { clerkClient } = await import('@clerk/nextjs/server');
-    const client = await clerkClient();
-    const user = await client.users.getUser(userId);
-    const isAdmin = user.publicMetadata?.role === 'admin';
+    // Check if user is admin via Supabase
+    const supabase = supabaseService();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin, id')
+      .eq('clerk_id', userId)
+      .single();
+
+    const isAdmin = profile?.is_admin || false;
 
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 });
@@ -31,9 +35,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = supabaseService();
-
-    // Get submission details
+    // Get submission details (supabase already initialized above)
     const { data: submission } = await supabase
       .from('contributor_submissions')
       .select('*')
@@ -44,14 +46,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
     }
 
-    // Get user profile ID for reviewed_by field
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('clerk_id', userId)
-      .single();
-
-    // Update submission status to rejected
+    // Update submission status to rejected (profile already fetched above)
     const { error } = await supabase
       .from('contributor_submissions')
       .update({
