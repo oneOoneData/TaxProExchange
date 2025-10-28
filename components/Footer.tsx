@@ -60,6 +60,7 @@ export default function Footer() {
             <a href="/legal/privacy" className="hover:text-slate-900">Privacy</a>
             <a href="/legal/terms" className="hover:text-slate-900">Terms</a>
             <a href="/join" className="hover:text-slate-900">Join Now</a>
+            <a href="/ai/write-for-us" className="hover:text-slate-900">Write for Us</a>
           </div>
         </div>
       </div>

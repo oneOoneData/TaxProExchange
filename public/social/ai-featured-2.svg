@@ -1,0 +1,45 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background -->
+  <rect width="1200" height="630" fill="white"/>
+  
+  <!-- Gradient accent -->
+  <defs>
+    <linearGradient id="social-accent-2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect y="0" width="1200" height="12" fill="url(#social-accent-2)"/>
+  
+  <!-- Content -->
+  <g transform="translate(100, 180)">
+    <!-- Large badge -->
+    <circle cx="60" cy="60" r="60" fill="url(#social-accent-2)" fill-opacity="0.1"/>
+    <circle cx="60" cy="60" r="50" fill="url(#social-accent-2)"/>
+    <path transform="translate(35, 35)" d="M25 0L30.625 19.375L50 25L30.625 30.625L25 50L19.375 30.625L0 25L19.375 19.375L25 0Z" fill="white"/>
+    
+    <!-- Text -->
+    <text x="160" y="40" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="800" fill="#1e293b">
+      AI Thought Leader
+    </text>
+    <text x="160" y="90" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="600" fill="#64748b">
+      Featured on TaxProExchange
+    </text>
+  </g>
+  
+  <!-- Quote or tagline -->
+  <g transform="translate(100, 400)">
+    <text x="0" y="0" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="500" fill="#475569">
+      Sharing AI expertise with tax professionals nationwide
+    </text>
+  </g>
+  
+  <!-- Footer -->
+  <g transform="translate(100, 550)">
+    <text x="0" y="0" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="600" fill="url(#social-accent-2)">
+      TaxProExchange.com/ai
+    </text>
+  </g>
+</svg>
+

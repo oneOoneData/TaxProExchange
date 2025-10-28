@@ -1,0 +1,44 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="social-bg-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="1200" height="630" fill="url(#social-bg-1)"/>
+  
+  <!-- Pattern overlay -->
+  <rect width="1200" height="630" fill="white" fill-opacity="0.05"/>
+  
+  <!-- Large sparkle icon -->
+  <g transform="translate(100, 150)">
+    <path d="M60 0L73.5 46.5L120 60L73.5 73.5L60 120L46.5 73.5L0 60L46.5 46.5L60 0Z" fill="white" fill-opacity="0.2"/>
+  </g>
+  
+  <g transform="translate(950, 400)">
+    <path d="M40 0L49 31L80 40L49 49L40 80L31 49L0 40L31 31L40 0Z" fill="white" fill-opacity="0.15"/>
+  </g>
+  
+  <!-- Main content -->
+  <g transform="translate(100, 240)">
+    <!-- Badge icon -->
+    <circle cx="40" cy="40" r="40" fill="white" fill-opacity="0.2"/>
+    <path transform="translate(20, 20)" d="M20 0L24.5 15.5L40 20L24.5 24.5L20 40L15.5 24.5L0 20L15.5 15.5L20 0Z" fill="white"/>
+    
+    <!-- Text -->
+    <text x="100" y="30" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="700" fill="white">
+      Featured AI Contributor
+    </text>
+    <text x="100" y="70" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="500" fill="white" fill-opacity="0.9">
+      TaxProExchange AI Hub
+    </text>
+  </g>
+  
+  <!-- Bottom text -->
+  <text x="100" y="550" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="400" fill="white" fill-opacity="0.8">
+    Published on TaxProExchange.com/ai
+  </text>
+</svg>
+

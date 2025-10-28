@@ -3625,3 +3625,320 @@ POST to /api/admin/send-job-poster-digests with body:
   `specificJobId`: `optional-job-id` // Optional: test single job
 }
 ```
+
+
+---
+
+## 2025-10-28: Contributor Recognition & Share System
+
+**Goal:** Build complete contributor recognition system for AI Hub articles to drive backlinks and social sharing.
+
+**Overview:**
+Implemented a comprehensive system for recruiting external contributors, managing submissions, and rewarding published contributors with badges and social media assets.
+
+### 1. Database Schema
+**File:** database/2025-10-28_contributor_submissions.sql
+
+Created contributor_submissions table with:
+- Basic info: name, email, firm, title, topic, draft_url, message
+- Status tracking: pending  approved  published (or rejected)
+- Article linking: article_slug field for approved submissions
+- Rate limiting: ip_address field for abuse prevention
+- Audit trail: reviewed_at, reviewed_by fields
+
+**RLS Policies:**
+- Public can insert (for form submissions)
+- Service role only for read/update (admin operations)
+
+**Indexes:**
+- status + created_at (admin dashboard queries)
+- email + created_at (duplicate detection)
+- ip_address + created_at (rate limiting)
+- article_slug (share page lookups)
+
+### 2. Submission Landing Page
+**File:** pp/ai/write-for-us/page.tsx
+
+Public-facing page at /ai/write-for-us with:
+- Hero section explaining contributor benefits
+- What You Get section (4 benefits: featured article, badge, social graphics, backlink)
+- Content Guidelines section (do's and don'ts)
+- Submission form with validation
+- Success/error state handling
+
+**Form Fields:**
+- Required: name, email, title, topic
+- Optional: firm, draft_url, message
+
+**Client-side Features:**
+- Real-time form validation
+- Loading states during submission
+- Success/error messaging
+- Automatic form reset on success
+
+### 3. Submission API
+**File:** pp/api/contributors/submit/route.ts
+
+Handles form submissions with:
+
+**Rate Limiting:**
+- Email: Max 1 submission per 7 days from same email
+- IP: Max 3 submissions per 24 hours from same IP
+
+**Validation:**
+- Required fields check
+- Email format validation
+- Duplicate detection
+
+**Security:**
+- IP tracking via x-forwarded-for headers
+- Case-insensitive email comparison
+- SQL injection prevention via Supabase
+
+### 4. Badge Assets
+**Files:** 
+- public/badges/tpe-ai-featured.svg (light theme)
+- public/badges/tpe-ai-featured-dark.svg (dark theme)
+- public/badges/tpe-ai-featured-mini.svg (circular compact)
+
+**Design:**
+- Gradient colors: #0EA5E9  #6366F1
+- SVG format (scalable, small file size)
+- Accessibility: role="img", aria-label
+- All under 50KB
+
+**Social Media Cards:**
+- public/social/ai-featured-1.svg (gradient background)
+- public/social/ai-featured-2.svg (white background with accent)
+- public/social/ai-featured-3.svg (dark background with glow)
+
+Dimensions: 1200x630px (optimal for LinkedIn/Twitter/Facebook)
+
+### 5. Share Success Page
+**File:** pp/ai/share-success/[slug]/page.tsx
+
+Dynamic page at /ai/share-success/[slug] with:
+
+**Features:**
+- Congratulations message with article title
+- Three badge variations with "Copy HTML" buttons
+- Three social media card downloads
+- Pre-written LinkedIn caption with copy button
+- LinkedIn share button with native share link
+- Responsive grid layout
+- Copy-to-clipboard functionality with success states
+
+**UX:**
+- Animated success icon (bounce effect)
+- Color-coded badge backgrounds (light/dark/mini)
+- Clipboard feedback (shows "Copied!" for 2 seconds)
+- External link indicators
+
+### 6. Email Notification System
+**File:** pp/api/notify/contributor-published/route.ts
+
+Admin-triggered email notification when article goes live:
+
+**Email Content:**
+- Celebration header with emoji
+- Article title and publication confirmation
+- CTA button to view published article
+- Prominent "Get Your Badge" CTA to share page
+- What You Get section listing all benefits
+- Tip about social sharing
+
+**Security:**
+- Admin-only endpoint
+- Clerk role verification
+- Missing field validation
+
+**Email Features:**
+- HTML and plain text versions
+- Responsive email template
+- Gradient header design matching brand
+- Reply-to set to koen@cardifftax.com
+
+### 7. Admin Review Dashboard
+**File:** pp/admin/contributors/page.tsx
+
+Full-featured admin dashboard at /admin/contributors with:
+
+**Features:**
+- Status filter tabs (All, Pending, Approved, Published, Rejected)
+- Submission cards with all details
+- Draft URL links (open in new tab)
+- Status badges (color-coded)
+
+**Actions by Status:**
+- **Pending:** Approve or Reject buttons
+- **Approved:** "Send Publication Notification" button
+- **Published:** Link to share page
+
+**Approve Workflow:**
+1. Admin clicks Approve
+2. Prompted for article slug
+3. Updates status  approved
+4. Admin creates article file in content/ai/
+5. Admin clicks "Send Publication Notification"
+6. Email sent, status  published
+
+**Reject Workflow:**
+1. Admin clicks Reject
+2. Prompted for rejection reason
+3. Updates status  rejected
+4. Email sent to contributor with feedback
+
+### 8. Admin API Routes
+
+**pp/api/admin/contributors/route.ts** - List submissions
+- GET endpoint with status filter
+- Admin authentication required
+- Returns all submission data ordered by created_at DESC
+
+**pp/api/admin/contributors/approve/route.ts** - Approve submission
+- POST endpoint
+- Requires: submissionId, slug
+- Updates status, article_slug, reviewed_at, reviewed_by
+
+**pp/api/admin/contributors/reject/route.ts** - Reject submission
+- POST endpoint
+- Requires: submissionId, reason
+- Sends rejection email with feedback
+- Updates status, reviewed_at, reviewed_by
+
+**pp/api/admin/contributors/mark-published/route.ts** - Mark as published
+- POST endpoint
+- Updates status  published
+- Called automatically after sending publication email
+
+### Security Model
+
+**Public Access:**
+- Submit form (with rate limiting)
+- View share page (with article slug)
+
+**Admin Only:**
+- View all submissions
+- Approve/reject submissions
+- Send publication notifications
+
+**Rate Limiting:**
+- Email-based: 1 submission per 7 days
+- IP-based: 3 submissions per 24 hours
+
+### User Flow
+
+**Contributor Journey:**
+1. Visit /ai/write-for-us
+2. Submit article idea
+3. Wait for admin review
+4. (If approved) Receive publication email
+5. Visit /ai/share-success/[slug]
+6. Copy badge HTML
+7. Download social cards
+8. Share on LinkedIn/Twitter
+
+**Admin Workflow:**
+1. Receive submission notification (manual check at /admin/contributors)
+2. Review submission details and draft
+3. Approve with slug OR reject with reason
+4. If approved: Create article file in content/ai/[slug].md
+5. Send publication notification
+6. Contributor receives email with share page link
+
+### Benefits & Goals
+
+**For Contributors:**
+- Featured placement on growing AI hub
+- Verified badge for credibility signaling
+- Social media assets for easy sharing
+- Dofollow backlink for SEO
+- Pre-written captions save time
+
+**For TaxProExchange:**
+- Fresh content from industry experts
+- Backlinks from contributor websites
+- Social media amplification
+- Thought leadership positioning
+- Network effects (contributors share  new audience)
+
+### Future Enhancements
+
+**Potential additions (not implemented):**
+- Auto-notification when submission received (currently manual admin check)
+- Contributor dashboard to track submission status
+- Badge view counter / analytics
+- Multiple badge sizes/variations
+- Integration with content/ai/ markdown files (auto-populate author fields)
+- Slack/Discord notification on new submission
+
+### Testing Checklist
+
+**Submission Flow:**
+- [ ] Submit valid form  success message
+- [ ] Submit duplicate email within 7 days  error
+- [ ] Submit 3+ times from same IP in 24h  error
+- [ ] Submit with missing required fields  error
+- [ ] Submit with invalid email  error
+
+**Admin Dashboard:**
+- [ ] Filter by status works
+- [ ] Approve button prompts for slug
+- [ ] Reject button prompts for reason
+- [ ] Publication notification sends email
+- [ ] Status badges display correctly
+
+**Share Page:**
+- [ ] All three badges display
+- [ ] Copy HTML buttons work
+- [ ] Social cards load correctly
+- [ ] LinkedIn caption copies
+- [ ] LinkedIn share link opens
+
+**Email Templates:**
+- [ ] Publication email renders correctly
+- [ ] Rejection email renders correctly
+- [ ] CTAs are clickable
+- [ ] Reply-to is set correctly
+
+### Database Migration
+
+To apply schema:
+`ash
+psql -h [supabase-host] -U postgres -d postgres -f database/2025-10-28_contributor_submissions.sql
+`
+
+Or via Supabase dashboard:
+1. Go to SQL Editor
+2. Paste contents of database/2025-10-28_contributor_submissions.sql
+3. Run query
+
+### Files Created/Modified
+
+**New Files (17):**
+- database/2025-10-28_contributor_submissions.sql
+- app/ai/write-for-us/page.tsx
+- app/ai/share-success/[slug]/page.tsx
+- app/api/contributors/submit/route.ts
+- app/api/notify/contributor-published/route.ts
+- app/api/admin/contributors/route.ts
+- app/api/admin/contributors/approve/route.ts
+- app/api/admin/contributors/reject/route.ts
+- app/api/admin/contributors/mark-published/route.ts
+- app/admin/contributors/page.tsx
+- public/badges/tpe-ai-featured.svg
+- public/badges/tpe-ai-featured-dark.svg
+- public/badges/tpe-ai-featured-mini.svg
+- public/social/ai-featured-1.svg
+- public/social/ai-featured-2.svg
+- public/social/ai-featured-3.svg
+- CURSOR_TASK_NOTES.md (this update)
+
+**Next Steps:**
+1. Run database migration
+2. Test submission flow end-to-end
+3. Create first article in content/ai/ and test full workflow
+4. Add link to /ai/write-for-us from AI hub page
+5. Announce contributor program on social media
+6. Monitor submissions in /admin/contributors
+

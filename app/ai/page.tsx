@@ -48,6 +48,46 @@ export default function AIPage() {
             </div>
           </header>
 
+          {/* Write for Us CTA */}
+          <div className="mb-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-slate-900">Share Your AI Expertise</h3>
+                </div>
+                <p className="text-slate-700 mb-4">
+                  Have insights on how artificial intelligence is reshaping tax and accounting? Contribute to the TaxProExchange AI Hub and be featured as a thought leader among verified professionals.
+                </p>
+                <p className="text-sm font-medium text-slate-700 mb-2">Contributors receive:</p>
+                <div className="space-y-2 text-sm text-slate-700">
+                  <div className="flex items-start gap-2">
+                    <span>🧠</span>
+                    <span><strong>Contributor badge</strong> — verified "AI Contributor" badge on your profile</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span>💬</span>
+                    <span><strong>Social media assets</strong> — share your article on LinkedIn and beyond</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span>🔗</span>
+                    <span><strong>Author credit with a link to your firm's website</strong></span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Link
+                  href="/ai/write-for-us"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+                >
+                  Submit Your Article →
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {posts.length > 0 ? (
             <section>
               <h2 className="text-2xl font-semibold mb-6 text-slate-800">Recent Articles</h2>
