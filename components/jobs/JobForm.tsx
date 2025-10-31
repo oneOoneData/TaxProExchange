@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { WorkingExpectationsEditor } from './WorkingExpectationsEditor';
 import { jobSchema, type JobFormData } from '@/lib/validations/zodSchemas';
@@ -85,7 +85,12 @@ type ExtendedJobFormData = Partial<JobFormData> & {
   free_consultation_required?: boolean;
 };
 
-export function JobForm() {
+interface JobFormProps {
+  jobId?: string;
+  initialData?: ExtendedJobFormData;
+}
+
+export function JobForm({ jobId, initialData }: JobFormProps = {}) {
   const router = useRouter();
   const [formData, setFormData] = useState<ExtendedJobFormData>({
     title: '',
@@ -116,7 +121,65 @@ export function JobForm() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [loadingJob, setLoadingJob] = useState(!!jobId);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const isEditMode = !!jobId;
+
+  // Load existing job data when editing
+  useEffect(() => {
+    if (jobId && !initialData) {
+      const loadJob = async () => {
+        try {
+          setLoadingJob(true);
+          const response = await fetch(`/api/jobs/${jobId}`);
+          const data = await response.json();
+          
+          if (response.ok && data.job) {
+            const job = data.job;
+            // Map API response to form data
+            setFormData({
+              title: job.title || '',
+              description: job.description || '',
+              deadline_date: job.deadline_date ? new Date(job.deadline_date) : undefined,
+              payout_type: job.payout_type || 'fixed',
+              payout_fixed: job.payout_fixed,
+              payout_min: job.payout_min,
+              payout_max: job.payout_max,
+              payment_terms: job.payment_terms || '',
+              credentials_required: job.credentials_required || [],
+              software_required: job.software_required || [],
+              specialization_keys: job.specialization_keys || [],
+              location_states: job.location_states || [],
+              volume_count: job.volume_count,
+              working_expectations_md: job.working_expectations_md || '',
+              draft_eta_date: job.draft_eta_date ? new Date(job.draft_eta_date) : undefined,
+              final_review_buffer_days: job.final_review_buffer_days || 3,
+              pro_liability_required: job.pro_liability_required || false,
+              trial_ok: job.trial_ok || false,
+              insurance_required: job.insurance_required || job.pro_liability_required || false,
+              location_us_only: job.location_us_only !== false,
+              location_countries: job.location_countries || [],
+              remote_ok: job.remote_ok !== false,
+              free_consultation_required: job.free_consultation_required || false,
+            });
+          } else {
+            setErrors({ submit: 'Failed to load job data' });
+          }
+        } catch (error) {
+          console.error('Error loading job:', error);
+          setErrors({ submit: 'Failed to load job data' });
+        } finally {
+          setLoadingJob(false);
+        }
+      };
+      
+      loadJob();
+    } else if (initialData) {
+      // Use provided initial data
+      setFormData(initialData);
+      setLoadingJob(false);
+    }
+  }, [jobId, initialData]);
 
   const handleInputChange = (field: keyof ExtendedJobFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -195,8 +258,11 @@ export function JobForm() {
       
       console.log('Submitting data:', submitData);
       
-      const response = await fetch('/api/jobs', {
-        method: 'POST',
+      const url = isEditMode ? `/api/jobs/${jobId}` : '/api/jobs';
+      const method = isEditMode ? 'PATCH' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -207,8 +273,8 @@ export function JobForm() {
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Job created successfully:', data);
-        router.push(`/jobs/${data.job.id}`);
+        console.log(isEditMode ? 'Job updated successfully:' : 'Job created successfully:', data);
+        router.push(`/jobs/${isEditMode ? jobId : data.job.id}`);
       } else {
         const errorData = await response.json();
         console.log('API error:', errorData);
@@ -219,16 +285,27 @@ export function JobForm() {
             profileSetup: 'You need to create and verify your profile before posting jobs.'
           });
         } else {
-          setErrors({ submit: errorData.error || 'Failed to create job' });
+          setErrors({ submit: errorData.error || (isEditMode ? 'Failed to update job' : 'Failed to create job') });
         }
       }
     } catch (error) {
-      console.error('Error creating job:', error);
-      setErrors({ submit: 'Failed to create job. Please try again.' });
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} job:`, error);
+      setErrors({ submit: `Failed to ${isEditMode ? 'update' : 'create'} job. Please try again.` });
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingJob) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading job data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-8">
@@ -600,7 +677,7 @@ export function JobForm() {
           disabled={loading}
           className="px-6 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Creating...' : 'Create Job'}
+          {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Job' : 'Create Job')}
         </button>
       </div>
     </form>

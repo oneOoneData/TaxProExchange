@@ -110,13 +110,16 @@ export async function PATCH(
     }
 
     // Admins can update any field, regular users have restrictions
-    // Regular users can only update status if they own the job
+    // Job owners can update all fields except created_by and status (unless closing)
     const updateData = isAdmin ? body : {
       ...body,
-      // Regular users cannot change these fields
+      // Regular users cannot change created_by
       created_by: undefined,
       // Allow status updates only if the job is being closed by the owner
-      status: (body.status === 'closed' && existingJob.created_by === userId) ? body.status : undefined
+      // Otherwise, don't allow status changes for regular users
+      status: (body.status === 'closed' && existingJob.created_by === userId) 
+        ? body.status 
+        : existingJob.status // Keep existing status for other updates
     };
 
     // Update the job

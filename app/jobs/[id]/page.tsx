@@ -293,17 +293,27 @@ export default function JobDetailPage() {
               </div>
               
               <div className="flex gap-3 mt-4 sm:mt-0">
-                {isOwner && job.status === 'open' && (
-                  <button
-                    onClick={handleCloseJob}
-                    disabled={isClosingJob}
-                    className="inline-flex items-center px-6 py-3 border border-red-300 text-base font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                  >
-                    {isClosingJob ? 'Closing...' : 'Close Job'}
-                  </button>
+                {isOwner && (
+                  <>
+                    <Link
+                      href={`/jobs/${job.id}/edit`}
+                      className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Edit Job
+                    </Link>
+                    {job.status === 'open' && (
+                      <button
+                        onClick={handleCloseJob}
+                        disabled={isClosingJob}
+                        className="inline-flex items-center px-6 py-3 border border-red-300 text-base font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                      >
+                        {isClosingJob ? 'Closing...' : 'Close Job'}
+                      </button>
+                    )}
+                  </>
                 )}
                 
-                {isSignedIn && job.status === 'open' && (
+                {isSignedIn && job.status === 'open' && !isOwner && (
                   <button
                     onClick={() => setShowApplyDialog(true)}
                     className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
