@@ -6,19 +6,19 @@ export async function GET() {
     // Get all profiles with their email and name information
     const supabase = createServerClient();
     
-    // Query profiles directly since users table is empty
+    // Query profiles with public_email (the email field doesn't exist in profiles table)
     const { data: profiles, error } = await supabase
       .from('profiles')
       .select(`
         id,
-        email,
+        clerk_id,
         public_email,
         first_name,
         last_name
       `)
-      .or('email.not.is.null,public_email.not.is.null')
-      .order('email')
-      .limit(1000); // Explicitly set high limit
+      .not('public_email', 'is', null) // Only get profiles with public_email
+      .not('clerk_id', 'is', null) // Only get profiles with Clerk IDs
+      .limit(1000);
     
     // Also get total count for debugging
     const { count: totalProfiles } = await supabase
@@ -28,7 +28,7 @@ export async function GET() {
     const { count: profilesWithEmails } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
-      .not('email', 'is', null);
+      .not('public_email', 'is', null);
     
     console.log('🔍 Users API: Profile counts:', { 
       totalProfiles, 
@@ -45,18 +45,29 @@ export async function GET() {
     }
 
     // Transform the data to match expected format
-    const transformedUsers = profiles?.map(profile => ({
-      id: profile.id,
-      email: profile.public_email || '', // Use public_email field
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-    })).filter(user => user.email) || []; // Only include users with actual email addresses
+    // Note: We only query profiles with public_email, so all should have it
+    const transformedUsers = (profiles || []).map((profile) => {
+      const email = (profile.public_email || '').trim();
+      
+      return {
+        id: profile.id,
+        email: email,
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+      };
+    });
 
-    console.log('🔍 Users API: Transformed users:', { transformedUsers, count: transformedUsers.length });
+    // Only include users with actual email addresses
+    const usersWithEmails = transformedUsers.filter(user => user.email && user.email.length > 0);
+
+    console.log('🔍 Users API: Transformed users:', { 
+      totalProfiles: profiles?.length || 0,
+      usersWithEmails: usersWithEmails.length 
+    });
 
     return NextResponse.json({
-      users: transformedUsers,
-      count: transformedUsers.length,
+      users: usersWithEmails,
+      count: usersWithEmails.length,
     });
 
   } catch (error) {
