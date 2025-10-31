@@ -61,12 +61,11 @@ export async function POST(req: NextRequest) {
       .from('profiles')
       .select(`
         id,
-        email,
         public_email,
         first_name,
         last_name
       `)
-      .or('email.not.is.null,public_email.not.is.null');
+      .not('public_email', 'is', null);
 
     if (profilesError) {
       console.error('Error fetching profile data:', profilesError);

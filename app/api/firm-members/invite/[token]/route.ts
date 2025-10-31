@@ -44,7 +44,7 @@ export async function POST(
     // Get user's profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, email, public_email')
+      .select('id, public_email')
       .eq('clerk_user_id', userId)
       .single();
 
@@ -91,7 +91,7 @@ export async function POST(
     }
 
     // Check if invitation is for this user
-    const userEmail = profile.email || profile.public_email;
+    const userEmail = profile.public_email;
     if (invitation.invited_email !== userEmail?.toLowerCase()) {
       return NextResponse.json(
         { error: 'This invitation was sent to a different email address' },
