@@ -3,6 +3,10 @@
     {
       "path": "/api/hubspot/reconcile",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/fetch-reddit-reviews",
+      "schedule": "0 2 * * *"
     }
   ]
 }
