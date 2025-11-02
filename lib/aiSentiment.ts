@@ -31,7 +31,10 @@ export interface SentimentAnalysis {
  */
 export async function analyzeRedditSentiment(
   toolName: string,
-  redditComments: Array<{ content: string; upvotes: number }>
+  redditComments: Array<{ content: string; upvotes: number }>,
+  options?: {
+    searchPhrase?: string; // Optional custom search phrase used to find these comments (e.g., "Thomson Reuters CoCounsel")
+  }
 ): Promise<SentimentAnalysis> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY not configured');
@@ -53,7 +56,10 @@ export async function analyzeRedditSentiment(
     .map((comment, idx) => `Comment ${idx + 1} (${comment.upvotes} upvotes): ${comment.content}`)
     .join('\n\n');
 
-  const prompt = `You are analyzing Reddit discussions about an AI tax tool called "${toolName}".
+  // Use search phrase if provided (what we actually searched for), otherwise use tool name
+  const searchTerm = options?.searchPhrase || toolName;
+
+  const prompt = `You are analyzing Reddit discussions about an AI tax tool called "${toolName}".${options?.searchPhrase ? ` (These comments were found by searching for "${searchTerm}")` : ''}
 Below are real Reddit comments from tax professionals discussing this tool.
 
 Task:
@@ -62,6 +68,7 @@ Task:
 3. Keep the tone professional but conversational
 4. Output exactly 1 concise paragraph (max 75 words - be comprehensive)
 5. Be specific about what tax pros like or dislike
+6. Focus on comments about "${toolName}" - ignore any unrelated discussions${options?.searchPhrase ? ` (note: results were found using search term "${searchTerm}")` : ''}
 
 Comments:
 ${commentsText}
@@ -69,7 +76,7 @@ ${commentsText}
 Format your response as JSON:
 {
   "sentiment_label": "positive" | "mixed" | "negative",
-  "summary": "Your one-paragraph summary here (max 50 words)"
+  "summary": "Your one-paragraph summary here (max 75 words)"
 }`;
 
   try {
