@@ -65,11 +65,11 @@ export default function WebinarPromoBanner() {
           --nbl-border: #1E1E1E;
           --nbl-text: #FFFFFF;
           --nbl-muted: #C7C7C7;
-          --nbl-orange: #00FF00;
-          --nbl-orange-hover: #00CC00;
+          --nbl-orange: #B4D830;
+          --nbl-orange-hover: #9AB928;
           border-bottom: 1px solid var(--nbl-border);
           background:
-            radial-gradient(circle at 8% 50%, rgba(0,255,0,0.12) 0, rgba(0,255,0,0.00) 42%),
+            radial-gradient(circle at 8% 50%, rgba(180,216,48,0.12) 0, rgba(180,216,48,0.00) 42%),
             var(--nbl-bg);
           font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Helvetica, Arial, sans-serif;
         }
@@ -119,7 +119,7 @@ export default function WebinarPromoBanner() {
         }
         .nbl-text-link:focus { 
           outline: none; 
-          box-shadow: 0 0 0 3px rgba(0,255,0,.35); 
+          box-shadow: 0 0 0 3px rgba(180,216,48,.35); 
         }
         .lime-text {
           color: var(--nbl-orange);
