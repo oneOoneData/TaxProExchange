@@ -35,10 +35,10 @@ export default function WebinarPromoBanner() {
       <div className="nbl-inner">
         <div className="nbl-copy">
           <span className="nbl-copy-full">
-            <strong>Join our webinar series with TaxGPT</strong> - AI for Tax Pros. Register here.
+            <strong>AI for Tax Firms</strong> - Free 3-Part Webinar Series. Hosted by TaxGPT and Tax Pro Exchange.
           </span>
           <span className="nbl-copy-mobile">
-            <strong>Join our AI webinar series</strong> with TaxGPT.
+            <strong>AI for Tax Firms</strong> - Free 3-Part Webinar Series.
           </span>
         </div>
 
@@ -47,7 +47,7 @@ export default function WebinarPromoBanner() {
           href="https://learn.taxproexchange.com/ai-webinar-series-tax-pro-exchange" 
           aria-label="Register for AI webinar series"
         >
-          REGISTER<span className="orange-text"> NOW</span>
+          REGISTER<span className="lime-text"> NOW</span>
         </a>
 
         <button 
@@ -65,11 +65,11 @@ export default function WebinarPromoBanner() {
           --nbl-border: #1E1E1E;
           --nbl-text: #FFFFFF;
           --nbl-muted: #C7C7C7;
-          --nbl-orange: #FF6B00;
-          --nbl-orange-hover: #E55F00;
+          --nbl-orange: #00FF00;
+          --nbl-orange-hover: #00CC00;
           border-bottom: 1px solid var(--nbl-border);
           background:
-            radial-gradient(circle at 8% 50%, rgba(255,107,0,0.12) 0, rgba(255,107,0,0.00) 42%),
+            radial-gradient(circle at 8% 50%, rgba(0,255,0,0.12) 0, rgba(0,255,0,0.00) 42%),
             var(--nbl-bg);
           font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Helvetica, Arial, sans-serif;
         }
@@ -119,12 +119,12 @@ export default function WebinarPromoBanner() {
         }
         .nbl-text-link:focus { 
           outline: none; 
-          box-shadow: 0 0 0 3px rgba(255,107,0,.35); 
+          box-shadow: 0 0 0 3px rgba(0,255,0,.35); 
         }
-        .orange-text {
+        .lime-text {
           color: var(--nbl-orange);
         }
-        .nbl-text-link:hover .orange-text {
+        .nbl-text-link:hover .lime-text {
           color: #0B0B0B;
         }
 
