@@ -38,6 +38,7 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "resend": "^3.5.0",
+    "sharp": "^0.34.4",
     "stream-chat": "^9.19.0",
     "stream-chat-react": "^13.6.1",
     "stripe": "^19.1.0",

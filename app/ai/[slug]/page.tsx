@@ -5,8 +5,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { getPostBySlug, getAllSlugs } from "@/lib/blog";
-import { siteUrl, articleJsonLd, jsonLd } from "@/lib/seo";
+import { siteUrl, articleJsonLd, generateBreadcrumbListJsonLd } from "@/lib/seo";
 import JsonLd from "@/components/seo/JsonLd";
+import Image from "next/image";
 
 export async function generateStaticParams() {
   const slugs = getAllSlugs();
@@ -73,10 +74,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     imageCaption: post.data.imageCaption,
     url,
   });
+  
+  const breadcrumbSchema = generateBreadcrumbListJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'AI Thought Leadership', url: '/ai' },
+    { name: post.data.title, url },
+  ]);
 
   return (
     <>
       <JsonLd data={articleSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <AppNavigation />
 
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
@@ -107,10 +115,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {post.data.image && (
               <div className="mb-8">
                 <div className="rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={post.data.image}
                     alt={post.data.title}
+                    width={1200}
+                    height={630}
                     className="w-full h-auto object-cover"
+                    priority={false}
+                    sizes="(max-width: 768px) 100vw, 1200px"
                   />
                 </div>
                 {post.data.imageCaption && (
@@ -134,9 +146,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <h3 className="text-sm font-semibold text-slate-900 mb-3">About the Author</h3>
                   <div className="flex items-start gap-4">
                     {post.data.authorImage ? (
-                      <img 
+                      <Image 
                         src={post.data.authorImage} 
                         alt={post.data.author}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                       />
                     ) : post.data.authorLinkedIn ? (

@@ -5,6 +5,7 @@ const nextConfig = {
   
   // Image optimization configuration
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -50,8 +51,12 @@ const nextConfig = {
   
   // Disable automatic trailing slash to prevent conflicts
   trailingSlash: false,
+  
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
 
-  // Security headers
+  // Security headers + Cache-Control for static assets
   async headers() {
     return [
       {
@@ -78,6 +83,25 @@ const nextConfig = {
           //   key: 'Strict-Transport-Security',
           //   value: 'max-age=31536000; includeSubDomains; preload',
           // },
+        ],
+      },
+      // Cache static assets aggressively
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/image',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
     ];
