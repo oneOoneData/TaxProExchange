@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
-export default function NblPromoBanner() {
+export default function WebinarPromoBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Check if banner was dismissed in this session
-    const sessionKey = 'nblPromoDismissedSession';
+    const sessionKey = 'webinarPromoDismissedSession';
     const dismissedThisSession = sessionStorage.getItem(sessionKey);
     
     if (!dismissedThisSession) {
@@ -16,7 +16,7 @@ export default function NblPromoBanner() {
   }, []);
 
   const handleDismiss = () => {
-    const sessionKey = 'nblPromoDismissedSession';
+    const sessionKey = 'webinarPromoDismissedSession';
     sessionStorage.setItem(sessionKey, 'true');
     setIsVisible(false);
   };
@@ -30,29 +30,29 @@ export default function NblPromoBanner() {
       className="nbl-promo" 
       id="nblPromo" 
       role="region" 
-      aria-label="NewBizLeads promotion"
+      aria-label="AI Webinar Series promotion"
     >
       <div className="nbl-inner">
         <div className="nbl-copy">
           <span className="nbl-copy-full">
-            <strong>Find New Clients First.</strong> Be the first tax pro to reach newly registered businesses in your area.
+            <strong>Join our webinar series with TaxGPT</strong> - AI for Tax Pros. Register here.
           </span>
           <span className="nbl-copy-mobile">
-            <strong>Find New Clients First.</strong>
+            <strong>Join our AI webinar series</strong> with TaxGPT.
           </span>
         </div>
 
         <a 
           className="nbl-text-link" 
-          href="https://www.newbizleads.com" 
-          aria-label="Explore NewBizLeads"
+          href="https://learn.taxproexchange.com/ai-webinar-series-tax-pro-exchange" 
+          aria-label="Register for AI webinar series"
         >
-          NEWBIZ<span className="orange-text">LEADS</span>
+          REGISTER<span className="orange-text"> NOW</span>
         </a>
 
         <button 
           className="nbl-close" 
-          aria-label="Dismiss NewBizLeads promotion"
+          aria-label="Dismiss webinar promotion"
           onClick={handleDismiss}
         >
           &times;
