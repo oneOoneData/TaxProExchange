@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AITool } from './ToolTile';
 import ToolTile from './ToolTile';
 import ToolDetailPanel from './ToolDetailPanel';
@@ -37,20 +37,23 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
   const [sentiment, setSentiment] = useState<Sentiment | null>(null);
   const [loading, setLoading] = useState(!initialTools.length);
 
+  // Track the currently selected tool ID to prevent race conditions
+  const currentSelectedIdRef = useRef<string | null>(null);
+
   // Fetch tools (polling only updates tools list, doesn't affect selection)
   useEffect(() => {
-    const fetchTools = async () => {
+    const fetchTools = async (currentId: string | null) => {
       try {
         const response = await fetch('/api/ai-tools');
         if (response.ok) {
           const data = await response.json();
           setTools(data.tools || []);
           
-          // Only update selected tool data if one is currently selected
-          // This prevents reopening the panel after closing
-          if (selectedToolId) {
-            const fullTool = data.tools.find((t: any) => t.id === selectedToolId);
-            if (fullTool) {
+          // Only update selected tool data if the ID matches what's currently selected
+          // This prevents race conditions where polling updates stale selections
+          if (currentId && currentId === currentSelectedIdRef.current) {
+            const fullTool = data.tools.find((t: any) => t.id === currentId);
+            if (fullTool && currentId === currentSelectedIdRef.current) {
               setSelectedToolData({
                 id: fullTool.id,
                 name: fullTool.name,
@@ -65,9 +68,10 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
               setReviews(fullTool.reviews || []);
               setCollateralLinks(fullTool.collateral_links || []);
               setSentiment(fullTool.sentiment || null);
-            } else {
+            } else if (!fullTool) {
               // Tool no longer exists, clear selection
               setSelectedToolId(null);
+              currentSelectedIdRef.current = null;
             }
           }
         }
@@ -79,14 +83,15 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
     };
 
     if (!initialTools.length) {
-      fetchTools();
+      fetchTools(selectedToolId);
     }
 
     // Poll for updates every 30 seconds
     // Only update if a tool is currently selected (won't reopen closed panels)
     const interval = setInterval(() => {
-      if (selectedToolId) {
-        fetchTools();
+      const currentId = currentSelectedIdRef.current;
+      if (currentId) {
+        fetchTools(currentId);
       } else {
         // Just update the tools list without affecting selection
         fetch('/api/ai-tools')
@@ -99,10 +104,13 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [initialTools, selectedToolId]); // Include selectedToolId in deps
+  }, [initialTools]); // Remove selectedToolId from deps to avoid re-creating interval
 
   // Load details when tool is selected
   useEffect(() => {
+    // Update the ref immediately when selection changes
+    currentSelectedIdRef.current = selectedToolId;
+    
     if (!selectedToolId) {
       setSelectedToolData(null);
       setReviews([]);
@@ -125,11 +133,13 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
     fetch('/api/ai-tools')
       .then(res => res.json())
       .then(data => {
-        // Only update if this effect wasn't cancelled (user didn't select another tool)
-        // and we're still looking for the same tool ID
-        if (!cancelled && selectedToolId === toolIdToFetch) {
+        // Only update if:
+        // 1. This effect wasn't cancelled (user didn't select another tool)
+        // 2. We're still looking for the same tool ID
+        // 3. The ref still matches (prevents race conditions with polling)
+        if (!cancelled && selectedToolId === toolIdToFetch && currentSelectedIdRef.current === toolIdToFetch) {
           const fullTool = data.tools.find((t: any) => t.id === toolIdToFetch);
-          if (fullTool) {
+          if (fullTool && currentSelectedIdRef.current === toolIdToFetch) {
             setSelectedToolData({
               id: fullTool.id,
               name: fullTool.name,
@@ -197,6 +207,7 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
           collateralLinks={collateralLinks}
           sentiment={sentiment}
           onClose={() => {
+            currentSelectedIdRef.current = null;
             setSelectedToolId(null);
             // The useEffect will clear the rest when selectedToolId becomes null
           }}
