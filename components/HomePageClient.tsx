@@ -11,6 +11,7 @@ import Logo from '@/components/Logo';
 import MobileNav from '@/components/MobileNav';
 import FeaturedProfiles from '@/components/FeaturedProfiles';
 import BuyMeACoffee from '@/components/BuyMeACoffee';
+import NblPromoBanner from '@/components/NblPromoBanner';
 
 interface HomePageClientProps {
   faqs: Array<{ question: string; answer: string }>;
@@ -138,6 +139,9 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
           </div>
         </div>
       </header>
+
+      {/* Promo Banner */}
+      <NblPromoBanner />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
