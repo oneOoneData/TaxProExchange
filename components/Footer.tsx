@@ -48,19 +48,35 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Main Footer */}
+        {/* Main Footer - First Row */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-white font-semibold">TX</span>
             <span>© {currentYear} TaxProExchange</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
+            <a href="/join" className="hover:text-slate-900">Join Now</a>
+            <a href="/ai/tools" className="hover:text-slate-900">
+              AI Tool Reviews
+            </a>
+            <a href="/ai/write-for-us" className="hover:text-slate-900">
+              Write for Us
+            </a>
+          </div>
+        </div>
+
+        {/* Second Row - Other Links */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500 mt-4 pt-4 border-t border-slate-200">
+          <div className="flex items-center gap-2">
+            {/* Spacer to align with copyright above */}
+            <span className="inline-flex h-8 w-8 items-center justify-center opacity-0">TX</span>
+            <span className="opacity-0">© {currentYear} TaxProExchange</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <a href="/trust" className="hover:text-slate-900">Trust & Verification</a>
             <a href="/transparency" className="hover:text-slate-900">Transparency</a>
             <a href="/legal/privacy" className="hover:text-slate-900">Privacy</a>
             <a href="/legal/terms" className="hover:text-slate-900">Terms</a>
-            <a href="/join" className="hover:text-slate-900">Join Now</a>
-            <a href="/ai/write-for-us" className="hover:text-slate-900">Write for Us</a>
           </div>
         </div>
       </div>
