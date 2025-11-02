@@ -21,9 +21,19 @@ export async function fetchRedditReviews(
   options: {
     limit?: number;
     subreddits?: string[];
+    searchPhrase?: string; // Optional custom search phrase (e.g., "Thomson Reuters CoCounsel")
+    excludePhrase?: string; // Optional phrase to exclude from results (e.g., "Solomon page")
   } = {}
 ): Promise<RedditPost[]> {
-  const { limit = 10, subreddits = ['taxpros', 'accounting', 'CPA', 'tax', 'taxpreparation'] } = options;
+  const { 
+    limit = 10, 
+    subreddits = ['taxpros', 'accounting', 'CPA', 'tax', 'taxpreparation'],
+    searchPhrase,
+    excludePhrase
+  } = options;
+
+  // Use custom search phrase if provided, otherwise use tool name
+  const queryPhrase = searchPhrase || toolName;
 
   const results: RedditPost[] = [];
 
@@ -31,7 +41,7 @@ export async function fetchRedditReviews(
   for (const subreddit of subreddits) {
     try {
       // Reddit search API: https://www.reddit.com/r/{subreddit}/search.json?q={query}&restrict_sr=1
-      const searchUrl = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(toolName)}&restrict_sr=1&limit=${limit}&sort=relevance`;
+      const searchUrl = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(queryPhrase)}&restrict_sr=1&limit=${limit}&sort=relevance`;
       
       const response = await fetch(searchUrl, {
         headers: {
@@ -59,10 +69,17 @@ export async function fetchRedditReviews(
         const postContent = postData.selftext || postData.title || '';
         const postPermalink = `https://reddit.com${postData.permalink}`;
         
-        // Check if tool name appears in post title/selftext
+        // Check if search phrase or tool name appears in post title/selftext
         const postContentLower = postContent.toLowerCase();
+        const searchPhraseLower = queryPhrase.toLowerCase();
         const toolNameLower = toolName.toLowerCase();
-        const postMatches = postContentLower.includes(toolNameLower);
+        // Match either the search phrase OR the original tool name
+        const postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
+        
+        // Exclude if exclude phrase is present
+        if (excludePhrase && postContentLower.includes(excludePhrase.toLowerCase())) {
+          continue; // Skip this post
+        }
 
         // If post matches, add it
         if (postMatches && postContent && postContent.length >= 20 && postContent !== '[removed]' && postContent !== '[deleted]') {
@@ -86,8 +103,15 @@ export async function fetchRedditReviews(
             let commentMatches = 0;
             for (const comment of comments) {
               const commentContentLower = comment.content.toLowerCase();
-              // Check if tool name appears in comment
-              if (commentContentLower.includes(toolNameLower) && comment.content.length >= 20) {
+              
+              // Exclude if exclude phrase is present
+              if (excludePhrase && commentContentLower.includes(excludePhrase.toLowerCase())) {
+                continue; // Skip this comment
+              }
+              
+              // Check if search phrase or tool name appears in comment
+              const commentMatchesPhrase = commentContentLower.includes(searchPhraseLower) || commentContentLower.includes(toolNameLower);
+              if (commentMatchesPhrase && comment.content.length >= 20) {
                 // Only add if not already in results (avoid duplicates)
                 const isDuplicate = results.some(r => r.permalink === comment.permalink);
                 if (!isDuplicate) {

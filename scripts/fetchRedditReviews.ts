@@ -36,7 +36,7 @@ async function main() {
   // Get AI tools - either all tools or just the specified one
   let query = supabase
     .from('ai_tools')
-    .select('id, name, slug');
+    .select('id, name, slug, search_phrase, exclude_phrase');
 
   if (toolNameArg) {
     // Search by name or slug (case-insensitive)
@@ -64,11 +64,26 @@ async function main() {
     console.log(`\n🔎 Fetching reviews for: ${tool.name}`);
 
     try {
+      // Use custom search phrase if provided, otherwise use tool name
+      const searchPhrase = (tool as any).search_phrase || tool.name;
+      const excludePhrase = (tool as any).exclude_phrase || undefined;
+      
+      if ((tool as any).search_phrase) {
+        console.log(`  🔍 Searching Reddit with custom phrase: "${searchPhrase}" (tool: ${tool.name})`);
+      } else {
+        console.log(`  🔍 Searching Reddit for: "${tool.name}"`);
+      }
+      
+      if (excludePhrase) {
+        console.log(`  🚫 Excluding results containing: "${excludePhrase}"`);
+      }
+      
       // Fetch Reddit reviews
-      console.log(`  🔍 Searching Reddit for: "${tool.name}"`);
       const reviews = await fetchRedditReviews(tool.name, {
         limit: 30, // Increased to account for comments
         subreddits: ['taxpros', 'accounting', 'CPA', 'tax', 'taxpreparation', 'Bookkeeping'],
+        searchPhrase: searchPhrase,
+        excludePhrase: excludePhrase,
       });
 
       console.log(`  ✓ Found ${reviews.length} reviews/mentions`);
@@ -148,7 +163,10 @@ async function main() {
           if (recentReviews && recentReviews.length > 0) {
             const sentiment = await analyzeRedditSentiment(
               tool.name,
-              recentReviews.map(r => ({ content: r.content, upvotes: r.upvotes || 0 }))
+              recentReviews.map(r => ({ content: r.content, upvotes: r.upvotes || 0 })),
+              {
+                searchPhrase: searchPhrase, // Pass the search phrase used to find these reviews
+              }
             );
 
             // Upsert sentiment summary
