@@ -417,3 +417,110 @@ export function articleJsonLd(post: {
 
   return jsonLd;
 }
+
+/**
+ * Generate JSON-LD for Article schema (hub/page level)
+ * Use for collection pages like /ai
+ */
+export function generateArticleCollectionJsonLd({
+  title,
+  description,
+  url,
+  dateModified,
+  author,
+}: {
+  title: string;
+  description: string;
+  url: string;
+  dateModified?: string;
+  author?: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    dateModified: dateModified || new Date().toISOString(),
+    ...(author && {
+      author: {
+        '@type': 'Person',
+        name: author,
+      },
+    }),
+    publisher: {
+      '@type': 'Organization',
+      name: 'TaxProExchange',
+      url: siteUrl,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/logo-black.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+  };
+}
+
+/**
+ * Generate JSON-LD for BreadcrumbList schema
+ * Use for navigation: Home → AI Hub → Article
+ */
+export function generateBreadcrumbListJsonLd(items: Array<{ name: string; url: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url.startsWith('http') ? item.url : `${siteUrl}${item.url}`,
+    })),
+  };
+}
+
+/**
+ * Sanitize outbound user-generated links by adding rel="nofollow noopener noreferrer"
+ * Prevents search engines from following user-submitted links
+ */
+export function sanitizeOutboundLinks(htmlContent: string): string {
+  if (!htmlContent) return htmlContent;
+  
+  // Regex to match <a> tags with href attributes
+  // This safely adds rel attributes to all external links
+  const linkRegex = /<a\s+([^>]*?\s*?)href=["']([^"']+)["']([^>]*?)\s*>/gi;
+  
+  return htmlContent.replace(linkRegex, (match, beforeHref, href, afterHref) => {
+    // Check if link is already internal (same domain)
+    const isInternalLink = href.startsWith('/') || href.startsWith('#') || href.includes(siteUrl);
+    
+    // Only add nofollow to external links
+    if (!isInternalLink) {
+      // Check if rel attribute already exists
+      const relMatch = match.match(/\srel=["']([^"']+)["']/i);
+      if (relMatch) {
+        const existingRel = relMatch[1];
+        // Merge with existing rel attributes
+        const newRel = `${existingRel} nofollow noopener noreferrer`.split(' ').filter((v, i, a) => a.indexOf(v) === i).join(' ');
+        return match.replace(/\srel=["']([^"']+)["']/i, ` rel="${newRel}"`);
+      } else {
+        // Add rel attribute
+        return `<a ${beforeHref}href="${href}"${afterHref} rel="nofollow noopener noreferrer"`;
+      }
+    }
+    
+    return match;
+  });
+}
+
+/**
+ * Detect if a text field contains URLs where they shouldn't be
+ * Used to detect spam patterns in form submissions
+ */
+export function containsIllegalUrls(text: string): boolean {
+  if (!text) return false;
+  
+  const urlPattern = /https?:\/\/[^\s]+/gi;
+  return urlPattern.test(text);
+}

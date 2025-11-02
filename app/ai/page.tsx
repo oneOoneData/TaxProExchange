@@ -2,31 +2,58 @@ import { Metadata } from "next";
 import AppNavigation from "@/components/AppNavigation";
 import Link from "next/link";
 import Image from "next/image";
-import { siteUrl } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { siteUrl, generateArticleCollectionJsonLd, generateFaqJsonLd } from "@/lib/seo";
 import { getAllPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
-  title: "AI Thought Leadership | TaxProExchange",
-  description: "Exploring how AI can transform tax preparation — local LLMs, automation, and tools for CPAs.",
+  title: "AI in Tax: Thought Leadership & Tools for CPAs | TaxProExchange",
+  description: "Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.",
   alternates: { canonical: `${siteUrl}/ai` },
   openGraph: {
-    title: "AI Thought Leadership | TaxProExchange",
-    description: "Exploring how AI can transform tax preparation — local LLMs, automation, and tools for CPAs.",
+    title: "AI in Tax: Thought Leadership & Tools for CPAs | TaxProExchange",
+    description: "Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.",
     url: `${siteUrl}/ai`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Thought Leadership | TaxProExchange",
-    description: "Exploring how AI can transform tax preparation — local LLMs, automation, and tools for CPAs.",
+    title: "AI in Tax: Thought Leadership & Tools for CPAs | TaxProExchange",
+    description: "Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.",
   },
 };
 
 export default function AIPage() {
   const posts = getAllPosts();
+  
+  // Generate schemas
+  const articleSchema = generateArticleCollectionJsonLd({
+    title: 'AI in Tax: Thought Leadership & Tools for CPAs',
+    description: 'Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.',
+    url: `${siteUrl}/ai`,
+    dateModified: posts.length > 0 ? posts[0].data.date : new Date().toISOString(),
+    author: 'TaxProExchange Editorial',
+  });
+  
+  const faqSchema = generateFaqJsonLd([
+    {
+      question: 'How does AI help tax professionals?',
+      answer: 'AI assists tax pros with document processing, error detection, client communication, and staying current with tax law changes. Local AI tools offer privacy and security advantages.',
+    },
+    {
+      question: 'Is local AI secure for sensitive tax data?',
+      answer: 'Yes. Local AI models run on your own infrastructure, ensuring client data never leaves your control. This is critical for CPA firms handling confidential financial information.',
+    },
+    {
+      question: 'Will AI replace CPAs and tax preparers?',
+      answer: 'No. AI augments tax professionals by handling repetitive tasks, allowing CPAs and EAs to focus on complex advisory work, client relationships, and strategic planning.',
+    },
+  ]);
 
   return (
     <>
+      <JsonLd data={articleSchema} />
+      <JsonLd data={faqSchema} />
       <AppNavigation />
       
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
@@ -137,10 +164,14 @@ export default function AIPage() {
                     <Link href={`/ai/${post.slug}`}>
                       {(post.data.previewImage || post.data.image) && (
                         <div className="h-72 overflow-hidden bg-slate-100">
-                          <img
-                            src={post.data.previewImage || post.data.image}
+                          <Image
+                            src={post.data.previewImage || post.data.image || '/images/placeholder.png'}
                             alt={post.data.title}
+                            width={800}
+                            height={450}
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         </div>
                       )}
