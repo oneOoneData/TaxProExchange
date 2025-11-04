@@ -133,5 +133,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   });
 
+  // Add AI tools index page
+  routes.push({
+    url: `${siteUrl}/ai/tools`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  });
+
+  // Fetch AI tools for dynamic routes
+  const { data: aiTools } = await supabase
+    .from('ai_tools')
+    .select('slug, updated_at')
+    .not('slug', 'is', null);
+
+  if (aiTools) {
+    aiTools.forEach((tool) => {
+      routes.push({
+        url: `${siteUrl}/ai/tools/${tool.slug}`,
+        lastModified: tool.updated_at ? new Date(tool.updated_at) : new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    });
+  }
+
   return routes;
 }
