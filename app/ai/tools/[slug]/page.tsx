@@ -168,7 +168,7 @@ export default async function ToolDetailPage({
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <nav className="flex items-center gap-2 text-sm text-slate-600">
+          <nav className="flex items-center gap-2 text-sm text-slate-600 mb-4">
             <Link href="/ai" className="hover:text-slate-900">
               AI
             </Link>
@@ -179,6 +179,17 @@ export default async function ToolDetailPage({
             <span>→</span>
             <span className="text-slate-900">{tool.name}</span>
           </nav>
+          
+          {/* Back to the Wall Button */}
+          <Link
+            href="/ai/tools"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to the Wall
+          </Link>
         </div>
 
         {/* Tool Detail */}
