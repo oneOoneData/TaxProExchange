@@ -79,7 +79,7 @@ export default function ToolDetailClient({ tool }: ToolDetailClientProps) {
                 toolId={tool.id}
                 initialVotes={tool.votes}
               />
-              {tool.slug?.toLowerCase() === 'truss' ? (
+              {(tool.slug?.toLowerCase().trim() === 'truss' || tool.name?.toLowerCase().trim() === 'truss') ? (
                 <a
                   href="https://gettruss.link/koen"
                   target="_blank"
