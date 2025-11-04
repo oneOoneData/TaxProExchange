@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import AppNavigation from '@/components/AppNavigation';
 import ToolWall from '@/components/ai/ToolWall';
 import { siteUrl } from '@/lib/seo';
@@ -66,7 +67,13 @@ export default function AIToolsPage() {
           </div>
 
           {/* Tools Wall */}
-          <ToolWall />
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <div className="text-slate-500">Loading tools...</div>
+            </div>
+          }>
+            <ToolWall />
+          </Suspense>
         </main>
       </div>
     </>

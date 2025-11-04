@@ -28,12 +28,46 @@ export default function PartnerCard({ partner }: PartnerCardProps) {
         href={`/partners/${partner.slug}`}
         className="block h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-lg hover:border-slate-300 transition-all"
       >
-        {/* Logo placeholder */}
-        <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-slate-50">
-          <div className="text-2xl font-bold text-slate-400">
-            {partner.name}
+        {/* Logo */}
+        {partner.slug === 'truss' ? (
+          <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
+            <img
+              src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/truss.jpg"
+              alt={`${partner.name} logo`}
+              className="h-full w-auto object-contain"
+            />
           </div>
-        </div>
+        ) : partner.slug === 'taxgpt' ? (
+          <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
+            <img
+              src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/taxgpt.jpg"
+              alt={`${partner.name} logo`}
+              className="h-full w-auto object-contain"
+            />
+          </div>
+        ) : partner.slug === 'bluej' ? (
+          <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
+            <img
+              src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/bluej.png"
+              alt={`${partner.name} logo`}
+              className="h-full w-auto object-contain"
+            />
+          </div>
+        ) : partner.logo ? (
+          <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
+            <img
+              src={partner.logo}
+              alt={`${partner.name} logo`}
+              className="h-full w-auto object-contain"
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-slate-50">
+            <div className="text-2xl font-bold text-slate-400">
+              {partner.name}
+            </div>
+          </div>
+        )}
 
         {/* Category Badge */}
         <div className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium mb-3">
