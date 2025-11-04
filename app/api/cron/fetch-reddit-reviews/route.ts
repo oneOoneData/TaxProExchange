@@ -7,42 +7,22 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
- * Vercel Cron endpoint to fetch Reddit reviews daily
- * Protected by Vercel Cron secret header
+ * Shared function to fetch Reddit reviews for all tools
  */
-export async function POST(request: Request) {
-  try {
-    // Verify this is a Vercel Cron request
-    const authHeader = request.headers.get('authorization');
-    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
-    
-    if (!process.env.CRON_SECRET) {
-      return NextResponse.json(
-        { ok: false, error: 'cron_secret_not_configured' },
-        { status: 500 }
-      );
-    }
-    
-    if (authHeader !== expectedAuth) {
-      return NextResponse.json(
-        { ok: false, error: 'unauthorized' },
-        { status: 401 }
-      );
-    }
+async function fetchAllRedditReviews() {
+  console.log('🔍 Starting Reddit review fetch...');
 
-    console.log('🔍 Starting Reddit review fetch...');
+  const supabase = supabaseService();
 
-    const supabase = supabaseService();
+    // Get all AI tools with search_phrase and exclude_phrase
+  const { data: tools, error: toolsError } = await supabase
+    .from('ai_tools')
+    .select('id, name, slug, search_phrase, exclude_phrase');
 
-    // Get all AI tools
-    const { data: tools, error: toolsError } = await supabase
-      .from('ai_tools')
-      .select('id, name, slug');
-
-    if (toolsError || !tools) {
-      console.error('Error fetching tools:', toolsError);
-      return NextResponse.json({ error: 'Failed to fetch tools' }, { status: 500 });
-    }
+  if (toolsError || !tools) {
+    console.error('Error fetching tools:', toolsError);
+    throw new Error('Failed to fetch tools');
+  }
 
     console.log(`📋 Found ${tools.length} tools to process`);
 
@@ -50,13 +30,25 @@ export async function POST(request: Request) {
     let totalInserted = 0;
 
     for (const tool of tools) {
+      // Use custom search phrase if provided, otherwise fall back to tool name
+      const searchPhrase = (tool as any).search_phrase || tool.name;
+      const excludePhrase = (tool as any).exclude_phrase || undefined;
+
       console.log(`\n🔎 Fetching reviews for: ${tool.name}`);
+      if ((tool as any).search_phrase) {
+        console.log(`  🔍 Using custom search phrase: "${searchPhrase}"`);
+      }
+      if (excludePhrase) {
+        console.log(`  🚫 Excluding results containing: "${excludePhrase}"`);
+      }
 
       try {
-        // Fetch Reddit reviews
+        // Fetch Reddit reviews with custom search/exclude phrases
         const reviews = await fetchRedditReviews(tool.name, {
           limit: 20,
           subreddits: ['taxpros', 'accounting', 'CPA', 'tax', 'taxpreparation', 'Bookkeeping'],
+          searchPhrase: searchPhrase,
+          excludePhrase: excludePhrase,
         });
 
         console.log(`  ✓ Found ${reviews.length} reviews`);
@@ -177,9 +169,76 @@ export async function POST(request: Request) {
 
     console.log(`\n✅ Complete!`, result);
 
+    return result;
+  } catch (error) {
+    console.error('Fatal error in Reddit review fetch:', error);
+    throw error;
+  }
+}
+
+/**
+ * Vercel Cron endpoint to fetch Reddit reviews daily
+ * Protected by Vercel Cron secret header
+ */
+export async function POST(request: Request) {
+  try {
+    // Verify this is a Vercel Cron request
+    const authHeader = request.headers.get('authorization');
+    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+    
+    if (!process.env.CRON_SECRET) {
+      return NextResponse.json(
+        { ok: false, error: 'cron_secret_not_configured' },
+        { status: 500 }
+      );
+    }
+    
+    if (authHeader !== expectedAuth) {
+      return NextResponse.json(
+        { ok: false, error: 'unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const result = await fetchAllRedditReviews();
     return NextResponse.json(result);
   } catch (error) {
     console.error('Fatal error in Reddit review fetch:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET endpoint for manual triggering (for testing/debugging)
+ * Requires CRON_SECRET for security
+ */
+export async function GET(request: Request) {
+  try {
+    // Verify authorization (same as POST)
+    const authHeader = request.headers.get('authorization');
+    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+    
+    if (!process.env.CRON_SECRET) {
+      return NextResponse.json(
+        { ok: false, error: 'cron_secret_not_configured' },
+        { status: 500 }
+      );
+    }
+    
+    if (authHeader !== expectedAuth) {
+      return NextResponse.json(
+        { ok: false, error: 'unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const result = await fetchAllRedditReviews();
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Fatal error in manual Reddit review fetch:', error);
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
