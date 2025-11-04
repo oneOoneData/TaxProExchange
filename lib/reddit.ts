@@ -13,6 +13,45 @@ export interface RedditPost {
 }
 
 /**
+ * Helper function to check if all words in a phrase appear in content
+ * For multi-word phrases, requires all words appear and they're close together
+ */
+function containsAllWords(phrase: string, content: string): boolean {
+  const words = phrase.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+  if (words.length === 0) return false;
+  
+  // For single word, just check if it appears
+  if (words.length === 1) {
+    return content.includes(words[0]);
+  }
+  
+  // For multiple words, require ALL words appear AND they appear relatively close together
+  const allWordsPresent = words.every(word => content.includes(word));
+  if (!allWordsPresent) return false;
+  
+  // Check if they appear as a phrase (exact match)
+  if (content.includes(phrase.toLowerCase())) {
+    return true;
+  }
+  
+  // Check if words appear close together (within 50 characters of each other)
+  const wordPositions = words.map(word => {
+    const index = content.indexOf(word);
+    return index >= 0 ? index : -1;
+  }).filter(pos => pos >= 0);
+  
+  if (wordPositions.length < words.length) return false;
+  
+  // Check if all words are within 50 characters of each other
+  const minPos = Math.min(...wordPositions);
+  const maxPos = Math.max(...wordPositions);
+  const maxWordLength = Math.max(...words.map(w => w.length));
+  
+  // Allow up to 50 chars between first and last word (plus word lengths)
+  return (maxPos - minPos) <= (50 + maxWordLength);
+}
+
+/**
  * Search Reddit for posts/comments about a tool
  * Searches in relevant tax/accounting subreddits
  */
@@ -95,12 +134,12 @@ export async function fetchRedditReviews(
         const searchPhraseLower = queryPhrase.toLowerCase();
         const toolNameLower = toolName.toLowerCase();
         
-        // If a custom search phrase is provided (different from tool name), ONLY match that phrase
+        // If a custom search phrase is provided (different from tool name), use strict matching
         // Otherwise, match either the search phrase OR the original tool name
         let postMatches: boolean;
         if (searchPhrase && searchPhrase.toLowerCase() !== toolName.toLowerCase()) {
-          // Custom search phrase provided - require exact match of that phrase only
-          postMatches = postContentLower.includes(searchPhraseLower);
+          // Custom search phrase provided - require strict match (all words must appear)
+          postMatches = containsAllWords(searchPhrase, postContentLower);
         } else {
           // No custom phrase or it matches tool name - match either phrase or tool name
           postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
@@ -140,11 +179,11 @@ export async function fetchRedditReviews(
               }
               
               // Check if search phrase or tool name appears in comment
-              // Use same logic as post matching: if custom search phrase, require only that
+              // Use same logic as post matching: if custom search phrase, require strict matching
               let commentMatchesPhrase: boolean;
               if (searchPhrase && searchPhrase.toLowerCase() !== toolName.toLowerCase()) {
-                // Custom search phrase provided - require exact match of that phrase only
-                commentMatchesPhrase = commentContentLower.includes(searchPhraseLower);
+                // Custom search phrase provided - require all words to appear
+                commentMatchesPhrase = containsAllWords(searchPhrase, commentContentLower);
               } else {
                 // No custom phrase or it matches tool name - match either phrase or tool name
                 commentMatchesPhrase = commentContentLower.includes(searchPhraseLower) || commentContentLower.includes(toolNameLower);
