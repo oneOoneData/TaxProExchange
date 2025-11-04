@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AITool } from './ToolTile';
 import ToolTile from './ToolTile';
 import ToolDetailPanel from './ToolDetailPanel';
@@ -29,6 +30,7 @@ interface FullTool extends AITool {
 }
 
 export default function ToolWall({ initialTools = [] }: ToolWallProps) {
+  const searchParams = useSearchParams();
   const [tools, setTools] = useState<AITool[]>(initialTools);
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
   const [selectedToolData, setSelectedToolData] = useState<FullTool | null>(null);
@@ -40,6 +42,22 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
   // Track the currently selected tool ID to prevent race conditions
   const currentSelectedIdRef = useRef<string | null>(null);
 
+  // Check URL parameter for tool selection on mount and when tools load
+  useEffect(() => {
+    const toolParam = searchParams.get('tool');
+    if (toolParam && tools.length > 0) {
+      // Try to find tool by slug or id (case-insensitive)
+      const toolParamLower = toolParam.toLowerCase();
+      const tool = tools.find(t => 
+        (t.slug && t.slug.toLowerCase() === toolParamLower) || 
+        (t.id && t.id.toLowerCase() === toolParamLower)
+      );
+      if (tool && tool.id !== selectedToolId) {
+        setSelectedToolId(tool.id);
+      }
+    }
+  }, [searchParams, tools, selectedToolId]);
+
   // Fetch tools (polling only updates tools list, doesn't affect selection)
   useEffect(() => {
     const fetchTools = async (currentId: string | null) => {
@@ -47,12 +65,44 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
         const response = await fetch('/api/ai-tools');
         if (response.ok) {
           const data = await response.json();
-          setTools(data.tools || []);
+          const fetchedTools = data.tools || [];
+          setTools(fetchedTools);
+          
+          // Check URL parameter after fetching tools
+          const toolParam = searchParams.get('tool');
+          if (toolParam && fetchedTools.length > 0 && !currentSelectedIdRef.current) {
+            const toolParamLower = toolParam.toLowerCase();
+            const tool = fetchedTools.find((t: any) => 
+              (t.slug && t.slug.toLowerCase() === toolParamLower) || 
+              (t.id && t.id.toLowerCase() === toolParamLower)
+            );
+            if (tool) {
+              const toolId = tool.id;
+              setSelectedToolId(toolId);
+              currentSelectedIdRef.current = toolId;
+              
+              // Immediately load tool details
+              setSelectedToolData({
+                id: tool.id,
+                name: tool.name,
+                slug: tool.slug,
+                logo_url: tool.logo_url,
+                short_description: tool.short_description,
+                votes: tool.votes,
+                long_description: tool.long_description,
+                category: tool.category,
+                website_url: tool.website_url,
+              });
+              setReviews(tool.reviews || []);
+              setCollateralLinks(tool.collateral_links || []);
+              setSentiment(tool.sentiment || null);
+            }
+          }
           
           // Only update selected tool data if the ID matches what's currently selected
           // This prevents race conditions where polling updates stale selections
           if (currentId && currentId === currentSelectedIdRef.current) {
-            const fullTool = data.tools.find((t: any) => t.id === currentId);
+            const fullTool = fetchedTools.find((t: any) => t.id === currentId);
             if (fullTool && currentId === currentSelectedIdRef.current) {
               setSelectedToolData({
                 id: fullTool.id,
@@ -82,7 +132,21 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
       }
     };
 
-    if (!initialTools.length) {
+    // Check URL parameter with initialTools if available
+    if (initialTools.length > 0) {
+      const toolParam = searchParams.get('tool');
+      if (toolParam && !currentSelectedIdRef.current) {
+        const toolParamLower = toolParam.toLowerCase();
+        const tool = initialTools.find(t => 
+          (t.slug && t.slug.toLowerCase() === toolParamLower) || 
+          (t.id && t.id.toLowerCase() === toolParamLower)
+        );
+        if (tool) {
+          setSelectedToolId(tool.id);
+          currentSelectedIdRef.current = tool.id;
+        }
+      }
+    } else {
       fetchTools(selectedToolId);
     }
 
@@ -104,7 +168,7 @@ export default function ToolWall({ initialTools = [] }: ToolWallProps) {
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [initialTools]); // Remove selectedToolId from deps to avoid re-creating interval
+  }, [initialTools, searchParams]); // Add searchParams to deps
 
   // Load details when tool is selected
   useEffect(() => {
