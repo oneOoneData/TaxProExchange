@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabaseService } from '@/lib/supabaseService';
 import ToolDetailClient from '@/components/ai/ToolDetailClient';
+import JsonLd from '@/components/seo/JsonLd';
+import { siteUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +58,46 @@ async function getToolBySlug(slug: string) {
   };
 }
 
+function generateSoftwareApplicationJsonLd(tool: {
+  name: string;
+  slug: string;
+  short_description?: string;
+  long_description?: string;
+  category?: string;
+  website_url?: string;
+  logo_url?: string;
+}) {
+  const url = `${siteUrl}/ai/tools/${tool.slug}`;
+  const description = tool.short_description || tool.long_description || `Learn more about ${tool.name} for tax professionals.`;
+  const image = tool.logo_url ? (tool.logo_url.startsWith('http') ? tool.logo_url : `${siteUrl}${tool.logo_url}`) : undefined;
+
+  const jsonLd: any = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: tool.name,
+    description: description.substring(0, 160),
+    url: url,
+    applicationCategory: 'BusinessApplication',
+  };
+
+  if (image) {
+    jsonLd.image = image;
+  }
+
+  if (tool.category) {
+    jsonLd.keywords = tool.category;
+  }
+
+  if (tool.website_url) {
+    jsonLd.offers = {
+      '@type': 'Offer',
+      url: tool.website_url,
+    };
+  }
+
+  return jsonLd;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -66,13 +108,42 @@ export async function generateMetadata({
 
   if (!tool) {
     return {
-      title: 'Tool Not Found',
+      title: 'Tool Not Found | TaxProExchange',
     };
   }
 
+  const url = `${siteUrl}/ai/tools/${slug}`;
+  const description = tool.short_description || tool.long_description || `Learn more about ${tool.name} for tax professionals.`;
+  const imageUrl = tool.logo_url 
+    ? (tool.logo_url.startsWith('http') ? tool.logo_url : `${siteUrl}${tool.logo_url}`)
+    : `${siteUrl}/og-image.png`;
+
   return {
-    title: `${tool.name} | AI Tools for Tax Pros | TaxProExchange`,
-    description: tool.short_description || tool.long_description || `Learn more about ${tool.name} for tax professionals.`,
+    title: `${tool.name}${tool.category ? ` – ${tool.category}` : ''} | AI Tools for Tax Pros | TaxProExchange`,
+    description: description.substring(0, 160),
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: tool.name,
+      description: description.substring(0, 160),
+      url: url,
+      type: 'website',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${tool.name} logo`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: tool.name,
+      description: description.substring(0, 160),
+      images: [imageUrl],
+    },
   };
 }
 
@@ -88,15 +159,22 @@ export default async function ToolDetailPage({
     notFound();
   }
 
+  const softwareApplicationSchema = generateSoftwareApplicationJsonLd(tool);
+
   return (
     <>
+      <JsonLd data={softwareApplicationSchema} />
       <AppNavigation />
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <nav className="flex items-center gap-2 text-sm text-slate-600">
             <Link href="/ai" className="hover:text-slate-900">
-              AI Tools
+              AI
+            </Link>
+            <span>→</span>
+            <Link href="/ai/tools" className="hover:text-slate-900">
+              Tools
             </Link>
             <span>→</span>
             <span className="text-slate-900">{tool.name}</span>

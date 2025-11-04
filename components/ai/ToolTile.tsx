@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import VoteButton from './VoteButton';
 
@@ -18,33 +18,21 @@ export interface AITool {
 interface ToolTileProps {
   tool: AITool;
   index: number;
-  onSelect?: (tool: AITool) => void;
 }
 
-export default function ToolTile({ tool, index, onSelect }: ToolTileProps) {
-  const router = useRouter();
+export default function ToolTile({ tool, index }: ToolTileProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleClick = () => {
-    if (window.innerWidth < 768) {
-      // Mobile: navigate to detail page
-      router.push(`/ai/tools/${tool.slug}`);
-    } else {
-      // Desktop: show in side panel
-      onSelect?.(tool);
-    }
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      onClick={handleClick}
-      className="group relative aspect-square bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer overflow-hidden"
-    >
+    <Link href={`/ai/tools/${tool.slug}`}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group relative aspect-square bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer overflow-hidden"
+      >
       {/* Logo */}
       <div className="absolute inset-0 flex items-center justify-center p-6">
         {tool.logo_url ? (
@@ -82,7 +70,7 @@ export default function ToolTile({ tool, index, onSelect }: ToolTileProps) {
       </motion.div>
 
       {/* Vote button - bottom right */}
-      <div className="absolute bottom-3 right-3 z-20">
+      <div className="absolute bottom-3 right-3 z-20" onClick={(e) => e.stopPropagation()}>
         <VoteButton
           toolId={tool.id}
           initialVotes={tool.votes}
@@ -93,6 +81,7 @@ export default function ToolTile({ tool, index, onSelect }: ToolTileProps) {
         />
       </div>
     </motion.div>
+    </Link>
   );
 }
 
