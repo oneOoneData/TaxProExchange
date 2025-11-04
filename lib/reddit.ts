@@ -40,8 +40,11 @@ export async function fetchRedditReviews(
   // Search each subreddit
   for (const subreddit of subreddits) {
     try {
-      // Reddit search API: https://www.reddit.com/r/{subreddit}/search.json?q={query}&restrict_sr=1
-      const searchUrl = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(queryPhrase)}&restrict_sr=1&limit=${limit}&sort=relevance`;
+      // Reddit search API: Use subreddit-specific search endpoint (original approach that worked)
+      // Format: /r/{subreddit}/search.json?q={query}&restrict_sr=1
+      const searchUrl = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(queryPhrase)}&restrict_sr=1&limit=${limit}&sort=new&t=all&type=link,comment`;
+      
+      console.log(`    Searching r/${subreddit} with query: "${queryPhrase}"`);
       
       const response = await fetch(searchUrl, {
         headers: {
@@ -50,11 +53,29 @@ export async function fetchRedditReviews(
       });
 
       if (!response.ok) {
-        console.warn(`Reddit search failed for r/${subreddit}: ${response.status}`);
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('retry-after');
+          const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 10000; // Use retry-after header or default to 10s
+          console.warn(`  ⚠️  Rate limited on r/${subreddit} (429). Waiting ${waitTime/1000} seconds before continuing...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime)); // Wait based on retry-after or 10s
+          continue;
+        }
+        if (response.status === 404) {
+          console.warn(`  ⚠️  Subreddit r/${subreddit} not found (404). Skipping...`);
+          continue;
+        }
+        const errorText = await response.text().catch(() => '');
+        console.warn(`Reddit search failed for r/${subreddit}: ${response.status} - ${errorText.substring(0, 200)}`);
         continue;
       }
 
       const data = await response.json();
+      
+      // Check if Reddit returned an error in the JSON response
+      if (data.error || data.reason) {
+        console.warn(`  ⚠️  Reddit API error for r/${subreddit}: ${data.reason || data.error}`);
+        continue;
+      }
       const posts = data.data?.children || [];
       
       console.log(`    r/${subreddit}: Found ${posts.length} posts from search`);
@@ -73,8 +94,17 @@ export async function fetchRedditReviews(
         const postContentLower = postContent.toLowerCase();
         const searchPhraseLower = queryPhrase.toLowerCase();
         const toolNameLower = toolName.toLowerCase();
-        // Match either the search phrase OR the original tool name
-        const postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
+        
+        // If a custom search phrase is provided (different from tool name), ONLY match that phrase
+        // Otherwise, match either the search phrase OR the original tool name
+        let postMatches: boolean;
+        if (searchPhrase && searchPhrase.toLowerCase() !== toolName.toLowerCase()) {
+          // Custom search phrase provided - require exact match of that phrase only
+          postMatches = postContentLower.includes(searchPhraseLower);
+        } else {
+          // No custom phrase or it matches tool name - match either phrase or tool name
+          postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
+        }
         
         // Exclude if exclude phrase is present
         if (excludePhrase && postContentLower.includes(excludePhrase.toLowerCase())) {
@@ -110,7 +140,15 @@ export async function fetchRedditReviews(
               }
               
               // Check if search phrase or tool name appears in comment
-              const commentMatchesPhrase = commentContentLower.includes(searchPhraseLower) || commentContentLower.includes(toolNameLower);
+              // Use same logic as post matching: if custom search phrase, require only that
+              let commentMatchesPhrase: boolean;
+              if (searchPhrase && searchPhrase.toLowerCase() !== toolName.toLowerCase()) {
+                // Custom search phrase provided - require exact match of that phrase only
+                commentMatchesPhrase = commentContentLower.includes(searchPhraseLower);
+              } else {
+                // No custom phrase or it matches tool name - match either phrase or tool name
+                commentMatchesPhrase = commentContentLower.includes(searchPhraseLower) || commentContentLower.includes(toolNameLower);
+              }
               if (commentMatchesPhrase && comment.content.length >= 20) {
                 // Only add if not already in results (avoid duplicates)
                 const isDuplicate = results.some(r => r.permalink === comment.permalink);
@@ -130,8 +168,8 @@ export async function fetchRedditReviews(
         }
       }
 
-      // Rate limiting: wait between requests
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Rate limiting: wait between requests (increased to avoid 429 errors)
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Increased from 1s to 2s
     } catch (error) {
       console.error(`Error fetching Reddit reviews from r/${subreddit}:`, error);
       // Continue with other subreddits
