@@ -125,11 +125,25 @@ export async function fetchRedditReviews(
       for (const post of posts) {
         const postData = post.data;
         
-        // Extract meaningful content (selftext or title+selftext)
-        const postContent = postData.selftext || postData.title || '';
+        // Reddit search can return both posts (links) and comments
+        // Posts have: title, selftext
+        // Comments have: body, and link_title (the post they're on)
+        const isComment = postData.kind === 't1' || (postData.body && !postData.selftext);
+        
+        // Extract meaningful content
+        // For posts: selftext or title
+        // For comments: body (the actual comment text)
+        const postContent = isComment 
+          ? (postData.body || '') 
+          : (postData.selftext || postData.title || '');
         const postPermalink = `https://reddit.com${postData.permalink}`;
         
-        // Check if search phrase or tool name appears in post title/selftext
+        // Skip if no content
+        if (!postContent || postContent.length < 20 || postContent === '[removed]' || postContent === '[deleted]') {
+          continue;
+        }
+        
+        // Check if search phrase or tool name appears in post title/selftext or comment body
         const postContentLower = postContent.toLowerCase();
         const searchPhraseLower = queryPhrase.toLowerCase();
         const toolNameLower = toolName.toLowerCase();
@@ -140,6 +154,10 @@ export async function fetchRedditReviews(
         if (searchPhrase && searchPhrase.toLowerCase() !== toolName.toLowerCase()) {
           // Custom search phrase provided - require strict match (all words must appear)
           postMatches = containsAllWords(searchPhrase, postContentLower);
+          if (!postMatches && postContent.length > 0) {
+            // Debug: log why it didn't match (only for first few non-matches to avoid spam)
+            console.log(`    ⚠️  Skipping ${isComment ? 'comment' : 'post'}: "${postContent.substring(0, 100)}..." - doesn't contain all words from "${searchPhrase}"`);
+          }
         } else {
           // No custom phrase or it matches tool name - match either phrase or tool name
           postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
@@ -147,11 +165,13 @@ export async function fetchRedditReviews(
         
         // Exclude if exclude phrase is present
         if (excludePhrase && postContentLower.includes(excludePhrase.toLowerCase())) {
-          continue; // Skip this post
+          console.log(`    🚫 Excluding ${isComment ? 'comment' : 'post'}: contains exclude phrase "${excludePhrase}"`);
+          continue; // Skip this post/comment
         }
 
-        // If post matches, add it
-        if (postMatches && postContent && postContent.length >= 20 && postContent !== '[removed]' && postContent !== '[deleted]') {
+        // If post/comment matches, add it
+        if (postMatches) {
+          console.log(`    ✓ Matched ${isComment ? 'comment' : 'post'}: "${postContent.substring(0, 80)}..."`);
           results.push({
             author: postData.author || 'Unknown',
             content: postContent.slice(0, 500),
@@ -162,9 +182,10 @@ export async function fetchRedditReviews(
           });
         }
 
-        // Also fetch comments from matching posts to find mentions in comment threads
+        // Also fetch comments from matching POSTS (not comments) to find mentions in comment threads
         // Limit to avoid too many requests and rate limiting
-        if (postMatches && postsProcessedForComments < maxCommentFetches) {
+        // Only fetch comments if this is a post (not a comment) and it matches
+        if (!isComment && postMatches && postsProcessedForComments < maxCommentFetches) {
           postsProcessedForComments++;
           try {
             await new Promise(resolve => setTimeout(resolve, 500)); // Rate limit comment fetching
