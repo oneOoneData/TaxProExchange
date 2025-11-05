@@ -154,10 +154,6 @@ export async function fetchRedditReviews(
         if (searchPhrase && searchPhrase.toLowerCase() !== toolName.toLowerCase()) {
           // Custom search phrase provided - require strict match (all words must appear)
           postMatches = containsAllWords(searchPhrase, postContentLower);
-          if (!postMatches && postContent.length > 0) {
-            // Debug: log why it didn't match (only for first few non-matches to avoid spam)
-            console.log(`    ⚠️  Skipping ${isComment ? 'comment' : 'post'}: "${postContent.substring(0, 100)}..." - doesn't contain all words from "${searchPhrase}"`);
-          }
         } else {
           // No custom phrase or it matches tool name - match either phrase or tool name
           postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
