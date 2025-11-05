@@ -61,7 +61,7 @@ export async function fetchRedditReviews(
     limit?: number;
     subreddits?: string[];
     searchPhrase?: string; // Optional custom search phrase (e.g., "Thomson Reuters CoCounsel")
-    excludePhrase?: string; // Optional phrase to exclude from results (e.g., "Solomon page")
+    excludePhrase?: string; // Optional phrase(s) to exclude - comma-separated (e.g., "Solomon page, Solomon Software")
   } = {}
 ): Promise<RedditPost[]> {
   const { 
@@ -70,6 +70,11 @@ export async function fetchRedditReviews(
     searchPhrase,
     excludePhrase
   } = options;
+  
+  // Parse multiple exclusion phrases (comma-separated)
+  const excludePhrases = excludePhrase
+    ? excludePhrase.split(',').map(p => p.trim()).filter(p => p.length > 0)
+    : [];
 
   // Use custom search phrase if provided, otherwise use tool name
   const queryPhrase = searchPhrase || toolName;
@@ -159,9 +164,12 @@ export async function fetchRedditReviews(
           postMatches = postContentLower.includes(searchPhraseLower) || postContentLower.includes(toolNameLower);
         }
         
-        // Exclude if exclude phrase is present
-        if (excludePhrase && postContentLower.includes(excludePhrase.toLowerCase())) {
-          console.log(`    🚫 Excluding ${isComment ? 'comment' : 'post'}: contains exclude phrase "${excludePhrase}"`);
+        // Exclude if any exclude phrase is present
+        const matchedExcludePhrase = excludePhrases.find(excludePh => 
+          postContentLower.includes(excludePh.toLowerCase())
+        );
+        if (matchedExcludePhrase) {
+          console.log(`    🚫 Excluding ${isComment ? 'comment' : 'post'}: contains exclude phrase "${matchedExcludePhrase}"`);
           continue; // Skip this post/comment
         }
 
@@ -190,8 +198,11 @@ export async function fetchRedditReviews(
             for (const comment of comments) {
               const commentContentLower = comment.content.toLowerCase();
               
-              // Exclude if exclude phrase is present
-              if (excludePhrase && commentContentLower.includes(excludePhrase.toLowerCase())) {
+              // Exclude if any exclude phrase is present
+              const matchedExcludePhrase = excludePhrases.find(excludePh => 
+                commentContentLower.includes(excludePh.toLowerCase())
+              );
+              if (matchedExcludePhrase) {
                 continue; // Skip this comment
               }
               
