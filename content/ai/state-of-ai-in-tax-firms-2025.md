@@ -24,7 +24,7 @@ keywords:
   - "tax firm automation roadmap"
 previewImage: "/images/the_hybrid_desk.png"
 imageAlt: "Tax professional’s hybrid desk with laptop, workpapers, and AI workflow on screen"
-canonical: "https://www.taxproexchange.com/ai/ai-in-tax-firms-2025"
+canonical: "https://www.taxproexchange.com/ai/state-of-ai-in-tax-firms-2025"
 readingTime: 12
 robots: "index,follow"
 ogTitle: "What’s Next for AI in Tax Firms"

@@ -5,6 +5,7 @@ export function verifiedListedHtml(opts: {
   shareLinkedInUrl: string;
   shareXUrl: string;
   inviteUrl: string;
+  surveyUrl: string;
   managePrefsUrl: string;
   siteUrl: string;
   year: number;
@@ -16,6 +17,7 @@ export function verifiedListedHtml(opts: {
     shareLinkedInUrl,
     shareXUrl,
     inviteUrl,
+    surveyUrl,
     managePrefsUrl,
     siteUrl,
     year,
@@ -44,6 +46,16 @@ export function verifiedListedHtml(opts: {
 
                 <div style="text-align:center;margin:22px 0 28px;">
                   <a href="${profileUrl}" style="background:#10b981;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;display:inline-block;font-weight:600">View your profile</a>
+                </div>
+
+                <!-- Survey CTA -->
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin:0 0 18px;">
+                  <p style="margin:0 0 10px;font-size:14px;">
+                    Help us improve TaxProExchange for you — take our 1‑minute AI survey.
+                  </p>
+                  <div style="text-align:center;">
+                    <a href="${surveyUrl}" style="background:#1f2937;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;display:inline-block;font-weight:600">Take 1‑minute survey</a>
+                  </div>
                 </div>
 
                 <ul style="padding-left:18px;margin:0 0 18px;line-height:1.6;">
@@ -116,13 +128,14 @@ export function verifiedListedText(opts: {
   shareLinkedInUrl: string;
   shareXUrl: string;
   inviteUrl: string;
+  surveyUrl: string;
   managePrefsUrl: string;
   siteUrl: string;
   year: number;
 }) {
   const {
     firstName, profileUrl, foundingMemberUrl,
-    shareLinkedInUrl, shareXUrl, inviteUrl, managePrefsUrl, siteUrl, year
+    shareLinkedInUrl, shareXUrl, inviteUrl, surveyUrl, managePrefsUrl, siteUrl, year
   } = opts;
 
   return `Hi ${firstName || "there"},
@@ -130,6 +143,9 @@ export function verifiedListedText(opts: {
 Congrats. Your profile is now VERIFIED and publicly listed. People can find you in search and send connection requests.
 
 View your profile: ${profileUrl}
+
+Quick favor (optional): Take our 1‑minute AI survey to help improve TaxProExchange.
+Survey: ${surveyUrl}
 
 Next steps:
 • Connect and message other pros who fit your needs.
