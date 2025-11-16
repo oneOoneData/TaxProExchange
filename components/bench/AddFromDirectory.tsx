@@ -8,6 +8,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 
 interface Profile {
@@ -537,10 +538,12 @@ export default function AddFromDirectory({ firmId, onAdd, onClose }: AddFromDire
                       {/* Avatar */}
                       <div className="flex-shrink-0">
                         {avatarUrl ? (
-                          <img
+                          <Image
                             src={avatarUrl}
                             alt={`${profile.first_name} ${profile.last_name}`}
                             className="w-14 h-14 rounded-full object-cover"
+                            width={56}
+                            height={56}
                           />
                         ) : (
                           <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-lg">
@@ -693,12 +696,12 @@ export default function AddFromDirectory({ firmId, onAdd, onClose }: AddFromDire
                   <textarea
                     value={inviteMessage}
                     onChange={(e) => setInviteMessage(e.target.value)}
-                    placeholder="Tell them about your firm, the type of work, or why you'd like them on your team..."
+                    placeholder="Tell them about your firm, the type of work, or why you&rsquo;d like them on your team..."
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    They'll receive an email with your invitation and can accept or decline.
+                    They&rsquo;ll receive an email with your invitation and can accept or decline.
                   </p>
                 </div>
 

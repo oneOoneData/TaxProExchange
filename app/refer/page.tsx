@@ -139,7 +139,7 @@ export default function ReferPage() {
             </div>
             {profile?.slug && (
               <p className="text-xs text-slate-500 mt-2">
-                This link includes your referral code. You'll earn a Referrer badge when your colleague gets verified.
+                This link includes your referral code. You&rsquo;ll earn a Referrer badge when your colleague gets verified.
               </p>
             )}
           </div>
@@ -184,7 +184,7 @@ export default function ReferPage() {
           {/* Info Note */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <p className="text-sm text-blue-800">
-              <strong>You'll earn a Referrer badge when your colleague gets verified.</strong> 
+              <strong>You&rsquo;ll earn a Referrer badge when your colleague gets verified.</strong> 
               {!profile?.slug && ' Sign in to get your personalized referral link.'}
             </p>
           </div>

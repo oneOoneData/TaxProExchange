@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -70,18 +70,7 @@ export default function AdminJobApplicationsPage() {
   const [notifying, setNotifying] = useState(false);
   const [testingEmail, setTestingEmail] = useState(false);
 
-  useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/sign-in');
-      return;
-    }
-    
-    if (isLoaded && user) {
-      fetchApplications();
-    }
-  }, [isLoaded, user, router, statusFilter]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -103,7 +92,18 @@ export default function AdminJobApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/sign-in');
+      return;
+    }
+    
+    if (isLoaded && user) {
+      fetchApplications();
+    }
+  }, [isLoaded, user, router, fetchApplications]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

@@ -12,6 +12,7 @@ export type ContactProps = {
   firstname?: string | null;
   lastname?: string | null;
   marketing_opt_in?: boolean;
+  properties?: Record<string, any>;
 };
 
 /**
@@ -126,6 +127,10 @@ export async function upsertHubSpotContact(props: ContactProps) {
 
     // Custom property for marketing consent (create this property in HubSpot if needed)
     hsProps.tpe_marketing_opt_in = marketing_opt_in ?? false;
+
+    if (props.properties) {
+      Object.assign(hsProps, props.properties);
+    }
 
     // 2) Update existing contact or create new
     if (searchData?.total > 0) {

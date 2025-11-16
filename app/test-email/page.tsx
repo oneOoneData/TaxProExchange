@@ -82,7 +82,7 @@ export default function TestEmailPage() {
             <div className="border border-gray-200 rounded-lg p-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-3">1. Check Your Profile</h2>
               <p className="text-gray-600 mb-3">
-                First, let's verify your profile has an email address configured.
+                First, let&rsquo;s verify your profile has an email address configured.
               </p>
               <button
                 onClick={checkProfile}
@@ -134,8 +134,8 @@ export default function TestEmailPage() {
               <ol className="list-decimal list-inside space-y-2 text-blue-800">
                 <li>Make sure you have a <code className="bg-blue-100 px-1 rounded">RESEND_API_KEY</code> in your environment variables</li>
                 <li>Ensure your profile has a <code className="bg-blue-100 px-1 rounded">public_email</code> field set</li>
-                <li>Click "Check Profile" to verify your email is configured</li>
-                <li>Click "Send Test Email" to send a test email</li>
+                <li>Click &quot;Check Profile&quot; to verify your email is configured</li>
+                <li>Click &quot;Send Test Email&quot; to send a test email</li>
                 <li>Check your email inbox for the test message</li>
               </ol>
             </div>

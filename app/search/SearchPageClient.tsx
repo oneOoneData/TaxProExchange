@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { safeMap, safeLength } from '@/lib/safe';
@@ -77,6 +77,7 @@ export default function SearchPageClient() {
   const [connectionStates, setConnectionStates] = useState<Record<string, { status: string; connectionId?: string; isRequester?: boolean }>>({});
   const [forceUpdate, setForceUpdate] = useState(0); // Force re-render trigger
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasInitializedRef = useRef(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -139,12 +140,6 @@ export default function SearchPageClient() {
     { value: 'truss', label: 'Truss' }
   ];
 
-  useEffect(() => {
-    // Always fetch specializations and search - no authentication required
-    fetchSpecializations();
-    searchProfiles(filters, 1);
-  }, [isLoaded]); // Remove user dependency since search is now public
-
   // Check for unread messages
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -206,7 +201,31 @@ export default function SearchPageClient() {
     }, 300);
   };
 
-  const fetchSpecializations = async () => {
+  const checkConnectionStatus = useCallback(async (profileId: string) => {
+    try {
+      console.log('🔍 Checking connection status for profile:', profileId);
+      const response = await fetch(`/api/connections/status?otherProfileId=${profileId}`);
+      console.log('📥 Status response:', response.status, response.statusText);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Connection status received:', data);
+        setConnectionStates(prev => ({
+          ...prev,
+          [profileId]: data
+        }));
+        // Force re-render after state update
+        setForceUpdate(prev => prev + 1);
+        console.log('🔄 Force re-render triggered');
+      } else {
+        console.log('❌ Status check failed:', response.status);
+      }
+    } catch (error) {
+      console.error('💥 Status check error:', error);
+    }
+  }, []);
+
+  const fetchSpecializations = useCallback(async () => {
     try {
       const response = await fetch('/api/specializations');
       if (response.ok) {
@@ -216,12 +235,11 @@ export default function SearchPageClient() {
     } catch (error) {
       console.error('Error fetching specializations:', error);
     }
-  };
+  }, []);
 
-  const searchProfiles = async (customFilters?: SearchFilters, page: number = 1) => {
+  const searchProfiles = useCallback(async (filtersToUse: SearchFilters, page: number = 1) => {
     setLoading(true);
     try {
-      const filtersToUse = customFilters || filters;
       const params = new URLSearchParams();
       Object.entries(filtersToUse).forEach(([key, value]) => {
         if (value !== '' && value !== null && value !== undefined) {
@@ -271,7 +289,16 @@ export default function SearchPageClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkConnectionStatus, pagination.limit, user]);
+
+  useEffect(() => {
+    if (hasInitializedRef.current) {
+      return;
+    }
+    hasInitializedRef.current = true;
+    fetchSpecializations();
+    searchProfiles(filters, 1);
+  }, [fetchSpecializations, filters, searchProfiles]);
 
   const updateFilter = (key: keyof SearchFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -359,30 +386,6 @@ export default function SearchPageClient() {
       }
     } catch (error) {
       console.error('💥 Connection error:', error);
-    }
-  };
-
-  const checkConnectionStatus = async (profileId: string) => {
-    try {
-      console.log('🔍 Checking connection status for profile:', profileId);
-      const response = await fetch(`/api/connections/status?otherProfileId=${profileId}`);
-      console.log('📥 Status response:', response.status, response.statusText);
-      
-             if (response.ok) {
-         const data = await response.json();
-         console.log('✅ Connection status received:', data);
-         setConnectionStates(prev => ({
-           ...prev,
-           [profileId]: data
-         }));
-         // Force re-render after state update
-         setForceUpdate(prev => prev + 1);
-         console.log('🔄 Force re-render triggered');
-       } else {
-        console.log('❌ Status check failed:', response.status);
-      }
-    } catch (error) {
-      console.error('💥 Status check error:', error);
     }
   };
 

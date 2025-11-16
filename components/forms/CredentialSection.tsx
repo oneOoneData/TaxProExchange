@@ -219,7 +219,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
       {value.credential_type === 'Student' ? (
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
           <p className="text-sm text-blue-800">
-            <strong>Student profiles</strong> aren't verified or listed until a professional credential is added and approved.
+            <strong>Student profiles</strong> aren&rsquo;t verified or listed until a professional credential is added and approved.
           </p>
         </div>
       ) : value.credential_type === 'Other' ? (

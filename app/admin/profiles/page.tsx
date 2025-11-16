@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
@@ -45,11 +45,7 @@ export default function AdminProfilesPage() {
   const [showDeleted, setShowDeleted] = useState(false);
   const [filterUnverified, setFilterUnverified] = useState(true);
 
-  useEffect(() => {
-    loadProfiles();
-  }, [showDeleted, filterUnverified]);
-
-  const loadProfiles = async () => {
+  const loadProfiles = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/profiles?showDeleted=${showDeleted}&filterUnverified=${filterUnverified}`);
       if (response.ok) {
@@ -61,7 +57,11 @@ export default function AdminProfilesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showDeleted, filterUnverified]);
+
+  useEffect(() => {
+    loadProfiles();
+  }, [loadProfiles]);
 
   const softDeleteProfile = async (profileId: string) => {
     if (!confirm('Are you sure you want to delete this profile? This will hide it from search but preserve the data.')) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { JobCard } from '@/components/jobs/JobCard';
@@ -66,14 +66,7 @@ export default function JobsPage() {
     remote: ''
   });
 
-  useEffect(() => {
-    fetchJobs();
-    if (isSignedIn && user) {
-      fetchMyJobs();
-    }
-  }, [filters, isSignedIn, user]);
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -97,9 +90,9 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const fetchMyJobs = async () => {
+  const fetchMyJobs = useCallback(async () => {
     try {
       const response = await fetch('/api/jobs/my');
       const data = await response.json();
@@ -112,7 +105,14 @@ export default function JobsPage() {
     } catch (error) {
       console.error('Error fetching my jobs:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchJobs();
+    if (isSignedIn && user) {
+      fetchMyJobs();
+    }
+  }, [fetchJobs, fetchMyJobs, isSignedIn, user]);
 
   const handleFilterChange = (newFilters: Partial<JobFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));

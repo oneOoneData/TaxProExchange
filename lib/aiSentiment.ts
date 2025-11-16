@@ -80,6 +80,7 @@ Format your response as JSON:
 }`;
 
   try {
+    console.log(`    🤖 Calling OpenAI API with ${redditComments.length} comments...`);
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -102,6 +103,7 @@ Format your response as JSON:
       throw new Error('No response from OpenAI');
     }
 
+    console.log(`    ✅ Received OpenAI response (${content.length} chars)`);
     const parsed = JSON.parse(content) as SentimentAnalysis;
     
     // Validate sentiment label
@@ -114,9 +116,13 @@ Format your response as JSON:
       parsed.summary = parsed.summary.slice(0, 497) + '...';
     }
 
+    console.log(`    ✅ Parsed sentiment: ${parsed.sentiment_label}`);
     return parsed;
   } catch (error) {
-    console.error('Error analyzing sentiment:', error);
+    console.error('    ❌ Error analyzing sentiment:', error);
+    if (error instanceof Error) {
+      console.error(`    Error message: ${error.message}`);
+    }
     throw error;
   }
 }

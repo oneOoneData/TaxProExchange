@@ -29,7 +29,7 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">1. Acceptance of Terms</h2>
             <p className="text-slate-700 mb-4">
-              By accessing and using TaxProExchange ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+              By accessing and using TaxProExchange (&quot;the Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
             </p>
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">2. Description of Service</h2>
@@ -63,7 +63,7 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">6. Disclaimers</h2>
             <p className="text-slate-700 mb-4">
-              The Service is provided "as is" without warranties of any kind. TaxProExchange does not guarantee the accuracy, completeness, or usefulness of any information on the platform. We are not responsible for any professional advice or services provided by users.
+              The Service is provided &quot;as is&quot; without warranties of any kind. TaxProExchange does not guarantee the accuracy, completeness, or usefulness of any information on the platform. We are not responsible for any professional advice or services provided by users.
             </p>
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">7. Limitation of Liability</h2>

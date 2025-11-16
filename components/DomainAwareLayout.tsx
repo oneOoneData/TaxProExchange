@@ -1,6 +1,7 @@
 'use client';
 
 import { Inter } from 'next/font/google';
+import Head from 'next/head';
 import { ClerkProvider } from '@clerk/nextjs';
 import dynamic from 'next/dynamic';
 import Script from 'next/script';
@@ -47,7 +48,7 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
   // Always render the same structure to prevent hydration mismatch
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <head>
+      <Head>
         {/* Viewport meta for proper mobile behavior */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         
@@ -74,7 +75,7 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.google.com" />
         <link rel="preconnect" href="https://www.gstatic.com" crossOrigin="anonymous" />
-      </head>
+      </Head>
       <body className={inter.className}>
         {/* Google reCAPTCHA v3 */}
         {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (

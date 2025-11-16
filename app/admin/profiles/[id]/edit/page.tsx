@@ -593,7 +593,7 @@ export default function AdminProfileEditPage({ params }: { params: Promise<{ id:
                 {profile.licenses.length === 0 ? (
                   <div className="text-center py-8 text-slate-500">
                     <p>No licenses added yet.</p>
-                    <p className="text-sm mt-1">Click "Add License" to get started.</p>
+                    <p className="text-sm mt-1">Click &ldquo;Add License&rdquo; to get started.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">

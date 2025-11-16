@@ -1,5 +1,151 @@
 # Cursor Task Notes
 
+## 2025-11-15: ESLint & Hook Stability Pass
+
+### Summary
+- Escaped 70+ apostrophes/quotes across onboarding, legal, marketing, trust, and job modules so `react/no-unescaped-entities` stays enforced without disabling the rule.
+- Wrapped every `useEffect` that depended on helper functions (`jobs`, `messages`, `search`, `settings`, `SlackIntegration`, etc.) with `useCallback` + dependency-safe invocations to silence `react-hooks/exhaustive-deps`.
+- Replaced legacy `<img>` usage with `next/image` in profiles, partners, reddit, and cards to clear `@next/next/no-img-element` warnings.
+- Migrated `components/DomainAwareLayout` to use Next.js `<Head>` and kept analytics/meta injection centralized there.
+- Documented manual Slack channel auto-creation guard (new effect) and ensured `search` bootstraps once via `hasInitializedRef`.
+
+### Decisions
+1. Stick with HTML entities (`&rsquo;`, `&quot;`) for marketing/legal copy so writers don’t need to alter ESLint config.
+2. Trigger Slack channel auto-creation via a dedicated effect rather than recursive fetches to avoid duplicate invites.
+
+### TODO
+- When editors add new longform copy, remind them to use entities before committing to bypass another lint sweep.
+- Monitor the new Slack auto-create effect in logs to confirm it doesn’t spam the API when `connection.stream_channel_id` is missing.
+
+## 2025-11-14: AI Blog – State of AI in Tax Firms
+
+### Summary
+- Added `content/ai/state-of-ai-in-tax-firms-2025.md`, an SEO-focused longform that maps AI adoption across research, preparation, workflow, and advisory pillars.
+- Included vendor comparison tables, maturity model, FAQ, and internal CTAs to `/partners/taxgpt`, `/partners/bluej`, and `/join` to capture waitlist leads.
+- Frontmatter now standardizes canonical URL, preview image, and keyword set for future sitemap automation.
+- Appended practitioner sentiment insights under the compliance section to reference real-world r/taxpros feedback on trust and automation accuracy.
+- Added closing CTA promoting the live `/ai/survey` benchmark so readers funnel into the 2025 research study.
+- Updated `app/ai/page.tsx` so all article cards share the same style; newly published pieces now appear first using the default listing component rather than a bespoke hero card.
+- Swapped the 2025 AI article’s author metadata to Koen Van Duyse (matching `ai-tax-assistant-local-llm`) so the page-level byline and “About the author” box stay consistent.
+- Pointed the article hero image to `/images/AI_Capabilities.png` (card preview stays `/images/the_hybrid_desk.png`) so the visual appears directly under the deck copy.
+- Cleaned up AI-section lint warnings (escaped quotes/apostrophes, converted badge images to `next/image`, replaced inline `<img>` usage) to keep builds green without relaxing ESLint rules.
+
+### Decisions
+1. Use the `/ai/state-of-ai-in-tax-firms-2025` slug plus canonical URL to align with existing AI content routing.
+2. Maintain “TaxProExchange Editorial” author profile so multi-contributor metadata stays accurate without inventing new personas.
+
+### TODO
+- Backfill social/OG image sized derivatives for `/blog/ai-tax-firms-2025-cover.jpg` once creative is approved.
+- Consider adding JSON-LD Article schema generation for AI posts in the Next.js layer.
+
+## 2025-11-14: Directory By Location
+
+### Summary
+- Added a server-rendered `/directory/by-location` page that fetches all `visibility_state='verified'` + `is_listed=true` profiles and groups them by US state and international coverage to eliminate sitemap orphan issues.
+- Introduced a "Directory" dropdown (desktop + mobile) that links to both `/search` and the new location hub so crawlers and users can find the listings without client-side filtering.
+
+### TODO
+- Monitor Supabase response size; if the verified roster exceeds ~1,200 profiles we may need pagination or incremental static regeneration.
+- Layer in per-state intro copy (top niches, CTA for firms) once analytics identifies regional demand.
+
+## 2025-11-12: TaxGPT Partner Page Refresh
+
+### Summary
+- Updated `app/partners/[slug]/page.tsx` (TaxGPT view) with webinar recording details, upcoming event CTA, and refreshed hero actions.
+- Removed the legacy “Exclusive Offer” CTA, seat-count copy, collateral placeholders, and generic contact block for TaxGPT so the page reflects current availability.
+
+### Decisions
+1. Link the Fathom recording directly; reinforce that access is email-gated on the destination page.
+2. Promote the November 18 follow-up session via the Calendly scheduling link while leaving other webinar slots as "coming soon."
+
+### TODO
+- Add the remaining webinar links and collateral once they are available.
+- Replace the generic resource cards with live assets when provided.
+
+## 2025-01-30: SEO & Anti-Spam Hardening
+
+### Summary
+Implemented comprehensive SEO hygiene and anti-spam protection without changing UX or page content. Hardened submission forms, blocked spam backlinks, and added monitoring capabilities.
+
+### Changes Made
+
+1. **Robots.txt & Meta Controls** (`app/robots.ts`, `app/ai/write-for-us/page.tsx`)
+   - Added `/ai/write-for-us` and `/suggest-event` to disallow list
+   - Set `noindex, nofollow` meta tags on Write for Us page
+   - Prevents search engines from indexing UGC submission routes
+
+2. **Outbound Link Sanitization** (`lib/seo.ts`)
+   - Added `sanitizeOutboundLinks()` function to append `rel="nofollow noopener noreferrer"` to user-generated external links
+   - Added `containsIllegalUrls()` to detect URLs in text fields
+   - Protects against spam backlink manipulation
+
+3. **Anti-Spam Utilities** (`lib/antispam.ts`) - NEW FILE
+   - Honeypot field validation (`checkHoneypot()`)
+   - URL validation in text fields (`validateNoUrlsInTextFields()`)
+   - IP-based rate limiting (`checkRateLimit()`) - 10 requests per 15 minutes
+   - Comprehensive spam check (`performSpamCheck()`)
+   - Spam activity logging to database
+   - Client IP extraction with multi-header support
+
+4. **Security Headers** (`middleware.ts`)
+   - Added `X-Robots-Tag: noarchive`
+   - Added `Referrer-Policy: strict-origin-when-cross-origin`
+   - Added `Permissions-Policy: interest-cohort=()`
+   - Applied globally to all routes
+
+5. **Form Hardening**
+   - `app/ai/write-for-us/WriteForUsClient.tsx` - Added honeypot field
+   - `app/suggest-event/page.tsx` - Added honeypot field
+   - `app/feedback/page.tsx` - Added honeypot field
+
+6. **API Route Protection**
+   - `app/api/contributors/submit/route.ts` - Added spam checks
+   - `app/api/events/suggest/route.ts` - Added spam checks (complements existing reCAPTCHA)
+   - `app/api/feedback/route.ts` - Added spam checks for authenticated users
+
+7. **Database Schema** (`database/2025-01-30_spam_activity.sql`) - NEW MIGRATION
+   - Created `spam_activity` table for monitoring
+   - Indexes for endpoint, IP, time, and monitoring queries
+   - RLS policies for service role access
+   - Stores sanitized request data for security
+
+### Security Features
+- **Honeypot Fields**: Hidden form fields that trap bots
+- **Rate Limiting**: IP-based throttling (10 req/15min per endpoint)
+- **URL Detection**: Blocks URLs in non-URL fields
+- **reCAPTCHA v3**: Already implemented on suggest-event (0.3 threshold)
+- **Spam Logging**: All blocked attempts logged for monitoring
+- **No UX Changes**: All protection is invisible to legitimate users
+
+### Monitoring & Logging
+- All rejected spam attempts logged to `spam_activity` table
+- Includes IP, endpoint, reason, user-agent, and sanitized body
+- Query for monitoring: `SELECT endpoint, reason, COUNT(*) FROM spam_activity WHERE created_at > NOW() - INTERVAL '24 hours' GROUP BY endpoint, reason;`
+- Auto-cleanup recommended for data older than 90 days
+
+### Next Steps
+1. Run migration: `database/2025-01-30_spam_activity.sql` in Supabase
+2. Monitor spam_activity table for attack patterns
+3. Adjust rate limits if legitimate users are blocked
+4. Consider Redis for production rate limiting (currently in-memory)
+5. Optional: Add admin dashboard to visualize spam activity
+
+### Files Changed
+- `app/robots.ts` - Updated disallow list
+- `app/ai/write-for-us/page.tsx` - Added noindex meta
+- `lib/seo.ts` - Added link sanitization utilities
+- `lib/antispam.ts` - NEW: Anti-spam utilities
+- `middleware.ts` - Added security headers
+- `app/ai/write-for-us/WriteForUsClient.tsx` - Added honeypot
+- `app/suggest-event/page.tsx` - Added honeypot
+- `app/feedback/page.tsx` - Added honeypot
+- `app/api/contributors/submit/route.ts` - Added spam checks
+- `app/api/events/suggest/route.ts` - Added spam checks
+- `app/api/feedback/route.ts` - Added spam checks
+- `database/2025-01-30_spam_activity.sql` - NEW: Migration
+
+---
+
 ## 2025-10-17: Google reCAPTCHA v3 Integration
 
 ### Summary
@@ -3941,4 +4087,44 @@ Or via Supabase dashboard:
 4. Add link to /ai/write-for-us from AI hub page
 5. Announce contributor program on social media
 6. Monitor submissions in /admin/contributors
+
+### 9. AI Survey Page
+**File:** `app/ai/survey/page.tsx`
+
+- Presents the “AI in Tax & Wealth Firms 2025 Survey” with six grouped sections.
+- Client-side validation on `email`, `role`, and `firmType`, plus inline error states.
+- Supabase insert to `ai_survey_responses` using the shared client in `lib/supabase/client.ts`.
+- Inline confirmation state replaces the form after a successful submission.
+- Responsive stacked layout with dark-mode variants and centered CTA button.
+
+**Outstanding:**
+- Create Supabase table `ai_survey_responses` per provided schema before launch.
+- Consider Cron/Zapier sync to HubSpot contacts once table is populated.
+- Added wizard-style flow with progress indicator, 4-minute completion hint, and opt-in toggles for survey results & TPE communications (`send_results_opt_in`, `tpe_communications_opt_in` columns required).
+- Step copy tuned with timeline, confidentiality messaging, reward hook, AI use multi-select, labeled trust scale, and optional peer advice question.
+- New survey field: `open_to_followup` (boolean) for interview opt-ins—ensure Supabase column exists (`alter table ... add column if not exists open_to_followup boolean default false;`).
+- Updated AI Familiarity & Usage section to radio-based flow:
+  - Familiarity (1–5 scale) and current use (single-select with “Other” detail) now required.
+  - AI budget status converted to radio options; spend dropdown refreshed with 2025 ranges.
+- AI budget range dropdown expanded with higher tiers and writes `ai_budget_estimate` midpoint (numeric) alongside existing `ai_budget_range` text column.
+- “About You” step now uses select inputs: role options include CPA, EA, RIA, etc., and firm type covers tax, wealth/RIA, multi-service, corporate, and other.
+- Survey submission now posts to `/api/hubspot/ai-survey`, which upserts/creates the HubSpot contact with `ai_survey_submitted = true` (metadata remains in Supabase; sync skipped for anonymous responses).
+- Thank-you state now reminds respondents to confirm the email (check Promotions/Updates folders) so the final report reaches their inbox.
+- HubSpot sync falls back to a minimal payload (only `ai_survey_submitted`) if custom properties fail, preventing 400 errors.
+- Anonymous respondents now skip the “Stay in the Loop” step entirely; the contact section only renders for non-anonymous flows.
+- Added a blue survey CTA banner directly beneath the webinar promo on the homepage linking to `/ai/survey`.
+- Sitemap search preset URLs now escape query ampersands (`&amp;`) to satisfy XML parsing (fixes Search Console error).
+
+### 10. AI Article Refresh (Nov 15, 2025)
+- Replaced `content/ai/state-of-ai-in-tax-firms-2025.md` with the new “What’s Next for Artificial Intelligence in Tax Firms” narrative, keeping the same slug for continuity.
+- Updated front matter title/description while preserving existing metadata (author, imagery, canonical, etc.).
+- Integrated the anecdotal intro, revised workflow sections, refreshed stack checklist, FAQ updates, and survey CTA per latest brief.
+- TODO: confirm CMS/nav surfaces (AI hub, newsletter highlights) point to the refreshed article and update any scheduled social copy referencing the old title.
+
+## 2025-11-15: §7216 Risk Article
+
+- Added `content/ai/7216.md` covering §7216 compliance pitfalls with public chatbots, safe vs. unsafe prompt patterns, and a guardrailed workflow checklist.
+- Included ready-to-use policy statement, consent blurb, and training plan so firms can operationalize guidance immediately.
+- No additional UI or API changes required; article will surface automatically wherever AI hub content is listed.
+- Updated `content/ai/state-of-ai-in-tax-firms-2025.md` so every in-article mention of §7216 links to the new compliance explainer for consistent guidance.
 

@@ -114,7 +114,7 @@ export default function CreateProfilePage() {
               Create Your Profile
             </h1>
             <p className="text-slate-600">
-              Let's set up your professional profile on TaxProExchange.
+              Let&rsquo;s set up your professional profile on TaxProExchange.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export default function CreateProfilePage() {
             <ul className="space-y-2 text-sm text-slate-600">
               <li className="flex items-start gap-2">
                 <span className="text-green-500 mt-1">✓</span>
-                <span>We'll create your basic profile with your name and email</span>
+                <span>We&rsquo;ll create your basic profile with your name and email</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">→</span>

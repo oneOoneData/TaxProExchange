@@ -86,8 +86,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   searchPresets.forEach((preset) => {
+    const encodedQuery = preset.query.replace(/&/g, '&amp;');
     routes.push({
-      url: `${siteUrl}/search?${preset.query}`,
+      url: `${siteUrl}/search?${encodedQuery}`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.6,

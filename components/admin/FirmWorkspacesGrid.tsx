@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -54,11 +54,7 @@ export default function FirmWorkspacesGrid() {
   }, [search]);
 
   // Fetch data
-  useEffect(() => {
-    fetchFirms();
-  }, [debouncedSearch, sorting, pagination.pageIndex, pagination.pageSize]);
-
-  const fetchFirms = async () => {
+  const fetchFirms = useCallback(async () => {
     setLoading(true);
     try {
       const sortStr = sorting.length > 0
@@ -85,9 +81,13 @@ export default function FirmWorkspacesGrid() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearch, sorting, pagination.pageIndex, pagination.pageSize]);
 
-  const handleDelete = async (firmId: string, firmName: string) => {
+  useEffect(() => {
+    fetchFirms();
+  }, [fetchFirms]);
+
+  const handleDelete = useCallback(async (firmId: string, firmName: string) => {
     if (!confirm(`Are you sure you want to delete "${firmName}"? This will:\n\n• Remove the firm workspace\n• Remove all team members\n• Remove all trusted bench connections\n• Cancel any active subscriptions\n\nThis action cannot be undone.`)) {
       return;
     }
@@ -112,7 +112,7 @@ export default function FirmWorkspacesGrid() {
     } finally {
       setDeleting(null);
     }
-  };
+  }, [fetchFirms]);
 
   const columns = useMemo(
     () => [
@@ -258,7 +258,7 @@ export default function FirmWorkspacesGrid() {
         size: 100,
       }),
     ],
-    [deleting]
+    [deleting, handleDelete]
   );
 
   const table = useReactTable({

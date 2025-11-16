@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -21,16 +21,7 @@ export default function NewJobPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isSignedIn) {
-      router.push('/sign-in');
-      return;
-    }
-
-    checkProfile();
-  }, [isSignedIn, router]);
-
-  const checkProfile = async () => {
+  const checkProfile = useCallback(async () => {
     try {
       const response = await fetch(`/api/profile?clerk_id=${user?.id}`);
       const data = await response.json();
@@ -55,7 +46,16 @@ export default function NewJobPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push('/sign-in');
+      return;
+    }
+
+    checkProfile();
+  }, [checkProfile, isSignedIn, router]);
 
   if (loading) {
     return (

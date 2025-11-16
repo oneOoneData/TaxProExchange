@@ -617,7 +617,7 @@ export default function ApplicationsPage() {
                     {activeTab === 'sent' ? 'Your Cover Note' : 'Applicant\'s Cover Note'}
                   </h4>
                   <p className="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-md">
-                    "{application.cover_note}"
+                    &ldquo;{application.cover_note}&rdquo;
                   </p>
                 </div>
 

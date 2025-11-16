@@ -267,7 +267,7 @@ export default function FirmOnboardingPage() {
               </h2>
             </div>
             <p className="text-gray-600 mb-6">
-              Tell us about your firm. You'll complete payment in the next step ($10/month, cancel anytime).
+              Tell us about your firm. You&rsquo;ll complete payment in the next step ($10/month, cancel anytime).
             </p>
 
             {error && (

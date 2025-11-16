@@ -120,7 +120,7 @@ export function ApplicationCard({ application, onStatusUpdate, connectionState, 
         <div>
           <h4 className="text-sm font-medium text-gray-700 mb-2">Cover Note</h4>
           <p className="text-sm text-gray-600 italic">
-            "{application.cover_note}"
+            &ldquo;{application.cover_note}&rdquo;
           </p>
         </div>
       </div>

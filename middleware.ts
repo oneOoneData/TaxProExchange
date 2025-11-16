@@ -21,6 +21,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   response.headers.set('x-debug-user-id', userId || 'none');
   response.headers.set('x-debug-session-id', sessionId || 'none');
 
+  // Security headers
+  response.headers.set('X-Robots-Tag', 'noarchive');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'interest-cohort=()');
+
   // Localhost bypass for development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     response.headers.set('x-debug-bypass', 'localhost');

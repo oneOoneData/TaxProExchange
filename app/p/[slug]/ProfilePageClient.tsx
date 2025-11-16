@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
@@ -155,7 +156,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
     if (isSignedIn && user) {
       checkConnectionStatus(profile.id);
     }
-  }, [profile.id, isSignedIn, user]);
+  }, [isSignedIn, profile.id, profile.software, profile.specializations, user]);
 
   // Fetch firm information if user is a firm member
   useEffect(() => {
@@ -942,9 +943,11 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                 >
                   <div className="flex items-center gap-4 mb-3">
                     {relatedProfile.avatar_url ? (
-                      <img
+                      <Image
                         src={relatedProfile.avatar_url}
                         alt={`${relatedProfile.first_name} ${relatedProfile.last_name}`}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     ) : (

@@ -69,12 +69,12 @@ export default function SpecializationsPage() {
               Specializations
             </h1>
             <p className="text-slate-600">
-              Coming soon! You'll be able to select your areas of expertise here.
+              Coming soon! You&rsquo;ll be able to select your areas of expertise here.
             </p>
           </div>
 
           <div className="bg-slate-50 rounded-lg p-6 mb-8 text-left">
-            <h3 className="font-medium text-slate-900 mb-3">What's next?</h3>
+            <h3 className="font-medium text-slate-900 mb-3">What&rsquo;s next?</h3>
             <ul className="space-y-2 text-sm text-slate-600">
               <li className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1">→</span>

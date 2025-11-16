@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { siteUrl, partnerOrganizationLD, jsonLd } from '@/lib/seo';
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView';
@@ -188,33 +189,41 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
               {/* Logo */}
               {partner.slug === 'truss' ? (
                 <div className="flex items-center justify-center h-24 w-24 mx-auto mb-6 rounded-2xl bg-white overflow-hidden">
-                  <img
+                  <Image
                     src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/truss.jpg"
                     alt={`${partner.name} logo`}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-contain"
                   />
                 </div>
               ) : partner.slug === 'taxgpt' ? (
                 <div className="flex items-center justify-center h-24 w-24 mx-auto mb-6 rounded-2xl bg-white overflow-hidden">
-                  <img
+                  <Image
                     src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/taxgpt.jpg"
                     alt={`${partner.name} logo`}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-contain"
                   />
                 </div>
               ) : partner.slug === 'bluej' ? (
                 <div className="flex items-center justify-center h-24 w-24 mx-auto mb-6 rounded-2xl bg-white overflow-hidden">
-                  <img
+                  <Image
                     src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/bluej.png"
                     alt={`${partner.name} logo`}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-contain"
                   />
                 </div>
               ) : partner.logo ? (
                 <div className="flex items-center justify-center h-24 w-24 mx-auto mb-6 rounded-2xl bg-white overflow-hidden">
-                  <img
+                  <Image
                     src={partner.logo}
                     alt={`${partner.name} logo`}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-contain"
                   />
                 </div>
@@ -257,6 +266,51 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </a>
+              ) : partner.slug === 'taxgpt' ? (
+                <>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a
+                      href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                    >
+                      Watch the Recording
+                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </a>
+                    {partner.slug === 'taxgpt' ? (
+                      <a
+                        href="https://calendly.com/devin-taxgpt/30min?utm_source=koen"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
+                      >
+                        Request a Custom Demo
+                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </a>
+                    ) : partner.website ? (
+                      <a
+                        href={partner.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
+                      >
+                        Request a Custom Demo
+                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </a>
+                    ) : null}
+                  </div>
+                  <p className="mt-4 text-sm text-slate-500">
+                    Access to the recording requires a verified email. You&apos;ll be prompted before viewing.
+                  </p>
+                </>
               ) : partner.slug === 'truss' ? (
                 <a
                   href="https://gettruss.link/koen"
@@ -289,7 +343,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
         </section>
 
         {/* Special Offer CTA - Only show for non-Truss partners */}
-        {partner.slug !== 'truss' && (
+        {partner.slug !== 'truss' && partner.slug !== 'taxgpt' && (
           <section className="py-16 bg-gradient-to-b from-white to-slate-50">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-4xl mx-auto">
@@ -370,6 +424,117 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                       title="Truss Product Demo"
                     />
                   </div>
+                </div>
+              ) : partner.slug === 'taxgpt' ? (
+                <div className="space-y-8">
+                  <article className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
+                    <div className="flex flex-col gap-6">
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                          Webinar Recording
+                        </p>
+                        <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                          How to Reclaim Your Competitive Edge in 2026
+                        </h3>
+                        <p className="mt-4 text-base text-slate-600">
+                          The first session in the <span className="italic">AI in Tax Practice</span> series examined the structural challenges reshaping the tax profession and how specialized AI tools can provide practical, risk-aware solutions.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-slate-900">Key Insights</h4>
+                        <ul className="mt-4 space-y-3 text-base text-slate-600">
+                          <li>
+                            <span className="font-semibold text-slate-900">The Profession Is at a Crossroads:</span> With nearly 70% of CPAs expected to retire within a decade and new entrants declining, firms face mounting workload pressure amid ever-growing code complexity.
+                          </li>
+                          <li>
+                            <span className="font-semibold text-slate-900">Why General AI Falls Short:</span> Broad AI models like ChatGPT can&rsquo;t be trusted for professional use, they frequently &quot;hallucinate,&quot; rely on outdated data, and miss key technical and compliance nuances that matter in tax work.
+                          </li>
+                          <li>
+                            <span className="font-semibold text-slate-900">The Rise of Specialized AI:</span> Tools like <strong>TaxGPT</strong> are trained exclusively on authoritative sources, Code, Regs, Rulings, Court Cases, and provide live citations for every answer so professionals can focus on higher-value advisory work.
+                          </li>
+                          <li>
+                            <span className="font-semibold text-slate-900">The New Model for Productivity:</span> Attendees saw examples of how purpose-built AI can reduce research time by up to 80%, accelerate drafting, and enable document-based analysis of returns, notices, and financial statements while maintaining professional accuracy.
+                          </li>
+                          <li>
+                            <span className="font-semibold text-slate-900">A Glimpse Ahead:</span> The session previewed &quot;agentic&quot; AI workflows that review returns, compare source documents, and flag risk or planning opportunities, signaling how AI may redefine review processes in 2026.
+                          </li>
+                        </ul>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <a
+                          href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                        >
+                          Watch the Recording
+                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </a>
+                        <a
+                          href="https://calendly.com/devin-taxgpt/30min?utm_source=koen"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 shadow-lg transition-all"
+                        >
+                          Request a Custom Demo
+                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </a>
+                      </div>
+                      <p className="text-sm text-slate-500">
+                        Access requires a verified email. Submit yours when prompted to unlock the recording.
+                      </p>
+                    </div>
+                  </article>
+
+                  <article className="rounded-2xl border border-slate-200 bg-white p-8 md:p-10">
+                    <div className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                      Upcoming Webinar
+                    </div>
+                    <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                      Part 2: How to Reclaim Your Competitive Edge in 2026
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                      Live on November 18 • Hosted by TaxGPT
+                    </p>
+                    <p className="mt-4 text-base text-slate-600">
+                      The follow-up session dives into detailed examples and applied workflows from firm engagements, helping teams understand how specialized AI augments research, drafting, and review in practice.
+                    </p>
+                    <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <a
+                          href="https://calendly.com/devin-taxgpt/how-to-reclaim-your-competitive-edge-in-2026-part2"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                        >
+                          Reserve Your Seat
+                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </a>
+                        <a
+                          href="https://calendly.com/devin-taxgpt/30min?utm_source=koen"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 shadow-lg transition-all"
+                        >
+                          Request a Custom Demo
+                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                    <p className="mt-4 text-sm text-slate-500">
+                      Two additional webinars in the series will be announced soon. Hold your spot to receive updates first.
+                    </p>
+                  </article>
+
                 </div>
               ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -474,7 +639,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 <div className="text-center py-12">
                   <p className="text-slate-600">Truss tool data not available.</p>
                 </div>
-              ) : (
+              ) : partner.slug === 'taxgpt' ? null : (
             <div className="max-w-4xl mx-auto">
               <div className="rounded-2xl border border-slate-200 bg-white p-8 md:p-12">
                 <div className="flex items-start gap-4 mb-6">

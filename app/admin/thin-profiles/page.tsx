@@ -401,7 +401,7 @@ export default function ThinProfilesPage() {
                   <li>Credential-specific example bio (CPA, EA, or CTEC)</li>
                   <li>Pro tips for writing compelling bios</li>
                   <li>Direct link to their profile editor</li>
-                  <li>Offer: "Reply with 3 bullets and I'll write your bio for you"</li>
+                  <li>Offer: &ldquo;Reply with 3 bullets and I&rsquo;ll write your bio for you&rdquo;</li>
                 </ul>
                 <p className="mt-4"><strong>Tone:</strong> Helpful and educational, not pushy or sales-y</p>
                 <p><strong>Call to action:</strong> Update profile OR reply for personalized help</p>

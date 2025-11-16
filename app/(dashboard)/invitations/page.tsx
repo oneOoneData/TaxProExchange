@@ -182,15 +182,15 @@ function InvitationsContent() {
 
                   {invitation.message && (
                     <div className="bg-gray-50 border-l-4 border-blue-400 p-4 rounded mb-4">
-                      <p className="text-gray-700 italic">"{invitation.message}"</p>
+                      <p className="text-gray-700 italic">&ldquo;{invitation.message}&rdquo;</p>
                     </div>
                   )}
 
                   <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
                     <p className="text-sm text-blue-900">
-                      <strong>What this means:</strong> By accepting, you'll be added to {invitation.firms.name}'s trusted bench. 
-                      They may reach out when they have overflow work or need your expertise. You're not committing to any 
-                      specific work—just signaling you're open to opportunities.
+                      <strong>What this means:</strong> By accepting, you&rsquo;ll be added to {invitation.firms.name}&rsquo;s trusted bench. 
+                      They may reach out when they have overflow work or need your expertise. You&rsquo;re not committing to any 
+                      specific work—just signaling you&rsquo;re open to opportunities.
                     </p>
                   </div>
 
@@ -229,7 +229,7 @@ function InvitationsContent() {
             </svg>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No invitations yet</h3>
             <p className="text-gray-600 mb-6">
-              When firms invite you to their team, you'll see invitations here.
+              When firms invite you to their team, you&rsquo;ll see invitations here.
             </p>
             <Link
               href="/search"

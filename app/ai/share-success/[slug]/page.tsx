@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import AppNavigation from "@/components/AppNavigation";
 import { useState, useEffect } from "react";
 import { siteUrl } from "@/lib/seo";
+import Image from "next/image";
 
 interface ArticleData {
   title: string;
@@ -93,7 +94,7 @@ Read the full article: ${siteUrl}/ai/${slug}
         <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-slate-900 mb-2">Article Not Found</h1>
-            <p className="text-slate-600">The article you're looking for doesn't exist.</p>
+            <p className="text-slate-600">The article you&rsquo;re looking for doesn&rsquo;t exist.</p>
           </div>
         </div>
       </>
@@ -119,7 +120,7 @@ Read the full article: ${siteUrl}/ai/${slug}
             </div>
             <h1 className="text-4xl font-bold mb-4 text-slate-900">Congratulations! 🎉</h1>
             <p className="text-xl text-slate-700 mb-2">
-              Your article <span className="font-semibold">"{article.title}"</span> is now live
+              Your article <span className="font-semibold">&ldquo;{article.title}&rdquo;</span> is now live
             </p>
             <p className="text-slate-600">
               on the{" "}
@@ -148,7 +149,7 @@ Read the full article: ${siteUrl}/ai/${slug}
               your contribution.
             </p>
 
-            <div className="space-y-8">
+              <div className="space-y-8">
               {/* Light Badge */}
               <div className="border border-slate-200 rounded-lg p-6 bg-slate-50">
                 <div className="flex items-center justify-between mb-4">
@@ -156,10 +157,13 @@ Read the full article: ${siteUrl}/ai/${slug}
                   <span className="text-xs text-slate-500">Best for light backgrounds</span>
                 </div>
                 <div className="mb-4 p-4 bg-white rounded flex items-center justify-center">
-                  <img
+                  <Image
                     src="/badges/tpe-ai-featured.svg"
                     alt="Featured AI Contributor Badge - Light"
                     className="w-60"
+                    width={240}
+                    height={80}
+                    priority={false}
                   />
                 </div>
                 <button
@@ -200,10 +204,13 @@ Read the full article: ${siteUrl}/ai/${slug}
                   <span className="text-xs text-slate-400">Best for dark backgrounds</span>
                 </div>
                 <div className="mb-4 p-4 bg-slate-800 rounded flex items-center justify-center">
-                  <img
+                  <Image
                     src="/badges/tpe-ai-featured-dark.svg"
                     alt="Featured AI Contributor Badge - Dark"
                     className="w-60"
+                    width={240}
+                    height={80}
+                    priority={false}
                   />
                 </div>
                 <button
@@ -244,10 +251,13 @@ Read the full article: ${siteUrl}/ai/${slug}
                   <span className="text-xs text-slate-500">Compact circular design</span>
                 </div>
                 <div className="mb-4 p-4 bg-white rounded flex items-center justify-center">
-                  <img
+                  <Image
                     src="/badges/tpe-ai-featured-mini.svg"
                     alt="Featured AI Contributor Badge - Mini"
                     className="w-30"
+                    width={120}
+                    height={120}
+                    priority={false}
                   />
                 </div>
                 <button
@@ -296,10 +306,12 @@ Read the full article: ${siteUrl}/ai/${slug}
             <div className="grid md:grid-cols-3 gap-4">
               {[1, 2, 3].map((num) => (
                 <div key={num} className="border border-slate-200 rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={`/social/ai-featured-${num}.svg`}
                     alt={`Social media card ${num}`}
                     className="w-full h-auto"
+                    width={800}
+                    height={450}
                   />
                   <button
                     onClick={() => downloadImage(`ai-featured-${num}.svg`)}

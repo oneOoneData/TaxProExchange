@@ -159,7 +159,7 @@ export default function AddEventPage() {
                 Add New Event
               </h2>
               <p className="text-slate-600">
-                Just provide the conference URL and we'll automatically extract the details for you!
+                Just provide the conference URL and we&rsquo;ll automatically extract the details for you!
                 Admin-created events are approved by default.
               </p>
             </div>
@@ -222,7 +222,7 @@ export default function AddEventPage() {
                   <p className="mt-2 text-sm text-red-600">{scrapeError}</p>
                 )}
         <p className="mt-1 text-sm text-gray-500">
-          We'll automatically extract the event details from this URL. Please review data for accuracy.
+          We&rsquo;ll automatically extract the event details from this URL. Please review data for accuracy.
         </p>
               </div>
 

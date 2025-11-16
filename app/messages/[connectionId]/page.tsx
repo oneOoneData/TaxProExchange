@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -49,17 +49,6 @@ export default function ChatThreadPage() {
   const [streamToken, setStreamToken] = useState<string | null>(null);
 
   const connectionId = params.connectionId as string;
-
-  useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/sign-in');
-      return;
-    }
-    
-    if (user && connectionId) {
-      fetchConnection();
-    }
-  }, [isLoaded, user, connectionId, router]);
 
   // Cleanup Stream Chat client on unmount
   useEffect(() => {
@@ -130,64 +119,8 @@ export default function ChatThreadPage() {
     }
   }, [chatClient, connection?.stream_channel_id]);
 
-  const fetchConnection = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/stream/connection/${connectionId}`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Connection data:', data);
-        console.log('Connection status:', data.connection.status);
-        console.log('Has stream_channel_id:', !!data.connection.stream_channel_id);
-        console.log('Stream channel ID:', data.connection.stream_channel_id);
-        setConnection(data.connection);
-        setCurrentProfileId(data.currentProfileId);
-        
-        // Initialize Stream Chat if connection is accepted
-        if (data.connection.status === 'accepted') {
-          if (data.connection.stream_channel_id) {
-            console.log('Connection accepted with channel ID:', data.connection.stream_channel_id);
-            await initializeStreamChat(data.currentProfileId);
-          } else {
-            console.log('Connection accepted but missing Stream channel, creating now...');
-            console.log('Connection details:', {
-              id: data.connection.id,
-              status: data.connection.status,
-              stream_channel_id: data.connection.stream_channel_id
-            });
-            // Automatically create Stream channel for accepted connections
-            setCreatingChannel(true);
-            try {
-              console.log('Starting automatic Stream channel creation...');
-              await createStreamChannel(false); // Don't show error alerts for automatic creation
-              console.log('Automatic Stream channel creation completed');
-            } catch (error) {
-              console.error('Automatic Stream channel creation failed:', error);
-            } finally {
-              setCreatingChannel(false);
-            }
-          }
-        } else {
-          console.log('Connection not ready for chat:', {
-            status: data.connection.status,
-            hasChannel: !!data.connection.stream_channel_id
-          });
-        }
-      } else {
-        console.error('Failed to fetch connection');
-        // Redirect to messages if connection not found
-        router.push('/messages');
-      }
-    } catch (error) {
-      console.error('Error fetching connection:', error);
-      router.push('/messages');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const initializeStreamChat = async (profileId: string) => {
+  const initializeStreamChat = useCallback(async (profileId: string) => {
     try {
       console.log('Initializing Stream Chat for profile:', profileId);
       
@@ -229,7 +162,55 @@ export default function ChatThreadPage() {
     } catch (error) {
       console.error('Error initializing Stream Chat:', error);
     }
-  };
+  }, [user?.fullName]);
+
+  const fetchConnection = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/stream/connection/${connectionId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Connection data:', data);
+        console.log('Connection status:', data.connection.status);
+        console.log('Has stream_channel_id:', !!data.connection.stream_channel_id);
+        console.log('Stream channel ID:', data.connection.stream_channel_id);
+        setConnection(data.connection);
+        setCurrentProfileId(data.currentProfileId);
+        
+        // Initialize Stream Chat if connection is accepted
+        if (data.connection.status === 'accepted' && data.connection.stream_channel_id) {
+          console.log('Connection accepted with channel ID:', data.connection.stream_channel_id);
+          await initializeStreamChat(data.currentProfileId);
+        } else {
+          console.log('Connection not ready for chat:', {
+            status: data.connection.status,
+            hasChannel: !!data.connection.stream_channel_id
+          });
+        }
+      } else {
+        console.error('Failed to fetch connection');
+        // Redirect to messages if connection not found
+        router.push('/messages');
+      }
+    } catch (error) {
+      console.error('Error fetching connection:', error);
+      router.push('/messages');
+    } finally {
+      setLoading(false);
+    }
+  }, [connectionId, initializeStreamChat, router]);
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push('/sign-in');
+      return;
+    }
+    
+    if (user && connectionId) {
+      fetchConnection();
+    }
+  }, [connectionId, fetchConnection, isLoaded, router, user]);
 
   const getOtherProfile = () => {
     if (!connection || !currentProfileId) return null;
@@ -238,7 +219,7 @@ export default function ChatThreadPage() {
       : connection.requester_profile;
   };
 
-  const createStreamChannel = async (showErrorAlert = true) => {
+  const createStreamChannel = useCallback(async (showErrorAlert = true) => {
     console.log('createStreamChannel called with showErrorAlert:', showErrorAlert);
     console.log('Connection ID from state:', connection?.id);
     console.log('Connection ID from params:', connectionId);
@@ -283,7 +264,16 @@ export default function ChatThreadPage() {
         console.error('Automatic Stream channel creation failed:', error);
       }
     }
-  };
+  }, [connection?.id, connectionId, fetchConnection]);
+
+  useEffect(() => {
+    if (connection?.status === 'accepted' && !connection.stream_channel_id && !creatingChannel) {
+      setCreatingChannel(true);
+      createStreamChannel(false)
+        .catch((error) => console.error('Automatic Stream channel creation failed:', error))
+        .finally(() => setCreatingChannel(false));
+    }
+  }, [connection, createStreamChannel, creatingChannel]);
 
   const testStreamConfig = async () => {
     try {
@@ -335,7 +325,7 @@ export default function ChatThreadPage() {
           </div>
           <h3 className="text-lg font-medium text-slate-900 mb-2">Connection Not Found</h3>
           <p className="text-slate-600 mb-4">
-            This connection doesn't exist or you don't have permission to access it.
+            This connection doesn&rsquo;t exist or you don&rsquo;t have permission to access it.
           </p>
           <Link
             href="/messages"

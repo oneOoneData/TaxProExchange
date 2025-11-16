@@ -108,7 +108,7 @@ export default function ForFirmsPage() {
                   Only Licensed Pros
                 </h3>
                 <p className="text-slate-600">
-                  Every CPA, EA, and CTEC credential is manually verified before profiles go live. Work with confidence knowing you're connecting with active, licensed professionals.
+                  Every CPA, EA, and CTEC credential is manually verified before profiles go live. Work with confidence knowing you&rsquo;re connecting with active, licensed professionals.
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-8">
@@ -225,7 +225,7 @@ export default function ForFirmsPage() {
                   <li><strong>Active status:</strong> All credentials must be current and in good standing</li>
                 </ul>
                 <p className="text-slate-600">
-                  No self-certification, no honor system. If a credential can't be verified, the profile doesn't go live. Learn more about our <Link href="/trust" className="text-blue-600 hover:underline">verification process</Link>.
+                  No self-certification, no honor system. If a credential can&rsquo;t be verified, the profile doesn&rsquo;t go live. Learn more about our <Link href="/trust" className="text-blue-600 hover:underline">verification process</Link>.
                 </p>
               </div>
             </div>

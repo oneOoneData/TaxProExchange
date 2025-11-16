@@ -1,6 +1,7 @@
 // app/reddit/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import BuyMeACoffee from '@/components/BuyMeACoffee';
 
 export const metadata: Metadata = {
@@ -32,9 +33,11 @@ export default function RedditLanding() {
       {/* Top notice */}
       <div className="w-full bg-amber-50 border-b border-amber-200">
         <div className="mx-auto max-w-5xl px-4 py-2 text-sm text-amber-900 flex items-center gap-2">
-          <img 
+          <Image 
             src="https://redditinc.com/hs-fs/hubfs/Reddit%20Inc/Content/Brand%20Page/Reddit_Logo.png?width=600&height=600&name=Reddit_Logo.png" 
             alt="Reddit" 
+            width={16}
+            height={16}
             className="h-4 w-4"
           />
           Built for Reddit tax pros — plain, transparent, and free for founding members.
@@ -89,7 +92,7 @@ export default function RedditLanding() {
             This web app, which aims to be a job marketplace for tax professionals grew out of two things:
           </p>
           <ol className="list-decimal list-inside space-y-2 ml-4">
-            <li>A reddit post where people were complaining about throwing money away on services that promise to offload tax work but don't deliver</li>
+            <li>A reddit post where people were complaining about throwing money away on services that promise to offload tax work but don&rsquo;t deliver</li>
             <li>Frustrated Tax Pros that use expensive services to pick up tax work</li>
           </ol>
           <p>
@@ -136,9 +139,9 @@ export default function RedditLanding() {
         </div>
       </section>
 
-      {/* What it is / isn't */}
+      {/* What it is / isn&rsquo;t */}
       <section className="mx-auto max-w-5xl px-4 py-10 sm:py-12">
-        <h2 className="text-xl font-semibold text-slate-900">What it is (and isn't)</h2>
+        <h2 className="text-xl font-semibold text-slate-900">What it is (and isn&rsquo;t)</h2>
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <div>
             <h3 className="font-medium text-slate-900">✅ It is</h3>
@@ -149,7 +152,7 @@ export default function RedditLanding() {
             </ul>
           </div>
           <div>
-            <h3 className="font-medium text-slate-900">❌ It isn't</h3>
+            <h3 className="font-medium text-slate-900">❌ It isn&rsquo;t</h3>
             <ul className="mt-3 space-y-2 text-slate-700">
               <li>• A place to store client files</li>
               <li>• An escrow/payments platform (for now)</li>
