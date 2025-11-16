@@ -7,10 +7,11 @@
 
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import BenchCard from '@/components/bench/BenchCard';
 import AddFromDirectory from '@/components/bench/AddFromDirectory';
 
@@ -63,24 +64,6 @@ function TeamDashboardContent() {
   const [error, setError] = useState<string | null>(null);
   const [checkoutStatus, setCheckoutStatus] = useState<string | null>(null);
 
-  // Early return while auth is loading to prevent hydration issues
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Redirect if not authenticated
-  if (!userId) {
-    router.push('/sign-in');
-    return null;
-  }
-
   // Handle checkout success/cancel status
   useEffect(() => {
     const checkout = searchParams.get('checkout');
@@ -93,6 +76,12 @@ function TeamDashboardContent() {
       setTimeout(() => setCheckoutStatus(null), 5000);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (isLoaded && !userId) {
+      router.push('/sign-in');
+    }
+  }, [isLoaded, userId, router]);
 
   // Load user's firms
   useEffect(() => {
@@ -247,8 +236,21 @@ function TeamDashboardContent() {
     });
   };
 
-  // Loading handled by early return above
-  
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userId) {
+    return null;
+  }
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -385,7 +387,7 @@ function TeamDashboardContent() {
               </svg>
               <h3 className="text-2xl font-bold text-red-900 mb-2">Subscription Required</h3>
               <p className="text-red-800 mb-6">
-                Your firm's subscription is {selectedFirm.subscription_status === 'canceled' ? 'canceled' : 'inactive'}. 
+                Your firm&rsquo;s subscription is {selectedFirm.subscription_status === 'canceled' ? 'canceled' : 'inactive'}. 
                 Reactivate your subscription to access your team workspace and manage your bench.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -565,10 +567,12 @@ function TeamDashboardContent() {
                       {/* Avatar */}
                       <div className="flex-shrink-0">
                         {avatarUrl ? (
-                          <img
+                          <Image
                             src={avatarUrl}
                             alt={`${profile.first_name} ${profile.last_name}`}
                             className="w-12 h-12 rounded-full object-cover"
+                            width={48}
+                            height={48}
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-700 font-semibold">

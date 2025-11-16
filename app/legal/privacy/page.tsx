@@ -28,7 +28,7 @@ export default function PrivacyPage() {
             </p>
 
             <p className="text-slate-700 mb-6">
-              TaxProExchange ("we," "our," or "us") respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our professional networking platform.
+              TaxProExchange (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our professional networking platform.
             </p>
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">1. Information We Collect</h2>
@@ -145,7 +145,7 @@ export default function PrivacyPage() {
               We use essential cookies and similar technologies to provide our service, authenticate users, and improve functionality. We do not use tracking cookies for advertising purposes.
             </p>
 
-            <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">8. Children's Privacy</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">8. Children&rsquo;s Privacy</h2>
             <p className="text-slate-700 mb-4">
               Our service is not intended for individuals under 18 years of age. We do not knowingly collect personal information from children under 18.
             </p>
@@ -157,7 +157,7 @@ export default function PrivacyPage() {
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">10. Changes to This Policy</h2>
             <p className="text-slate-700 mb-4">
-              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on our website and updating the "Last updated" date.
+              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on our website and updating the &quot;Last updated&quot; date.
             </p>
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">11. Contact Us</h2>

@@ -288,7 +288,7 @@ export default function ToolDetailPanel({
                       ) : (
                         <div className="text-center py-8 px-4">
                           <p className="text-slate-600 mb-3">
-                            We couldn't find any Reddit discussions about <strong>{tool.name}</strong> yet, but we're always listening. Did we miss a valuable comment or thread?
+                            We couldn&rsquo;t find any Reddit discussions about <strong>{tool.name}</strong> yet, but we&rsquo;re always listening. Did we miss a valuable comment or thread?
                           </p>
                           <a
                             href={`/feedback?tool=${encodeURIComponent(tool.name)}`}

@@ -15,9 +15,11 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const { user } = useUser();
   const pathname = usePathname();
   const [isCommunityOpen, setIsCommunityOpen] = useState(false);
+  const [isDirectoryOpen, setIsDirectoryOpen] = useState(false);
 
-  const topNavItems = [
-    { href: '/search', label: 'Directory' },
+  const directoryItems = [
+    { href: '/search', label: 'Search Directory' },
+    { href: '/directory/by-location', label: 'By Location' },
   ];
 
   const communityItems = [
@@ -70,25 +72,53 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
               {/* Navigation Items */}
               <nav className="flex-1 p-6 overflow-y-auto">
                 <ul className="space-y-2">
-                  {/* Top Nav Items */}
-                  {topNavItems.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                      <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          onClick={onClose}
-                          className={`block py-3 px-4 rounded-lg transition-colors text-lg ${
-                            isActive 
-                              ? 'bg-slate-100 text-slate-900 font-medium' 
-                              : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
-                          }`}
+                  {/* Directory Dropdown */}
+                  <li>
+                    <button
+                      onClick={() => setIsDirectoryOpen(!isDirectoryOpen)}
+                      className="w-full flex items-center justify-between py-3 px-4 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors text-lg"
+                    >
+                      <span className="font-medium">Directory</span>
+                      <svg
+                        className={`w-5 h-5 transition-transform ${isDirectoryOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <AnimatePresence>
+                      {isDirectoryOpen && (
+                        <motion.ul
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="ml-4 mt-2 space-y-1 overflow-hidden"
                         >
-                          {item.label}
-                        </Link>
-                      </li>
-                    );
-                  })}
+                          {directoryItems.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                              <li key={item.href}>
+                                <Link
+                                  href={item.href}
+                                  onClick={onClose}
+                                  className={`block py-2 px-4 rounded-lg transition-colors ${
+                                    isActive 
+                                      ? 'bg-slate-100 text-slate-900 font-medium' 
+                                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                  }`}
+                                >
+                                  {item.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </li>
 
                   {/* Community Dropdown */}
                   <li>

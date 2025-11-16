@@ -116,7 +116,7 @@ export default function WriteForUsClient() {
                     Contributor Badge
                   </h3>
                   <p className="text-slate-600 text-sm">
-                    Get a verified "AI Contributor" badge displayed on your TaxProExchange profile.
+                    Get a verified &ldquo;AI Contributor&rdquo; badge displayed on your TaxProExchange profile.
                   </p>
                 </div>
               </div>
@@ -172,7 +172,7 @@ export default function WriteForUsClient() {
               <div className="flex gap-3">
                 <span className="text-green-600 font-bold text-lg">✓</span>
                 <p>
-                  <strong>All levels welcome</strong> – You don't need to be an AI expert; just share how AI benefits your work or how you've started using it.
+                  <strong>All levels welcome</strong> – You don&rsquo;t need to be an AI expert; just share how AI benefits your work or how you&rsquo;ve started using it.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -196,13 +196,13 @@ export default function WriteForUsClient() {
               <div className="flex gap-3">
                 <span className="text-red-600 font-bold text-lg">✗</span>
                 <p>
-                  <strong>No generic AI hype</strong> – Focus on specifics, not "AI will change everything."
+                  <strong>No generic AI hype</strong> – Focus on specifics, not &ldquo;AI will change everything.&rdquo;
                 </p>
               </div>
               <div className="flex gap-3 mt-6 pt-6 border-t border-slate-200 items-start">
                 <span className="text-blue-600 font-bold text-lg flex-shrink-0">ℹ️</span>
                 <p className="text-sm italic">
-                  <strong>Strict "No AI Slop" rule:</strong> Use AI tools responsibly — every article must be human-reviewed and fact-checked.
+                  <strong>Strict &ldquo;No AI Slop&rdquo; rule:</strong> Use AI tools responsibly — every article must be human-reviewed and fact-checked.
                 </p>
               </div>
             </div>
@@ -237,6 +237,17 @@ export default function WriteForUsClient() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Honeypot field - hidden via CSS */}
+              <input
+                type="text"
+                name="website_url_verification"
+                tabIndex={-1}
+                autoComplete="off"
+                className="absolute opacity-0 pointer-events-none"
+                style={{ position: 'absolute', left: '-9999px' }}
+                aria-hidden="true"
+              />
+              
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-slate-900 mb-2">
@@ -368,7 +379,7 @@ export default function WriteForUsClient() {
                   {isSubmitting ? "Submitting..." : "Submit My Article"}
                 </button>
                 <p className="mt-3 text-sm text-slate-600">
-                  You'll receive an email confirmation, and we'll get back to you within 5–7 business days.
+                  You&rsquo;ll receive an email confirmation, and we&rsquo;ll get back to you within 5–7 business days.
                 </p>
               </div>
             </form>

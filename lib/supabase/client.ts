@@ -15,5 +15,3 @@ export function createClientClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
-// Export as default for compatibility
-export const supabase = createClientClient();

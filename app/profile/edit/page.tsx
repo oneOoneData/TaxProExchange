@@ -1194,7 +1194,7 @@ export default function EditProfilePage() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-slate-300 resize-none"
                 />
                 <p className="mt-1 text-xs text-slate-500">
-                  Help others understand what you're looking for and what you can offer
+                  Help others understand what you&rsquo;re looking for and what you can offer
                 </p>
               </div>
 
@@ -1410,7 +1410,7 @@ export default function EditProfilePage() {
                 </label>
               </div>
               <p className="text-xs text-slate-500 ml-6">
-                When enabled, your profile appears in search results and is discoverable by others. When disabled, your profile is still viewable by direct link, but won't appear in searches.
+                When enabled, your profile appears in search results and is discoverable by others. When disabled, your profile is still viewable by direct link, but won&rsquo;t appear in searches.
               </p>
 
               {/* Mentorship Section */}
@@ -1432,7 +1432,7 @@ export default function EditProfilePage() {
                     className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
                   />
                   <label htmlFor="is_open_to_mentor" className="text-sm font-medium text-slate-700">
-                    I'm open to mentoring other tax professionals
+                    I&rsquo;m open to mentoring other tax professionals
                   </label>
                 </div>
 
@@ -1446,7 +1446,7 @@ export default function EditProfilePage() {
                     className="rounded border-slate-300 text-slate-900 focus:ring-slate-300"
                   />
                   <label htmlFor="is_seeking_mentor" className="text-sm font-medium text-slate-700">
-                    I'm seeking mentorship from experienced tax professionals
+                    I&rsquo;m seeking mentorship from experienced tax professionals
                   </label>
                 </div>
 
@@ -1480,7 +1480,7 @@ export default function EditProfilePage() {
                   States Where You Work
                 </label>
                 <p className="text-xs text-slate-500 mb-3">
-                  Select the states where you're licensed to practice or can handle tax work.
+                  Select the states where you&rsquo;re licensed to practice or can handle tax work.
                 </p>
                 
                 {/* State Search */}
@@ -1558,7 +1558,7 @@ export default function EditProfilePage() {
                   </label>
                 </div>
                 <p className="text-xs text-slate-500 ml-6">
-                  When enabled, you'll appear in searches for any U.S. state and all states will be automatically selected above.
+                  When enabled, you&rsquo;ll appear in searches for any U.S. state and all states will be automatically selected above.
                 </p>
 
                 <div className="flex items-center gap-3">
@@ -1574,7 +1574,7 @@ export default function EditProfilePage() {
                   </label>
                 </div>
                 <p className="text-xs text-slate-500 ml-6">
-                  When enabled, you'll appear in international searches and can select specific countries below.
+                  When enabled, you&rsquo;ll appear in international searches and can select specific countries below.
                 </p>
 
                 {/* Country Selection */}
@@ -1636,10 +1636,10 @@ export default function EditProfilePage() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Tax Software & Tools You're Comfortable With
+                  Tax Software & Tools You&rsquo;re Comfortable With
                 </label>
                 <p className="text-xs text-slate-500 mb-3">
-                  Select the software you're proficient in. This helps other professionals understand your technical capabilities.
+                  Select the software you&rsquo;re proficient in. This helps other professionals understand your technical capabilities.
                 </p>
                 
                 <div className="max-h-64 overflow-y-auto p-2 border border-slate-200 rounded-lg">
@@ -1712,7 +1712,7 @@ export default function EditProfilePage() {
                     Profile Complete! 🎉
                   </h2>
                   <p className="text-slate-600">
-                    Your professional profile has been saved successfully. Here's what happens next:
+                    Your professional profile has been saved successfully. Here&rsquo;s what happens next:
                   </p>
                 </div>
 
@@ -1733,7 +1733,7 @@ export default function EditProfilePage() {
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-blue-500 mt-1">4.</span>
-                      <span><strong>Get Notified:</strong> You'll receive an email when your profile is verified and goes live</span>
+                      <span><strong>Get Notified:</strong> You&rsquo;ll receive an email when your profile is verified and goes live</span>
                     </li>
                   </ul>
                 </div>

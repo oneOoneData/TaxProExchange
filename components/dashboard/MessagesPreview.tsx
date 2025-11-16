@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import { useEffect, useState } from 'react';
 
@@ -120,10 +121,12 @@ export default function MessagesPreview({ threads = [], unreadTotal = 0 }: Messa
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0">
                   {thread.counterpartAvatar ? (
-                    <img
+                    <Image
                       src={thread.counterpartAvatar}
                       alt={thread.counterpartName}
                       className="w-8 h-8 rounded-full object-cover"
+                      width={32}
+                      height={32}
                     />
                   ) : (
                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">

@@ -163,7 +163,7 @@ export default function SuggestEventPage() {
               Suggest an Event
             </h2>
             <p className="text-slate-600">
-              Just provide the conference URL and we'll automatically extract the details for you!
+              Just provide the conference URL and we&rsquo;ll automatically extract the details for you!
               Our team will review and add it to our curated list.
             </p>
           </div>
@@ -175,7 +175,7 @@ export default function SuggestEventPage() {
                 <div>
                   <h3 className="text-green-800 font-medium">Thank you!</h3>
                   <p className="text-green-700 text-sm">
-                    Your event suggestion has been submitted. We'll review it and add it to our list if it's a good fit.
+                    Your event suggestion has been submitted. We&rsquo;ll review it and add it to our list if it&rsquo;s a good fit.
                   </p>
                 </div>
               </div>
@@ -197,6 +197,17 @@ export default function SuggestEventPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Honeypot field - hidden via CSS */}
+            <input
+              type="text"
+              name="website_url_verification"
+              tabIndex={-1}
+              autoComplete="off"
+              className="absolute opacity-0 pointer-events-none"
+              style={{ position: 'absolute', left: '-9999px' }}
+              aria-hidden="true"
+            />
+            
             {/* Event URL - Primary input */}
             <div>
               <label htmlFor="eventUrl" className="block text-sm font-medium text-gray-700 mb-2">
@@ -226,7 +237,7 @@ export default function SuggestEventPage() {
                 <p className="mt-2 text-sm text-red-600">{scrapeError}</p>
               )}
         <p className="mt-1 text-sm text-gray-500">
-          We'll automatically extract the event details from this URL. Please review data for accuracy.
+          We&rsquo;ll automatically extract the event details from this URL. Please review data for accuracy.
         </p>
             </div>
 

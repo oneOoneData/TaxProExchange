@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -40,13 +40,7 @@ export default function SettingsPage() {
     }
   }, [isLoaded, user, router]);
 
-  useEffect(() => {
-    if (user) {
-      loadPreferences();
-    }
-  }, [user]);
-
-  const loadPreferences = async () => {
+  const loadPreferences = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -73,7 +67,13 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadPreferences();
+    }
+  }, [loadPreferences, user]);
 
   const savePreferences = async () => {
     if (!user) return;
@@ -191,7 +191,7 @@ export default function SettingsPage() {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
             <h2 className="text-xl font-semibold text-slate-900 mb-4">Email Notifications</h2>
             <p className="text-slate-600 mb-6">
-              Choose which emails you'd like to receive and how often. We'll never spam you.
+              Choose which emails you&rsquo;d like to receive and how often. We&rsquo;ll never spam you.
             </p>
 
             {loading ? (

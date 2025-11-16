@@ -220,7 +220,7 @@ export function ApplyDialog({ job, onClose, onSuccess }: ApplyDialogProps) {
             <ul className="text-xs text-blue-800 space-y-1">
               <li>• Be specific about your relevant experience</li>
               <li>• Mention any certifications or specializations</li>
-              <li>• Explain why you're interested in this firm</li>
+              <li>• Explain why you&rsquo;re interested in this firm</li>
               <li>• Keep your cover note concise but informative</li>
             </ul>
           </div>

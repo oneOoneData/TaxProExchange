@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 interface PartnerCardProps {
@@ -31,33 +32,41 @@ export default function PartnerCard({ partner }: PartnerCardProps) {
         {/* Logo */}
         {partner.slug === 'truss' ? (
           <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
-            <img
+            <Image
               src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/truss.jpg"
               alt={`${partner.name} logo`}
+              width={160}
+              height={80}
               className="h-full w-auto object-contain"
             />
           </div>
         ) : partner.slug === 'taxgpt' ? (
           <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
-            <img
+            <Image
               src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/taxgpt.jpg"
               alt={`${partner.name} logo`}
+              width={160}
+              height={80}
               className="h-full w-auto object-contain"
             />
           </div>
         ) : partner.slug === 'bluej' ? (
           <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
-            <img
+            <Image
               src="https://rzbfkdicrhdharyzfmul.supabase.co/storage/v1/object/public/ai-tool-logos/bluej.png"
               alt={`${partner.name} logo`}
+              width={160}
+              height={80}
               className="h-full w-auto object-contain"
             />
           </div>
         ) : partner.logo ? (
           <div className="flex items-center justify-center h-20 mb-4 rounded-lg bg-white overflow-hidden">
-            <img
+            <Image
               src={partner.logo}
               alt={`${partner.name} logo`}
+              width={160}
+              height={80}
               className="h-full w-auto object-contain"
             />
           </div>

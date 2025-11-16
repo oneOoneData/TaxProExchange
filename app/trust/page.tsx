@@ -26,7 +26,7 @@ export default function TrustPage() {
             How TaxProExchange Verifies Professionals
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-            Trust and transparency are the foundation of our platform. Here's exactly how we verify credentials and maintain professional standards.
+            Trust and transparency are the foundation of our platform. Here&rsquo;s exactly how we verify credentials and maintain professional standards.
           </p>
         </motion.div>
 
@@ -101,7 +101,7 @@ export default function TrustPage() {
                 </h3>
                 <p className="text-slate-600">
                   Professionals must pass verification <em>and</em> explicitly opt-in to public listing. 
-                  We respect privacy and don't list anyone without their consent.
+                  We respect privacy and don&rsquo;t list anyone without their consent.
                 </p>
               </div>
             </div>
@@ -131,16 +131,16 @@ export default function TrustPage() {
           className="bg-slate-50 rounded-2xl p-8 border border-slate-200 mb-12"
         >
           <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            What We Don't Do
+            What We Don&rsquo;t Do
           </h2>
           <ul className="space-y-3 text-slate-700">
             <li className="flex items-start gap-3">
               <span className="text-red-500 font-bold">✗</span>
-              <span><strong>No payment processing:</strong> We don't handle money or take a cut of your transactions. Connect and negotiate directly.</span>
+              <span><strong>No payment processing:</strong> We don&rsquo;t handle money or take a cut of your transactions. Connect and negotiate directly.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-red-500 font-bold">✗</span>
-              <span><strong>No client file exchange in-app:</strong> We're a discovery and connection platform, not a file-sharing or practice management system.</span>
+              <span><strong>No client file exchange in-app:</strong> We&rsquo;re a discovery and connection platform, not a file-sharing or practice management system.</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="text-red-500 font-bold">✗</span>
@@ -164,7 +164,7 @@ export default function TrustPage() {
             Data Minimization & Privacy
           </h2>
           <p className="text-slate-700 mb-4">
-            We only collect what's necessary for verification and professional networking:
+            We only collect what&rsquo;s necessary for verification and professional networking:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-slate-700">
             <li>Credential type and license number (verified against official sources)</li>

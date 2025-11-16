@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -53,11 +53,7 @@ export default function FirmsGrid() {
   }, [search]);
 
   // Fetch data
-  useEffect(() => {
-    fetchFirms();
-  }, [debouncedSearch, sorting, pagination.pageIndex, pagination.pageSize]);
-
-  const fetchFirms = async () => {
+  const fetchFirms = useCallback(async () => {
     setLoading(true);
     try {
       const sortStr = sorting.length > 0
@@ -84,7 +80,11 @@ export default function FirmsGrid() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearch, sorting, pagination.pageIndex, pagination.pageSize]);
+
+  useEffect(() => {
+    fetchFirms();
+  }, [fetchFirms]);
 
   const handleExportVisible = () => {
     // Export visible data (client-side)
@@ -166,7 +166,7 @@ export default function FirmsGrid() {
     }
   };
 
-  const handleDelete = async (firmId: string, firmName: string | null) => {
+  const handleDelete = useCallback(async (firmId: string, firmName: string | null) => {
     if (!confirm(`Are you sure you want to delete "${firmName || 'this firm'}"? This action cannot be undone and will remove all associated data.`)) {
       return;
     }
@@ -191,7 +191,7 @@ export default function FirmsGrid() {
     } finally {
       setDeleting(null);
     }
-  };
+  }, [fetchFirms]);
 
   const handleEnrichment = async (unenrichedOnly = false) => {
     setEnriching(true);
@@ -396,7 +396,7 @@ export default function FirmsGrid() {
         size: 100,
       }),
     ],
-    [deleting]
+    [deleting, handleDelete]
   );
 
   const table = useReactTable({

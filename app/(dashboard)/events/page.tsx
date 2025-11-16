@@ -111,7 +111,7 @@ export default async function EventsPage({ searchParams }:{ searchParams?: Promi
       </div>
       {(events ?? []).length === 0 && (
         <div className="mt-12 text-center text-sm opacity-70">
-          No upcoming events found. Try "Show all events".
+          No upcoming events found. Try &ldquo;Show all events&rdquo;.
         </div>
       )}
     </div>

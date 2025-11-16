@@ -139,7 +139,7 @@ export default async function SolutionPage({ params }: Props) {
                   How Verification Works
                 </h2>
                 <p className="text-slate-700 mb-4">
-                  Every professional on TaxProExchange is credential-verified before their profile goes live. We manually check CPA state board records, IRS EA enrollment, and CTEC registration to ensure you're working with licensed, active professionals.
+                  Every professional on TaxProExchange is credential-verified before their profile goes live. We manually check CPA state board records, IRS EA enrollment, and CTEC registration to ensure you&rsquo;re working with licensed, active professionals.
                 </p>
                 <p className="text-slate-700">
                   Learn more about our <Link href="/trust" className="text-blue-600 hover:underline font-medium">verification process</Link> and why trust is the default on TaxProExchange.

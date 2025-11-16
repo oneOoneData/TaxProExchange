@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Profile, VerificationRequest, getProfileDisplayName, getCredentialBadgeColor, getVisibilityBadgeColor, getPublicProfileUrl, isFirmMember, getFirmMemberBadgeColor } from '@/lib/db/profile';
 
 interface ProfileStatusCardProps {
@@ -50,10 +51,12 @@ export default function ProfileStatusCard({ profile, verificationRequest }: Prof
           </div>
         </div>
         {profile.avatar_url && (
-          <img
+          <Image
             src={profile.avatar_url}
             alt={displayName}
             className="w-12 h-12 rounded-full object-cover"
+            width={48}
+            height={48}
           />
         )}
       </div>

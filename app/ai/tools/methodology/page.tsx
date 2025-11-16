@@ -71,7 +71,7 @@ export default function MethodologyPage() {
                 Collection Process
               </h3>
               <p className="text-slate-700 mb-4">
-                We use Reddit's public JSON API to search for posts and comments mentioning each tool. The process:
+                We use Reddit&rsquo;s public JSON API to search for posts and comments mentioning each tool. The process:
               </p>
               <ol className="list-decimal list-inside space-y-2 text-slate-700 mb-6 ml-2">
                 <li>Query each subreddit for the tool name</li>
@@ -83,7 +83,7 @@ export default function MethodologyPage() {
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
                 <p className="text-sm text-blue-900">
-                  We use Reddit's official public API endpoints, permitted under their terms of service.
+                  We use Reddit&rsquo;s official public API endpoints, permitted under their terms of service.
                 </p>
               </div>
 
@@ -110,7 +110,7 @@ export default function MethodologyPage() {
               </h2>
 
               <p className="text-slate-700 mb-6">
-                We use OpenAI's GPT-4o-mini model to analyze Reddit discussions and generate sentiment summaries. This runs daily via an automated script.
+                We use OpenAI&rsquo;s GPT-4o-mini model to analyze Reddit discussions and generate sentiment summaries. This runs daily via an automated script.
               </p>
 
               <h3 className="text-xl font-semibold mb-3 text-slate-800 mt-6">
@@ -199,7 +199,7 @@ Format your response as JSON:
               </h2>
               <ul className="list-disc list-inside space-y-2 text-slate-700 mb-6 ml-2">
                 <li>All Reddit mentions link to the original post/comment</li>
-                <li>Sentiment summaries are labeled as "AI Summary"</li>
+                <li>Sentiment summaries are labeled as &ldquo;AI Summary&rdquo;</li>
                 <li>Upvote counts and author names shown when available</li>
                 <li>All claims verifiable via source Reddit discussions</li>
                 <li>Reddit content presented as found, unedited</li>

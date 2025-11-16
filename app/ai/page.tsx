@@ -62,16 +62,16 @@ export default function AIPage() {
             <h1 className="text-4xl font-bold mb-4 text-slate-900">AI Thought Leadership</h1>
             <div className="text-lg text-slate-700 space-y-4 mb-8">
               <p>
-                There are a lot of things we could write about when it comes to tax firms today. The world is changing fast: from new legislation like the "Big, Beautiful Bill" to the shut down and other global developments that ripple through our economy. But nothing will have a bigger impact on tax firms than artificial intelligence.
+                There are a lot of things we could write about when it comes to tax firms today. The world is changing fast: from new legislation like the &ldquo;Big, Beautiful Bill&rdquo; to the shut down and other global developments that ripple through our economy. But nothing will have a bigger impact on tax firms than artificial intelligence.
               </p>
               <p>
-                Like every other profession, AI is changing how we work. Some people believe it's coming for tax preparers' jobs. Others think it won't make much sense in taxes. And some imagine a future where every CPA is assisted by a few AI copilots.
+                Like every other profession, AI is changing how we work. Some people believe it&rsquo;s coming for tax preparers&rsquo; jobs. Others think it won&rsquo;t make much sense in taxes. And some imagine a future where every CPA is assisted by a few AI copilots.
               </p>
               <p>
                 No matter where you stand, one thing is certain: AI is coming to your firm.
               </p>
               <p>
-                In this section, we dig into how AI is already reshaping the work of tax professionals. We'll cover new AI-native technology and ways tax firms can bring AI in house.
+                In this section, we dig into how AI is already reshaping the work of tax professionals. We&rsquo;ll cover new AI-native technology and ways tax firms can bring AI in house.
               </p>
             </div>
           </header>
@@ -217,7 +217,7 @@ export default function AIPage() {
                 <div className="space-y-2 text-sm text-slate-700">
                   <div className="flex items-start gap-2">
                     <span>🧠</span>
-                    <span><strong>Contributor badge</strong> — verified "AI Contributor" badge on your profile</span>
+                    <span><strong>Contributor badge</strong> — verified &ldquo;AI Contributor&rdquo; badge on your profile</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span>💬</span>
@@ -225,7 +225,7 @@ export default function AIPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <span>🔗</span>
-                    <span><strong>Author credit with a link to your firm's website</strong></span>
+                    <span><strong>Author credit with a link to your firm&rsquo;s website</strong></span>
                   </div>
                 </div>
               </div>

@@ -76,7 +76,7 @@ export default async function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
           <p className="mt-2 text-gray-600">
-            Welcome back! Here's what's happening with your profile and connections.
+            Welcome back! Here&rsquo;s what&rsquo;s happening with your profile and connections.
           </p>
         </div>
 

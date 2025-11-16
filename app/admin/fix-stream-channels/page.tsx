@@ -63,7 +63,7 @@ export default function FixStreamChannelsPage() {
             
             <div className="mb-6">
               <p className="text-slate-600 mb-4">
-                This tool will find all accepted connections that don't have Stream channels and create them.
+                This tool will find all accepted connections that don&rsquo;t have Stream channels and create them.
               </p>
               
               <button

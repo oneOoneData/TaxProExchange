@@ -122,7 +122,7 @@ export default function FirmInvitePage({ params }: { params: Promise<{ token: st
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Firm Team Invitation</h1>
           <p className="text-gray-600">
-            You've been invited to join a firm team on TaxProExchange
+            You&rsquo;ve been invited to join a firm team on TaxProExchange
           </p>
         </div>
 
@@ -134,14 +134,14 @@ export default function FirmInvitePage({ params }: { params: Promise<{ token: st
 
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <p className="text-sm text-gray-600 mb-2">
-            As a team member, you'll be able to:
+            As a team member, you&rsquo;ll be able to:
           </p>
           <ul className="text-sm text-gray-700 space-y-1">
             <li className="flex items-start gap-2">
               <svg className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span>Help manage the firm's bench of trusted professionals</span>
+              <span>Help manage the firm&rsquo;s bench of trusted professionals</span>
             </li>
             <li className="flex items-start gap-2">
               <svg className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

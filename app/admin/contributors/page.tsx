@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
@@ -27,11 +27,7 @@ export default function AdminContributorsPage() {
   const [processing, setProcessing] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'published'>('pending');
 
-  useEffect(() => {
-    loadSubmissions();
-  }, [filter]);
-
-  const loadSubmissions = async () => {
+  const loadSubmissions = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/contributors?status=${filter}`);
       if (response.ok) {
@@ -49,7 +45,11 @@ export default function AdminContributorsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadSubmissions();
+  }, [loadSubmissions]);
 
   const handleApprove = async (id: string, title: string) => {
     const slug = prompt('Enter article slug (will be used in URL /ai/[slug]):', 

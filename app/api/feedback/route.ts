@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { sendEmail } from '@/lib/email';
+import { performSpamCheck, createSpamResponse } from '@/lib/antispam';
+import { NextRequest } from 'next/server';
 
 export async function POST(request: Request) {
   try {
@@ -16,6 +18,13 @@ export async function POST(request: Request) {
     // Parse request body
     const body = await request.json();
     const { feedbackType, message } = body;
+
+    // Perform spam checks (even for authenticated users)
+    const spamCheck = await performSpamCheck(request as unknown as NextRequest, body);
+    if (spamCheck.isSpam) {
+      console.log(`Spam detected on feedback submission: ${spamCheck.reason}`);
+      return createSpamResponse(spamCheck.reason || 'Unknown spam reason');
+    }
 
     if (!feedbackType || !message?.trim()) {
       return NextResponse.json(

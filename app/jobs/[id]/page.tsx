@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -56,13 +56,19 @@ export default function JobDetailPage() {
   const [isOwner, setIsOwner] = useState(false);
   const [isClosingJob, setIsClosingJob] = useState(false);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchJob(params.id as string);
+  const checkOwnership = useCallback(async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/check-ownership`);
+      const data = await response.json();
+      if (response.ok) {
+        setIsOwner(data.isOwner);
+      }
+    } catch (error) {
+      console.error('Error checking ownership:', error);
     }
-  }, [params.id]);
+  }, []);
 
-  const fetchJob = async (jobId: string) => {
+  const fetchJob = useCallback(async (jobId: string) => {
     try {
       setLoading(true);
       const response = await fetch(`/api/jobs/${jobId}`);
@@ -83,19 +89,13 @@ export default function JobDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkOwnership, isSignedIn, user]);
 
-  const checkOwnership = async (jobId: string) => {
-    try {
-      const response = await fetch(`/api/jobs/${jobId}/check-ownership`);
-      const data = await response.json();
-      if (response.ok) {
-        setIsOwner(data.isOwner);
-      }
-    } catch (error) {
-      console.error('Error checking ownership:', error);
+  useEffect(() => {
+    if (params.id) {
+      fetchJob(params.id as string);
     }
-  };
+  }, [fetchJob, params.id]);
 
   const handleCloseJob = async () => {
     if (!job || !isOwner) return;

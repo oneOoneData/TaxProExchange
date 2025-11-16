@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Profile } from '@/lib/db/profile';
 import Card from '@/components/ui/Card';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface Opportunity {
   id: string;
@@ -25,13 +26,7 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
   const [opportunityList, setOpportunityList] = useState<Opportunity[]>(opportunities);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (profile && opportunities.length === 0) {
-      fetchOpportunities();
-    }
-  }, [profile]);
-
-  const fetchOpportunities = async () => {
+  const fetchOpportunities = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/dashboard/opportunities');
@@ -48,7 +43,13 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (profile && opportunities.length === 0) {
+      fetchOpportunities();
+    }
+  }, [profile, opportunities.length, fetchOpportunities]);
 
   if (!profile) {
     return (
@@ -95,7 +96,7 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
             </svg>
           </div>
           <h4 className="font-medium text-gray-900 mb-1">No matches found</h4>
-          <p className="text-sm text-gray-600 mb-3">We couldn't find any tax professionals matching your profile right now.</p>
+          <p className="text-sm text-gray-600 mb-3">We couldn&rsquo;t find any tax professionals matching your profile right now.</p>
           <Link
             href="/search"
             className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
@@ -109,10 +110,12 @@ export default function Opportunities({ profile, opportunities = [] }: Opportuni
             <div key={opportunity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="flex-shrink-0">
                 {opportunity.avatar ? (
-                  <img
+                  <Image
                     src={opportunity.avatar}
                     alt={opportunity.name}
                     className="w-10 h-10 rounded-full object-cover"
+                    width={40}
+                    height={40}
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">

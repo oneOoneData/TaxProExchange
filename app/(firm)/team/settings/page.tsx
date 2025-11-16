@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
@@ -303,7 +304,7 @@ function FirmSettingsContent() {
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Team Members</h2>
             <p className="text-sm text-gray-600 mb-4">
-              Team members can help manage your firm's bench of professionals. Admins have full control.
+              Team members can help manage your firm&rsquo;s bench of professionals. Admins have full control.
             </p>
 
             <div className="space-y-3">
@@ -316,10 +317,12 @@ function FirmSettingsContent() {
                   <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
                       {avatarUrl ? (
-                        <img
+                        <Image
                           src={avatarUrl}
                           alt={`${profile.first_name} ${profile.last_name}`}
                           className="w-10 h-10 rounded-full"
+                          width={40}
+                          height={40}
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold">
@@ -365,7 +368,7 @@ function FirmSettingsContent() {
             {isAdmin && (
               <div className="mt-4 pt-4 border-t">
                 <p className="text-sm text-gray-600 mb-3">
-                  Invite others to help manage your firm's bench of professionals.
+                  Invite others to help manage your firm&rsquo;s bench of professionals.
                 </p>
                 <button
                   onClick={() => setShowInviteModal(true)}

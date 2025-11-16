@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { verifyRecaptcha } from "@/lib/recaptcha";
+import { performSpamCheck, createSpamResponse } from "@/lib/antispam";
+import { NextRequest } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +22,13 @@ export async function POST(req: Request) {
       additionalInfo,
       recaptchaToken
     } = body;
+
+    // Perform spam checks first (before reCAPTCHA to save API calls)
+    const spamCheck = await performSpamCheck(req as unknown as NextRequest, body);
+    if (spamCheck.isSpam) {
+      console.log(`Spam detected on event suggestion: ${spamCheck.reason}`);
+      return createSpamResponse(spamCheck.reason || 'Unknown spam reason');
+    }
 
     // Verify reCAPTCHA token (with lower threshold for public forms)
     if (recaptchaToken) {

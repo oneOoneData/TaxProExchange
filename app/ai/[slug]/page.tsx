@@ -206,7 +206,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                               className="inline-flex items-center"
                               title="View Profile on TaxProExchange"
                             >
-                              <img src="/favicon.ico" alt="TaxProExchange" className="w-5 h-5 hover:opacity-70 transition-opacity" />
+                              <Image
+                                src="/favicon.ico"
+                                alt="TaxProExchange"
+                                className="w-5 h-5 hover:opacity-70 transition-opacity"
+                                width={20}
+                                height={20}
+                              />
                             </a>
                           )}
                         </div>

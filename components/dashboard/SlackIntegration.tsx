@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 
 // Global type declaration for gtag
 declare global {
@@ -36,20 +37,7 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
     return () => setMounted(false);
   }, []);
 
-  useEffect(() => {
-    if (!isVerified) {
-      if (mounted) {
-        setLoading(false);
-      }
-      return;
-    }
-
-    if (mounted) {
-      fetchSlackStatus();
-    }
-  }, [isVerified, mounted]);
-
-  const fetchSlackStatus = async () => {
+  const fetchSlackStatus = useCallback(async () => {
     if (!mounted) return;
     
     try {
@@ -73,7 +61,20 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
         setLoading(false);
       }
     }
-  };
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!isVerified) {
+      if (mounted) {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (mounted) {
+      fetchSlackStatus();
+    }
+  }, [fetchSlackStatus, isVerified, mounted]);
 
 
   const handleBadgeClick = async () => {
@@ -205,10 +206,13 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
             style={{ backgroundColor: '#4A154B' }}
           >
-            <img 
+            <Image 
               src="/Slack_icon_2019.svg" 
               alt="Slack" 
               className="w-5 h-5"
+              width={20}
+              height={20}
+              priority={false}
             />
             {loading ? 'Sending request...' : 'Invite Me'}
           </button>
@@ -218,10 +222,13 @@ export default function SlackIntegration({ isVerified }: SlackIntegrationProps) 
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
             style={{ backgroundColor: '#4A154B' }}
           >
-            <img 
+            <Image 
               src="/Slack_icon_2019.svg" 
               alt="Slack" 
               className="w-5 h-5"
+              width={20}
+              height={20}
+              priority={false}
             />
             Open
           </button>

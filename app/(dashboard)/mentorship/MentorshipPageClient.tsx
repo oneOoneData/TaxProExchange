@@ -110,7 +110,7 @@ export default function MentorshipPageClient({ profile, preferences, matches, al
                 </h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <p>
-                    Use the toggles above to indicate whether you're open to mentoring others or seeking mentorship.
+                    Use the toggles above to indicate whether you&rsquo;re open to mentoring others or seeking mentorship.
                   </p>
                 </div>
               </div>

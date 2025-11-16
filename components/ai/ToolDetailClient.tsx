@@ -219,7 +219,7 @@ export default function ToolDetailClient({ tool }: ToolDetailClientProps) {
         ) : (
           <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
             <p className="text-sm text-slate-700 mb-3">
-              We couldn't find any Reddit discussions about <strong>{tool.name}</strong> yet, but we're always listening. Did we miss a valuable comment or thread?
+              We couldn&rsquo;t find any Reddit discussions about <strong>{tool.name}</strong> yet, but we&rsquo;re always listening. Did we miss a valuable comment or thread?
             </p>
             <a
               href={`/feedback?tool=${encodeURIComponent(tool.name)}`}

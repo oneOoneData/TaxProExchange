@@ -22,6 +22,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
   const router = useRouter();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isCommunityOpen, setIsCommunityOpen] = useState(false);
+  const [isDirectoryOpen, setIsDirectoryOpen] = useState(false);
 
   // Auto-redirect authenticated users to their dashboard
   useEffect(() => {
@@ -67,7 +68,28 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
         <div className="container-mobile py-3 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <a href="/search" className="hover:text-slate-900">Directory</a>
+            <div className="relative">
+              <button
+                onClick={() => setIsDirectoryOpen(!isDirectoryOpen)}
+                onBlur={() => setTimeout(() => setIsDirectoryOpen(false), 200)}
+                className="flex items-center gap-1 hover:text-slate-900 transition-colors"
+              >
+                Directory
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isDirectoryOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                  <a href="/search" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Search Directory
+                  </a>
+                  <a href="/directory/by-location" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    By Location
+                  </a>
+                </div>
+              )}
+            </div>
             
             {/* Community Dropdown */}
             <div className="relative">
@@ -142,6 +164,24 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
 
       {/* Promo Banner */}
       <NblPromoBanner />
+
+      {/* AI Survey Banner */}
+      <div className="bg-blue-900 text-white">
+        <div className="container-mobile flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold uppercase tracking-wide text-blue-200/80">AI in Tax & Wealth Firms 2025</span>
+            <p className="text-base font-medium sm:text-lg">
+              Help us benchmark how tax and wealth teams are using AI today.
+            </p>
+          </div>
+          <a
+            href="/ai/survey"
+            className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50"
+          >
+            Take the Survey
+          </a>
+        </div>
+      </div>
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -506,7 +546,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 {/* Info Note */}
                 <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-sm text-blue-900">
-                    <strong>💡 Preview:</strong> This is how your firm's team dashboard will look. Organize professionals by category, add custom titles, and manage your bench efficiently.
+                    <strong>💡 Preview:</strong> This is how your firm&rsquo;s team dashboard will look. Organize professionals by category, add custom titles, and manage your bench efficiently.
                   </p>
                 </div>
               </div>

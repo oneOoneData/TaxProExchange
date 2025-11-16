@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { sendEmail } from '@/lib/email';
 import { headers } from 'next/headers';
+import { performSpamCheck, createSpamResponse } from '@/lib/antispam';
+import { NextRequest } from 'next/server';
 
 interface SubmissionData {
   name: string;
@@ -18,6 +20,13 @@ export async function POST(request: Request) {
     // Parse request body
     const body = await request.json() as SubmissionData;
     const { name, email, firm, title, topic, draft_url, message } = body;
+
+    // Perform spam checks
+    const spamCheck = await performSpamCheck(request as unknown as NextRequest, body);
+    if (spamCheck.isSpam) {
+      console.log(`Spam detected on contributor submission: ${spamCheck.reason}`);
+      return createSpamResponse(spamCheck.reason || 'Unknown spam reason');
+    }
 
     // Validate required fields
     if (!name?.trim() || !email?.trim() || !title?.trim() || !topic?.trim()) {
