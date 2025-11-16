@@ -1,6 +1,6 @@
 ---
 title: "What's Next for Artificial Intelligence in Tax Firms"
-description: "Practical ways AI is landing in tax firms now. Covering research, preparation, workflow, and advisory, with a vendor checklist and [§7216](/ai/7216) guidance."
+description: "Practical ways AI is landing in tax firms now. Covering research, preparation, workflow, and advisory, with a vendor checklist and §7216 guidance."
 author: "Koen Van Duyse"
 authorLinkedIn: "https://www.linkedin.com/in/koenvanduyse/"
 authorReddit: "https://www.reddit.com/user/RepliKoen/"
@@ -28,11 +28,11 @@ canonical: "https://www.taxproexchange.com/ai/ai-in-tax-firms-2025"
 readingTime: 12
 robots: "index,follow"
 ogTitle: "What’s Next for AI in Tax Firms"
-ogDescription: "A practitioner’s guide to how AI is really used in tax firms—research, prep, workflow, advisory—plus a vendor checklist and [§7216](/ai/7216)-ready pilot plan."
+ogDescription: "A practitioner's guide to how AI is really used in tax firms, research, prep, workflow, advisory, plus a vendor checklist and §7216-ready pilot plan."
 ogImage: "/images/the_hybrid_desk.png"
 twitterCard: "summary_large_image"
 twitterTitle: "What’s Next for AI in Tax Firms"
-twitterDescription: "Real workflows, not hype: research, prep, workflow, advisory—and how to pilot AI safely with [§7216](/ai/7216) controls."
+twitterDescription: "Real workflows, not hype: research, prep, workflow, advisory, and how to pilot AI safely with §7216 controls."
 twitterImage: "/images/the_hybrid_desk.png"
 schemaType: "Article"
 ---
@@ -46,13 +46,13 @@ The story also dispels a myth: not every firm that skips automation is behind. T
 
 So are we at a point where even firms like this can materially benefit from AI? My answer: yes. The question is no longer whether AI will show up in your firm, it’s how quickly you can implement it to gain an advantage and which vendor you can trust to get you there.
 
-I’ve watched AI mature inside other complex arenas, like contact centers. At Fanatics, AI-driven conversational systems now handle 25,000 calls per day, reduce headcount by roughly 250 agents, and still deliver the metric that matters most — fast resolution. Customers care about outcomes; AI keeps improving at resolving problems with human-level tone and context.
+I've watched AI mature inside other complex arenas, like contact centers. At Fanatics, AI-driven conversational systems now handle 25,000 calls per day, reduce headcount by roughly 250 agents, and still deliver the metric that matters most, fast resolution. Customers care about outcomes; AI keeps improving at resolving problems with human-level tone and context.
 
 Tax conversations are nuanced and infrequent, so the front line may evolve more slowly. But onboarding, research, preparation, and review are already primed for AI leverage. Partners face tight capacity, denser codes, and fewer qualified candidates. Firms that deploy AI strategically are winning on efficiency, talent retention, and client experience.
 
 Underneath the excitement lives a harder question: how do you use AI as a competitive advantage without risking client data, compliance, or reputation?
 
-This article breaks down what’s real, what’s hype, and what’s next across four primary workflows — Research, Preparation & Review, Workflow Automation, and Planning & Advisory — along with a practical approach to selecting vendors, piloting responsibly, and sharing the wins.
+This article breaks down what's real, what's hype, and what's next across four primary workflows, Research, Preparation & Review, Workflow Automation, and Planning & Advisory, along with a practical approach to selecting vendors, piloting responsibly, and sharing the wins.
 
 ![AI capabilities map](/images/AI_Capabilities.png)
 
@@ -79,7 +79,7 @@ AI in tax isn’t monolithic. Different technologies solve different problems, u
 
 ### 1. Tax Research
 
-AI-assisted research tools train on authoritative sources — the Internal Revenue Code, Treasury regulations, IRS rulings, and case law — to surface relevant guidance in seconds. Unlike generic LLMs, they are curated, citation-based, and audit-friendly.
+AI-assisted research tools train on authoritative sources, the Internal Revenue Code, Treasury regulations, IRS rulings, and case law, to surface relevant guidance in seconds. Unlike generic LLMs, they are curated, citation-based, and audit-friendly.
 
 **Representative tools**
 - **[Thomson Reuters CoCouncil](/ai/tools/cocounsel)** for trusted summaries tied to citations.
@@ -106,9 +106,9 @@ AI-assisted research tools train on authoritative sources — the Internal Reven
 Most automation budgets land here. Firms are moving beyond basic data entry toward semi-automated workflows: AI pulls data from W-2s, 1099s, K-1s, and prior returns, maps everything into prep software, and produces linked workpapers plus review flags so humans focus on judgment instead of transcription.
 
 **Examples of solutions**
-- **[Juno](/ai/tools/juno-tax)** — Now [integrated](https://www.reddit.com/r/AITaxPros/comments/1ovg5yh/taxdome_and_juno_integration/) with TaxDome. The integrated flow lets staff send docs from TaxDome to Juno, which extracts relevant data, draft returns, and push the work back into TaxDome-supported software (Lacerte, ProConnect, Drake, UltraTax, with CCH Axcess and others in beta).  
-- **[Black Ore](http://localhost:3000/ai/tools/black-ore)** — Targets CPA firms with 1040 automation spanning ingestion, drafting, workpapers, and partner review, processed in U.S.-based, SOC-2 environments.  
-- **[Solomon](/ai/tools/solomon)** — Positions itself as an analyzer of source documents that prepares returns directly inside the firm’s current software stack.  
+- **[Juno](/ai/tools/juno-tax)**, Now [integrated](https://www.reddit.com/r/AITaxPros/comments/1ovg5yh/taxdome_and_juno_integration/) with TaxDome. The integrated flow lets staff send docs from TaxDome to Juno, which extracts relevant data, draft returns, and push the work back into TaxDome-supported software (Lacerte, ProConnect, Drake, UltraTax, with CCH Axcess and others in beta).  
+- **[Black Ore](http://localhost:3000/ai/tools/black-ore)**, Targets CPA firms with 1040 automation spanning ingestion, drafting, workpapers, and partner review, processed in U.S.-based, SOC-2 environments.  
+- **[Solomon](/ai/tools/solomon)**, Positions itself as an analyzer of source documents that prepares returns directly inside the firm's current software stack.  
 
 **Emerging trends**
 - Today’s focus sits on Form 1040 and other high-volume work because the inputs are standardized and predictable.
@@ -145,7 +145,7 @@ Beyond returns lies the unglamorous infrastructure: intake, communication, revie
 
 ### 4. Planning & Advisory
 
-Once compliance is streamlined, the next expansion vector is advisory — where AI has the potential to lift margins and strengthen client relationships. Interest is high, but the market is still early: current tools cover slices of planning workflows, yet no “end-to-end AI financial planning” platform exists.
+Once compliance is streamlined, the next expansion vector is advisory, where AI has the potential to lift margins and strengthen client relationships. Interest is high, but the market is still early: current tools cover slices of planning workflows, yet no "end-to-end AI financial planning" platform exists.
 
 **What AI can currently support**
 - Compare tax liability outcomes across states, entity types, or filing positions.
@@ -167,7 +167,7 @@ Despite prototypes and marketing claims, comprehensive planning remains a practi
 
 **Why it matters for firms**
 
-As compliance gets automated, clients expect proactive guidance. AI acts as a force multiplier by speeding research, generating draft materials, and surfacing strategies that humans might miss. The firms that treat AI as an assistive layer — freeing advisors to analyze, explain, and present insights — will be best positioned to turn planning into durable revenue.
+As compliance gets automated, clients expect proactive guidance. AI acts as a force multiplier by speeding research, generating draft materials, and surfacing strategies that humans might miss. The firms that treat AI as an assistive layer, freeing advisors to analyze, explain, and present insights, will be best positioned to turn planning into durable revenue.
 
 ## **Choosing the Right AI Stack for 2026: Vendor Evaluation Checklist**
 
@@ -309,7 +309,19 @@ To use LLMs safely, you need a vendor that:
 * Provides documented [§7216](/ai/7216) workflows/consent language
 * Guarantees no training on your data
 
-Public LLMs are useful for experimentation — never for production tax work.
+Public LLMs are useful for experimentation, never for production tax work.
+
+---
+
+### **Should I build my own local LLM to handle tax research?**
+
+Building your own local LLM can work if you need absolute data privacy or have strict regulatory requirements that prohibit cloud-based tools. However, the technical and maintenance overhead is significant: you’ll need to handle OCR, document parsing, model updates, security hardening, and compliance controls yourself.
+
+For most firms, a better path is evaluating purpose-built tax AI vendors that already handle privacy, [§7216](/ai/7216) compliance, and IRS form updates. If you’re exploring DIY options, see our detailed breakdown of what it actually takes to [build a local AI tax assistant](/ai/ai-tax-assistant-local-llm), including cost, hardware requirements, and maintenance trade-offs.
+
+For deeper technical guidance on AI implementation, data lineage, and governance, resources like [MyUndoAI](https://myundoai.com/) offer thorough, research-backed guides that respect your time and intelligence.
+
+---
 
 ## 5. Next steps
 
