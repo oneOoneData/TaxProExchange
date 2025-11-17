@@ -239,6 +239,35 @@ export default function AIPage() {
               </div>
             </div>
           </div>
+
+          {/* AI Survey CTA */}
+          <div className="mb-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                    <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-slate-900">AI in Tax & Wealth Firms Survey</h3>
+                </div>
+                <p className="text-slate-700 mb-4">
+                  Help us benchmark adoption, maturity, and ROI across the profession. Your insights shape the January 2026 report and help us highlight where AI is truly delivering value.
+                </p>
+                <p className="text-sm text-slate-600">
+                  Share your experience with AI tools, automation, and how artificial intelligence is transforming your practice.
+                </p>
+              </div>
+              <div>
+                <Link
+                  href="/ai/survey"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+                >
+                  Take the Survey →
+                </Link>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </>
