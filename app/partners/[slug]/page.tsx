@@ -283,7 +283,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                     </a>
                     {partner.slug === 'taxgpt' ? (
                       <a
-                        href="https://calendly.com/devin-taxgpt/30min?utm_source=koen"
+                        href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
@@ -474,7 +474,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                           </svg>
                         </a>
                         <a
-                          href="https://calendly.com/devin-taxgpt/30min?utm_source=koen"
+                          href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 shadow-lg transition-all"
@@ -518,7 +518,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                           </svg>
                         </a>
                         <a
-                          href="https://calendly.com/devin-taxgpt/30min?utm_source=koen"
+                          href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 shadow-lg transition-all"
