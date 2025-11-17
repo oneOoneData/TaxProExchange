@@ -107,9 +107,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (profiles) {
     profiles.forEach((profile) => {
+      // Skip profiles with invalid slugs
+      if (!profile.slug || typeof profile.slug !== 'string') {
+        return;
+      }
+      
+      // Ensure slug is URL-safe
+      const safeSlug = profile.slug.trim();
+      if (!safeSlug) {
+        return;
+      }
+      
+      // Validate date
+      let lastModified: Date;
+      if (profile.updated_at) {
+        const date = new Date(profile.updated_at);
+        lastModified = isNaN(date.getTime()) ? new Date() : date;
+      } else {
+        lastModified = new Date();
+      }
+      
       routes.push({
-        url: `${siteUrl}/p/${profile.slug}`,
-        lastModified: profile.updated_at ? new Date(profile.updated_at) : new Date(),
+        url: `${siteUrl}/p/${safeSlug}`,
+        lastModified,
         changeFrequency: 'weekly',
         priority: 0.4,
       });
@@ -119,9 +139,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Blog posts
   const blogPosts = getAllPosts();
   blogPosts.forEach((post) => {
+    // Skip posts with invalid slugs
+    if (!post.slug || typeof post.slug !== 'string') {
+      return;
+    }
+    
+    // Use slug from frontmatter if available, otherwise construct from filename
+    const slug = post.data.slug || `/ai/${post.slug}`;
+    const url = slug.startsWith('http') ? slug : `${siteUrl}${slug.startsWith('/') ? slug : `/${slug}`}`;
+    
+    // Validate date
+    let lastModified: Date;
+    if (post.data.date) {
+      const date = new Date(post.data.date);
+      lastModified = isNaN(date.getTime()) ? new Date() : date;
+    } else {
+      lastModified = new Date();
+    }
+    
     routes.push({
-      url: `${siteUrl}${post.data.slug || `/ai/${post.slug}`}`,
-      lastModified: new Date(post.data.date),
+      url,
+      lastModified,
       changeFrequency: 'monthly',
       priority: 0.6,
     });
@@ -151,9 +189,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (aiTools) {
     aiTools.forEach((tool) => {
+      // Skip tools with invalid slugs (already filtered with .not('slug', 'is', null), but double-check)
+      if (!tool.slug || typeof tool.slug !== 'string') {
+        return;
+      }
+      
+      // Ensure slug is URL-safe
+      const safeSlug = tool.slug.trim();
+      if (!safeSlug) {
+        return;
+      }
+      
+      // Validate date
+      let lastModified: Date;
+      if (tool.updated_at) {
+        const date = new Date(tool.updated_at);
+        lastModified = isNaN(date.getTime()) ? new Date() : date;
+      } else {
+        lastModified = new Date();
+      }
+      
       routes.push({
-        url: `${siteUrl}/ai/tools/${tool.slug}`,
-        lastModified: tool.updated_at ? new Date(tool.updated_at) : new Date(),
+        url: `${siteUrl}/ai/tools/${safeSlug}`,
+        lastModified,
         changeFrequency: 'weekly',
         priority: 0.6,
       });

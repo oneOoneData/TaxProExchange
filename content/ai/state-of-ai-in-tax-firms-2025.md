@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-14"
 category: "AI"
 pillar: "Future of Tax Work"
-slug: "/ai/ai-in-tax-firms-2025"
+slug: "/ai/state-of-ai-in-tax-firms-2025"
 keywords:
   - "AI in tax firms"
   - "AI for CPAs"
@@ -62,7 +62,7 @@ For the first time in 2025, AI will no longer feel like a novelty during filing 
 
 - The AICPA and CPA.com now call AI “a strategic imperative,” and that language is showing up in budgets.
 - Firms such as RSM and BDO aren’t dabbling anymore; they’re funding internal AI development and embedding automation across workflows.
-- Incumbents (Thomson Reuters, Wolters Kluwer, Intuit) frame AI as their next growth engine, while challengers like [TaxGPT](/ai/tools/taxgpt), [Blue J](/ai/tools/blue-j), and [Bizora](/ai/tools/bizora) ship purpose-built models for tax work, not generic use.
+- Incumbents (Thomson Reuters, Wolters Kluwer, Intuit) frame AI as their next growth engine, while challengers like [TaxGPT](/ai/tools/taxgpt), [Blue J](/partners/bluej), and [Bizora](/ai/tools/bizora) ship purpose-built models for tax work, not generic use.
 
 The shift is driven by data, not hype:
 
@@ -83,7 +83,7 @@ AI-assisted research tools train on authoritative sources, the Internal Revenue 
 
 **Representative tools**
 - **[Thomson Reuters CoCouncil](/ai/tools/cocounsel)** for trusted summaries tied to citations.
-- **[Blue J](/ai/tools/blue-j)** for scenario modeling and outcome prediction.
+- **[Blue J](/partners/bluej)** for scenario modeling and outcome prediction.
 - **[Bizora](/ai/tools/bizora)** for complex federal, state, and international questions with citation-backed reasoning, document parsing, and scenario modeling.
 - **[TaxGPT](/ai/tools/taxgpt)** for cited tax research, memo drafting, and its signature “Tax Matrix” comparisons.
 
