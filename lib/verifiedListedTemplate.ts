@@ -51,10 +51,10 @@ export function verifiedListedHtml(opts: {
                 <!-- Survey CTA -->
                 <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin:0 0 18px;">
                   <p style="margin:0 0 10px;font-size:14px;">
-                    Help us improve TaxProExchange for you — take our 1‑minute AI survey.
+                    TaxProExchange is running a survey on AI in Tax Firm - We'd love your input! Take 3 minutes to complete the survey here.
                   </p>
                   <div style="text-align:center;">
-                    <a href="${surveyUrl}" style="background:#1f2937;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;display:inline-block;font-weight:600">Take 1‑minute survey</a>
+                    <a href="${surveyUrl}" style="background:#1f2937;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;display:inline-block;font-weight:600">Take survey</a>
                   </div>
                 </div>
 
@@ -144,7 +144,7 @@ Congrats. Your profile is now VERIFIED and publicly listed. People can find you 
 
 View your profile: ${profileUrl}
 
-Quick favor (optional): Take our 1‑minute AI survey to help improve TaxProExchange.
+TaxProExchange is running a survey on AI in Tax Firm - We'd love your input! Take 3 minutes to complete the survey here.
 Survey: ${surveyUrl}
 
 Next steps:
