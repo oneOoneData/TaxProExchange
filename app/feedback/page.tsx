@@ -82,7 +82,7 @@ export default function FeedbackPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h1 className="text-xl font-semibold text-slate-900 mb-2">Authentication Required</h1>
+            <h1 className="text-3xl font-semibold text-slate-900 mb-2">Authentication Required</h1>
             <p className="text-slate-600">Please sign in to submit feedback.</p>
           </div>
         </div>
