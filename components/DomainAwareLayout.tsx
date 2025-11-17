@@ -89,6 +89,14 @@ export default function DomainAwareLayout({ children }: DomainAwareLayoutProps) 
           {/* Main content - no conditional wrappers */}
           {children}
           
+          {/* Keak tracking pixel for A/B testing and conversion tracking */}
+          <Script
+            id="keak-script"
+            src="https://zzontar2hsjaawcn.public.blob.vercel-storage.com/scripts/domain-495-httpstaxproexchange.com.js"
+            data-domain="495"
+            strategy="afterInteractive"
+          />
+          
           {/* Footer - always render */}
           <Footer />
         </ClerkProvider>
