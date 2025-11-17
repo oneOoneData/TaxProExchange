@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import 'stream-chat-react/dist/css/v2/index.css';
 import DomainAwareLayout from '@/components/DomainAwareLayout';
-import { defaultTitle, defaultDescription } from '@/lib/seo';
+import JsonLd from '@/components/seo/JsonLd';
+import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 
-// This layout will be replaced by DomainAwareLayout
-// Keeping minimal metadata for Next.js
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.taxproexchange.com'),
@@ -30,10 +32,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  // Add Google Search Console verification when you get the code
-  // verification: {
-  //   google: 'YOUR_VERIFICATION_CODE_HERE',
-  // },
   openGraph: {
     siteName: 'TaxProExchange',
     type: 'website',
@@ -65,6 +63,10 @@ export const metadata: Metadata = {
     shortcut: '/favicon.ico',
   },
   manifest: '/site.webmanifest',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+  },
 };
 
 export default function RootLayout({
@@ -72,5 +74,32 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DomainAwareLayout>{children}</DomainAwareLayout>;
+  return (
+    <html lang="en" data-scroll-behavior="smooth">
+      <body className={inter.className}>
+        {/* JSON-LD Structured Data */}
+        <JsonLd data={getOrganizationJsonLd()} />
+        <JsonLd data={getWebsiteJsonLd()} />
+        {/* Google reCAPTCHA v3 */}
+        {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+          <Script
+            src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+            strategy="lazyOnload"
+          />
+        )}
+        
+        <DomainAwareLayout>
+          {children}
+        </DomainAwareLayout>
+        
+        {/* Keak tracking pixel for A/B testing and conversion tracking */}
+        <Script
+          id="keak-script"
+          src="https://zzontar2hsjaawcn.public.blob.vercel-storage.com/scripts/domain-495-httpstaxproexchange.com.js"
+          data-domain="495"
+          strategy="afterInteractive"
+        />
+      </body>
+    </html>
+  );
 }
