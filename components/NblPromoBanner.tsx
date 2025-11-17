@@ -44,7 +44,9 @@ export default function WebinarPromoBanner() {
 
         <a 
           className="nbl-text-link" 
-          href="https://learn.taxproexchange.com/ai-webinar-series-tax-pro-exchange" 
+          href="https://calendly.com/devin-taxgpt/how-to-reclaim-your-competitive-edge-in-2026-part2" 
+          target="_blank"
+          rel="noopener noreferrer"
           aria-label="Register for AI webinar series"
         >
           REGISTER<span className="lime-text"> NOW</span>

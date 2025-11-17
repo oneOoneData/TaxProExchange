@@ -78,6 +78,7 @@ function generateSoftwareApplicationJsonLd(tool: {
     description: description.substring(0, 160),
     url: url,
     applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web, SaaS, Cloud',
   };
 
   if (image) {

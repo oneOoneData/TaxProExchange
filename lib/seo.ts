@@ -76,6 +76,7 @@ export function generateWebSiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "name": "TaxProExchange",
     "url": `${siteUrl}/`,
     "potentialAction": {
       "@type": "SearchAction",

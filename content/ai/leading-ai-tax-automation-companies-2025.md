@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-17"
 category: "AI"
 pillar: "Tax Technology"
-slug: "/ai/leading-ai-tax-automation-companies-2026"
+slug: "/ai/leading-ai-tax-automation-companies-2025"
 keywords:
   - "AI tax tools"
   - "AI for tax professionals"
@@ -24,7 +24,7 @@ keywords:
   - "tax automation market map"
 previewImage: "/images/leading-ai-tax-automation-companies.png"
 imageAlt: "Market map of leading AI tax automation companies across research, preparation, workflow, and planning categories."
-canonical: "https://www.taxproexchange.com/ai/leading-ai-tax-automation-companies-2026"
+canonical: "https://www.taxproexchange.com/ai/leading-ai-tax-automation-companies-2025"
 readingTime: 14
 robots: "index,follow"
 ogTitle: "Leading AI Tax Automation Companies (2026 Market Map)"
@@ -64,8 +64,8 @@ Below is a comparison of the leading tools across these touchpoints.
 | Company | Category Tags | Ideal ICP | Core Use Cases | AI-Native | Pricing | Best For |
 |--------|---------------|-----------|----------------|:---------:|---------|----------|
 | **[TaxGPT](/ai/tools/taxgpt)** | Research, drafting | Solo → mid-size | Citation-backed research; client letters; abatement requests; notices | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$ | High-accuracy interpretation & compliance support |
-| **[BlueJ](/ai/tools/blue-j)** | Research, planning | Advisory, EA firms | Predictive analysis; multi-factor legal tests; worker classification | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$$ | Legal reasoning & planning scenarios |
-| **[Truss](/ai/tools/truss)** | Intake automation, document cleanup | 1040-heavy firms | PDF convert; auto-split; auto-rename; basic form detection; emerging K-1 extraction *(see K1x Aggregator Plus)* | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$ | High-volume document intake cleanup |
+| **[BlueJ](/partners/bluej)** | Research, planning | Advisory, EA firms | Predictive analysis; multi-factor legal tests; worker classification | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$$ | Legal reasoning & planning scenarios |
+| **[Truss](/partners/truss)** | Intake automation, document cleanup | 1040-heavy firms | PDF convert; auto-split; auto-rename; basic form detection; emerging K-1 extraction *(see K1x Aggregator Plus)* | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$ | High-volume document intake cleanup |
 | **Magnetic Tax** | Preparation automation | Solo → mid-size | AI extraction; mapping; 1040 draft returns; review flags | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$ | AI-driven first-pass 1040 prep |
 | **[Black Ore](/ai/tools/black-ore)** | Prep automation + workpapers | Mid-size → large | Automated extraction; AI workpaper generation; document linking | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$$ | Modern AI workpaper automation |
 | **[Solomon](/ai/tools/solomon)** | Preparation automation | Solo → mid-size | Extract documents; draft returns directly inside existing prep software | <span style="color: #10b981; font-size: 1.2em;">✓</span> | $$ | Firms wanting AI prep inside their current workflow |
@@ -108,10 +108,10 @@ Firms have different bottlenecks. These recommendations are use-case driven.
 
 ### **If your bottleneck is Research & Interpretation**
 - **[TaxGPT](/ai/tools/taxgpt)** — fast, cited answers  
-- **[BlueJ](/ai/tools/blue-j)** — predictive multi-factor analysis  
+- **[BlueJ](/partners/bluej)** — predictive multi-factor analysis  
 
 ### **If your bottleneck is Document Handling or Prep**
-- **[Truss](/ai/tools/truss)** — AI-native intake cleanup  
+- **[Truss](/partners/truss)** — AI-native intake cleanup  
 - **Magnetic Tax** — automated extraction & 1040 draft creation  
 - **[Black Ore](/ai/tools/black-ore)** — AI-driven workpapers  
 - **[Solomon](/ai/tools/solomon)** — AI prep inside existing software  
@@ -135,7 +135,7 @@ Firms have different bottlenecks. These recommendations are use-case driven.
 
 # 5. Vendor Evaluation Checklist
 
-For a more comprehensive vendor evaluation checklist covering AI roadmap, security, integration, and scalability, see [What's Next for AI in Tax Firms](/ai/ai-in-tax-firms-2025).
+For a more comprehensive vendor evaluation checklist covering AI roadmap, security, integration, and scalability, see [What's Next for AI in Tax Firms](/ai/state-of-ai-in-tax-firms-2025).
 
 ### Compliance
 - ☐ [§7216 documentation](/ai/7216)  
@@ -170,7 +170,7 @@ For a more comprehensive vendor evaluation checklist covering AI roadmap, securi
 # 6. FAQs
 
 ### **What matters most when choosing an AI vendor?**
-The roadmap. Tax AI shifts quarterly. Pick partners committed to research, prep, workflow, and planning, not single-feature add-ons. For a deeper dive on vendor evaluation, see [What's Next for AI in Tax Firms](/ai/ai-in-tax-firms-2025).
+The roadmap. Tax AI shifts quarterly. Pick partners committed to research, prep, workflow, and planning, not single-feature add-ons. For a deeper dive on vendor evaluation, see [What's Next for AI in Tax Firms](/ai/state-of-ai-in-tax-firms-2025).
 
 ### **Can small firms afford AI?**
 Yes. Most challengers offer flexible per-user or per-return pricing. Many pilots land under \$1,000/month.
