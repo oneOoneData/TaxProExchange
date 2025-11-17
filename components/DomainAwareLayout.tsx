@@ -8,7 +8,8 @@ import { useEffect } from 'react';
 
 // Disable SSR for ALL components that might cause hydration issues
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: false });
-const CanonicalUrl = dynamic(() => import('@/components/CanonicalUrl'), { ssr: false });
+// CanonicalUrl removed - Next.js metadata.alternates.canonical handles this server-side
+// Client-side canonical injection would cause duplicate canonicals
 const AppNavigation = dynamic(() => import('@/components/AppNavigation'), { ssr: false });
 const MobileBottomNav = dynamic(() => import('@/components/MobileBottomNav'), { ssr: false });
 

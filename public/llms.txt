@@ -1,0 +1,16 @@
+# llms.txt for TaxProExchange
+
+# About
+TaxProExchange is a discovery and connection platform for verified tax professionals (CPAs, EAs, CTEC preparers).
+
+# Content Sources
+- Blog: https://www.taxproexchange.com/ai
+- Tools directory: https://www.taxproexchange.com/ai/tools
+- Methodology: https://www.taxproexchange.com/ai/tools/methodology
+
+# Contact
+For questions about content or corrections, contact: koen@cardifftax.com
+
+# License
+Content is provided for informational purposes. Verify all information independently before use.
+

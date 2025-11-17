@@ -86,9 +86,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   searchPresets.forEach((preset) => {
-    const encodedQuery = preset.query.replace(/&/g, '&amp;');
+    // Next.js MetadataRoute.Sitemap handles URL encoding automatically
+    // Don't manually encode & to &amp; as it will double-encode
     routes.push({
-      url: `${siteUrl}/search?${encodedQuery}`,
+      url: `${siteUrl}/search?${preset.query}`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.6,

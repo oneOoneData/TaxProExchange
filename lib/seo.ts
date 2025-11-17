@@ -440,6 +440,8 @@ export function generateArticleCollectionJsonLd({
     '@type': 'Article',
     headline: title,
     description,
+    // datePublished is required for Article schema
+    datePublished: dateModified || new Date().toISOString(),
     dateModified: dateModified || new Date().toISOString(),
     ...(author && {
       author: {
