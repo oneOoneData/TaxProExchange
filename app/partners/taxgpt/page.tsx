@@ -184,17 +184,6 @@ export default function TaxGPTPartnerPage() {
                 <p className="text-lg text-slate-600 mb-4">
                   If your firm wants to reduce research time while strengthening accuracy and defensibility, TaxGPT is the tool we recommend. Learn more about the <Link href="/ai/state-of-ai-in-tax-firms-2025" className="text-emerald-600 hover:text-emerald-700 underline">state of AI in tax firms</Link>.
                 </p>
-                <a
-                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                >
-                  Request a Custom Demo
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
               </div>
 
               {/* Key Capabilities */}
@@ -378,25 +367,6 @@ export default function TaxGPTPartnerPage() {
                     ChatGPT is great for general writing. <strong>TaxGPT is built for professional tax compliance and defensible research.</strong>
                   </p>
                 </div>
-
-                {/* Conversion CTA after comparison */}
-                <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">See exactly how TaxGPT applies to your firm</h3>
-                  <p className="text-base text-slate-600 mb-6">
-                    Upload a prior-year return, a P&L, or a multistate scenario — we&apos;ll walk through it live.
-                  </p>
-                  <a
-                    href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                  >
-                    Request a Custom Demo
-                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </a>
-                </div>
               </div>
 
               {/* Webinar Recordings */}
@@ -420,31 +390,18 @@ export default function TaxGPTPartnerPage() {
                         A strategic overview of workforce shortages, rising complexity, and how specialized AI helps firms increase capacity.
                       </p>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <a
-                        href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                      >
-                        Watch the Recording
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </a>
-                      <a
-                        href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 shadow-lg transition-all"
-                      >
-                        Request a Custom Demo
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </a>
-                    </div>
+                    <a
+                      href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                    >
+                      Watch the Recording
+                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </a>
                     <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
                       <p className="text-sm font-medium text-amber-900">
                         ⚠️ Access requires a verified email. Submit yours when prompted to unlock the recording.
@@ -467,31 +424,18 @@ export default function TaxGPTPartnerPage() {
                         Deep-dive demonstrations of how firms use TaxGPT for research, review, planning, and proposals.
                       </p>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <a
-                        href="https://fathom.video/share/a79tTvfbuRR1N71CjtcgvjsyXAbsr2ag"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                      >
-                        Watch the Recording
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </a>
-                      <a
-                        href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-white border border-emerald-200 hover:bg-emerald-50 shadow-lg transition-all"
-                      >
-                        Request a Custom Demo
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </a>
-                    </div>
+                    <a
+                      href="https://fathom.video/share/a79tTvfbuRR1N71CjtcgvjsyXAbsr2ag"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                    >
+                      Watch the Recording
+                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </a>
                     <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
                       <p className="text-sm font-medium text-amber-900">
                         ⚠️ Access requires a verified email. Submit yours when prompted to unlock the recording.
