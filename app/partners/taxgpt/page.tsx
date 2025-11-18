@@ -149,8 +149,7 @@ export default function TaxGPTPartnerPage() {
             <div className="max-w-4xl mx-auto space-y-12">
               {/* What Is TaxGPT */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                  <span className="text-2xl">❓</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">
                   What Is TaxGPT?
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -164,10 +163,11 @@ export default function TaxGPTPartnerPage() {
                 </p>
               </div>
 
+              <hr className="my-10 border-slate-200" />
+
               {/* Why TaxProExchange Recommends TaxGPT */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                  <span className="text-2xl">⭐</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">
                   Why TaxProExchange Recommends TaxGPT
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -179,24 +179,25 @@ export default function TaxGPTPartnerPage() {
                   <li>Analyzes tax documents such as prior-year returns, financial statements, notices, and workpapers</li>
                   <li>Handles multi-state complexity with the <strong>Matrix</strong> feature</li>
                   <li>Generates defensive workpapers, memos, engagement letter language, and client-ready explanations</li>
-                  <li>Operates with built-in §7216 awareness and does <strong>not</strong> auto-file returns</li>
+                  <li>Operates with built-in <Link href="/ai/7216" className="text-emerald-600 hover:text-emerald-700 underline">§7216</Link> awareness and does <strong>not</strong> auto-file returns</li>
                 </ul>
                 <p className="text-lg text-slate-600 mb-4">
                   If your firm wants to reduce research time while strengthening accuracy and defensibility, TaxGPT is the tool we recommend. Learn more about the <Link href="/ai/state-of-ai-in-tax-firms-2025" className="text-emerald-600 hover:text-emerald-700 underline">state of AI in tax firms</Link>.
                 </p>
               </div>
 
+              <hr className="my-10 border-slate-200" />
+
               {/* Key Capabilities */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                  <span className="text-2xl">🔑</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-8">
                   Key Capabilities
                 </h2>
                 
                 <div className="space-y-8">
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <span className="text-xl">🧠</span>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                      {/* Icon: Research */}
                       Research With Live Citations
                     </h3>
                     <p className="text-base text-slate-600 mb-3">
@@ -212,8 +213,8 @@ export default function TaxGPTPartnerPage() {
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <span className="text-xl">📄</span>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                      {/* Icon: Document */}
                       Document Upload & Review
                     </h3>
                     <p className="text-base text-slate-600 mb-3">
@@ -229,8 +230,8 @@ export default function TaxGPTPartnerPage() {
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <span className="text-xl">🌎</span>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                      {/* Icon: Multistate */}
                       Multi-State Matrix (Most Popular Feature)
                     </h3>
                     <p className="text-base text-slate-600 mb-3">
@@ -250,8 +251,8 @@ export default function TaxGPTPartnerPage() {
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <span className="text-xl">🧾</span>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                      {/* Icon: Pricing */}
                       Proposal & Pricing Automation
                     </h3>
                     <p className="text-base text-slate-600 mb-3">
@@ -267,8 +268,8 @@ export default function TaxGPTPartnerPage() {
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                      <span className="text-xl">🧮</span>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                      {/* Icon: Planning */}
                       Planning Scenarios
                     </h3>
                     <p className="text-base text-slate-600 mb-3">
@@ -287,28 +288,31 @@ export default function TaxGPTPartnerPage() {
               </div>
 
               {/* Mid-Page CTA */}
-              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 p-8 md:p-10 text-center">
-                <h2 className="text-2xl font-bold text-slate-900 mb-3">Ready to see TaxGPT on your data?</h2>
-                <p className="text-base text-slate-600 mb-6">
-                  Upload a prior-year return, a P&L, or a multistate scenario — we&apos;ll walk through it live.
-                </p>
-                <a
-                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                >
-                  Request a Custom Demo
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
+              <div className="mt-10 mb-6">
+                <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 p-8 md:p-10 text-center">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-3">Ready to see TaxGPT on your data?</h2>
+                  <p className="text-base text-slate-600 mb-6">
+                    Upload a prior-year return, a P&L, or a multistate scenario — we&apos;ll walk through it live.
+                  </p>
+                  <a
+                    href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                  >
+                    Request a Custom Demo
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </a>
+                </div>
               </div>
+
+              <hr className="my-10 border-slate-200" />
 
               {/* TaxGPT vs ChatGPT */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">⚖️</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   TaxGPT vs ChatGPT (What Tax Pros Need to Know)
                 </h2>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
@@ -369,10 +373,11 @@ export default function TaxGPTPartnerPage() {
                 </div>
               </div>
 
+              <hr className="my-10 border-slate-200" />
+
               {/* Webinar Recordings */}
               <div className="space-y-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">🎥</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   Webinar Recordings
                 </h2>
 
@@ -394,17 +399,13 @@ export default function TaxGPTPartnerPage() {
                       href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                      className="inline-block border border-emerald-600 text-emerald-700 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition"
                     >
                       Watch the Recording
-                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
                     </a>
                     <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
                       <p className="text-sm font-medium text-amber-900">
-                        ⚠️ Access requires a verified email. Submit yours when prompted to unlock the recording.
+                        Access requires a verified email. Submit yours when prompted to unlock the recording.
                       </p>
                     </div>
                   </div>
@@ -428,27 +429,24 @@ export default function TaxGPTPartnerPage() {
                       href="https://fathom.video/share/a79tTvfbuRR1N71CjtcgvjsyXAbsr2ag"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                      className="inline-block border border-emerald-600 text-emerald-700 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition"
                     >
                       Watch the Recording
-                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
                     </a>
                     <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
                       <p className="text-sm font-medium text-amber-900">
-                        ⚠️ Access requires a verified email. Submit yours when prompted to unlock the recording.
+                        Access requires a verified email. Submit yours when prompted to unlock the recording.
                       </p>
                     </div>
                   </div>
                 </article>
               </div>
 
+              <hr className="my-10 border-slate-200" />
+
               {/* Is TaxGPT Right for Your Firm */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                  <span className="text-2xl">✅</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4">
                   Is TaxGPT Right for Your Firm?
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -469,28 +467,30 @@ export default function TaxGPTPartnerPage() {
               </div>
 
               {/* Final CTA */}
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 md:p-10">
-                <h2 className="text-2xl font-bold text-slate-900 mb-4">Request a Custom Demo</h2>
-                <p className="text-base text-slate-600 mb-6">
-                  We&apos;ll tailor the walkthrough to your:
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-6">
-                  <li>firm size</li>
-                  <li>states served</li>
-                  <li>client mix</li>
-                  <li>workflow needs</li>
-                </ul>
-                <a
-                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                >
-                  Request a Custom Demo
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
+              <div className="mt-10 mb-6">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 md:p-10">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-4">Request a Custom Demo</h2>
+                  <p className="text-base text-slate-600 mb-6">
+                    We&apos;ll tailor the walkthrough to your:
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-6">
+                    <li>firm size</li>
+                    <li>states served</li>
+                    <li>client mix</li>
+                    <li>workflow needs</li>
+                  </ul>
+                  <a
+                    href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                  >
+                    Request a Custom Demo
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </a>
+                </div>
               </div>
 
               {/* Link to Deep Dive */}
@@ -501,12 +501,9 @@ export default function TaxGPTPartnerPage() {
                 </p>
                 <Link
                   href="/partners/taxgpt/deep-dive"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
+                  className="inline-block border border-emerald-600 text-emerald-700 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition"
                 >
                   TaxGPT Deep Dive →
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
                 </Link>
               </div>
             </div>
@@ -543,4 +540,3 @@ export default function TaxGPTPartnerPage() {
     </>
   );
 }
-
