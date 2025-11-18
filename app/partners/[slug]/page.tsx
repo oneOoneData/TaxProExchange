@@ -267,50 +267,17 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                   </svg>
                 </a>
               ) : partner.slug === 'taxgpt' ? (
-                <>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a
-                      href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                    >
-                      Watch the Recording
-                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </a>
-                    {partner.slug === 'taxgpt' ? (
-                      <a
-                        href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
-                      >
-                        Request a Custom Demo
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </a>
-                    ) : partner.website ? (
-                      <a
-                        href={partner.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
-                      >
-                        Request a Custom Demo
-                        <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </a>
-                    ) : null}
-                  </div>
-                  <p className="mt-4 text-sm text-slate-500">
-                    Access to the recording requires a verified email. You&apos;ll be prompted before viewing.
-                  </p>
-                </>
+                <a
+                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 shadow-lg transition-all"
+                >
+                  Request a Custom Demo
+                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </a>
               ) : partner.slug === 'truss' ? (
                 <a
                   href="https://gettruss.link/koen"
@@ -341,6 +308,38 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
             </div>
           </div>
         </section>
+
+        {/* Quick Navigation to Webinars - TaxGPT only */}
+        {partner.slug === 'taxgpt' && (
+          <section className="py-8 bg-slate-50 border-b border-slate-200">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <a
+                    href="#webinar-part-1"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition-all"
+                  >
+                    <svg className="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Webinar 1: Key Insights + Recording
+                  </a>
+                  <a
+                    href="#webinar-part-2"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:border-slate-400 shadow-sm transition-all"
+                  >
+                    <svg className="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Webinar 2: Key Takeaways + Recording
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Special Offer CTA - Only show for non-Truss partners */}
         {partner.slug !== 'truss' && partner.slug !== 'taxgpt' && (
@@ -427,7 +426,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                 </div>
               ) : partner.slug === 'taxgpt' ? (
                 <div className="space-y-8">
-                  <article className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10">
+                  <article id="webinar-part-1" className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10 scroll-mt-8">
                     <div className="flex flex-col gap-6">
                       <div>
                         <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
@@ -491,30 +490,30 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                     </div>
                   </article>
 
-                  <article className="rounded-2xl border border-slate-200 bg-white p-8 md:p-10">
-                    <div className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-                      Upcoming Webinar
-                    </div>
-                    <h3 className="mt-2 text-2xl font-bold text-slate-900">
-                      Part 2: How to Reclaim Your Competitive Edge in 2026
-                    </h3>
-                    <p className="text-sm text-slate-500">
-                      Live on November 18 • Hosted by TaxGPT
-                    </p>
-                    <p className="mt-4 text-base text-slate-600">
-                      The follow-up session dives into detailed examples and applied workflows from firm engagements, helping teams understand how specialized AI augments research, drafting, and review in practice.
-                    </p>
-                    <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                  <article id="webinar-part-2" className="rounded-2xl border border-slate-200 bg-white p-8 md:p-10 scroll-mt-8">
+                    <div className="flex flex-col gap-6">
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                          Webinar Recording
+                        </p>
+                        <h3 className="mt-2 text-2xl font-bold text-slate-900">
+                          Part 2: How to Reclaim Your Competitive Edge in 2026
+                        </h3>
+                        <p className="mt-4 text-base text-slate-600">
+                          The follow-up session dives into detailed examples and applied workflows from firm engagements, helping teams understand how specialized AI augments research, drafting, and review in practice.
+                        </p>
+                      </div>
                       <div className="flex flex-col sm:flex-row gap-4">
                         <a
-                          href="https://calendly.com/devin-taxgpt/how-to-reclaim-your-competitive-edge-in-2026-part2"
+                          href="https://fathom.video/share/a79tTvfbuRR1N71CjtcgvjsyXAbsr2ag"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
                         >
-                          Reserve Your Seat
+                          Watch the Recording
                           <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </a>
                         <a
@@ -529,10 +528,220 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
                           </svg>
                         </a>
                       </div>
+                      <p className="text-sm text-slate-500">
+                        Access requires a verified email. Submit yours when prompted to unlock the recording.
+                      </p>
+                      <div className="border-t border-slate-200 pt-6 mt-2">
+                        <h3 className="text-2xl font-bold text-slate-900 mb-4">
+                          What Were Some Key Takeaways From the Second Session?
+                        </h3>
+                        <p className="text-base text-slate-600 mb-6">
+                          In Part 2, we took a deep dive into the specifics of how firms use TaxGPT to reclaim their competitive edge in 2026. Unlike the broad overview of how firms can use TaxGPT to compete at the beginning of Part 1, the second session involved a walk-through of actual tax workflow examples so participants could see firsthand how firms are using TaxGPT to save time on prep, research, planning and client communications.
+                        </p>
+                        <p className="text-base text-slate-600 mb-8">
+                          If You Are Evaluating an AI Tool to Implement Within Your Firm, Here Are the Insights That Matter:
+                        </p>
+                      </div>
+
+                      <div className="space-y-8">
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            1. TaxGPT is NOT a search engine - it is a tax research + workflow copilot.
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            CPAs generally begin using AI similar to the way they would use Google: asking very narrow questions, providing minimal context and receiving limited depth of response.
+                          </p>
+                          <p className="text-base text-slate-600 mb-3">
+                            In the second session, participants saw how, as soon as you provide TaxGPT with all relevant information about your client (i.e., entities; income sources; fact pattern; states; prior year returns), the model will behave as a consultative research partner to provide assistance with:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4">
+                            <li>documentation related to R&D tax credits</li>
+                            <li>look-back years for research purposes</li>
+                            <li>reasonable-basis memos</li>
+                            <li>research citations</li>
+                            <li>tax positions and work paper outlines</li>
+                          </ul>
+                          <p className="text-base text-slate-600 mt-3">
+                            Ultimately, you do not simply receive answers - you also receive drafts of memoranda, client-explained concepts and audit-ready evidence to defend those concepts.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            2. Document Upload and Analysis Has Become a Competency that Small Firms Must Possess
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            Kevin demonstrated how firms are using TaxGPT to analyze prior-year S-Corporation and Partnership Returns; P&Ls and Balance Sheets; Trial Balances; Workpapers; Multi-State Filings Requirements.
+                          </p>
+                          <p className="text-base text-slate-600 mb-3">
+                            Live Use Cases were demonstrated including:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>Tie-Outs: Finding Discrepancies Between P&Ls Filed in Prior Years and Actual Return (Even Down to Specific Accounts)</li>
+                            <li>Documenting R&D Credit Information</li>
+                            <li>Automatically Creating Schedules, Notes, and Bullet Points for Workpapers</li>
+                            <li>Automatically Creating Lists of Items Clients Need to Provide</li>
+                          </ul>
+                          <p className="text-base text-slate-600">
+                            If you ingest prior year returns before quoting, TaxGPT enables you to establish accurate pricing and mitigate scope creep for engagements.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            3. Proposal Development and Pricing Will be Done Faster and More Defensively
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            Most firms currently price engagements based upon memory, or by utilizing one of the many rigid proposal development tools available today.
+                          </p>
+                          <p className="text-base text-slate-600 mb-3">
+                            TaxGPT demonstrated how to:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>Estimate Complexity Based Upon Reading Prior Year Returns</li>
+                            <li>Identify Scope Items Clients Actually Need</li>
+                            <li>Develop Proposal Language</li>
+                            <li>Develop Engagement Letter Scope</li>
+                            <li>Price Against National Quartiles</li>
+                            <li>Defend the Price Justified to Clients</li>
+                            <li>Save Approximately 30-60 minutes per New Engagement.</li>
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            4. The Matrix Feature Will Save Hours of Time Searching for Multistate Rules
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            Matrix is one of the features that has been demonstrated as the most powerful tool presented:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>State Business Income Tax Rules</li>
+                            <li>Nexus Triggers</li>
+                            <li>Filing Requirements</li>
+                            <li>Due Dates & Extended Due Dates</li>
+                            <li>Penalty Structures</li>
+                            <li>Payment Portals</li>
+                            <li>Sales Tax Considerations</li>
+                            <li>Apportionment References</li>
+                          </ul>
+                          <p className="text-base text-slate-600">
+                            Each Cell Becomes a Full Research Thread Complete with Sources - Not a Static Table.
+                          </p>
+                          <p className="text-base text-slate-600 mt-2">
+                            Participants Compared it to &quot;Smart Charts, But Actually Useful&quot;.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            5. The Real-World Tax Planning Scenarios Demonstrated How Far TaxGPT Can Go
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            The Group Walked Through Multiple Planning Scenarios Including:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>Planning Options for Service Providers Who Own an S-Corporation</li>
+                            <li>Divorce Planning Where There is a Business and/or Real Estate Split</li>
+                            <li>Retirement Planning (tax, property, and estate angles)</li>
+                            <li>Choosing Entity Structure When Spouses Operate Businesses</li>
+                            <li>Implications of Depreciation, Filing Status, and Section 1041</li>
+                            <li>Whether Elderly Clients Need Active Planning</li>
+                            <li>Moving Assets From Dormant Schedule C Businesses to Investments</li>
+                          </ul>
+                          <p className="text-base text-slate-600 mb-3">
+                            Findings Included:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>TaxGPT Can Create Entire Planning Workflows</li>
+                            <li>TaxGPT Can Generate First-Draft Strategy List</li>
+                            <li>TaxGPT Can Validate Your Own Strategies</li>
+                            <li>TaxGPT Will Not Propose Investment Products (Compliance-Safe)</li>
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            6. AI Does Not Replace Professionals - It Enhances the Work You Already Do
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            TaxGPT Clearly Reiterated the Following:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>No &quot;Upload and Auto-File&quot; Return Generation</li>
+                            <li>Professionals Remain Involved</li>
+                            <li>AI Accelerates Research, Analysis, and Drafting</li>
+                            <li>AI Enables Busywork Reduction, Not Expert Elimination</li>
+                          </ul>
+                          <p className="text-base text-slate-600">
+                            This is Important for Compliance Under §7216 and Trust With Clients.
+                          </p>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            7. Engagement Letters, Client Emails and Documentation Will Be Created Automatically
+                          </h4>
+                          <p className="text-base text-slate-600 mb-3">
+                            Kevin Demonstrated How the Writing Tools:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-3">
+                            <li>Create Clear Client Request Lists</li>
+                            <li>Create Engagement Letter Scopes</li>
+                            <li>Create Planning Summaries for Clients</li>
+                            <li>Create Internal Memos</li>
+                            <li>Create Proposals Tailored to Specific Fact Patterns</li>
+                          </ul>
+                          <p className="text-base text-slate-600">
+                            The More Context You Upload, the Better the Output.
+                          </p>
                     </div>
-                    <p className="mt-4 text-sm text-slate-500">
-                      Two additional webinars in the series will be announced soon. Hold your spot to receive updates first.
-                    </p>
+
+                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            Why These Concepts Are Important For Firms Entering 2026
+                          </h4>
+                          <p className="text-base text-slate-600 mb-4">
+                            Now firms can:
+                          </p>
+                          <ul className="list-disc list-inside space-y-2 text-base text-slate-600 ml-4 mb-4">
+                            <li>Do Research Faster</li>
+                            <li>Have Cleaner Workpapers</li>
+                            <li>Have Stronger Documentation</li>
+                            <li>Price More Accurately</li>
+                            <li>Complete Meaningful Tax Planning</li>
+                            <li>Communicate More Confidently With Clients</li>
+                            <li>Spend Less Time Digging Through PDFs or State Sites</li>
+                          </ul>
+                          <p className="text-base text-slate-600 font-semibold">
+                            And Most Importantly: There is No Other Tool That Combines Domain-Specific Training with Full Research Threads, Citations, and Document Analysis Like TaxGPT.
+                          </p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">
+                            See How This Applies to Your Firm
+                          </h4>
+                          <p className="text-base text-slate-600 mb-4">
+                            If you want to understand exactly how TaxGPT fits your workflows - research, planning, prep, proposals, or state work - the fastest way is to walk through your own fact patterns live.
+                          </p>
+                        <a
+                          href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                        >
+                          Request a Custom Demo
+                          <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </a>
+                          <p className="text-sm text-slate-500 mt-3">
+                            We&apos;ll tailor it to your firm&apos;s size, tools, service mix, and use cases.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </article>
 
                 </div>
