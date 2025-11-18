@@ -49,11 +49,9 @@ export default function TaxGPTDeepDivePage() {
         <section className="relative overflow-hidden bg-white border-b border-slate-200">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-start justify-between mb-6">
-                <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
-                  TaxGPT Deep Dive: How Firms Use AI to Reclaim Their Competitive Edge in 2026
-                </h1>
-              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
+                TaxGPT Deep Dive: How Firms Use AI to Reclaim Their Competitive Edge in 2026
+              </h1>
               <p className="text-xl text-slate-600 mb-8">
                 This guide expands on the webinar series and walks through detailed examples of how tax firms use TaxGPT to streamline research, planning, document review, and engagement workflows.
               </p>
@@ -66,22 +64,22 @@ export default function TaxGPTDeepDivePage() {
                     Not a Search Engine
                   </a>
                   <a href="#document-upload" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
-                    Document Upload
+                    Document Upload & Analysis
                   </a>
                   <a href="#proposals" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
-                    Proposals
+                    Proposals & Pricing
                   </a>
                   <a href="#matrix" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
-                    Matrix
+                    Multi-State Matrix
                   </a>
                   <a href="#planning" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
-                    Planning
+                    Planning Scenarios
                   </a>
                   <a href="#documentation" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
                     Documentation
                   </a>
                   <a href="#impact" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
-                    Impact
+                    2026 Impact
                   </a>
                   <a href="#demo" className="text-sm text-slate-600 hover:text-emerald-600 transition-colors">
                     Demo CTA
@@ -98,8 +96,7 @@ export default function TaxGPTDeepDivePage() {
             <div className="max-w-4xl mx-auto space-y-16">
               {/* Section 1 */}
               <div id="not-search-engine" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">🧠</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   1. TaxGPT Is Not a Search Engine
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -108,18 +105,20 @@ export default function TaxGPTDeepDivePage() {
                 <p className="text-lg text-slate-600 mb-6">
                   TaxGPT behaves differently. Once you provide relevant information — entities, states, fact patterns, prior returns, income sources, planning goals — it shifts into a consultative research assistant.
                 </p>
-                <p className="text-lg text-slate-600 mb-4 font-semibold">
-                  Firms use TaxGPT to generate:
-                </p>
-                <ul className="list-disc list-inside space-y-2 text-lg text-slate-600 ml-4 mb-6">
-                  <li>Workpaper outlines</li>
-                  <li>Reasonable-basis memos</li>
-                  <li>R&D credit documentation</li>
-                  <li>Research citations</li>
-                  <li>Tax position summaries</li>
-                  <li>Client-ready explanations</li>
-                  <li>Draft letters and planning notes</li>
-                </ul>
+                <div className="mt-8">
+                  <p className="text-lg text-slate-600 mb-4 font-semibold">
+                    Firms use TaxGPT to generate:
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 text-lg text-slate-600 ml-4 mb-6">
+                    <li>Workpaper outlines</li>
+                    <li>Reasonable-basis memos</li>
+                    <li>R&D credit documentation</li>
+                    <li>Research citations</li>
+                    <li>Tax position summaries</li>
+                    <li>Client-ready explanations</li>
+                    <li>Draft letters and planning notes</li>
+                  </ul>
+                </div>
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
                   <p className="text-lg text-slate-900 font-semibold">
                     Bottom line: You don&apos;t just receive answers — you receive <strong>defensible, documented analysis</strong>.
@@ -127,12 +126,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 2 */}
               <div id="document-upload" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">📄</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   2. Document Upload & Analysis
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -148,51 +146,52 @@ export default function TaxGPTDeepDivePage() {
                   <li>IRS notices</li>
                 </ul>
 
-                <h3 className="text-xl font-semibold text-slate-900 mb-4">Live examples included:</h3>
-                
-                <div className="space-y-6">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Tie-Outs:</h3>
-                    <p className="text-base text-slate-600">
-                      Finding discrepancies between P&Ls and filed returns, <strong>down to individual accounts</strong>.
-                    </p>
-                  </div>
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-slate-900 mb-4">Live examples included:</h3>
+                  
+                  <div className="space-y-6">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Tie-Outs:</h3>
+                      <p className="text-base text-slate-600">
+                        Finding discrepancies between P&Ls and filed returns, <strong>down to individual accounts</strong>.
+                      </p>
+                    </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">R&D Credits:</h3>
-                    <p className="text-base text-slate-600">
-                      Documenting inputs, lookback years, and <strong>audit-ready narratives</strong>.
-                    </p>
-                  </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">R&D Credits:</h3>
+                      <p className="text-base text-slate-600">
+                        Documenting inputs, lookback years, and <strong>audit-ready narratives</strong>.
+                      </p>
+                    </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Workpaper Generation:</h3>
-                    <p className="text-base text-slate-600">
-                      Schedules, bullets, and notes <strong>created automatically from a PDF</strong>.
-                    </p>
-                  </div>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Workpaper Generation:</h3>
+                      <p className="text-base text-slate-600">
+                        Schedules, bullets, and notes <strong>created automatically from a PDF</strong>.
+                      </p>
+                    </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Client Request Lists:</h3>
-                    <p className="text-base text-slate-600">
-                      TaxGPT identifies missing documents and <strong>produces a checklist</strong>.
-                    </p>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">Client Request Lists:</h3>
+                      <p className="text-base text-slate-600">
+                        TaxGPT identifies missing documents and <strong>produces a checklist</strong>.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+                <div className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-6">
                   <p className="text-lg text-slate-600">
                     <strong>Key insight:</strong> When firms ingest prior-year returns <em>before quoting</em>, they dramatically reduce scope creep.
                   </p>
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 3 */}
               <div id="proposals" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">📊</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   3. Proposal Development & Defensive Pricing
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -216,12 +215,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 4 */}
               <div id="matrix" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">🌎</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   4. The Multi-State Matrix
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -249,31 +247,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              {/* Mid-Page CTA after Matrix */}
-              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 p-8 md:p-10 text-center">
-                <h3 className="text-xl font-bold text-slate-900 mb-3">Want to see the Matrix applied to your client&apos;s scenario?</h3>
-                <p className="text-base text-slate-600 mb-6">
-                  Upload a P&L or return — we&apos;ll walk through it live.
-                </p>
-                <a
-                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                >
-                  Request a Custom Demo
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
-              </div>
-
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 5 */}
               <div id="planning" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">⚖️</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   5. Planning Scenarios
                 </h2>
                 <p className="text-lg text-slate-600 mb-6">
@@ -337,12 +315,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 6 */}
               <div className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">🛡️</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   6. AI Does Not Replace Professionals
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -361,12 +338,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 7 */}
               <div id="documentation" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">📘</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   7. Documentation & Client Communications
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -386,12 +362,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Section 8 */}
               <div id="impact" className="scroll-mt-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">🚀</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   8. What This Means for Firms Entering 2026
                 </h2>
                 <p className="text-lg text-slate-600 mb-4">
@@ -416,12 +391,11 @@ export default function TaxGPTDeepDivePage() {
                 </div>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Webinar Recordings - Condensed */}
               <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <span className="text-2xl">🎥</span>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6">
                   Webinar Recordings
                 </h2>
 
@@ -437,13 +411,9 @@ export default function TaxGPTDeepDivePage() {
                     href="https://fathom.video/share/uDmwZ61kuh-Bk1z34qW8MwSnhZzQNetD"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                    className="inline-block border border-emerald-600 text-emerald-700 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition"
                   >
                     Watch the Recording
-                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
                   </a>
                 </article>
 
@@ -459,36 +429,34 @@ export default function TaxGPTDeepDivePage() {
                     href="https://fathom.video/share/a79tTvfbuRR1N71CjtcgvjsyXAbsr2ag"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                    className="inline-block border border-emerald-600 text-emerald-700 px-4 py-2 rounded-lg font-medium hover:bg-emerald-50 transition"
                   >
                     Watch the Recording
-                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
                   </a>
                 </article>
               </div>
 
-              <hr className="my-8 border-slate-200" />
+              <hr className="my-10 border-slate-200" />
 
               {/* Final CTA */}
-              <div id="demo" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 md:p-10 scroll-mt-8">
-                <h2 className="text-2xl font-bold text-slate-900 mb-4">See How This Applies to Your Firm</h2>
-                <p className="text-base text-slate-600 mb-6">
-                  If you want a walkthrough tailored to your clients, states, and workflow:
-                </p>
-                <a
-                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
-                >
-                  Request a Custom Demo
-                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
+              <div id="demo" className="mt-10 mb-6 scroll-mt-8">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 md:p-10">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-4">See How This Applies to Your Firm</h2>
+                  <p className="text-base text-slate-600 mb-6">
+                    If you want a walkthrough tailored to your clients, states, and workflow:
+                  </p>
+                  <a
+                    href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                  >
+                    Request a Custom Demo
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </a>
+                </div>
               </div>
 
               {/* Internal Links & Navigation */}
