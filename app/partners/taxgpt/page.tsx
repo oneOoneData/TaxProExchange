@@ -83,8 +83,13 @@ export default function TaxGPTPartnerPage() {
               </h1>
 
               {/* Tagline */}
-              <p className="text-xl text-slate-600 mb-6">
+              <p className="text-xl text-slate-600 mb-4">
                 Conversational AI for tax guidance
+              </p>
+
+              {/* SEO Paragraph */}
+              <p className="text-base text-slate-600 max-w-3xl mx-auto mb-6">
+                TaxGPT is a specialized AI tax research platform used by CPAs, EAs, and tax preparers to accelerate research, strengthen documentation, and safely analyze returns with real citations. Learn more about <Link href="/ai/tools" className="text-emerald-600 hover:text-emerald-700 underline">AI tax tools</Link> and <Link href="/ai/7216" className="text-emerald-600 hover:text-emerald-700 underline">§7216 compliance</Link>.
               </p>
 
               {/* Description */}
@@ -144,12 +149,15 @@ export default function TaxGPTPartnerPage() {
             <div className="max-w-4xl mx-auto space-y-12">
               {/* What Is TaxGPT */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4">What Is TaxGPT?</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="text-2xl">❓</span>
+                  What Is TaxGPT?
+                </h2>
                 <p className="text-lg text-slate-600 mb-4">
                   TaxGPT is an AI-powered research and document analysis engine built specifically for tax professionals.
                 </p>
                 <p className="text-lg text-slate-600 mb-4">
-                  Unlike general chatbots, TaxGPT is trained exclusively on authoritative sources — the Internal Revenue Code, Treasury Regulations, IRS guidance, court cases, and technical publications. Every answer includes <strong>live citations</strong>, allowing practitioners to verify conclusions instantly.
+                  Unlike general chatbots, TaxGPT is trained exclusively on authoritative tax law sources — the Internal Revenue Code, Treasury Regulations, IRS guidance, court cases, and technical publications. Every answer includes <strong>live citations</strong>, allowing practitioners to verify conclusions instantly.
                 </p>
                 <p className="text-lg text-slate-600">
                   This makes TaxGPT a practical, compliance-aware tool for research, planning, review, and client communication.
@@ -158,7 +166,10 @@ export default function TaxGPTPartnerPage() {
 
               {/* Why TaxProExchange Recommends TaxGPT */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4">Why TaxProExchange Recommends TaxGPT</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="text-2xl">⭐</span>
+                  Why TaxProExchange Recommends TaxGPT
+                </h2>
                 <p className="text-lg text-slate-600 mb-4">
                   After reviewing dozens of AI tools for accountants and tax professionals, TaxGPT stands out because it:
                 </p>
@@ -171,7 +182,7 @@ export default function TaxGPTPartnerPage() {
                   <li>Operates with built-in §7216 awareness and does <strong>not</strong> auto-file returns</li>
                 </ul>
                 <p className="text-lg text-slate-600 mb-4">
-                  If your firm wants to reduce research time while strengthening accuracy and defensibility, TaxGPT is the tool we recommend.
+                  If your firm wants to reduce research time while strengthening accuracy and defensibility, TaxGPT is the tool we recommend. Learn more about the <Link href="/ai/state-of-ai-in-tax-firms-2025" className="text-emerald-600 hover:text-emerald-700 underline">state of AI in tax firms</Link>.
                 </p>
                 <a
                   href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
@@ -188,11 +199,17 @@ export default function TaxGPTPartnerPage() {
 
               {/* Key Capabilities */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-6">Key Capabilities</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+                  <span className="text-2xl">🔑</span>
+                  Key Capabilities
+                </h2>
                 
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3">Research With Live Citations</h3>
+                <div className="space-y-8">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <span className="text-xl">🧠</span>
+                      Research With Live Citations
+                    </h3>
                     <p className="text-base text-slate-600 mb-3">
                       TaxGPT acts as a research copilot, producing:
                     </p>
@@ -205,8 +222,11 @@ export default function TaxGPTPartnerPage() {
                     </ul>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3">Document Upload & Review</h3>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <span className="text-xl">📄</span>
+                      Document Upload & Review
+                    </h3>
                     <p className="text-base text-slate-600 mb-3">
                       Upload PDFs or spreadsheets to:
                     </p>
@@ -219,8 +239,11 @@ export default function TaxGPTPartnerPage() {
                     </ul>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3">Multi-State Matrix (Most Popular Feature)</h3>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <span className="text-xl">🌎</span>
+                      Multi-State Matrix (Most Popular Feature)
+                    </h3>
                     <p className="text-base text-slate-600 mb-3">
                       A single view showing:
                     </p>
@@ -237,8 +260,11 @@ export default function TaxGPTPartnerPage() {
                     </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3">Proposal & Pricing Automation</h3>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <span className="text-xl">🧾</span>
+                      Proposal & Pricing Automation
+                    </h3>
                     <p className="text-base text-slate-600 mb-3">
                       TaxGPT helps firms quickly:
                     </p>
@@ -251,8 +277,11 @@ export default function TaxGPTPartnerPage() {
                     </ul>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-3">Planning Scenarios</h3>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                      <span className="text-xl">🧮</span>
+                      Planning Scenarios
+                    </h3>
                     <p className="text-base text-slate-600 mb-3">
                       Supports scenario modeling for:
                     </p>
@@ -268,9 +297,31 @@ export default function TaxGPTPartnerPage() {
                 </div>
               </div>
 
+              {/* Mid-Page CTA */}
+              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-emerald-100 p-8 md:p-10 text-center">
+                <h2 className="text-2xl font-bold text-slate-900 mb-3">Ready to see TaxGPT on your data?</h2>
+                <p className="text-base text-slate-600 mb-6">
+                  Upload a prior-year return, a P&L, or a multistate scenario — we&apos;ll walk through it live.
+                </p>
+                <a
+                  href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                >
+                  Request a Custom Demo
+                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </a>
+              </div>
+
               {/* TaxGPT vs ChatGPT */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-6">TaxGPT vs ChatGPT</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                  <span className="text-2xl">⚖️</span>
+                  TaxGPT vs ChatGPT (What Tax Pros Need to Know)
+                </h2>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
@@ -327,11 +378,33 @@ export default function TaxGPTPartnerPage() {
                     ChatGPT is great for general writing. <strong>TaxGPT is built for professional tax compliance and defensible research.</strong>
                   </p>
                 </div>
+
+                {/* Conversion CTA after comparison */}
+                <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">See exactly how TaxGPT applies to your firm</h3>
+                  <p className="text-base text-slate-600 mb-6">
+                    Upload a prior-year return, a P&L, or a multistate scenario — we&apos;ll walk through it live.
+                  </p>
+                  <a
+                    href="https://calendly.com/devin-taxgpt/taxproexchange-taxgpt-booknow"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg transition-all"
+                  >
+                    Request a Custom Demo
+                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </a>
+                </div>
               </div>
 
               {/* Webinar Recordings */}
               <div className="space-y-8">
-                <h2 className="text-3xl font-bold text-slate-900 mb-6">Webinar Recordings</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                  <span className="text-2xl">🎥</span>
+                  Webinar Recordings
+                </h2>
 
                 {/* Webinar 1 */}
                 <article id="webinar-part-1" className="rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10 scroll-mt-8">
@@ -372,9 +445,11 @@ export default function TaxGPTPartnerPage() {
                         </svg>
                       </a>
                     </div>
-                    <p className="text-sm text-slate-500">
-                      Access requires a verified email. Submit yours when prompted to unlock the recording.
-                    </p>
+                    <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                      <p className="text-sm font-medium text-amber-900">
+                        ⚠️ Access requires a verified email. Submit yours when prompted to unlock the recording.
+                      </p>
+                    </div>
                   </div>
                 </article>
 
@@ -417,16 +492,21 @@ export default function TaxGPTPartnerPage() {
                         </svg>
                       </a>
                     </div>
-                    <p className="text-sm text-slate-500">
-                      Access requires a verified email. Submit yours when prompted to unlock the recording.
-                    </p>
+                    <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                      <p className="text-sm font-medium text-amber-900">
+                        ⚠️ Access requires a verified email. Submit yours when prompted to unlock the recording.
+                      </p>
+                    </div>
                   </div>
                 </article>
               </div>
 
               {/* Is TaxGPT Right for Your Firm */}
               <div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4">Is TaxGPT Right for Your Firm?</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-4 flex items-center gap-3">
+                  <span className="text-2xl">✅</span>
+                  Is TaxGPT Right for Your Firm?
+                </h2>
                 <p className="text-lg text-slate-600 mb-4">
                   TaxGPT is a strong fit if your team wants to:
                 </p>
