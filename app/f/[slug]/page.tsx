@@ -5,16 +5,65 @@
  * Gated by FEATURE_FIRM_WORKSPACES flag.
  */
 
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createServerClient } from '@/lib/supabase/server';
 import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
+import { siteUrl } from '@/lib/seo';
 
 interface PageProps {
   params: Promise<{
     slug: string;
   }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  
+  if (!FEATURE_FIRM_WORKSPACES) {
+    return {
+      title: 'Firm Not Found | TaxProExchange',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const supabase = createServerClient();
+  const { data: firm, error } = await supabase
+    .from('firms')
+    .select('name, verified')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !firm) {
+    return {
+      title: 'Firm Not Found | TaxProExchange',
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const title = `${firm.name}${firm.verified ? ' – Verified Firm' : ''} | TaxProExchange`;
+  const description = `View ${firm.name}'s team of verified tax professionals on TaxProExchange. Find CPAs, EAs, and tax preparers for your firm.`;
+  const url = `${siteUrl}/f/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
 }
 
 export default async function FirmProfilePage({ params }: PageProps) {
