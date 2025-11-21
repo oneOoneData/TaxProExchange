@@ -35,7 +35,7 @@ export const STRIPE_CONFIG = {
   CURRENCY: 'usd',
   
   // Billing
-  FIRM_WORKSPACE_AMOUNT: 1000, // $10.00 in cents
+  FIRM_WORKSPACE_AMOUNT: 3000, // $30.00 in cents
   
   // Trial period (optional - set to 0 for no trial)
   TRIAL_PERIOD_DAYS: 0,

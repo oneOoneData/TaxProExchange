@@ -257,7 +257,7 @@ function FirmSettingsContent() {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Plan</p>
                   <p className="text-sm text-gray-600 mt-1">
-                    {hasActiveSubscription ? 'Firm Workspace - $10/month' : 'No active subscription'}
+                    {hasActiveSubscription ? 'Firm Workspace - $30/month' : 'No active subscription'}
                   </p>
                 </div>
               </div>

@@ -228,7 +228,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                   <div className="flex-1">
                     <h3 className="font-semibold text-blue-900 mb-1">For Firms</h3>
                     <p className="text-sm text-blue-800">
-                      Build your trusted bench of professionals for $10/month. <a href="#pricing" className="underline font-medium hover:text-blue-900">Learn more</a>
+                      Build your trusted bench of professionals for $30/month. <a href="#pricing" className="underline font-medium hover:text-blue-900">Learn more</a>
                     </p>
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                   </span>
                 </div>
                 <div className="mb-6">
-                  <div className="text-4xl font-bold text-slate-900">$10</div>
+                  <div className="text-4xl font-bold text-slate-900">$30</div>
                   <div className="text-slate-600">per month</div>
                 </div>
                 <div className="mb-6 p-4 rounded-2xl bg-white border border-blue-100">

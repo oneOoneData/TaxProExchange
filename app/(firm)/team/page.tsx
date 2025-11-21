@@ -410,7 +410,7 @@ function TeamDashboardContent() {
                   }}
                   className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
                 >
-                  Reactivate Subscription ($10/month)
+                  Reactivate Subscription ($30/month)
                 </button>
                 {selectedFirm.stripe_customer_id && selectedFirm.user_role === 'admin' && (
                   <button
@@ -467,7 +467,7 @@ function TeamDashboardContent() {
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span><strong>$10/month</strong> - Cancel anytime</span>
+                  <span><strong>$30/month</strong> - Cancel anytime</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-blue-900">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
