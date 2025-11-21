@@ -43,7 +43,7 @@ export default function FirmOnboardingPage() {
               Create Your Firm Workspace
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Build and manage your trusted bench of verified tax professionals. $10/month, cancel anytime.
+              Build and manage your trusted bench of verified tax professionals. $30/month, cancel anytime.
             </p>
             
             <div className="space-y-4 mb-8">
@@ -173,7 +173,7 @@ export default function FirmOnboardingPage() {
                 2
               </div>
               <h3 className="font-medium text-gray-900 text-sm mb-1">Subscribe</h3>
-              <p className="text-xs text-gray-600">$10/month</p>
+              <p className="text-xs text-gray-600">$30/month</p>
             </div>
 
             {/* Arrow */}
@@ -267,7 +267,7 @@ export default function FirmOnboardingPage() {
               </h2>
             </div>
             <p className="text-gray-600 mb-6">
-              Tell us about your firm. You&rsquo;ll complete payment in the next step ($10/month, cancel anytime).
+              Tell us about your firm. You&rsquo;ll complete payment in the next step ($30/month, cancel anytime).
             </p>
 
             {error && (
