@@ -156,7 +156,9 @@ export default function AIPage() {
               </div>
 
               {/* Regular Articles */}
-              {posts.length > 0 && posts.map((post) => (
+              {posts.length > 0 && posts
+                .filter((post) => post?.data?.title && post?.slug)
+                .map((post) => (
                   <article
                     key={post.slug}
                     className="border border-slate-200 rounded-lg overflow-hidden hover:border-slate-300 hover:shadow-md transition-all bg-white"
@@ -166,7 +168,7 @@ export default function AIPage() {
                         <div className="h-72 overflow-hidden bg-slate-100">
                           <Image
                             src={post.data.previewImage || post.data.image || '/images/placeholder.png'}
-                            alt={post.data.title}
+                            alt={post.data.title || 'Article image'}
                             width={800}
                             height={450}
                             className="w-full h-full object-cover"
@@ -177,26 +179,30 @@ export default function AIPage() {
                       )}
                       <div className="p-4">
                         <h3 className="text-lg font-semibold mb-2 text-slate-900 hover:text-slate-700 line-clamp-2">
-                          {post.data.title}
+                          {post.data.title || 'Untitled Article'}
                         </h3>
                         <p className="text-slate-600 mb-3 text-sm line-clamp-2">
-                          {post.data.description}
+                          {post.data.description || ''}
                         </p>
                         <div className="flex items-center gap-3 text-xs text-slate-500">
                           <time dateTime={post.data.date}>
-                            {new Date(post.data.date).toLocaleDateString("en-US", {
+                            {post.data.date ? new Date(post.data.date).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "long",
                               day: "numeric",
-                            })}
+                            }) : ''}
                           </time>
-                          <span>•</span>
-                          <span>{post.data.author}</span>
+                          {post.data.author && (
+                            <>
+                              <span>•</span>
+                              <span>{post.data.author}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </Link>
                   </article>
-              ))}
+                ))}
             </div>
           </section>
 
