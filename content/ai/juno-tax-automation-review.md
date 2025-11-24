@@ -1,6 +1,6 @@
 ---
-title: "Juno Tax Automation Review: A Technical, Human-Written Analysis of Features, Exports, Reviewer, and AI Tools"
-description: "A factual, non-salesy technical review of Juno's tax automation platform, covering document intake, data extraction, exports, Reviewer quality checks, AI advisor tools, workflow impact, and future development roadmap."
+title: "Juno's Tax Automation Features: A Technical Review"
+description: "A factual, technical review of Juno's tax automation platform, covering document intake, data extraction, exports, Reviewer quality checks, AI advisor tools, workflow impact, and future development roadmap."
 author: "Koen Van Duyse"
 authorLinkedIn: "https://www.linkedin.com/in/koenvanduyse/"
 authorReddit: "https://www.reddit.com/user/RepliKoen/"
@@ -27,19 +27,17 @@ imageAlt: "Juno Tax Automation platform review"
 canonical: "https://www.taxproexchange.com/ai/juno-tax-automation-review"
 readingTime: 12
 robots: "index,follow"
-ogTitle: "Juno Tax Automation Review: A Technical, Human-Written Analysis"
+ogTitle: "Juno's Tax Automation Features: A Technical Review"
 ogDescription: "An in-depth, technical, and non-salesy review of Juno's tax automation platform based on a recent demonstration."
 ogImage: "/images/juno-logo.png"
 twitterCard: "summary_large_image"
-twitterTitle: "Juno Tax Automation Review: Technical Analysis"
+twitterTitle: "Juno's Tax Automation Features: A Technical Review"
 twitterDescription: "A factual review of Juno's tax automation platform covering document intake, exports, Reviewer, and AI tools."
 twitterImage: "/images/juno-logo.png"
 schemaType: "Article"
 ---
 
-# Juno's Tax Automation Features: A Technical Review
-
-This article provides a neutral, technical review of the Juno tax automation platform. It is intended for tax professionals evaluating AI-supported document intake, 1040 automation, data extraction, tax software export workflows, and Reviewer-based quality control. The observations below are based on a recent demonstration of Juno's platform. The author is not affiliated with Juno.
+This review is based on a recent demonstration of Juno's platform. The author is not affiliated with Juno.
 
 Before diving in, you may also want to compare this with our analysis:  
 - **SurePrep in an AI-First World**: [/ai/sureprep-in-an-ai-first-world](/ai/sureprep-in-an-ai-first-world)  
@@ -251,7 +249,7 @@ It replaces some workflows (intake, extraction, workpapers) but uses a different
 Support for business returns and trust/estate returns is planned but not yet fully implemented.
 
 **What tax software does Juno export to?**  
-Juno exports to desktop and cloud-based tax preparation systems using local or browser agents.
+Juno exports to desktop and cloud-based tax preparation systems using local or browser agents. Common supported tax software includes Intuit Lacerte, Intuit ProSeries, Intuit ProConnect, Thomson Reuters UltraTax CS, Drake Tax, CCH Axcess Tax, CCH ProSystem fx Tax, and other major professional tax preparation systems. *At the time of writing.*
 
 **What is Reviewer used for?**  
 Reviewer checks for mismatches, missing information, filing issues, carryover discrepancies, and cross-form structural issues.
