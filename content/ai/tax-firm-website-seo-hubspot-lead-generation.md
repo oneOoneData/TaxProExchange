@@ -140,23 +140,3 @@ HubSpot's default reports are fine, but a few custom dashboards tell you what to
 
 How would your firm apply this? If you've built smarter lifecycle stages or a better way to route multi‑state leads, I want to learn from it. If you're wrestling with consent, sequences, or attribution, share your stack and I'll send back a workflow you can copy.
 
-If you don't want to spin up your own local LLM to research or chat with client files, check out partners like TaxGPT — already built for this use case.
-
----
-
-## SEO Meta Kit (for editors)
-
-* **Title tag:** Building a Tax Firm Website With AI: SEO, HubSpot, and Lead Generation That Converts
-* **Meta description:** A practical guide for CPAs and EAs to build a fast, search‑optimized tax firm website with AI, connect HubSpot CRM and email, and turn visitors into booked consults.
-* **Slug/URL:** /ai-tax-firm-website-seo-hubspot-lead-generation
-* **Primary keywords:** tax firm website, CPA SEO, HubSpot for accountants, AI for tax firms, Blaze.ai, Cursor editor, Porkbun domain, LinkedIn lead generation, tax marketing automation, notice resolution leads
-* **H1:** Building a Tax Firm Website That Generates Real Leads Using AI
-* **Suggested H2s:** The Stack That Works Together; Make HubSpot Your System of Record; Capture With Context; Nurture With Sequences; Build Light and Fast; Repurpose With Blaze.ai; Track What Matters; Workflow Examples; Limitations and Trade‑offs; What Ifs
-* **Internal link ideas:** Link "CP2000 response" to a dedicated CP2000 guide page; link "multi‑state nexus" to a SALT landing page; link "R&D credit" to your R&D service page and calculator.
-* **Schema:** Organization, LocalBusiness, Service, and Article JSON‑LD; FAQPage for intent pages; ContactPoint for sales.
-* **Image alt text pattern:** "Tax professional reviewing [topic] checklist," "HubSpot pipeline for [service]," "Cursor AI page outline for [niche]."
-* **Open Graph:**
-  * og:title: AI for Tax Firm Websites: SEO, HubSpot, and Lead Gen
-  * og:description: Step‑by‑step stack to build an AI‑assisted site, nurture with HubSpot, and convert visitors into clients.
-  * og:type: article
-
