@@ -76,6 +76,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
+      <head>
+        <meta name="impact-site-verification" content="5ac1f852-32d0-4d61-a7e7-7489ba980c15" />
+      </head>
       <body className={inter.className}>
         {/* JSON-LD Structured Data */}
         <JsonLd data={getOrganizationJsonLd()} />
