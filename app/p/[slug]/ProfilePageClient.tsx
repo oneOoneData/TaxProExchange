@@ -781,6 +781,25 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
               className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
             >
               <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">Contact</h3>
+              
+              {/* Website URL - Always visible */}
+              {profile.website_url && (
+                <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors mb-3">
+                  <p className="text-sm text-slate-500 mb-1">Website</p>
+                  <a
+                    href={profile.website_url.startsWith('http') ? profile.website_url : `https://${profile.website_url}`}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    className="text-slate-900 hover:text-slate-700 break-all flex items-center gap-1"
+                  >
+                    {profile.firm_name || profile.website_url.replace(/^https?:\/\//, '')}
+                    <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              )}
+
               {shouldShowContactInfo() ? (
                 <div className="space-y-3">
                   {profile.public_email && (
@@ -803,23 +822,6 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                         className="text-slate-900 hover:text-slate-700"
                       >
                         {profile.phone}
-                      </a>
-                    </div>
-                  )}
-
-                  {profile.website_url && (
-                    <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
-                      <p className="text-sm text-slate-500 mb-1">Website</p>
-                      <a
-                        href={profile.website_url.startsWith('http') ? profile.website_url : `https://${profile.website_url}`}
-                        target="_blank"
-                        rel="nofollow noopener noreferrer"
-                        className="text-slate-900 hover:text-slate-700 break-all flex items-center gap-1"
-                      >
-                        {profile.website_url.replace(/^https?:\/\//, '')}
-                        <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
                       </a>
                     </div>
                   )}
