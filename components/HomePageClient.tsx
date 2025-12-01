@@ -11,7 +11,7 @@ import Logo from '@/components/Logo';
 import MobileNav from '@/components/MobileNav';
 import FeaturedProfiles from '@/components/FeaturedProfiles';
 import BuyMeACoffee from '@/components/BuyMeACoffee';
-import NblPromoBanner from '@/components/NblPromoBanner';
+import DualHero from '@/components/DualHero';
 
 interface HomePageClientProps {
   faqs: Array<{ question: string; answer: string }>;
@@ -162,116 +162,8 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
         </div>
       </header>
 
-      {/* Promo Banner */}
-      <NblPromoBanner />
-
-      {/* AI Survey Banner */}
-      <div className="bg-blue-900 text-white">
-        <div className="container-mobile flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <span className="text-xs font-semibold uppercase tracking-wide text-blue-200/80">AI in Tax & Wealth Firms 2025</span>
-            <p className="text-base font-medium sm:text-lg">
-              Help us benchmark how tax and wealth teams are using AI today.
-            </p>
-          </div>
-          <a
-            href="/ai/survey"
-            className="inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-blue-900 shadow-sm transition hover:bg-blue-50"
-          >
-            Take the Survey
-          </a>
-        </div>
-      </div>
-
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="container-mobile pt-16 pb-10 md:pt-24 md:pb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900">
-                Connect with Verified Tax Professionals
-              </h1>
-              <p className="mt-4 text-slate-600 text-lg">
-                The trusted network for CPAs, EAs, and tax professionals. Find collaborators for overflow work, niche expertise, mentorship, and review & sign-off.
-              </p>
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                {!user && (
-                  <a href="/join" className="rounded-2xl bg-slate-900 text-white px-6 py-3 sm:px-8 text-sm font-medium shadow-lg hover:shadow-xl transition-all">
-                    Join Free
-                  </a>
-                )}
-                <a href="/search" className="rounded-2xl bg-white text-slate-900 border border-slate-200 px-6 py-3 sm:px-8 text-sm font-medium hover:bg-slate-50 shadow-sm hover:shadow-md transition-all">
-                  Browse Directory
-                </a>
-              </div>
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>Verified credentials</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>Free forever</span>
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span>Hundreds of professionals</span>
-                </span>
-              </div>
-              
-              {/* For Firms Callout */}
-              <div className="mt-8 p-4 rounded-2xl border-2 border-blue-200 bg-blue-50">
-                <div className="flex items-start gap-3">
-                  <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-blue-900 mb-1">For Firms</h3>
-                    <p className="text-sm text-blue-800">
-                      Build your trusted bench of professionals for $30/month. <a href="#pricing" className="underline font-medium hover:text-blue-900">Learn more</a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}>
-              <div className="relative rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="text-xs uppercase tracking-wider text-slate-500 mb-2">Example search</div>
-                <a href="/search?credential_type=CPA&state=CA&specialization=1120s_s_corp&accepting_work=true" className="block rounded-xl border bg-slate-50 p-3 text-sm hover:bg-slate-100 transition-colors">
-                  CPA • California • S-Corp Reviews • Accepting work
-                </a>
-                <ul className="mt-4 space-y-3">
-                  {[
-                    { name: 'Jordan C., CPA', tag: 'S-Corp / Multi-State', state: 'CA', software: 'Drake Tax', verified: true },
-                    { name: 'Maya R., EA', tag: 'IRS Representation', state: 'TX', software: 'ProConnect', verified: true },
-                    { name: 'Leo P., CTEC', tag: '1040 + Sched C', state: 'CA', software: 'Truss', verified: true },
-                  ].map((p, i) => (
-                    <li key={i} className="flex items-start sm:items-center justify-between rounded-xl border p-3 gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-slate-900 flex items-center gap-2 flex-wrap">
-                          <span className="truncate">{p.name}</span>
-                          {p.verified && <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 whitespace-nowrap flex-shrink-0">Verified</span>}
-                        </div>
-                        <div className="text-xs sm:text-sm text-slate-500 mt-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="whitespace-nowrap">{p.tag} • {p.state}</span>
-                            <span className="inline-flex items-center px-2 py-0.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-700 whitespace-nowrap">
-                              {p.software}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <button className="text-xs sm:text-sm rounded-xl border px-2.5 py-1.5 sm:px-3 sm:py-2 hover:bg-slate-50 whitespace-nowrap flex-shrink-0">Connect</button>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 text-xs text-slate-500">*Profiles shown are illustrative.</div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <DualHero />
 
       {/* Logos / social proof */}
       <section className="py-6">
