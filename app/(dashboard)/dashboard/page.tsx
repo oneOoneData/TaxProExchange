@@ -14,7 +14,6 @@ import ProfileHealth from '@/components/dashboard/ProfileHealth';
 import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import DashboardTopEventCard from '@/components/DashboardTopEventCard';
 import SlackIntegration from '@/components/dashboard/SlackIntegration';
-import NblPromoBanner from '@/components/NblPromoBanner';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -64,7 +63,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="py-8">
-      <NblPromoBanner />
       <DashboardDebug 
         userId={userId} 
         profile={profile} 
