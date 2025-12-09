@@ -38,8 +38,6 @@ schemaType: "Article"
 organization_schema: ["Organization","LocalBusiness","Service"]
 ---
 
-# Building a Tax Firm Website That Generates Real Leads Using AI
-
 For years I kept punting our firm's website. Two summers ago I finally gave up a Sunday and promised I'd make real progress. I picked a Wix template, tweaked the colors, and felt "done" after an hour. Then the grind started: posting articles, writing unique meta descriptions, compressing images, adding alt text, crafting excerpts, and setting Open Graph tags. By dinner I'd done a mountain of busywork and still didn't have leads to show for it. If you've lived this, you know the pain.
 
 This is the playbook I wish I'd had. It's a lightweight, AI‑assisted stack that takes you from buying a domain to publishing content to distributing it on social, and, most importantly, to getting those leads into a CRM and email engine you can measure. The goal isn't pages. The goal is pipeline.
