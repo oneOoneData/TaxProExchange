@@ -28,7 +28,7 @@
     "gray-matter": "^4.0.3",
     "ics-parser": "^0.1.5",
     "jsdom": "^27.0.0",
-    "next": "^15.5.2",
+    "next": "15.5.7",
     "next-sitemap": "^4.2.3",
     "node-fetch": "^3.3.2",
     "openai": "^6.0.1",
