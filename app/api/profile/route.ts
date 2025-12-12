@@ -293,6 +293,39 @@ export async function PUT(request: Request) {
     } else {
       // For full profile updates
       const fullProfileData = validatedData as any;
+      
+      // Normalize primary_location to ensure it's always a proper object (not a string)
+      // This prevents the double-encoding issue that caused data quality problems
+      let normalizedPrimaryLocation = fullProfileData.primary_location;
+      if (normalizedPrimaryLocation) {
+        // If it's already an object, use it as-is
+        if (typeof normalizedPrimaryLocation === 'object' && !Array.isArray(normalizedPrimaryLocation)) {
+          // Ensure it has the correct structure with lowercase keys
+          normalizedPrimaryLocation = {
+            city: normalizedPrimaryLocation.city ?? normalizedPrimaryLocation.CITY ?? null,
+            state: normalizedPrimaryLocation.state ?? normalizedPrimaryLocation.STATE ?? null,
+            country: normalizedPrimaryLocation.country ?? normalizedPrimaryLocation.COUNTRY ?? 'US',
+            display_name: normalizedPrimaryLocation.display_name ?? normalizedPrimaryLocation.DISPLAY_NAME ?? null
+          };
+        } else if (typeof normalizedPrimaryLocation === 'string') {
+          // If it's a string, try to parse it (shouldn't happen with proper validation, but be safe)
+          try {
+            const parsed = JSON.parse(normalizedPrimaryLocation);
+            normalizedPrimaryLocation = {
+              city: parsed.city ?? parsed.CITY ?? null,
+              state: parsed.state ?? parsed.STATE ?? null,
+              country: parsed.country ?? parsed.COUNTRY ?? 'US',
+              display_name: parsed.display_name ?? parsed.DISPLAY_NAME ?? null
+            };
+          } catch {
+            // If parsing fails, set to null (will use default)
+            normalizedPrimaryLocation = null;
+          }
+        } else {
+          normalizedPrimaryLocation = null;
+        }
+      }
+      
       ({
         specializations,
         locations,
@@ -303,7 +336,7 @@ export async function PUT(request: Request) {
         works_international,
         countries,
         email_preferences,
-        primary_location,
+        primary_location: normalizedPrimaryLocation,
         location_radius,
         credential_type,
         licenses,
@@ -314,6 +347,9 @@ export async function PUT(request: Request) {
         connection_email_notifications,
         ...profileData 
       } = fullProfileData);
+      
+      // Override with normalized primary_location
+      primary_location = normalizedPrimaryLocation;
       
       console.log('🔍 Experience and firm fields being saved:', { 
         years_experience, 
