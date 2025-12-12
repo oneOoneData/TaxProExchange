@@ -81,12 +81,12 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
               </button>
               {isDirectoryOpen && (
                 <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
-                  <a href="/search" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                  <Link href="/search" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
                     Search Directory
-                  </a>
-                  <a href="/directory/by-location" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                  </Link>
+                  <Link href="/directory/by-location" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
                     By Location
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
