@@ -151,6 +151,76 @@ function EventsRefreshButton() {
   );
 }
 
+// Enrich Locations Button Component
+function EnrichLocationsButton() {
+  const [enriching, setEnriching] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const enrichLocations = async () => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      'This will crawl firm websites and attempt to update their location info. Continue?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setEnriching(true);
+    setResult(null);
+
+    try {
+      const response = await fetch('/api/admin/enrich-locations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResult(
+          `✅ Success!\n` +
+          `Updated: ${data.updated} profiles\n` +
+          `Skipped: ${data.skipped} profiles\n` +
+          `Errors: ${data.errors || 0}\n` +
+          `Duration: ${data.duration || 'N/A'}`
+        );
+      } else {
+        const error = await response.json();
+        setResult(`❌ Error: ${error.error || error.details || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setEnriching(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <button
+        onClick={enrichLocations}
+        disabled={enriching}
+        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {enriching ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Running...
+          </>
+        ) : (
+          'Enrich Firm Locations'
+        )}
+      </button>
+
+      {result && (
+        <div className="mt-2 text-xs text-slate-600 whitespace-pre-line bg-slate-50 p-3 rounded-lg border">
+          {result}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Weekly Digest Button Component
 function WeeklyDigestButton() {
   const [sending, setSending] = useState(false);
@@ -636,12 +706,18 @@ export default function AdminDashboard() {
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Firm Enrichment</h3>
             <p className="text-slate-600 mb-4">Enrich profile firm data with live website information for analytics.</p>
-            <Link
-              href="/admin/firms"
-              className="inline-flex items-center justify-center rounded-xl bg-cyan-600 text-white px-4 py-2 text-sm font-medium hover:bg-cyan-700 transition-colors"
-            >
-              View Enrichment
-            </Link>
+            <div className="space-y-3">
+              <Link
+                href="/admin/firms"
+                className="inline-flex items-center justify-center rounded-xl bg-cyan-600 text-white px-4 py-2 text-sm font-medium hover:bg-cyan-700 transition-colors"
+              >
+                View Enrichment
+              </Link>
+              <div className="pt-2 border-t border-slate-200">
+                <p className="text-xs text-slate-500 mb-2">Location Enrichment</p>
+                <EnrichLocationsButton />
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
