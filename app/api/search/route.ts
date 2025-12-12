@@ -14,6 +14,114 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+// US State names mapping for normalization
+const US_STATE_NAMES: Record<string, string> = {
+  AL: 'Alabama',
+  AK: 'Alaska',
+  AZ: 'Arizona',
+  AR: 'Arkansas',
+  CA: 'California',
+  CO: 'Colorado',
+  CT: 'Connecticut',
+  DE: 'Delaware',
+  FL: 'Florida',
+  GA: 'Georgia',
+  HI: 'Hawaii',
+  ID: 'Idaho',
+  IL: 'Illinois',
+  IN: 'Indiana',
+  IA: 'Iowa',
+  KS: 'Kansas',
+  KY: 'Kentucky',
+  LA: 'Louisiana',
+  ME: 'Maine',
+  MD: 'Maryland',
+  MA: 'Massachusetts',
+  MI: 'Michigan',
+  MN: 'Minnesota',
+  MS: 'Mississippi',
+  MO: 'Missouri',
+  MT: 'Montana',
+  NE: 'Nebraska',
+  NV: 'Nevada',
+  NH: 'New Hampshire',
+  NJ: 'New Jersey',
+  NM: 'New Mexico',
+  NY: 'New York',
+  NC: 'North Carolina',
+  ND: 'North Dakota',
+  OH: 'Ohio',
+  OK: 'Oklahoma',
+  OR: 'Oregon',
+  PA: 'Pennsylvania',
+  RI: 'Rhode Island',
+  SC: 'South Carolina',
+  SD: 'South Dakota',
+  TN: 'Tennessee',
+  TX: 'Texas',
+  UT: 'Utah',
+  VT: 'Vermont',
+  VA: 'Virginia',
+  WA: 'Washington',
+  WV: 'West Virginia',
+  WI: 'Wisconsin',
+  WY: 'Wyoming',
+};
+
+// Parse primary_location from JSON object
+// Since data is now normalized, this is much simpler - no need to handle strings
+function parseLocation(raw: any): { state?: string | null; country?: string | null } | null {
+  if (!raw) return null;
+  
+  // Data is now normalized, so it should always be an object
+  // But handle edge cases for safety
+  if (typeof raw === 'string') {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return null;
+  }
+
+  // Data is normalized with lowercase keys
+  const locationData = raw as Record<string, unknown>;
+  
+  return {
+    state: typeof locationData.state === 'string' ? locationData.state : null,
+    country: typeof locationData.country === 'string' ? locationData.country : null,
+  };
+}
+
+// Normalize state to 2-letter code (e.g., "Florida" -> "FL", "FL" -> "FL")
+function normalizeState(value: string | null | undefined): string | null {
+  if (!value) return null;
+  let state = value.trim();
+  if (!state) return null;
+  
+  // Handle comma-separated values (take first)
+  if (state.includes(',')) {
+    state = state.split(',')[0].trim();
+  }
+  
+  const upper = state.toUpperCase();
+  
+  // If it's already a 2-letter code, return it
+  if (US_STATE_NAMES[upper]) {
+    return upper;
+  }
+  
+  // Try to find by full name
+  const match = Object.entries(US_STATE_NAMES).find(
+    ([, name]) => name.toUpperCase() === upper
+  );
+  
+  return match ? match[0] : null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Check if Supabase is configured
@@ -30,7 +138,9 @@ export async function GET(request: NextRequest) {
     // Handle multiple specializations - get all values for this parameter
     const specializations = searchParams.getAll('specialization');
     const software = searchParams.get('software') || '';
-    const state = searchParams.get('state') || '';
+    // Normalize state filter to uppercase 2-letter code
+    const stateParam = searchParams.get('state') || '';
+    const state = stateParam ? normalizeState(stateParam) || stateParam.toUpperCase().trim() : '';
     const accepting_work = searchParams.get('accepting_work') || '';
     const verified_only = searchParams.get('verified_only') || 'false';
     console.log('🔍 Verified only parameter:', verified_only, 'type:', typeof verified_only);
@@ -58,6 +168,7 @@ export async function GET(request: NextRequest) {
         works_international,
         countries,
         primary_location,
+        states,
         years_experience,
         software,
         created_at,
@@ -316,15 +427,68 @@ export async function GET(request: NextRequest) {
       // Note: Country filtering within the countries array would need a more complex query
     }
 
-    // Get total count first
-    const { count: totalCount } = await supabaseQuery;
+    // IMPORTANT: If filtering by state, we need to fetch a larger set of profiles first
+    // then filter by location, then paginate. Since data is now normalized, the filtering
+    // will be reliable, but we still need to fetch enough profiles to find matches.
+    const shouldFilterByLocation = !!state;
+    const fetchLimit = shouldFilterByLocation ? 1000 : limit; // Fetch more if we need to filter by location
+    const fetchOffset = shouldFilterByLocation ? 0 : offset;
 
-    // Execute the query with pagination
+    console.log('🔍 Location filtering setup:', {
+      state: state,
+      shouldFilterByLocation: shouldFilterByLocation,
+      fetchLimit: fetchLimit,
+      fetchOffset: fetchOffset,
+      originalLimit: limit,
+      originalOffset: offset
+    });
+
+    // Get total count first (before location filtering)
+    const { count: totalCountBeforeLocationFilter } = await supabaseQuery;
+
+    // Execute the query - fetch larger set if filtering by location, otherwise use normal pagination
     // Order by verified status first, then by created_at
-    const { data: profiles, error } = await supabaseQuery
+    console.log('🔍 Executing query with range:', { fetchOffset, fetchLimit, range: `${fetchOffset} to ${fetchOffset + fetchLimit - 1}` });
+    
+    // When filtering by location, use limit() instead of range() to fetch all matching profiles
+    // (similar to how directory page does it). Otherwise use range() for normal pagination.
+    let profilesQuery = supabaseQuery
       .order('visibility_state', { ascending: false }) // 'verified' comes before 'pending_verification'
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order('created_at', { ascending: false });
+    
+    if (shouldFilterByLocation) {
+      // Use limit() to fetch up to fetchLimit profiles (no offset needed, we'll filter then paginate)
+      profilesQuery = profilesQuery.limit(fetchLimit);
+      console.log('🔍 Using limit() to fetch', fetchLimit, 'profiles for location filtering');
+    } else {
+      // Use range() for normal pagination
+      profilesQuery = profilesQuery.range(fetchOffset, fetchOffset + fetchLimit - 1);
+      console.log('🔍 Using range() for pagination:', { fetchOffset, fetchLimit });
+    }
+    
+    const { data: profiles, error } = await profilesQuery;
+    
+    console.log('🔍 Query executed, profiles fetched:', profiles?.length || 0);
+    console.log('🔍 Expected fetch limit was:', fetchLimit, 'but got:', profiles?.length || 0);
+    
+    // Check if we have any AL profiles in the fetched set
+    if (state && profiles && profiles.length > 0) {
+      const alProfiles = profiles.filter(p => {
+        const loc = parseLocation(p.primary_location);
+        if (loc && loc.state) {
+          const normalized = normalizeState(loc.state);
+          return normalized === state || loc.state.toUpperCase().trim() === state;
+        }
+        return false;
+      });
+      console.log('🔍 AL profiles found in fetched set:', alProfiles.length);
+      if (alProfiles.length > 0) {
+        console.log('🔍 First AL profile:', {
+          name: `${alProfiles[0].first_name} ${alProfiles[0].last_name}`,
+          primary_location: alProfiles[0].primary_location
+        });
+      }
+    }
 
     if (error) {
       console.error('Search error:', error);
@@ -335,7 +499,13 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🔍 Search API - Raw profiles found:', profiles?.length || 0);
-    console.log('🔍 Search parameters:', { query, credential_type, specializations, software, state, accepting_work, verified_only, years_experience });
+    console.log('🔍 Search parameters:', { query, credential_type, specializations, software, state, stateParam, accepting_work, verified_only, years_experience });
+    console.log('🔍 State filter details:', { 
+      stateParam: stateParam, 
+      normalizedState: state,
+      stateType: typeof state,
+      stateLength: state?.length 
+    });
     
     // Debug: Check if Alvin Choy is in the main query results
     if (profiles && profiles.length > 0) {
@@ -381,21 +551,108 @@ export async function GET(request: NextRequest) {
 
     // Apply remaining filters that can't be done in SQL
     let filteredProfiles = profiles || [];
+    let totalAfterLocationFilter = totalCountBeforeLocationFilter || 0; // Track total after location filtering
 
     // Filter by professional's location if specified
     if (state) {
-      console.log('🔍 Filtering by professional location:', state);
+      console.log('🔍 Filtering by professional location. State filter:', state, 'Type:', typeof state);
+      console.log('🔍 Total profiles before location filter:', filteredProfiles.length);
       
-      // Filter by primary_location state (where the professional is located)
-      // This matches the location display logic
+      // Log sample of primary_location data to debug
+      if (filteredProfiles.length > 0) {
+        console.log('🔍 Sample primary_location data from first 3 profiles:', 
+          filteredProfiles.slice(0, 3).map(p => ({
+            name: `${p.first_name} ${p.last_name}`,
+            primary_location: p.primary_location,
+            primary_location_type: typeof p.primary_location,
+            parsed: parseLocation(p.primary_location)
+          }))
+        );
+      }
+      
+      // Filter by primary_location state ONLY (where the professional is physically located)
+      // Do NOT check profile_locations table - that's for service areas and includes remote workers
+      // When filtering by state, users want to find professionals PHYSICALLY LOCATED in that state,
+      // not remote workers who can service that state
       filteredProfiles = filteredProfiles.filter(p => {
-        const primaryState = p.primary_location?.state;
-        const isMatch = primaryState === state;
-        console.log('🔍 Profile', p.first_name, p.last_name, 'primary_location state:', primaryState, 'matches', state, ':', isMatch);
-        return isMatch;
+        // Only check primary_location (where they're physically located)
+        const location = parseLocation(p.primary_location);
+        if (location && location.state) {
+          const normalizedState = normalizeState(location.state);
+          // Check normalized state first, then direct uppercase comparison as fallback
+          if (normalizedState === state || location.state.toUpperCase().trim() === state) {
+            console.log('🔍 Profile', p.first_name, p.last_name, 'matched via primary_location:', {
+              rawLocation: p.primary_location,
+              parsedState: location.state,
+              normalizedState: normalizedState,
+              directMatch: location.state.toUpperCase().trim() === state,
+              filterState: state
+            });
+            return true;
+          }
+        }
+        
+        // Do NOT check profile_locations - that includes remote workers' service areas
+        // Do NOT check states array - it's too broad and includes remote workers
+        
+        // Only log first few non-matches to avoid spam
+        if (filteredProfiles.indexOf(p) < 3) {
+          console.log('🔍 Profile', p.first_name, p.last_name, 'did not match (no primary_location state or state mismatch):', {
+            rawLocation: p.primary_location,
+            parsedState: location?.state,
+            normalizedState: location?.state ? normalizeState(location.state) : null,
+            directMatch: location?.state ? location.state.toUpperCase().trim() === state : false,
+            filterState: state,
+            filterStateType: typeof state
+          });
+        }
+        
+        return false;
       });
       
       console.log('🔍 Filtered profiles count by location:', filteredProfiles.length);
+      if (filteredProfiles.length === 0) {
+        console.log('🔍 WARNING: No profiles matched state filter', state);
+        console.log('🔍 Total profiles checked:', profiles?.length || 0);
+        console.log('🔍 Sample of profiles that were checked:', profiles?.slice(0, 5).map(p => {
+          const loc = parseLocation(p.primary_location);
+          return {
+            name: `${p.first_name} ${p.last_name}`,
+            primary_location: p.primary_location,
+            parsedState: loc?.state,
+            normalizedState: loc?.state ? normalizeState(loc.state) : null
+          };
+        }));
+        
+        // Check if any profiles have the state we're looking for (for debugging)
+        const profilesWithMatchingState = profiles?.filter(p => {
+          const loc = parseLocation(p.primary_location);
+          if (loc && loc.state) {
+            const normalized = normalizeState(loc.state);
+            return normalized === state || loc.state.toUpperCase().trim() === state;
+          }
+          return false;
+        });
+        console.log('🔍 Profiles that SHOULD match (for debugging):', profilesWithMatchingState?.length || 0);
+        if (profilesWithMatchingState && profilesWithMatchingState.length > 0) {
+          console.log('🔍 First matching profile:', {
+            name: `${profilesWithMatchingState[0].first_name} ${profilesWithMatchingState[0].last_name}`,
+            primary_location: profilesWithMatchingState[0].primary_location
+          });
+        }
+      }
+      
+      // Apply pagination AFTER location filtering since we fetched a larger set
+      totalAfterLocationFilter = filteredProfiles.length;
+      const paginatedProfiles = filteredProfiles.slice(offset, offset + limit);
+      filteredProfiles = paginatedProfiles;
+      
+      console.log('🔍 Applied pagination after location filter:', {
+        totalAfterLocationFilter,
+        offset,
+        limit,
+        paginatedCount: filteredProfiles.length
+      });
     }
 
     // Filter by specific country if specified
@@ -448,13 +705,16 @@ export async function GET(request: NextRequest) {
       })
     );
 
+    // Calculate correct total count - use filtered count if location filtering was applied
+    const finalTotalCount = state ? totalAfterLocationFilter : (totalCountBeforeLocationFilter || 0);
+
     return NextResponse.json({
       profiles: profilesWithDetails,
       pagination: {
         page,
         limit,
-        total: totalCount || 0,
-        totalPages: Math.ceil((totalCount || 0) / limit)
+        total: finalTotalCount,
+        totalPages: Math.ceil(finalTotalCount / limit)
       }
     });
 
