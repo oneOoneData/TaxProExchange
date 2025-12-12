@@ -19,6 +19,7 @@ export default function DashboardLayoutClient({
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isCommunityOpen, setIsCommunityOpen] = useState(false);
+  const [isDirectoryOpen, setIsDirectoryOpen] = useState(false);
 
   // Check for unread messages
   useEffect(() => {
@@ -70,7 +71,29 @@ export default function DashboardLayoutClient({
           <Logo />
           
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
-            <Link href="/search" className="hover:text-slate-900">Directory</Link>
+            {/* Directory Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDirectoryOpen(!isDirectoryOpen)}
+                onBlur={() => setTimeout(() => setIsDirectoryOpen(false), 200)}
+                className="flex items-center gap-1 hover:text-slate-900 transition-colors"
+              >
+                Directory
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {isDirectoryOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                  <Link href="/search" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Search Directory
+                  </Link>
+                  <Link href="/directory/by-location" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    By Location
+                  </Link>
+                </div>
+              )}
+            </div>
             
             {/* Community Dropdown */}
             <div className="relative">
