@@ -203,13 +203,29 @@ AI has changed the cost structure, the amount of time required to accomplish tas
 
 I recently had the opportunity to speak with Mike de Ravel, CEO of MITCO Digital, regarding this transformation. MITCO Digital is developing tools designed to alleviate many of the problems associated with operating a small tax accounting firm, tools that will not only create content but also will provide the framework for the overall strategy behind that content.
 
-"I speak with small firm owners every week, and the story is always the same - no budget for a full-time marketer, no time to create content, and no real know-how. And let's be honest, most tax professionals don't want to be doing their own marketing anyway.
+<div style="border-left: 4px solid #fbbf24; padding: 1.5rem 1.5rem 1.5rem 2rem; margin: 2.5rem 0; background: linear-gradient(to right, #fef3c7, #ffffff); border-radius: 0 0.5rem 0.5rem 0;">
+
+<blockquote style="margin: 0; padding: 0; border: none; font-size: 1.125rem; line-height: 1.75; color: #1f2937; font-style: italic;">
+
+I speak with small firm owners every week, and the story is always the same - no budget for a full-time marketer, no time to create content, and no real know-how. And let's be honest, most tax professionals don't want to be doing their own marketing anyway.
 
 The online space for tax firms is more competitive than ever. You can't depend on one channel anymore. You need a strong website, SEO, social posts, video, blogs, and - most importantly - a clear strategy that underpins it all.
 
 That's exactly why we're launching our AI Marketing Assistant. It gives smaller firms a foot in the game. It will build their website, create expert blogs, social content, videos, and more as we continue rolling out upgrades. And unlike generic AI tools that just pump out content, ours is built on proven agency strategy, so every output actually drives results - not noise.
 
-For more info about MITCO, click [here](https://mitco.tech/accountant-ai-marketing-automation/)
+</blockquote>
+
+<p style="margin-top: 1.25rem; margin-bottom: 0; font-style: normal; font-weight: 700; color: #111827; font-size: 1rem;">— Mike de Ravel, CEO of MITCO Digital</p>
+
+</div>
+
+<div style="background: #000000; border: 2px solid #fbbf24; border-radius: 0.75rem; padding: 2rem; margin: 2.5rem 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);">
+
+<p style="font-weight: 700; color: #fbbf24; margin-bottom: 1rem; font-size: 1.25rem; margin-top: 0;">Learn more about MITCO Digital's AI Marketing Assistant</p>
+
+<p style="margin: 0;"><a href="https://mitco.tech/accountant-ai-marketing-automation/" style="display: inline-block; color: #000000; font-weight: 700; text-decoration: none; padding: 0.875rem 1.75rem; background: #fbbf24; border-radius: 0.5rem; transition: all 0.2s; box-shadow: 0 2px 4px rgba(251, 191, 36, 0.4);">Visit MITCO Digital →</a></p>
+
+</div>
 
 The firms that lean into this early will not just "keep up." They will outpace. They will outpublish. They will outrank. And they will appear everywhere clients are looking.
 
