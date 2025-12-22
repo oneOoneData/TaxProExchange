@@ -53,6 +53,8 @@ To open a tax firm online is equivalent to opening a store in the middle of a co
 
 No one is going to see you.
 
+![AI-powered marketing tools for small tax firms](/images/tax-firm-marketing-ai-preview.png)
+
 When I began my practice in Encinitas, I had all the elements recommended by every guide for a website:
 
 - a website
