@@ -13,7 +13,6 @@ import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
 import ProfileHealth from '@/components/dashboard/ProfileHealth';
 import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import DashboardTopEventCard from '@/components/DashboardTopEventCard';
-import SlackIntegration from '@/components/dashboard/SlackIntegration';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -98,14 +97,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Slack Integration - only for verified users */}
-        {profile?.visibility_state === 'verified' && (
-          <div className="mb-8">
-            <div className="container-mobile">
-              <SlackIntegration isVerified={true} />
-            </div>
-          </div>
-        )}
 
         {/* 2. Profile Health and Messages Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
