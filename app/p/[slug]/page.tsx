@@ -35,7 +35,7 @@ async function getProfile(slug: string) {
     .from('profiles')
     .select(`
       id, slug, first_name, last_name, credential_type,
-      headline, bio, avatar_url, is_listed, visibility_state, updated_at,
+      headline, bio, avatar_url, is_listed, is_deleted, visibility_state, updated_at,
       firm_name, linkedin_url, public_email, phone, website_url,
       accepting_work, works_multistate, works_international,
       years_experience, entity_revenue_range, opportunities,
@@ -53,17 +53,17 @@ async function getProfile(slug: string) {
   // Log profile status for debugging
   console.log('🔍 Profile found for slug:', slug);
   
-  // Check visibility requirements - temporarily disabled for debugging
-  // TODO: Re-enable strict visibility check once profiles are properly verified
-  // if (!data.is_listed || data.visibility_state !== 'verified') {
-  //   console.log('🔍 Profile not visible:', {
-  //     slug: data.slug,
-  //     is_listed: data.is_listed,
-  //     visibility_state: data.visibility_state,
-  //     reason: !data.is_listed ? 'not listed' : 'not verified'
-  //   });
-  //   return null;
-  // }
+  // Enforce visibility requirements for public profile pages
+  if (data.is_deleted || !data.is_listed || data.visibility_state !== 'verified') {
+    console.log('🔍 Profile not visible:', {
+      slug: data.slug,
+      is_deleted: data.is_deleted,
+      is_listed: data.is_listed,
+      visibility_state: data.visibility_state,
+      reason: data.is_deleted ? 'deleted' : !data.is_listed ? 'not listed' : 'not verified'
+    });
+    return null;
+  }
 
   // Fetch specializations, locations, software, and licenses separately
   const [specializationsResult, locationsResult, softwareResult, licensesResult] = await Promise.all([

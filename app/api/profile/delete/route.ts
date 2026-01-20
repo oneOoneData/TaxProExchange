@@ -58,19 +58,71 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Soft delete the profile (safer than hard delete)
-    const { error: deleteError } = await supabase
+    // Delete all user-owned data before removing the profile
+    const { data: ownedJobs, error: ownedJobsError } = await supabase
+      .from('jobs')
+      .select('id')
+      .eq('created_by', userId);
+
+    if (ownedJobsError) {
+      console.error('Error fetching owned jobs:', ownedJobsError);
+      return NextResponse.json(
+        { error: 'Failed to delete profile' },
+        { status: 500 }
+      );
+    }
+
+    const ownedJobIds = (ownedJobs || []).map((job) => job.id);
+
+    if (ownedJobIds.length > 0) {
+      const { error: ownedJobAppsError } = await supabase
+        .from('job_applications')
+        .delete()
+        .in('job_id', ownedJobIds);
+
+      if (ownedJobAppsError) {
+        console.error('Error deleting applications for owned jobs:', ownedJobAppsError);
+        return NextResponse.json(
+          { error: 'Failed to delete profile' },
+          { status: 500 }
+        );
+      }
+    }
+
+    const deletionSteps = [
+      supabase.from('connections').delete().or(`requester_profile_id.eq.${profile.id},recipient_profile_id.eq.${profile.id}`),
+      supabase.from('job_applications').delete().or(`applicant_profile_id.eq.${profile.id},applicant_user_id.eq.${userId}`),
+      supabase.from('reviews_preparer_by_firm').delete().or(`reviewee_profile_id.eq.${profile.id},reviewer_user_id.eq.${userId}`),
+      supabase.from('mentorship_preferences').delete().eq('profile_id', profile.id),
+      supabase.from('profile_specializations').delete().eq('profile_id', profile.id),
+      supabase.from('profile_locations').delete().eq('profile_id', profile.id),
+      supabase.from('profile_software').delete().eq('profile_id', profile.id),
+      supabase.from('licenses').delete().eq('profile_id', profile.id),
+      supabase.from('slack_join_attempts').delete().eq('profile_id', profile.id),
+      supabase.from('slack_members').delete().eq('profile_id', profile.id),
+      supabase.from('jobs').update({ assigned_profile_id: null }).eq('assigned_profile_id', profile.id),
+      supabase.from('profiles').update({ referrer_profile_id: null }).eq('referrer_profile_id', profile.id),
+      supabase.from('jobs').delete().eq('created_by', userId)
+    ];
+
+    const deletionResults = await Promise.all(deletionSteps);
+    const deletionError = deletionResults.find((result) => result.error)?.error;
+
+    if (deletionError) {
+      console.error('Error deleting profile data:', deletionError);
+      return NextResponse.json(
+        { error: 'Failed to delete profile' },
+        { status: 500 }
+      );
+    }
+
+    const { error: deleteProfileError } = await supabase
       .from('profiles')
-      .update({
-        is_deleted: true,
-        deleted_at: new Date().toISOString(),
-        visibility_state: 'hidden',
-        is_listed: false
-      })
+      .delete()
       .eq('id', profile.id);
 
-    if (deleteError) {
-      console.error('Error soft deleting profile:', deleteError);
+    if (deleteProfileError) {
+      console.error('Error deleting profile:', deleteProfileError);
       return NextResponse.json(
         { error: 'Failed to delete profile' },
         { status: 500 }
@@ -99,14 +151,8 @@ export async function DELETE(request: NextRequest) {
       console.error('Error deleting user from Clerk:', clerkError);
       console.error('Clerk error details:', JSON.stringify(clerkError, null, 2));
       // Don't fail the entire operation if Clerk deletion fails
-      // The profile is already soft deleted, which is the most important part
+      // The profile data is already removed from the database
     }
-
-    // TODO: Consider also deleting related data like:
-    // - Profile specializations
-    // - Connections
-    // - Applications
-    // - Any other user-specific data
 
     return NextResponse.json({
       success: true,
