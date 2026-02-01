@@ -4128,3 +4128,4 @@ Or via Supabase dashboard:
 - No additional UI or API changes required; article will surface automatically wherever AI hub content is listed.
 - Updated `content/ai/state-of-ai-in-tax-firms-2025.md` so every in-article mention of §7216 links to the new compliance explainer for consistent guidance.
 
+## 2026-01-17: Thin Profile Email Copy- Removed the photo upload quick win from the thin-profile optimization email (HTML + text).

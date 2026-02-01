@@ -44,11 +44,8 @@ export default function DashboardLayoutClient({
     };
 
     checkUnreadMessages();
-    
-    // Check every 30 seconds
-    const interval = setInterval(checkUnreadMessages, 30000);
-    
-    // Also check when the page becomes visible (user navigates back)
+
+    // Only check when the page becomes visible (user navigates back)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         checkUnreadMessages();
@@ -58,7 +55,6 @@ export default function DashboardLayoutClient({
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isLoaded, user]);

@@ -4,6 +4,8 @@ import { SOLUTIONS } from '@/lib/constants/solutions';
 import { siteUrl } from '@/lib/seo';
 import { getAllPosts } from '@/lib/blog';
 
+export const revalidate = 21600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerClient();
   

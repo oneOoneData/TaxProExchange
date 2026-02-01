@@ -664,46 +664,75 @@ export async function GET(request: NextRequest) {
 
     // Software filtering is now handled in the SQL query above for better performance
 
-    // Fetch specializations, locations, software, and licenses for each profile
-    const profilesWithDetails = await Promise.all(
-      filteredProfiles.map(async (profile) => {
-        // Get specializations
-        const { data: specializations } = await supabase
+    // Fetch specializations, locations, software, and licenses in batches to reduce query volume
+    const profileIds = filteredProfiles.map(profile => profile.id);
+    const specializationsByProfile = new Map<string, string[]>();
+    const locationsByProfile = new Map<string, string[]>();
+    const softwareByProfile = new Map<string, string[]>();
+    const licensesByProfile = new Map<string, any[]>();
+
+    const addToMap = <T>(map: Map<string, T[]>, profileId: string, value: T) => {
+      const existing = map.get(profileId);
+      if (existing) {
+        existing.push(value);
+      } else {
+        map.set(profileId, [value]);
+      }
+    };
+
+    if (profileIds.length > 0) {
+      const [
+        { data: specializations },
+        { data: locations },
+        { data: software },
+        { data: licenses },
+      ] = await Promise.all([
+        supabase
           .from('profile_specializations')
-          .select('specialization_slug')
-          .eq('profile_id', profile.id);
-
-        // Get locations
-        const { data: locations } = await supabase
+          .select('profile_id, specialization_slug')
+          .in('profile_id', profileIds),
+        supabase
           .from('profile_locations')
-          .select('state')
-          .eq('profile_id', profile.id);
-
-        // Get software
-        const { data: software } = await supabase
+          .select('profile_id, state')
+          .in('profile_id', profileIds),
+        supabase
           .from('profile_software')
-          .select('software_slug')
-          .eq('profile_id', profile.id);
-
-        // Get licenses using the public view (never includes license_number)
-        const { data: licenses } = await supabase
+          .select('profile_id, software_slug')
+          .in('profile_id', profileIds),
+        supabase
           .from('licenses_public_view')
           .select('*')
-          .eq('profile_id', profile.id);
+          .in('profile_id', profileIds),
+      ]);
 
-        return {
-          ...profile,
-          specializations: specializations?.map(s => s.specialization_slug) || [],
-          states: locations?.map(l => l.state) || [],
-          software: software?.map(s => s.software_slug) || [],
-          licenses: licenses || [],
-          verified: profile.visibility_state === 'verified',
-          works_multistate: profile.works_multistate || false,
-          works_international: profile.works_international || false,
-          countries: profile.countries || []
-        };
-      })
-    );
+      specializations?.forEach((row: { profile_id: string; specialization_slug: string }) => {
+        addToMap(specializationsByProfile, row.profile_id, row.specialization_slug);
+      });
+
+      locations?.forEach((row: { profile_id: string; state: string }) => {
+        addToMap(locationsByProfile, row.profile_id, row.state);
+      });
+
+      software?.forEach((row: { profile_id: string; software_slug: string }) => {
+        addToMap(softwareByProfile, row.profile_id, row.software_slug);
+      });
+
+      licenses?.forEach((row: { profile_id: string }) => {
+        addToMap(licensesByProfile, row.profile_id, row as any);
+      });
+    }
+
+    const profilesWithDetails = filteredProfiles.map((profile) => ({
+      ...profile,
+      specializations: specializationsByProfile.get(profile.id) || [],
+      states: locationsByProfile.get(profile.id) || [],
+      software: softwareByProfile.get(profile.id) || [],
+      licenses: licensesByProfile.get(profile.id) || [],
+      verified: profile.visibility_state === 'verified',
+      works_multistate: profile.works_multistate || false,
+      works_international: profile.works_international || false,
+      countries: profile.countries || []
+    }));
 
     // Calculate correct total count - use filtered count if location filtering was applied
     const finalTotalCount = state ? totalAfterLocationFilter : (totalCountBeforeLocationFilter || 0);
