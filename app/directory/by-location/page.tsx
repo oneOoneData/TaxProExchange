@@ -99,13 +99,21 @@ const COUNTRY_NAME_LOOKUP = new Map<string, string>(
   COUNTRIES.map((country) => [country.name.toUpperCase(), country.code])
 );
 
+// Helper to convert state code to URL-friendly slug
+function stateToSlug(stateCode: string): string {
+  const stateName = US_STATE_NAMES[stateCode];
+  if (!stateName) return stateCode.toLowerCase();
+  return stateName.toLowerCase().replace(/\s+/g, '-');
+}
+
 type LocationGroup = {
   key: string;
   label: string;
   profiles: DirectoryProfile[];
+  isState?: boolean; // Flag to indicate if this is a US state
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 export const metadata: Metadata = {
   title: 'Directory by Location | TaxProExchange',
   description: 'Browse verified tax professionals grouped by US state and international coverage.',
@@ -290,7 +298,10 @@ function buildGroups(profiles: RawProfile[]) {
       }));
 
   return {
-    stateGroups: sortGroups(states, (code) => US_STATE_NAMES[code] || code),
+    stateGroups: sortGroups(states, (code) => US_STATE_NAMES[code] || code).map(group => ({
+      ...group,
+      isState: true,
+    })),
     countryGroups: sortGroups(countries, (code) => getCountryName(code)),
   };
 }
@@ -314,16 +325,30 @@ function LocationSection({
       </div>
 
       <div className="space-y-3">
-        {groups.map((group) => (
-          <details
-            key={group.key}
-            className="rounded-2xl border border-slate-200 bg-white"
-          >
-            <summary className="flex items-center justify-between cursor-pointer px-4 py-3 text-sm font-semibold text-slate-900">
-              <span>{group.label}</span>
-              <span className="text-slate-500">{group.profiles.length} verified</span>
-            </summary>
-            <ul className="px-4 pb-4 space-y-2 text-sm">
+        {groups.map((group) => {
+          const stateSlug = group.isState ? stateToSlug(group.key) : null;
+          const stateUrl = stateSlug ? `/directory/by-location/${stateSlug}` : null;
+
+          return (
+            <div key={group.key} className="rounded-2xl border border-slate-200 bg-white">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  {stateUrl ? (
+                    <Link
+                      href={stateUrl}
+                      className="text-sm font-semibold text-blue-700 hover:text-blue-800 hover:underline"
+                    >
+                      {group.label}
+                    </Link>
+                  ) : (
+                    <span className="text-sm font-semibold text-slate-900">{group.label}</span>
+                  )}
+                </div>
+                <span className="text-sm text-slate-500">{group.profiles.length} verified</span>
+              </div>
+              <details>
+                <summary className="sr-only">Toggle {group.label} profiles</summary>
+                <ul className="px-4 pb-4 pt-2 space-y-2 text-sm">
               {group.profiles.map((profile) => (
                 <li key={`${group.key}-${profile.slug}`}>
                   <Link
@@ -366,9 +391,11 @@ function LocationSection({
                   </Link>
                 </li>
               ))}
-            </ul>
-          </details>
-        ))}
+                </ul>
+              </details>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

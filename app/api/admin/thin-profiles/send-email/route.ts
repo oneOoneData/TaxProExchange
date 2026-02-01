@@ -32,7 +32,7 @@ function generateProfileOptimizationEmail(data: {
 
   const exampleBio = exampleBios[data.credentialType] || exampleBios['CPA'];
 
-  const subject = `📊 Make your TaxProExchange profile work harder for you`;
+  const subject = `People are viewing your Profile`;
 
   const html = `
     <!DOCTYPE html>
@@ -51,7 +51,7 @@ function generateProfileOptimizationEmail(data: {
           <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Hi ${data.firstName}!</h2>
           
           <p style="color: #4a5568; margin: 15px 0;">
-            I noticed your TaxProExchange profile could use a quick update to help potential clients and collaborators find you more easily.
+            Your profile is getting views, but I noticed your TaxProExchange profile could use a quick update to help potential clients and collaborators find you more easily.
           </p>
 
           <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #f59e0b;">
@@ -85,10 +85,6 @@ function generateProfileOptimizationEmail(data: {
             <li style="margin: 12px 0;">
               <strong>Add software proficiencies</strong><br>
               <span style="font-size: 14px; color: #718096;">Lacerte, Drake, ProSeries, QuickBooks, etc.</span>
-            </li>
-            <li style="margin: 12px 0;">
-              <strong>Upload a professional photo</strong><br>
-              <span style="font-size: 14px; color: #718096;">Profiles with photos get 5x more connection requests</span>
             </li>
           </ol>
         </div>
@@ -143,7 +139,7 @@ Optimize Your TaxProExchange Profile
 
 Hi ${data.firstName}!
 
-I noticed your TaxProExchange profile could use a quick update to help potential clients and collaborators find you more easily.
+Your profile is getting views, but I noticed your TaxProExchange profile could use a quick update to help potential clients and collaborators find you more easily.
 
 YOUR PROFILE: ${data.currentWordCount} words
 TARGET: 150+ words for better visibility
@@ -158,7 +154,6 @@ QUICK WINS (5 minutes):
 1. Add a professional bio (75-150 words)
 2. List your specializations (S-Corp, SALT, crypto, etc.)
 3. Add software proficiencies (Lacerte, Drake, etc.)
-4. Upload a professional photo
 
 Update your profile: ${data.profileEditUrl}
 

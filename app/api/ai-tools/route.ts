@@ -11,7 +11,7 @@ export async function GET() {
     // Get all tools
     const { data: tools, error: toolsError } = await supabase
       .from('ai_tools')
-      .select('*')
+      .select('id, name, slug, category, website_url, logo_url, short_description, long_description, affiliate_url, collateral_links, created_at')
       .order('created_at', { ascending: false });
 
     if (toolsError) {
@@ -101,7 +101,14 @@ export async function GET() {
     // Sort by vote count (highest first)
     toolsWithVotes.sort((a, b) => b.votes - a.votes);
 
-    return NextResponse.json({ tools: toolsWithVotes });
+    return NextResponse.json(
+      { tools: toolsWithVotes },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error in GET /api/ai-tools:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -40,7 +40,7 @@ export async function GET() {
     // Fetch all specializations with their groups
     const { data: specializations, error } = await supabase
       .from('specializations')
-      .select('*')
+      .select('id, slug, label, group_key')
       .order('label');
 
     if (error) {
@@ -54,7 +54,7 @@ export async function GET() {
     // Fetch all groups
     const { data: groups, error: groupsError } = await supabase
       .from('specialization_groups')
-      .select('*')
+      .select('id, key, label')
       .order('label');
 
     if (groupsError) {
@@ -72,7 +72,11 @@ export async function GET() {
       items: specializations.filter(spec => spec.group_key === group.key)
     }));
 
-    return NextResponse.json(groupedSpecializations);
+    return NextResponse.json(groupedSpecializations, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   } catch (error) {
     console.error('Specializations error:', error);
     return NextResponse.json(
