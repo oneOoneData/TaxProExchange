@@ -331,23 +331,33 @@ function LocationSection({
 
           return (
             <div key={group.key} className="rounded-2xl border border-slate-200 bg-white">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  {stateUrl ? (
-                    <Link
-                      href={stateUrl}
-                      className="text-sm font-semibold text-blue-700 hover:text-blue-800 hover:underline"
-                    >
-                      {group.label}
-                    </Link>
-                  ) : (
-                    <span className="text-sm font-semibold text-slate-900">{group.label}</span>
-                  )}
-                </div>
-                <span className="text-sm text-slate-500">{group.profiles.length} verified</span>
-              </div>
               <details>
-                <summary className="sr-only">Toggle {group.label} profiles</summary>
+                <summary className="flex items-center justify-between px-4 py-3 border-b border-slate-100 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    {stateUrl ? (
+                      <Link
+                        href={stateUrl}
+                        className="text-sm font-semibold text-blue-700 hover:text-blue-800 hover:underline"
+                      >
+                        {group.label}
+                      </Link>
+                    ) : (
+                      <span className="text-sm font-semibold text-slate-900">{group.label}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-500">{group.profiles.length} verified</span>
+                    <svg
+                      className="h-4 w-4 text-slate-400"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </summary>
                 <ul className="px-4 pb-4 pt-2 space-y-2 text-sm">
               {group.profiles.map((profile) => (
                 <li key={`${group.key}-${profile.slug}`}>
