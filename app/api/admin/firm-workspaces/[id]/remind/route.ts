@@ -54,7 +54,8 @@ export async function POST(
     }
 
     const supabase = createServerClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com';
+    const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com';
+    const appUrl = rawAppUrl.replace(/\/+$/, '');
 
     const { data: firm, error: firmError } = await supabase
       .from('firms')
