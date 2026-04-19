@@ -6,7 +6,7 @@ import { Suspense } from "react";
 
 function SignInContent() {
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect_url') || '/onboarding';
+  const redirectUrl = searchParams.get('redirect_url') || '/dashboard';
 
   return (
     <div className="mx-auto max-w-md py-10">
