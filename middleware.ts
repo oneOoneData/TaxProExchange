@@ -81,17 +81,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return response;
   }
 
-  // Check if onboarding is complete
-  const onboardingComplete = req.cookies.get('onboarding_complete')?.value === '1';
-  response.headers.set('x-debug-onboarding-check', onboardingComplete ? 'complete' : 'incomplete');
-  
-  // If onboarding is not complete, redirect to profile edit
-  if (!onboardingComplete) {
-    response.headers.set('x-debug-redirect', 'profile/edit (incomplete)');
-    return NextResponse.redirect(new URL('/profile/edit', req.url));
-  }
-
-  response.headers.set('x-debug-redirect', 'none (complete)');
+  // Do not enforce onboarding via cookie at middleware level.
+  // Cookie state can drift across devices/browsers and causes
+  // verified users to get incorrectly forced into profile edit.
+  response.headers.set('x-debug-onboarding-check', 'skipped');
+  response.headers.set('x-debug-redirect', 'none (onboarding check skipped)');
   return response;
 });
 

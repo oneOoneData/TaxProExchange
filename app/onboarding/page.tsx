@@ -28,9 +28,9 @@ export default async function Onboarding() {
   console.log('[onboarding] existingProfile:', existingProfile);
 
   if (existingProfile) {
-    // User has completed onboarding, redirect to profile edit
-    console.log('[onboarding] redirecting to profile edit');
-    redirect('/profile/edit');
+    // Returning users should land on dashboard, not profile edit.
+    console.log('[onboarding] existing profile found, redirecting to dashboard');
+    redirect('/dashboard');
   }
 
   // New user - redirect directly to credentials step

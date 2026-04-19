@@ -1,3 +1,23 @@
+### 2026-04-19: Fixed forced profile redirect loop for returning users
+
+**Goal**: Stop verified/returning users from being forced back to `/profile/edit` on login and navigation.
+
+**Root Cause**:
+- Middleware enforced onboarding using only the `onboarding_complete` cookie.
+- Cookie state can be missing/stale across devices or sessions, causing false "incomplete" redirects.
+- Sign-in defaulted to `/onboarding`, and onboarding redirected existing profiles to `/profile/edit`.
+
+**Fix Applied**:
+- `middleware.ts`: removed cookie-based global onboarding redirect enforcement.
+- `app/sign-in/[[...sign-in]]/page.tsx`: changed default post-login redirect from `/onboarding` to `/dashboard`.
+- `app/onboarding/page.tsx`: changed existing-profile redirect from `/profile/edit` to `/dashboard`.
+
+**Expected Outcome**:
+- Returning users can access platform tabs without being forced to re-submit profile details.
+- Logging back in no longer sends users to profile edit by default.
+
+---
+
 # Cursor Task Notes
 
 ## 2025-11-15: ESLint & Hook Stability Pass
