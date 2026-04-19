@@ -42,6 +42,7 @@ export default function FirmWorkspacesGrid() {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'created_at', desc: true }]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [reminding, setReminding] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
   // Debounce search
@@ -113,6 +114,36 @@ export default function FirmWorkspacesGrid() {
       setDeleting(null);
     }
   }, [fetchFirms]);
+
+  const handleReminder = useCallback(async (firmId: string, firmName: string, inviteType: 'bench' | 'team') => {
+    setReminding(`${firmId}:${inviteType}`);
+    setResult(null);
+
+    try {
+      const response = await fetch(`/api/admin/firm-workspaces/${firmId}/remind`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inviteType }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setResult(`❌ ${payload.error || 'Failed to send reminders'}`);
+        return;
+      }
+
+      const sentCount = payload.sentCount || 0;
+      const label = inviteType === 'bench' ? 'bench' : 'team';
+      setResult(`✅ Sent ${sentCount} ${label} invite reminder${sentCount === 1 ? '' : 's'} for "${firmName}"`);
+    } catch (error) {
+      setResult(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setReminding(null);
+    }
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -246,19 +277,45 @@ export default function FirmWorkspacesGrid() {
       columnHelper.display({
         id: 'actions',
         header: 'Actions',
-        cell: ({ row }) => (
-          <button
-            onClick={() => handleDelete(row.original.id, row.original.name)}
-            disabled={deleting === row.original.id}
-            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-medium disabled:opacity-50"
-          >
-            {deleting === row.original.id ? 'Deleting...' : 'Delete'}
-          </button>
-        ),
-        size: 100,
+        cell: ({ row }) => {
+          const firm = row.original;
+          const remindingBench = reminding === `${firm.id}:bench`;
+          const remindingTeam = reminding === `${firm.id}:team`;
+
+          return (
+            <div className="flex items-center gap-2">
+              {firm.bench_invites_pending > 0 && (
+                <button
+                  onClick={() => handleReminder(firm.id, firm.name, 'bench')}
+                  disabled={remindingBench || reminding !== null}
+                  className="px-2 py-1 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-xs font-medium disabled:opacity-50"
+                >
+                  {remindingBench ? 'Sending...' : 'Remind Bench'}
+                </button>
+              )}
+              {firm.team_invites_pending > 0 && (
+                <button
+                  onClick={() => handleReminder(firm.id, firm.name, 'team')}
+                  disabled={remindingTeam || reminding !== null}
+                  className="px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium disabled:opacity-50"
+                >
+                  {remindingTeam ? 'Sending...' : 'Remind Team'}
+                </button>
+              )}
+              <button
+                onClick={() => handleDelete(firm.id, firm.name)}
+                disabled={deleting === firm.id}
+                className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs font-medium disabled:opacity-50"
+              >
+                {deleting === firm.id ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          );
+        },
+        size: 260,
       }),
     ],
-    [deleting, handleDelete]
+    [deleting, handleDelete, handleReminder, reminding]
   );
 
   const table = useReactTable({

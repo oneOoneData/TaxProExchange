@@ -4149,3 +4149,11 @@ Or via Supabase dashboard:
 - Updated `content/ai/state-of-ai-in-tax-firms-2025.md` so every in-article mention of §7216 links to the new compliance explainer for consistent guidance.
 
 ## 2026-01-17: Thin Profile Email Copy- Removed the photo upload quick win from the thin-profile optimization email (HTML + text).
+
+## 2026-04-19: Admin Invite Reminders (Firm Workspaces)
+
+- Added admin-only endpoint `POST /api/admin/firm-workspaces/[id]/remind` to send reminder emails for pending invites by type (`bench` or `team`).
+- Bench reminders include direct accept/decline links to `/invitations?id=...&action=...`.
+- Team reminders include direct review link to `/firm-invite/[token]` with urgency copy ("you are in high demand").
+- Updated `components/admin/FirmWorkspacesGrid.tsx` to show `Remind Bench` and `Remind Team` actions per firm row when pending invites exist.
+- Reminder actions return sent counts in the admin UI to confirm delivery attempts.
