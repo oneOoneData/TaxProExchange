@@ -200,13 +200,25 @@ export default function FirmWorkspacesGrid() {
       columnHelper.accessor('bench_invites_pending', {
         header: 'Bench Invites',
         cell: (info) => {
+          const firm = info.row.original;
           const pending = info.getValue();
           const accepted = info.row.original.bench_invites_accepted;
           if (pending === 0 && accepted === 0) return <span className="text-slate-400 text-sm">—</span>;
           return (
-            <div className="flex items-center gap-1 text-xs">
-              {pending > 0 && <span className="text-amber-600 font-medium">{pending} pending</span>}
-              {accepted > 0 && <span className="text-emerald-600">{accepted} ✓</span>}
+            <div className="flex flex-col items-start gap-1 text-xs">
+              <div className="flex items-center gap-1">
+                {pending > 0 && <span className="text-amber-600 font-medium">{pending} pending</span>}
+                {accepted > 0 && <span className="text-emerald-600">{accepted} ✓</span>}
+              </div>
+              {pending > 0 && (
+                <button
+                  onClick={() => handleReminder(firm.id, firm.name, 'bench')}
+                  disabled={reminding === `${firm.id}:bench` || reminding !== null}
+                  className="px-2 py-0.5 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors text-[11px] font-medium disabled:opacity-50"
+                >
+                  {reminding === `${firm.id}:bench` ? 'Sending...' : 'Send reminder'}
+                </button>
+              )}
             </div>
           );
         },
@@ -215,12 +227,22 @@ export default function FirmWorkspacesGrid() {
       columnHelper.accessor('team_invites_pending', {
         header: 'Team Invites',
         cell: (info) => {
+          const firm = info.row.original;
           const count = info.getValue();
           if (count === 0) return <span className="text-slate-400 text-sm">—</span>;
           return (
-            <span className="text-amber-600 font-medium text-xs">
-              {count} pending
-            </span>
+            <div className="flex flex-col items-start gap-1">
+              <span className="text-amber-600 font-medium text-xs">
+                {count} pending
+              </span>
+              <button
+                onClick={() => handleReminder(firm.id, firm.name, 'team')}
+                disabled={reminding === `${firm.id}:team` || reminding !== null}
+                className="px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-[11px] font-medium disabled:opacity-50"
+              >
+                {reminding === `${firm.id}:team` ? 'Sending...' : 'Send reminder'}
+              </button>
+            </div>
           );
         },
         size: 100,

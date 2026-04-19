@@ -4157,3 +4157,4 @@ Or via Supabase dashboard:
 - Team reminders include direct review link to `/firm-invite/[token]` with urgency copy ("you are in high demand").
 - Updated `components/admin/FirmWorkspacesGrid.tsx` to show `Remind Bench` and `Remind Team` actions per firm row when pending invites exist.
 - Reminder actions return sent counts in the admin UI to confirm delivery attempts.
+- Follow-up UX tweak: also surfaced a `Send reminder` button directly in the `Bench Invites` and `Team Invites` cells so admins can see/use reminders without relying on the far-right actions column visibility.
