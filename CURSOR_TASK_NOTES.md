@@ -4158,3 +4158,4 @@ Or via Supabase dashboard:
 - Updated `components/admin/FirmWorkspacesGrid.tsx` to show `Remind Bench` and `Remind Team` actions per firm row when pending invites exist.
 - Reminder actions return sent counts in the admin UI to confirm delivery attempts.
 - Follow-up UX tweak: also surfaced a `Send reminder` button directly in the `Bench Invites` and `Team Invites` cells so admins can see/use reminders without relying on the far-right actions column visibility.
+- Bugfix: normalize `NEXT_PUBLIC_APP_URL` by removing trailing slashes before building reminder links so emails no longer produce malformed URLs like `//invitations`.
