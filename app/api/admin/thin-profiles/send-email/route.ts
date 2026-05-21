@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
+import { generateUnsubscribeUrl } from '@/app/api/unsubscribe/route';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,7 @@ function generateProfileOptimizationEmail(data: {
   currentWordCount: number;
   credentialType: string;
   profileEditUrl: string;
+  unsubscribeUrl: string;
 }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
 
@@ -92,7 +94,8 @@ function generateProfileOptimizationEmail(data: {
           <p style="margin: 0 0 8px 0;">Koen<br>TaxProExchange</p>
           <p style="margin: 0;">
             You're receiving this because your profile is live on TaxProExchange.
-            <a href="${appUrl}/settings" style="color: #64748b;">Manage preferences</a>
+            <a href="${appUrl}/settings" style="color: #64748b;">Manage preferences</a> ·
+            <a href="${data.unsubscribeUrl}" style="color: #64748b;">Unsubscribe</a>
           </p>
         </div>
 
@@ -124,6 +127,7 @@ TaxProExchange
 
 ---
 Manage preferences: ${appUrl}/settings
+Unsubscribe: ${data.unsubscribeUrl}
   `;
 
   return { subject, html, text };
@@ -174,7 +178,7 @@ export async function POST(request: NextRequest) {
     // Fetch target profiles
     let query = supabase
       .from('profiles')
-      .select('id, first_name, last_name, public_email, credential_type, slug, bio, headline, opportunities, specializations, states, profile_optimization_emailed_at')
+      .select('id, first_name, last_name, public_email, credential_type, slug, bio, headline, opportunities, specializations, states, profile_optimization_emailed_at, email_preferences')
       .eq('is_listed', true)
       .eq('visibility_state', 'verified');
 
@@ -216,6 +220,12 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
+      // Skip if opted out of marketing emails
+      if (profile.email_preferences?.marketing_updates === false) {
+        results.push({ success: false, email: profile.public_email, reason: 'Opted out of marketing emails', profile_id: profile.id });
+        continue;
+      }
+
       // Skip if emailed within the last 30 days
       if (wasRecentlyEmailed(profile.profile_optimization_emailed_at)) {
         results.push({ success: false, email: profile.public_email, reason: `Already emailed within ${SKIP_IF_EMAILED_WITHIN_DAYS} days`, profile_id: profile.id, last_emailed: profile.profile_optimization_emailed_at });
@@ -228,6 +238,7 @@ export async function POST(request: NextRequest) {
           currentWordCount: wordCount,
           credentialType: profile.credential_type,
           profileEditUrl: `${appUrl}/profile/edit`,
+          unsubscribeUrl: generateUnsubscribeUrl(profile.id, 'marketing'),
         });
 
         await sendEmail({

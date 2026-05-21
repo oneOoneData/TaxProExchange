@@ -1,35 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createHmac } from 'crypto';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function signToken(profileId: string): string {
+  return createHmac('sha256', process.env.WEBHOOK_SECRET || 'fallback')
+    .update(`unsub:${profileId}`)
+    .digest('hex');
+}
+
+export function generateUnsubscribeUrl(profileId: string, type = 'marketing'): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+  const token = signToken(profileId);
+  return `${appUrl}/api/unsubscribe?pid=${profileId}&token=${token}&type=${type}`;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const token = url.searchParams.get('token');
     const email = url.searchParams.get('email');
+    const pid = url.searchParams.get('pid');
     const type = url.searchParams.get('type') || 'all';
-    
-    if (!token && !email) {
-      return NextResponse.json({ 
-        error: 'Missing unsubscribe token or email' 
-      }, { status: 400 });
+
+    // New signed-token flow (pid + token)
+    if (pid && token) {
+      const expected = signToken(pid);
+      if (token !== expected) {
+        return new NextResponse('Invalid unsubscribe link.', { status: 403 });
+      }
+    } else if (!token && !email) {
+      return NextResponse.json({ error: 'Missing unsubscribe token or email' }, { status: 400 });
     }
 
-    let profileId: string | null = null;
-    
-    if (token) {
-      // Decode the token (in a real implementation, you'd want to use JWT or similar)
-      // For now, we'll use a simple base64 encoded profile ID
+    let profileId: string | null = pid;
+
+    if (!profileId && token) {
+      // Legacy: base64-encoded profile ID
       try {
         profileId = Buffer.from(token, 'base64').toString('utf-8');
-      } catch (error) {
-        return NextResponse.json({ 
-          error: 'Invalid unsubscribe token' 
-        }, { status: 400 });
+      } catch {
+        return NextResponse.json({ error: 'Invalid unsubscribe token' }, { status: 400 });
       }
     }
 
