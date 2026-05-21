@@ -105,7 +105,7 @@ export default function DemoRequestButton() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Anything you'd like us to know?</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Anything you&apos;d like us to know?</label>
                     <textarea
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
