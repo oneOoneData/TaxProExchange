@@ -238,11 +238,13 @@ export async function POST(request: NextRequest) {
         });
 
         // Stamp the profile with the send time
-        await supabase
+        supabase
           .from('profiles')
           .update({ profile_optimization_emailed_at: new Date().toISOString() })
           .eq('id', profile.id)
-          .catch((err: unknown) => console.error('Failed to stamp email timestamp:', err));
+          .then(({ error: stampError }) => {
+            if (stampError) console.error('Failed to stamp email timestamp:', stampError);
+          });
 
         results.push({
           success: true,
