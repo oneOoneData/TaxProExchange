@@ -4,6 +4,7 @@ import JsonLd from '@/components/seo/JsonLd';
 import { siteUrl, generateFaqJsonLd } from '@/lib/seo';
 import SolutionCTA from '@/components/seo/SolutionCTA';
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView';
+import DemoRequestButton from '@/components/DemoRequestButton';
 
 export const metadata: Metadata = {
   title: 'For Tax Firms: Verified Overflow Staffing & Niche Expertise | TaxProExchange',
@@ -87,12 +88,7 @@ export default function ForFirmsPage() {
                 >
                   Create Firm Account
                 </Link>
-                <a
-                  href="mailto:hello@taxproexchange.com?subject=Book 15-min Demo"
-                  className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all"
-                >
-                  Book 15-min Demo
-                </a>
+                <DemoRequestButton />
               </div>
             </div>
           </div>

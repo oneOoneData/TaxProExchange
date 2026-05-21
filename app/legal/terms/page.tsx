@@ -84,8 +84,8 @@ export default function TermsPage() {
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">10. Contact Information</h2>
             <p className="text-slate-700 mb-4">
               If you have any questions about these Terms of Use, please contact us at:{' '}
-              <a href="mailto:info@cardifftax.com" className="text-slate-600 hover:text-slate-800 underline">
-                info@cardifftax.com
+              <a href="mailto:support@taxproexchange.com" className="text-slate-600 hover:text-slate-800 underline">
+                support@taxproexchange.com
               </a>
             </p>
 

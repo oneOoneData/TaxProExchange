@@ -5,32 +5,33 @@ import Image from "next/image";
 import JsonLd from "@/components/seo/JsonLd";
 import { siteUrl, generateArticleCollectionJsonLd, generateFaqJsonLd } from "@/lib/seo";
 import { getAllPosts } from "@/lib/blog";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = {
-  title: "AI in Tax: Thought Leadership & Tools for CPAs | TaxProExchange",
-  description: "Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.",
-  alternates: { canonical: `${siteUrl}/ai` },
+  title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
+  description: "Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.",
+  alternates: { canonical: `${siteUrl}/insights` },
   openGraph: {
-    title: "AI in Tax: Thought Leadership & Tools for CPAs | TaxProExchange",
-    description: "Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.",
-    url: `${siteUrl}/ai`,
+    title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
+    description: "Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.",
+    url: `${siteUrl}/insights`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI in Tax: Thought Leadership & Tools for CPAs | TaxProExchange",
-    description: "Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.",
+    title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
+    description: "Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.",
   },
 };
 
-export default function AIPage() {
+export default function InsightsPage() {
   const posts = getAllPosts();
-  
+
   // Generate schemas
   const articleSchema = generateArticleCollectionJsonLd({
-    title: 'AI in Tax: Thought Leadership & Tools for CPAs',
-    description: 'Exploring how AI transforms tax preparation—local LLMs, automation, and trusted tools.',
-    url: `${siteUrl}/ai`,
+    title: 'Insights: AI, Tax Trends & Tools for CPAs',
+    description: 'Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.',
+    url: `${siteUrl}/insights`,
     dateModified: posts.length > 0 ? posts[0].data.date : new Date().toISOString(),
     author: 'TaxProExchange Editorial',
   });
@@ -205,6 +206,9 @@ export default function AIPage() {
                 ))}
             </div>
           </section>
+
+          {/* Newsletter Signup */}
+          <NewsletterSignup />
 
           {/* Write for Us CTA */}
           <div className="mb-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-8">

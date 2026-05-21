@@ -20,7 +20,6 @@ export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
 
   const communityItems = [
     { href: '/jobs', label: 'Jobs' },
-    { href: '/events', label: 'Events' },
     { href: '/mentorship', label: 'Mentorship' },
   ];
 

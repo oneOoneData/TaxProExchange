@@ -4,7 +4,8 @@ import AppNavigation from "@/components/AppNavigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { getPostBySlug, getAllSlugs } from "@/lib/blog";
+import Link from "next/link";
+import { getPostBySlug, getAllSlugs, getAllPosts } from "@/lib/blog";
 import { siteUrl, articleJsonLd, generateBreadcrumbListJsonLd } from "@/lib/seo";
 import JsonLd from "@/components/seo/JsonLd";
 import Image from "next/image";
@@ -63,6 +64,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   if (!post) {
     notFound();
   }
+
+  const relatedPosts = getAllPosts()
+    .filter((p) => p.slug !== slug && p?.data?.title)
+    .slice(0, 3);
 
   const url = `${siteUrl}${post.data.slug || `/insights/${slug}`}`;
   const articleSchema = articleJsonLd({
@@ -223,6 +228,50 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
             )}
           </article>
+
+          {/* Related Articles */}
+          {relatedPosts.length > 0 && (
+            <section className="mt-12 pt-10 border-t border-slate-200">
+              <h2 className="text-xl font-bold text-slate-900 mb-6">More Articles</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {relatedPosts.map((related) => (
+                  <Link
+                    key={related.slug}
+                    href={`/insights/${related.slug}`}
+                    className="group block border border-slate-200 rounded-lg overflow-hidden hover:border-slate-300 hover:shadow-md transition-all bg-white"
+                  >
+                    {(related.data.previewImage || related.data.image) && (
+                      <div className="h-36 overflow-hidden bg-slate-100">
+                        <Image
+                          src={related.data.previewImage || related.data.image || '/images/placeholder.png'}
+                          alt={related.data.title || 'Article image'}
+                          width={400}
+                          height={225}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-2 mb-1">
+                        {related.data.title}
+                      </h3>
+                      {related.data.date && (
+                        <time className="text-xs text-slate-500" dateTime={related.data.date}>
+                          {new Date(related.data.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </time>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </main>
       </div>
     </>

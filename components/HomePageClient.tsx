@@ -109,9 +109,6 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                   <a href="/jobs" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
                     Jobs
                   </a>
-                  <a href="/events" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
-                    Events
-                  </a>
                   <a href="/mentorship" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
                     Mentorship
                   </a>
@@ -187,6 +184,44 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
       <section className="py-16 bg-slate-50">
         <div className="container-mobile">
           <FeaturedProfiles />
+        </div>
+      </section>
+
+      {/* Browse by Specialty */}
+      <section className="py-16 bg-white">
+        <div className="container-mobile">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-slate-900">Browse by Specialty</h2>
+            <p className="mt-3 text-slate-600">Find verified professionals for the exact work you need.</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {[
+              { label: 'SALT Specialists — California', href: '/search?specialization=multi_state&state=CA' },
+              { label: 'SALT Specialists — New York', href: '/search?specialization=multi_state&state=NY' },
+              { label: 'IRS Representation — California', href: '/search?specialization=irs_rep&state=CA' },
+              { label: 'IRS Representation — Texas', href: '/search?specialization=irs_rep&state=TX' },
+              { label: 'Crypto Tax Specialists', href: '/search?specialization=crypto' },
+              { label: 'Trusts & Estates — Florida', href: '/search?specialization=trusts_estates&state=FL' },
+              { label: 'CPAs Available Now', href: '/search?credential_type=CPA&accepting_work=true' },
+              { label: 'EAs Available Now', href: '/search?credential_type=EA&accepting_work=true' },
+            ].map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-400 hover:shadow-sm transition-all text-sm text-slate-700 font-medium"
+              >
+                <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                {item.label}
+              </a>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <a href="/search" className="text-sm text-slate-500 hover:text-slate-700 underline">
+              See all search options →
+            </a>
+          </div>
         </div>
       </section>
 

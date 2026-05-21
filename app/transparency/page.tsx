@@ -168,14 +168,14 @@ export default function TransparencyPage() {
             <div className="bg-slate-50 p-4 rounded-lg">
               <p className="text-slate-700 mb-2">
                 <strong>Email:</strong>{' '}
-                <a href="mailto:koen@cardifftax.com" className="text-slate-600 hover:text-slate-800 underline">
-                  koen@cardifftax.com
+                <a href="mailto:support@taxproexchange.com" className="text-slate-600 hover:text-slate-800 underline">
+                  support@taxproexchange.com
                 </a>
               </p>
               <p className="text-slate-700 mb-2">
                 <strong>Security issues:</strong>{' '}
-                <a href="mailto:koen@cardifftax.com" className="text-slate-600 hover:text-slate-800 underline">
-                  koen@cardifftax.com
+                <a href="mailto:support@taxproexchange.com" className="text-slate-600 hover:text-slate-800 underline">
+                  support@taxproexchange.com
                 </a>
               </p>
             </div>

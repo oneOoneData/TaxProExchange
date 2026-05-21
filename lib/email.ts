@@ -685,7 +685,7 @@ export async function sendBatchJobNotifications(notifications: JobCreatedEmailDa
 
 // Send profile completion notification to admin
 export async function sendProfileCompletionNotification(data: ProfileCompletionEmailData) {
-  const adminEmail = process.env.ADMIN_EMAIL || 'koen@cardifftax.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'support@taxproexchange.com';
   const template = emailTemplates.profileCompletion(data);
   return sendEmailLegacy(adminEmail, template);
 }
