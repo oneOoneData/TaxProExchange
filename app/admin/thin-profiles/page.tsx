@@ -12,7 +12,7 @@ import AdminRouteGuard from '@/components/AdminRouteGuard';
 interface ThinProfile {
   id: string;
   name: string;
-  email: string; // This is mapped from public_email in the API
+  email: string;
   credential_type: string;
   firm_name: string;
   slug: string;
@@ -26,6 +26,13 @@ interface ThinProfile {
   states: string[];
   created_at: string;
   updated_at: string;
+  profile_optimization_emailed_at: string | null;
+}
+
+function wasRecentlyEmailed(emailedAt: string | null): boolean {
+  if (!emailedAt) return false;
+  const daysSince = (Date.now() - new Date(emailedAt).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince < 30;
 }
 
 export default function ThinProfilesPage() {
@@ -188,6 +195,13 @@ export default function ThinProfilesPage() {
                 <div className="text-sm text-slate-600 mb-1">Selected</div>
                 <div className="text-3xl font-bold text-blue-600">{selectedProfiles.size}</div>
               </div>
+              <div className="bg-white rounded-xl shadow-sm border border-amber-100 p-6">
+                <div className="text-sm text-slate-600 mb-1">Emailed (30d)</div>
+                <div className="text-3xl font-bold text-amber-500">
+                  {profiles.filter(p => wasRecentlyEmailed(p.profile_optimization_emailed_at)).length}
+                </div>
+                <div className="text-xs text-slate-500 mt-1">will be skipped</div>
+              </div>
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 <div className="text-sm text-slate-600 mb-1">Avg Words</div>
                 <div className="text-3xl font-bold text-slate-900">
@@ -289,6 +303,7 @@ export default function ThinProfilesPage() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase">Total Words</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase">Specs/States</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase">Updated</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase">Last Emailed</th>
                         <th className="px-4 py-3 text-right text-xs font-medium text-slate-600 uppercase">Actions</th>
                       </tr>
                     </thead>
@@ -361,6 +376,18 @@ export default function ThinProfilesPage() {
                           </td>
                           <td className="px-4 py-4 text-sm text-slate-600">
                             {new Date(profile.updated_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-4 text-sm">
+                            {profile.profile_optimization_emailed_at ? (
+                              <span className={wasRecentlyEmailed(profile.profile_optimization_emailed_at) ? 'text-amber-600 font-medium' : 'text-slate-500'}>
+                                {new Date(profile.profile_optimization_emailed_at).toLocaleDateString()}
+                                {wasRecentlyEmailed(profile.profile_optimization_emailed_at) && (
+                                  <span className="ml-1 text-xs text-amber-500">(skip)</span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">Never</span>
+                            )}
                           </td>
                           <td className="px-4 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">

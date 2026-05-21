@@ -14,6 +14,14 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+const SKIP_IF_EMAILED_WITHIN_DAYS = 30;
+
+function wasRecentlyEmailed(emailedAt: string | null): boolean {
+  if (!emailedAt) return false;
+  const daysSince = (Date.now() - new Date(emailedAt).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince < SKIP_IF_EMAILED_WITHIN_DAYS;
+}
+
 // Email template for profile optimization
 function generateProfileOptimizationEmail(data: {
   firstName: string;
@@ -22,17 +30,15 @@ function generateProfileOptimizationEmail(data: {
   profileEditUrl: string;
 }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
-  
-  // Credential-specific example bios
+
   const exampleBios: Record<string, string> = {
-    'CPA': `"With 15 years of experience specializing in S-Corporation taxation and multi-state SALT compliance, I help small businesses navigate complex tax situations. My practice focuses on overflow support during peak season and second reviews for partnership returns. Licensed in CA, TX, and NV."`,
-    'EA': `"As an Enrolled Agent with IRS representation experience, I assist practitioners with audit defense, offer in compromise cases, and collection matters. Available for consultation and collaborative engagements year-round."`,
-    'CTEC': `"CTEC-certified tax preparer specializing in individual returns, cryptocurrency reporting, and rental property taxation. Proficient in Drake Tax and QuickBooks. Seeking overflow opportunities during tax season."`,
+    'CPA': `"15 years specializing in S-Corporation taxation and multi-state SALT compliance. I help small businesses navigate complex situations and take on overflow work during peak season — second reviews, partnership returns, and entity structuring. Licensed in CA, TX, and NV."`,
+    'EA': `"Enrolled Agent with deep IRS representation experience. I assist practitioners with audit defense, offer in compromise cases, and collection matters. Available for consultation and collaborative engagements year-round — especially during exam season."`,
+    'CTEC': `"CTEC-certified preparer specializing in individual returns, crypto reporting, and rental property. Proficient in Drake and QuickBooks. Looking for overflow partnerships during tax season — fast turnaround, clean workpapers."`,
   };
 
   const exampleBio = exampleBios[data.credentialType] || exampleBios['CPA'];
-
-  const subject = `People are viewing your Profile`;
+  const subject = `Your TaxProExchange profile is missing something`;
 
   const html = `
     <!DOCTYPE html>
@@ -40,152 +46,87 @@ function generateProfileOptimizationEmail(data: {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Optimize Your Profile</title>
       </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
-          <h1 style="color: white; margin: 0; font-size: 24px; text-align: center;">📊 Optimize Your Profile</h1>
-        </div>
-        
-        <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
-          <h2 style="color: #2d3748; margin-top: 0; font-size: 20px;">Hi ${data.firstName}!</h2>
-          
-          <p style="color: #4a5568; margin: 15px 0;">
-            Your profile is getting views, but I noticed your TaxProExchange profile could use a quick update to help potential clients and collaborators find you more easily.
-          </p>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 580px; margin: 0 auto; padding: 32px 20px;">
 
-          <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-            <p style="margin: 0; color: #92400e; font-size: 14px;">
-              <strong>Your profile currently has about ${data.currentWordCount} words.</strong> Adding just 50-100 more words could significantly boost your visibility.
-            </p>
-          </div>
+        <p style="margin: 0 0 24px 0; font-size: 15px;">Hi ${data.firstName},</p>
 
-          <h3 style="color: #2d3748; margin: 25px 0 15px 0; font-size: 18px;">Here's why it matters:</h3>
-          
-          <ul style="color: #4a5568; margin: 10px 0; padding-left: 25px;">
-            <li style="margin: 8px 0;">✓ Complete profiles rank <strong>higher in our search results</strong></li>
-            <li style="margin: 8px 0;">✓ Profiles with detailed bios get <strong>3x more views</strong></li>
-            <li style="margin: 8px 0;">✓ Google indexes profiles with &gt;150 words more favorably</li>
-            <li style="margin: 8px 0;">✓ Clients trust professionals with comprehensive profiles</li>
-          </ul>
-        </div>
+        <p style="margin: 0 0 16px 0; font-size: 15px;">
+          Other professionals on TaxProExchange are searching for help — and your profile comes up. But right now it's pretty thin, which means most of them move on before reaching out.
+        </p>
 
-        <div style="background: white; padding: 25px; border-radius: 8px; border: 2px solid #e2e8f0; margin-bottom: 25px;">
-          <h3 style="color: #2d3748; margin-top: 0; font-size: 18px;">🚀 Quick Wins (5 minutes):</h3>
-          
-          <ol style="color: #4a5568; margin: 10px 0; padding-left: 25px;">
-            <li style="margin: 12px 0;">
-              <strong>Add a professional bio (75-150 words)</strong><br>
-              <span style="font-size: 14px; color: #718096;">Tell your story: What makes you different? What do you specialize in?</span>
-            </li>
-            <li style="margin: 12px 0;">
-              <strong>List your specializations</strong><br>
-              <span style="font-size: 14px; color: #718096;">S-Corp, SALT, crypto, trusts, K-1s, IRS rep, etc.</span>
-            </li>
-            <li style="margin: 12px 0;">
-              <strong>Add software proficiencies</strong><br>
-              <span style="font-size: 14px; color: #718096;">Lacerte, Drake, ProSeries, QuickBooks, etc.</span>
-            </li>
+        <p style="margin: 0 0 24px 0; font-size: 15px;">
+          Your profile has about <strong>${data.currentWordCount} words</strong>. Profiles with a solid bio and listed specializations show up higher in search and get significantly more contact requests. It takes about 5 minutes to fix.
+        </p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; margin: 0 0 28px 0;">
+          <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 14px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Three things that make the biggest difference:</p>
+          <ol style="margin: 0; padding-left: 20px; color: #334155;">
+            <li style="margin: 10px 0; font-size: 15px;"><strong>A bio (75–150 words)</strong> — what you specialize in, who you work with, what you're looking for</li>
+            <li style="margin: 10px 0; font-size: 15px;"><strong>Your specializations</strong> — S-Corp, SALT, crypto, trusts, IRS rep, K-1s, etc.</li>
+            <li style="margin: 10px 0; font-size: 15px;"><strong>Your software</strong> — Lacerte, Drake, ProSeries, QuickBooks, etc.</li>
           </ol>
         </div>
 
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${data.profileEditUrl}" style="display: inline-block; background: #667eea; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
-            Update My Profile →
+        <div style="text-align: center; margin: 0 0 32px 0;">
+          <a href="${data.profileEditUrl}" style="display: inline-block; background: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+            Update my profile →
           </a>
         </div>
 
-        <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; margin: 30px 0;">
-          <h3 style="margin: 0 0 15px 0; color: #0c4a6e; font-size: 16px;">📝 Example Bio for ${data.credentialType}s:</h3>
-          <p style="margin: 0; color: #0c4a6e; font-size: 14px; font-style: italic; line-height: 1.6;">
+        <div style="border-left: 3px solid #cbd5e1; padding-left: 16px; margin: 0 0 28px 0;">
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Example bio for ${data.credentialType}s</p>
+          <p style="margin: 0; font-size: 14px; color: #475569; font-style: italic; line-height: 1.7;">
             ${exampleBio}
           </p>
         </div>
 
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin: 0 0 10px 0; color: #2d3748; font-size: 16px;">💡 Pro Tips:</h3>
-          <ul style="color: #4a5568; font-size: 14px; margin: 5px 0; padding-left: 20px;">
-            <li style="margin: 6px 0;">Be specific about what you do (not just "tax professional")</li>
-            <li style="margin: 6px 0;">Mention the types of clients you work with</li>
-            <li style="margin: 6px 0;">List 3-5 key specializations you want to be found for</li>
-            <li style="margin: 6px 0;">Keep it professional but let your personality show</li>
-          </ul>
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 18px 20px; margin: 0 0 32px 0;">
+          <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 600; color: #166534;">Don't want to write it yourself?</p>
+          <p style="margin: 0; font-size: 14px; color: #166534;">
+            Reply to this email with 3 bullet points — your specializations, who you work with, and years of experience. I'll write a full bio and send it back for you to approve.
+          </p>
         </div>
-        
-        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
-          <p><strong>Need help?</strong> Reply to this email with 3 bullet points about yourself and I'll draft a professional bio for you.</p>
-          <p style="margin: 15px 0 5px 0;"><strong>Example bullets:</strong></p>
-          <ul style="margin: 5px 0; padding-left: 20px; color: #718096; font-size: 13px;">
-            <li>S-Corp and partnership taxation</li>
-            <li>Work with tech startups and small businesses</li>
-            <li>12 years experience, licensed in CA and NV</li>
-          </ul>
-          <p style="margin-top: 15px;">That's it! I'll write a bio for you and send it back for approval.</p>
-          
-          <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-            <p>Best regards,<br>The TaxProExchange Team</p>
-            <p style="font-size: 12px; color: #94a3b8;">
-              You're receiving this because your profile is live on TaxProExchange. 
-              <a href="${appUrl}/settings" style="color: #667eea; text-decoration: none;">Manage email preferences</a>
-            </p>
-          </div>
+
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 13px; color: #94a3b8;">
+          <p style="margin: 0 0 8px 0;">Koen<br>TaxProExchange</p>
+          <p style="margin: 0;">
+            You're receiving this because your profile is live on TaxProExchange.
+            <a href="${appUrl}/settings" style="color: #64748b;">Manage preferences</a>
+          </p>
         </div>
+
       </body>
     </html>
   `;
 
   const text = `
-Optimize Your TaxProExchange Profile
+Hi ${data.firstName},
 
-Hi ${data.firstName}!
+Other professionals on TaxProExchange are searching for help — and your profile comes up. But right now it's pretty thin, which means most of them move on before reaching out.
 
-Your profile is getting views, but I noticed your TaxProExchange profile could use a quick update to help potential clients and collaborators find you more easily.
+Your profile has about ${data.currentWordCount} words. Profiles with a solid bio and listed specializations show up higher in search and get significantly more contact requests. It takes about 5 minutes to fix.
 
-YOUR PROFILE: ${data.currentWordCount} words
-TARGET: 150+ words for better visibility
-
-Here's why it matters:
-✓ Complete profiles rank higher in our search results
-✓ Profiles with detailed bios get 3x more views
-✓ Google indexes profiles with >150 words more favorably
-✓ Clients trust professionals with comprehensive profiles
-
-QUICK WINS (5 minutes):
-1. Add a professional bio (75-150 words)
-2. List your specializations (S-Corp, SALT, crypto, etc.)
-3. Add software proficiencies (Lacerte, Drake, etc.)
+Three things that make the biggest difference:
+1. A bio (75–150 words) — what you specialize in, who you work with, what you're looking for
+2. Your specializations — S-Corp, SALT, crypto, trusts, IRS rep, K-1s, etc.
+3. Your software — Lacerte, Drake, ProSeries, QuickBooks, etc.
 
 Update your profile: ${data.profileEditUrl}
 
-EXAMPLE BIO FOR ${data.credentialType}s:
+Example bio for ${data.credentialType}s:
 ${exampleBio.replace(/"/g, '')}
 
-PRO TIPS:
-• Be specific about what you do (not just "tax professional")
-• Mention the types of clients you work with
-• List 3-5 key specializations you want to be found for
-• Keep it professional but let your personality show
+Don't want to write it yourself? Reply with 3 bullet points — your specializations, who you work with, and years of experience. I'll write a full bio and send it back for you to approve.
 
-NEED HELP?
-Reply to this email with 3 bullet points about yourself and I'll draft a professional bio for you.
-
-Example bullets:
-• S-Corp and partnership taxation
-• Work with tech startups and small businesses
-• 12 years experience, licensed in CA and NV
-
-Best regards,
-The TaxProExchange Team
+Koen
+TaxProExchange
 
 ---
-Manage email preferences: ${appUrl}/settings
+Manage preferences: ${appUrl}/settings
   `;
 
-  return {
-    subject,
-    html,
-    text,
-  };
+  return { subject, html, text };
 }
 
 export async function POST(request: NextRequest) {
@@ -233,7 +174,7 @@ export async function POST(request: NextRequest) {
     // Fetch target profiles
     let query = supabase
       .from('profiles')
-      .select('id, first_name, last_name, public_email, credential_type, slug, bio, headline, opportunities, specializations, states')
+      .select('id, first_name, last_name, public_email, credential_type, slug, bio, headline, opportunities, specializations, states, profile_optimization_emailed_at')
       .eq('is_listed', true)
       .eq('visibility_state', 'verified');
 
@@ -271,12 +212,13 @@ export async function POST(request: NextRequest) {
 
       // Skip if already has good content
       if (wordCount >= 120 && (profile.bio?.split(' ').length || 0) >= 50) {
-        results.push({ 
-          success: false, 
-          email: profile.public_email, 
-          reason: 'Profile already has sufficient content',
-          profile_id: profile.id
-        });
+        results.push({ success: false, email: profile.public_email, reason: 'Profile already has sufficient content', profile_id: profile.id });
+        continue;
+      }
+
+      // Skip if emailed within the last 30 days
+      if (wasRecentlyEmailed(profile.profile_optimization_emailed_at)) {
+        results.push({ success: false, email: profile.public_email, reason: `Already emailed within ${SKIP_IF_EMAILED_WITHIN_DAYS} days`, profile_id: profile.id, last_emailed: profile.profile_optimization_emailed_at });
         continue;
       }
 
@@ -295,8 +237,15 @@ export async function POST(request: NextRequest) {
           text: emailContent.text,
         });
 
-        results.push({ 
-          success: true, 
+        // Stamp the profile with the send time
+        await supabase
+          .from('profiles')
+          .update({ profile_optimization_emailed_at: new Date().toISOString() })
+          .eq('id', profile.id)
+          .catch((err: unknown) => console.error('Failed to stamp email timestamp:', err));
+
+        results.push({
+          success: true,
           email: profile.public_email,
           profile_id: profile.id,
           word_count: wordCount
