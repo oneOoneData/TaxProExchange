@@ -9,18 +9,18 @@ import NewsletterSignup from "@/components/NewsletterSignup";
 
 export const metadata: Metadata = {
   title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
-  description: "Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.",
+  description: "Practical insights on AI, industry trends, tools, and the business of tax — for CPAs, EAs, and tax preparers.",
   alternates: { canonical: `${siteUrl}/insights` },
   openGraph: {
     title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
-    description: "Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.",
+    description: "Practical insights on AI, industry trends, tools, and the business of tax — for CPAs, EAs, and tax preparers.",
     url: `${siteUrl}/insights`,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
-    description: "Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.",
+    description: "Practical insights on AI, industry trends, tools, and the business of tax — for CPAs, EAs, and tax preparers.",
   },
 };
 
@@ -29,8 +29,8 @@ export default function InsightsPage() {
 
   // Generate schemas
   const articleSchema = generateArticleCollectionJsonLd({
-    title: 'Insights: AI, Tax Trends & Tools for CPAs',
-    description: 'Thought leadership, AI tools, and practical resources for CPAs, EAs, and tax professionals.',
+    title: 'Insights for Tax Professionals | TaxProExchange',
+    description: 'Practical insights on AI, industry trends, tools, and the business of tax — for CPAs, EAs, and tax preparers.',
     url: `${siteUrl}/insights`,
     dateModified: posts.length > 0 ? posts[0].data.date : new Date().toISOString(),
     author: 'TaxProExchange Editorial',
@@ -60,19 +60,16 @@ export default function InsightsPage() {
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
         <main className="max-w-4xl mx-auto py-16 px-6">
           <header className="mb-12">
-            <h1 className="text-4xl font-bold mb-4 text-slate-900">AI Thought Leadership</h1>
+            <h1 className="text-4xl font-bold mb-4 text-slate-900">Insights for Tax Professionals</h1>
             <div className="text-lg text-slate-700 space-y-4 mb-8">
               <p>
-                There are a lot of things we could write about when it comes to tax firms today. The world is changing fast: from new legislation like the &ldquo;Big, Beautiful Bill&rdquo; to the shut down and other global developments that ripple through our economy. But nothing will have a bigger impact on tax firms than artificial intelligence.
+                The tax profession is changing fast. New legislation, AI tools, evolving client expectations, and the rise of remote work are reshaping how firms operate &mdash; and how professionals build careers.
               </p>
               <p>
-                Like every other profession, AI is changing how we work. Some people believe it&rsquo;s coming for tax preparers&rsquo; jobs. Others think it won&rsquo;t make much sense in taxes. And some imagine a future where every CPA is assisted by a few AI copilots.
+                TaxProExchange Insights covers what actually matters to CPAs, EAs, and tax preparers: practical takes on AI in tax, industry trends worth paying attention to, tools being adopted across the profession, and perspectives from practitioners in the field.
               </p>
               <p>
-                No matter where you stand, one thing is certain: AI is coming to your firm.
-              </p>
-              <p>
-                In this section, we dig into how AI is already reshaping the work of tax professionals. We&rsquo;ll cover new AI-native technology and ways tax firms can bring AI in house.
+                No hype, no fluff &mdash; just useful reading for people doing the work.
               </p>
             </div>
           </header>
