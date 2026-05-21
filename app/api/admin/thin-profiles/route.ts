@@ -99,7 +99,8 @@ export async function GET(request: NextRequest) {
         visibility_state,
         is_listed,
         created_at,
-        updated_at
+        updated_at,
+        profile_optimization_emailed_at
       `)
       .eq('is_listed', true)
       .eq('visibility_state', 'verified')
@@ -135,6 +136,7 @@ export async function GET(request: NextRequest) {
         states: profile.states,
         created_at: profile.created_at,
         updated_at: profile.updated_at,
+        profile_optimization_emailed_at: profile.profile_optimization_emailed_at ?? null,
       };
     });
 
