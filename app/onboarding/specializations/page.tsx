@@ -68,7 +68,7 @@ export default function SpecializationsPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span className="px-2 py-1 bg-slate-100 rounded-full">Step 2 of 3</span>
+            <span className="px-2 py-1 bg-slate-100 rounded-full">Step 2 of 2</span>
           </div>
         </div>
       </header>
