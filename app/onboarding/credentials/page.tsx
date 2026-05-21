@@ -144,8 +144,7 @@ export default function CredentialsPage() {
         throw new Error(errorData.error || 'Failed to save credentials');
       }
 
-      // Redirect to profile edit to complete setup
-      router.push('/profile/edit');
+      router.push('/onboarding/specializations');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -199,8 +198,7 @@ export default function CredentialsPage() {
         }
       }
 
-      // Redirect to profile edit
-      router.push('/profile/edit');
+      router.push('/onboarding/specializations');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       setIsSubmitting(false);
