@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
+import { postJobToFacebook } from '@/lib/facebook';
 
 export const dynamic = 'force-dynamic';
 
@@ -234,6 +235,11 @@ export async function POST(request: Request) {
       console.error('Job creation error:', jobError);
       return NextResponse.json({ error: 'Failed to create job' }, { status: 500 });
     }
+
+    // Post to Facebook Page
+    postJobToFacebook(job).catch((err) =>
+      console.error('Facebook post failed:', err)
+    );
 
     // Send job notifications to eligible users
     try {
