@@ -56,10 +56,10 @@ export default function Footer() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a href="/join" className="hover:text-slate-900">Join Now</a>
-            <a href="/ai/tools" className="hover:text-slate-900">
+            <a href="/insights/tools" className="hover:text-slate-900">
               AI Tool Reviews
             </a>
-            <a href="/ai/write-for-us" className="hover:text-slate-900">
+            <a href="/insights/write-for-us" className="hover:text-slate-900">
               Write for Us
             </a>
           </div>

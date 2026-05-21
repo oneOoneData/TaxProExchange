@@ -25,8 +25,7 @@ export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
   ];
 
   const bottomNavItems = [
-    { href: '/partners', label: '🤝 Partners' },
-    { href: '/ai', label: 'AI' },
+    { href: '/insights', label: 'Insights' },
   ];
 
   return (

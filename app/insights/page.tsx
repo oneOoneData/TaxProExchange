@@ -106,7 +106,7 @@ export default function AIPage() {
                           Community Reviews
                         </span>
                       </div>
-                      <Link href="/ai/tools">
+                      <Link href="/insights/tools">
                         <h2 className="text-2xl md:text-3xl font-bold mb-3 text-slate-900 hover:text-blue-700 transition-colors cursor-pointer">
                           AI Tools for Tax Pros
                         </h2>
@@ -119,7 +119,7 @@ export default function AIPage() {
                       </p>
                       <div className="text-sm text-slate-500 mb-4 space-y-2">
                         <p>
-                          <Link href="/ai/tools/methodology" className="text-blue-600 hover:text-blue-700 underline">
+                          <Link href="/insights/tools/methodology" className="text-blue-600 hover:text-blue-700 underline">
                             Learn about our methodology
                           </Link>
                           {' '}— how we collect Reddit reviews, analyze sentiment, and ensure transparency in our AI tool ratings.
@@ -132,7 +132,7 @@ export default function AIPage() {
                           {' '}what we can improve.
                         </p>
                       </div>
-                      <Link href="/ai/tools" className="inline-flex items-center gap-2 text-blue-600 font-medium hover:text-blue-700">
+                      <Link href="/insights/tools" className="inline-flex items-center gap-2 text-blue-600 font-medium hover:text-blue-700">
                         Explore AI Tools
                         <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -140,7 +140,7 @@ export default function AIPage() {
                       </Link>
                     </div>
                     <div className="flex-shrink-0">
-                      <Link href="/ai/tools">
+                      <Link href="/insights/tools">
                         <Image
                           src="/images/tax_tool_reviews.png"
                           alt="AI Tools for Tax Pros - Live Reviews"
@@ -163,7 +163,7 @@ export default function AIPage() {
                     key={post.slug}
                     className="border border-slate-200 rounded-lg overflow-hidden hover:border-slate-300 hover:shadow-md transition-all bg-white"
                   >
-                    <Link href={`/ai/${post.slug}`}>
+                    <Link href={`/insights/${post.slug}`}>
                       {(post.data.previewImage || post.data.image) && (
                         <div className="h-72 overflow-hidden bg-slate-100">
                           <Image
@@ -237,7 +237,7 @@ export default function AIPage() {
               </div>
               <div>
                 <Link
-                  href="/ai/write-for-us"
+                  href="/insights/write-for-us"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
                 >
                   Submit Your Article →
@@ -266,7 +266,7 @@ export default function AIPage() {
               </div>
               <div>
                 <Link
-                  href="/ai/survey"
+                  href="/insights/survey"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg whitespace-nowrap"
                 >
                   Take the Survey →

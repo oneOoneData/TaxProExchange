@@ -67,7 +67,7 @@ function generateSoftwareApplicationJsonLd(tool: {
   website_url?: string;
   logo_url?: string;
 }) {
-  const url = `${siteUrl}/ai/tools/${tool.slug}`;
+  const url = `${siteUrl}/insights/tools/${tool.slug}`;
   const description = tool.short_description || tool.long_description || `Learn more about ${tool.name} for tax professionals.`;
   const image = tool.logo_url ? (tool.logo_url.startsWith('http') ? tool.logo_url : `${siteUrl}${tool.logo_url}`) : undefined;
 
@@ -113,7 +113,7 @@ export async function generateMetadata({
     };
   }
 
-  const url = `${siteUrl}/ai/tools/${slug}`;
+  const url = `${siteUrl}/insights/tools/${slug}`;
   const description = tool.short_description || tool.long_description || `Learn more about ${tool.name} for tax professionals.`;
   const imageUrl = tool.logo_url 
     ? (tool.logo_url.startsWith('http') ? tool.logo_url : `${siteUrl}${tool.logo_url}`)
@@ -170,11 +170,11 @@ export default async function ToolDetailPage({
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <nav className="flex items-center gap-2 text-sm text-slate-600 mb-4">
-            <Link href="/ai" className="hover:text-slate-900">
+            <Link href="/insights" className="hover:text-slate-900">
               AI
             </Link>
             <span>→</span>
-            <Link href="/ai/tools" className="hover:text-slate-900">
+            <Link href="/insights/tools" className="hover:text-slate-900">
               Tools
             </Link>
             <span>→</span>
@@ -183,7 +183,7 @@ export default async function ToolDetailPage({
           
           {/* Back to the Wall Button */}
           <Link
-            href="/ai/tools"
+            href="/insights/tools"
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

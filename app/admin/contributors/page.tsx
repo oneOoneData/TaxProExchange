@@ -52,7 +52,7 @@ export default function AdminContributorsPage() {
   }, [loadSubmissions]);
 
   const handleApprove = async (id: string, title: string) => {
-    const slug = prompt('Enter article slug (will be used in URL /ai/[slug]):', 
+    const slug = prompt('Enter article slug (will be used in URL /insights/[slug]):',
       title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
     
     if (!slug) return;
@@ -66,7 +66,7 @@ export default function AdminContributorsPage() {
       });
 
       if (response.ok) {
-        alert('Submission approved! Remember to create the article file in content/ai/');
+        alert('Submission approved! Remember to create the article file in content/ai/');  // content dir unchanged
         loadSubmissions();
       } else {
         const data = await response.json();
@@ -259,12 +259,12 @@ export default function AdminContributorsPage() {
                           <p>
                             <strong>Slug:</strong>{' '}
                             <a
-                              href={`/ai/${submission.article_slug}`}
+                              href={`/insights/${submission.article_slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-600 hover:underline"
                             >
-                              /ai/{submission.article_slug}
+                              /insights/{submission.article_slug}
                             </a>
                           </p>
                         )}
@@ -329,7 +329,7 @@ export default function AdminContributorsPage() {
 
                     {submission.status === 'published' && submission.article_slug && (
                       <a
-                        href={`/ai/share-success/${submission.article_slug}`}
+                        href={`/insights/share-success/${submission.article_slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-2 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-700"

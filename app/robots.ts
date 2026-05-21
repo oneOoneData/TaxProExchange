@@ -31,7 +31,7 @@ export default function robots(): MetadataRoute.Robots {
           '/feedback',
           '/sign-in/',
           '/sign-up/',
-          '/ai/write-for-us',
+          '/insights/write-for-us',
           '/suggest-event',
           '*?private=*',
         ],

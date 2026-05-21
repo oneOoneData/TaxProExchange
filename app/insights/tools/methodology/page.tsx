@@ -6,11 +6,11 @@ import { siteUrl } from '@/lib/seo';
 export const metadata: Metadata = {
   title: 'AI Tools Methodology | TaxProExchange',
   description: 'Learn how we collect Reddit reviews, analyze sentiment, and ensure transparency in our AI tool ratings for tax professionals.',
-  alternates: { canonical: `${siteUrl}/ai/tools/methodology` },
+  alternates: { canonical: `${siteUrl}/insights/tools/methodology` },
   openGraph: {
     title: 'AI Tools Methodology | TaxProExchange',
     description: 'How we collect Reddit reviews and analyze sentiment for AI tax tools.',
-    url: `${siteUrl}/ai/tools/methodology`,
+    url: `${siteUrl}/insights/tools/methodology`,
     type: 'website',
   },
 };
@@ -23,11 +23,11 @@ export default function MethodologyPage() {
         <main className="max-w-4xl mx-auto py-8 md:py-12 px-4 sm:px-6 lg:px-8">
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6">
-            <Link href="/ai" className="hover:text-slate-900">
+            <Link href="/insights" className="hover:text-slate-900">
               AI
             </Link>
             <span>→</span>
-            <Link href="/ai/tools" className="hover:text-slate-900">
+            <Link href="/insights/tools" className="hover:text-slate-900">
               Tools
             </Link>
             <span>→</span>
@@ -228,7 +228,7 @@ Format your response as JSON:
             {/* Back Link */}
             <div className="pt-6">
               <Link
-                href="/ai/tools"
+                href="/insights/tools"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

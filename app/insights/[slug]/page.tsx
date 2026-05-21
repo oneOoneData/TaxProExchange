@@ -28,7 +28,7 @@ export async function generateMetadata({
     };
   }
 
-  const url = `${siteUrl}${post.data.slug || `/ai/${slug}`}`;
+  const url = `${siteUrl}${post.data.slug || `/insights/${slug}`}`;
   const imageUrl = post.data.image 
     ? `${siteUrl}${post.data.image}` 
     : `${siteUrl}/og-image.png`;
@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  const url = `${siteUrl}${post.data.slug || `/ai/${slug}`}`;
+  const url = `${siteUrl}${post.data.slug || `/insights/${slug}`}`;
   const articleSchema = articleJsonLd({
     title: post.data.title,
     description: post.data.description,
@@ -77,7 +77,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   
   const breadcrumbSchema = generateBreadcrumbListJsonLd([
     { name: 'Home', url: '/' },
-    { name: 'AI Thought Leadership', url: '/ai' },
+    { name: 'Insights', url: '/insights' },
     { name: post.data.title, url },
   ]);
 
