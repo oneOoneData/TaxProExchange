@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     await resend.emails.send({
       from: 'TaxProExchange <noreply@taxproexchange.com>',
       to: adminEmail,
-      replyTo: email,
+      reply_to: email,
       subject: `Demo Request: ${firmName || name}`,
       html: `
         <h2>New Demo Request</h2>
