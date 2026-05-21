@@ -8,11 +8,11 @@ import { siteUrl } from '@/lib/seo';
 export const metadata: Metadata = {
   title: 'AI Tools for Tax Pros | TaxProExchange',
   description: 'Discover AI tools trusted by tax professionals. Vote for your favorites, read real Reddit reviews, and explore resources.',
-  alternates: { canonical: `${siteUrl}/ai/tools` },
+  alternates: { canonical: `${siteUrl}/insights/tools` },
   openGraph: {
     title: 'AI Tools for Tax Pros | TaxProExchange',
     description: 'Reviewed by the most critical audience on the planet: Reddit Users!',
-    url: `${siteUrl}/ai/tools`,
+    url: `${siteUrl}/insights/tools`,
     type: 'website',
   },
   twitter: {
@@ -31,7 +31,7 @@ export default function AIToolsPage() {
           {/* Header */}
           <div className="mb-8">
             <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6">
-              <a href="/ai" className="hover:text-slate-900">
+              <a href="/insights" className="hover:text-slate-900">
                 AI
               </a>
               <span>→</span>
@@ -50,7 +50,7 @@ export default function AIToolsPage() {
               </p>
               <div className="text-sm text-slate-500 space-y-2">
                 <p>
-                  <Link href="/ai/tools/methodology" className="text-blue-600 hover:text-blue-700 underline">
+                  <Link href="/insights/tools/methodology" className="text-blue-600 hover:text-blue-700 underline">
                     Learn about our methodology
                   </Link>
                   {' '}— how we collect Reddit reviews, analyze sentiment, and ensure transparency in our AI tool ratings.

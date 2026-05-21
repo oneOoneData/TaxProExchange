@@ -166,12 +166,7 @@ export default function JobsPage() {
               )}
             </div>
             
-            <Link href="/partners" className="hover:text-slate-900 flex items-center gap-1.5">
-              <span className="text-base">🤝</span>
-              Partners
-            </Link>
-            
-            <Link href="/ai" className="hover:text-slate-900">AI</Link>
+            <Link href="/insights" className="hover:text-slate-900">Insights</Link>
           </nav>
           <div className="flex items-center gap-4">
             {isSignedIn ? (

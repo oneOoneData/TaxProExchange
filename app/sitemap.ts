@@ -147,7 +147,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     
     // Use slug from frontmatter if available, otherwise construct from filename
-    const slug = post.data.slug || `/ai/${post.slug}`;
+    const slug = post.data.slug || `/insights/${post.slug}`;
     const url = slug.startsWith('http') ? slug : `${siteUrl}${slug.startsWith('/') ? slug : `/${slug}`}`;
     
     // Validate date
@@ -167,9 +167,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   });
 
-  // Add AI blog index page
+  // Add Insights index page
   routes.push({
-    url: `${siteUrl}/ai`,
+    url: `${siteUrl}/insights`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.7,
@@ -177,7 +177,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Add AI tools index page
   routes.push({
-    url: `${siteUrl}/ai/tools`,
+    url: `${siteUrl}/insights/tools`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.7,
@@ -212,7 +212,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
       
       routes.push({
-        url: `${siteUrl}/ai/tools/${safeSlug}`,
+        url: `${siteUrl}/insights/tools/${safeSlug}`,
         lastModified,
         changeFrequency: 'weekly',
         priority: 0.6,

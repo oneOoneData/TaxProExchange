@@ -41,8 +41,8 @@ export async function POST(request: Request) {
     }
 
     // Send notification email
-    const sharePageUrl = `${siteUrl}/ai/share-success/${articleSlug}`;
-    const articleUrl = `${siteUrl}/ai/${articleSlug}`;
+    const sharePageUrl = `${siteUrl}/insights/share-success/${articleSlug}`;
+    const articleUrl = `${siteUrl}/insights/${articleSlug}`;
 
     const html = `
       <!DOCTYPE html>

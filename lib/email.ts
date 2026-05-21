@@ -717,7 +717,7 @@ export async function sendVerifiedListedEmail(opts: {
 }) {
   const SITE_URL = process.env.SITE_URL || 'https://www.taxproexchange.com';
   const FOUNDING_MEMBER_URL = process.env.FOUNDING_MEMBER_URL || 'https://buymeacoffee.com/koenf';
-  const SURVEY_URL = process.env.AI_SURVEY_URL || 'https://www.taxproexchange.com/ai/survey';
+  const SURVEY_URL = process.env.AI_SURVEY_URL || 'https://www.taxproexchange.com/insights/survey';
   
   const profileUrl = `${SITE_URL}/p/${opts.slug}`;
   const shareLinkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`;

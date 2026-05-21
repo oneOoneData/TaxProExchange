@@ -24,7 +24,7 @@ export default function ToolTile({ tool, index }: ToolTileProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Link href={`/ai/tools/${tool.slug}`}>
+    <Link href={`/insights/tools/${tool.slug}`}>
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

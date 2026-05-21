@@ -33,13 +33,13 @@ export default function ShareSuccessPage() {
   }, [slug]);
 
   const badgeCode = {
-    light: `<a href="${siteUrl}/ai/${slug}" target="_blank" rel="noopener">
+    light: `<a href="${siteUrl}/insights/${slug}" target="_blank" rel="noopener">
   <img src="${siteUrl}/badges/tpe-ai-featured.svg" alt="Featured AI Contributor - TaxProExchange" />
 </a>`,
-    dark: `<a href="${siteUrl}/ai/${slug}" target="_blank" rel="noopener">
+    dark: `<a href="${siteUrl}/insights/${slug}" target="_blank" rel="noopener">
   <img src="${siteUrl}/badges/tpe-ai-featured-dark.svg" alt="Featured AI Contributor - TaxProExchange" />
 </a>`,
-    mini: `<a href="${siteUrl}/ai/${slug}" target="_blank" rel="noopener">
+    mini: `<a href="${siteUrl}/insights/${slug}" target="_blank" rel="noopener">
   <img src="${siteUrl}/badges/tpe-ai-featured-mini.svg" alt="Featured AI Contributor - TaxProExchange" width="120" />
 </a>`,
   };
@@ -49,14 +49,14 @@ export default function ShareSuccessPage() {
 
 I explore how tax professionals can leverage AI to transform their practice — from local LLMs to workflow automation.
 
-Read the full article: ${siteUrl}/ai/${slug}
+Read the full article: ${siteUrl}/insights/${slug}
 
 #TaxTech #AI #Accounting #CPA #TaxProfessional #Automation`
     : "";
 
   const linkedInShareUrl = article
     ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-        `${siteUrl}/ai/${slug}`
+        `${siteUrl}/insights/${slug}`
       )}`
     : "";
 
@@ -125,14 +125,14 @@ Read the full article: ${siteUrl}/ai/${slug}
             <p className="text-slate-600">
               on the{" "}
               <a
-                href={`${siteUrl}/ai`}
+                href={`${siteUrl}/insights`}
                 className="text-blue-600 hover:underline font-medium"
               >
                 TaxProExchange AI Hub
               </a>
             </p>
             <a
-              href={`${siteUrl}/ai/${slug}`}
+              href={`${siteUrl}/insights/${slug}`}
               className="inline-block mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
             >
               View Your Article

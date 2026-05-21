@@ -119,12 +119,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
               )}
             </div>
             
-            <a href="/partners" className="hover:text-slate-900 flex items-center gap-1.5">
-              <span className="text-base">🤝</span>
-              Partners
-            </a>
-            
-            <a href="/ai" className="hover:text-slate-900">AI</a>
+            <a href="/insights" className="hover:text-slate-900">Insights</a>
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
