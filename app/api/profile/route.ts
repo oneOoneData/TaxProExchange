@@ -4,6 +4,8 @@ import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { ProfileUpdateSchema } from '@/lib/validations/zodSchemas';
 import { parseReferralCookie } from '@/lib/cookies';
+import { sendEmail } from '@/lib/email';
+import { generateUnsubscribeUrl } from '@/lib/unsubscribe';
 
 export const dynamic = 'force-dynamic';
 
@@ -448,6 +450,7 @@ export async function PUT(request: Request) {
 
     let profile;
     let profileError;
+    const isNewProfile = !existingProfile;
 
       if (existingProfile) {
       // Update existing profile
@@ -744,6 +747,95 @@ export async function PUT(request: Request) {
       } catch (emailError) {
         console.error('Failed to send profile completion notification:', emailError);
         // Don't fail the request if email fails
+      }
+    }
+
+    // Send welcome email for new signups
+    if (isNewProfile && profile && !profileError) {
+      const recipientEmail = profile.public_email || userEmail;
+      if (recipientEmail) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+        const firstName = profile.first_name || 'there';
+        const unsubscribeUrl = generateUnsubscribeUrl(profile.id, 'marketing');
+
+        sendEmail({
+          to: recipientEmail,
+          subject: `Welcome to TaxProExchange, ${firstName}`,
+          from: 'Koen at TaxProExchange <support@taxproexchange.com>',
+          replyTo: 'support@taxproexchange.com',
+          html: `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 580px; margin: 0 auto; padding: 32px 20px;">
+
+    <p style="margin: 0 0 24px 0; font-size: 15px;">Hi ${firstName},</p>
+
+    <p style="margin: 0 0 16px 0; font-size: 15px;">
+      Welcome to TaxProExchange. You're in — your profile is created and pending verification.
+    </p>
+
+    <p style="margin: 0 0 24px 0; font-size: 15px;">
+      TaxProExchange is a professional network for CPAs, EAs, and tax preparers to find overflow help, refer clients, and connect with colleagues across the country. Once you're verified and listed, other professionals can find and contact you.
+    </p>
+
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 24px; margin: 0 0 28px 0;">
+      <p style="margin: 0 0 12px 0; font-weight: 600; font-size: 14px; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Three things to do now:</p>
+      <ol style="margin: 0; padding-left: 20px; color: #334155;">
+        <li style="margin: 10px 0; font-size: 15px;"><strong>Complete your profile</strong> — add a bio, your specializations, and the software you use</li>
+        <li style="margin: 10px 0; font-size: 15px;"><strong>Browse the directory</strong> — search for colleagues by credential, state, or specialty</li>
+        <li style="margin: 10px 0; font-size: 15px;"><strong>Check the job board</strong> — see what overflow work is available, or post your own</li>
+      </ol>
+    </div>
+
+    <div style="text-align: center; margin: 0 0 32px 0;">
+      <a href="${appUrl}/profile/edit" style="display: inline-block; background: #0f172a; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+        Complete my profile →
+      </a>
+    </div>
+
+    <p style="margin: 0 0 16px 0; font-size: 15px;">
+      Once you submit your profile for review, I'll personally take a look and verify it — usually within a day or two. If you have questions, just reply to this email.
+    </p>
+
+    <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 13px; color: #94a3b8;">
+      <p style="margin: 0 0 8px 0;">Koen<br>TaxProExchange</p>
+      <p style="margin: 0;">
+        You're receiving this because you created an account on TaxProExchange.
+        <a href="${appUrl}/settings" style="color: #64748b;">Manage preferences</a> ·
+        <a href="${unsubscribeUrl}" style="color: #64748b;">Unsubscribe</a>
+      </p>
+    </div>
+
+  </body>
+</html>`,
+          text: `Hi ${firstName},
+
+Welcome to TaxProExchange. You're in — your profile is created and pending verification.
+
+TaxProExchange is a professional network for CPAs, EAs, and tax preparers to find overflow help, refer clients, and connect with colleagues across the country. Once you're verified and listed, other professionals can find and contact you.
+
+Three things to do now:
+1. Complete your profile — add a bio, your specializations, and the software you use
+2. Browse the directory — search for colleagues by credential, state, or specialty
+3. Check the job board — see what overflow work is available, or post your own
+
+Complete my profile: ${appUrl}/profile/edit
+
+Once you submit your profile for review, I'll personally take a look and verify it — usually within a day or two. If you have questions, just reply to this email.
+
+Koen
+TaxProExchange
+
+---
+Manage preferences: ${appUrl}/settings
+Unsubscribe: ${unsubscribeUrl}`,
+        }).catch((err) => {
+          console.error('Failed to send welcome email:', err);
+        });
       }
     }
 
