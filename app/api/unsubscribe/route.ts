@@ -1,23 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { createHmac } from 'crypto';
+import { signUnsubscribeToken } from '@/lib/unsubscribe';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-function signToken(profileId: string): string {
-  return createHmac('sha256', process.env.WEBHOOK_SECRET || 'fallback')
-    .update(`unsub:${profileId}`)
-    .digest('hex');
-}
-
-export function generateUnsubscribeUrl(profileId: string, type = 'marketing'): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
-  const token = signToken(profileId);
-  return `${appUrl}/api/unsubscribe?pid=${profileId}&token=${token}&type=${type}`;
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     // New signed-token flow (pid + token)
     if (pid && token) {
-      const expected = signToken(pid);
+      const expected = signUnsubscribeToken(pid);
       if (token !== expected) {
         return new NextResponse('Invalid unsubscribe link.', { status: 403 });
       }
