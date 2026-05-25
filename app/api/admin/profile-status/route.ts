@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabaseService';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     const { searchParams } = new URL(request.url);
     const slug = searchParams.get('slug');
@@ -56,6 +59,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     const { slug, action } = await request.json();
     

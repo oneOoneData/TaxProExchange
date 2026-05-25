@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // Helper function to chunk array into smaller batches
 function chunk<T>(array: T[], size: number): T[][] {
@@ -23,6 +24,8 @@ function personalizeEmail(content: string, userData: { first_name?: string; last
 }
 
 export async function POST(req: NextRequest) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     const { from, replyTo, subject, body, recipients } = await req.json();
 

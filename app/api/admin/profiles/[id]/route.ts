@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -55,6 +56,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Check if Supabase is configured
     if (!supabase) {
@@ -161,6 +164,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Check if Supabase is configured
     if (!supabase) {
@@ -329,6 +334,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Check if Supabase is configured
     if (!supabase) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,8 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 export async function GET(request: NextRequest) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Check if Supabase is configured
     if (!supabase) {
@@ -315,6 +318,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Check if Supabase is configured
     if (!supabase) {
