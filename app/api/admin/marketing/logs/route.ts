@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Get email logs ordered by most recent first
     const supabase = createServerClient();

@@ -54,7 +54,7 @@ export async function GET() {
     // Fetch all groups
     const { data: groups, error: groupsError } = await supabase
       .from('specialization_groups')
-      .select('id, key, label')
+      .select('key, label')
       .order('label');
 
     if (groupsError) {

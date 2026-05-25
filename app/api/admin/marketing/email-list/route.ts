@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
+  const adminCheck = await requireAdmin();
+  if (adminCheck instanceof NextResponse) return adminCheck;
   try {
     // Read the email list file
     const filePath = join(process.cwd(), 'data', '.emaillist.txt');
