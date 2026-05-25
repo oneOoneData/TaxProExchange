@@ -97,6 +97,14 @@ export async function GET(req: NextRequest) {
           job_notifications: false
         }
       };
+    } else if (type === 'marketing') {
+      // Disable marketing/promotional emails
+      updateData = {
+        email_preferences: {
+          ...profile.email_preferences,
+          marketing_updates: false
+        }
+      };
     }
 
     // Update the profile
