@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-20"
 category: "AI"
 pillar: "Tax Technology"
-slug: "/ai/sureprep-in-an-ai-first-world"
+slug: "/insights/sureprep-in-an-ai-first-world"
 keywords:
   - "SurePrep"
   - "SurePrep alternatives"
@@ -31,7 +31,7 @@ keywords:
   - "SurePrep vs AI tools"
 previewImage: "/images/sueprep.png"
 imageAlt: "Comparison of SurePrep and modern AI-first tax automation tools"
-canonical: "https://www.taxproexchange.com/ai/sureprep-in-an-ai-first-world"
+canonical: "https://www.taxproexchange.com/insights/sureprep-in-an-ai-first-world"
 readingTime: 11
 robots: "index,follow"
 ogTitle: "SurePrep in an AI-First World: Still Relevant or Being Replaced?"

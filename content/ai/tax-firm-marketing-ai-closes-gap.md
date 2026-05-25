@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-12-01"
 category: "AI"
 pillar: "Tax Marketing"
-slug: "/ai/tax-firm-marketing-ai-closes-gap"
+slug: "/insights/tax-firm-marketing-ai-closes-gap"
 keywords:
   - "tax firm marketing"
   - "AI marketing for CPAs"
@@ -24,7 +24,7 @@ keywords:
   - "tax accounting marketing"
 previewImage: "/images/tax-firm-marketing-ai-preview.png"
 imageAlt: "AI-powered marketing tools for small tax firms"
-canonical: "https://www.taxproexchange.com/ai/tax-firm-marketing-ai-closes-gap"
+canonical: "https://www.taxproexchange.com/insights/tax-firm-marketing-ai-closes-gap"
 readingTime: 12
 robots: "index,follow"
 ogTitle: "Tax Firm Marketing Without Big Budgets: How AI Closes the Gap"

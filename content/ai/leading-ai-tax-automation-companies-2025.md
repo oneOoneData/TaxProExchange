@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-17"
 category: "AI"
 pillar: "Tax Technology"
-slug: "/ai/leading-ai-tax-automation-companies-2025"
+slug: "/insights/leading-ai-tax-automation-companies-2025"
 keywords:
   - "AI tax tools"
   - "AI for tax professionals"
@@ -24,7 +24,7 @@ keywords:
   - "tax automation market map"
 previewImage: "/images/leading-ai-tax-automation-companies.png"
 imageAlt: "Market map of leading AI tax automation companies across research, preparation, workflow, and planning categories."
-canonical: "https://www.taxproexchange.com/ai/leading-ai-tax-automation-companies-2025"
+canonical: "https://www.taxproexchange.com/insights/leading-ai-tax-automation-companies-2025"
 readingTime: 14
 robots: "index,follow"
 ogTitle: "Leading AI Tax Automation Companies (2026 Market Map)"

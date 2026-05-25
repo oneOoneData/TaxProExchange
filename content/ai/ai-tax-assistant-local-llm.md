@@ -15,8 +15,8 @@ image: "/images/ai-tax-assistant-local-llm.png"
 imageCaption: "Our very simple CPA-LLM up and running answering questions. Some GPU power would make the app a lot faster and better at reasoning."
 previewImage: "/images/CPA_AI_Desktop.png"
 readingTime: 9
-slug: "/ai/ai-tax-assistant-local-llm"
-canonical: "https://www.taxproexchange.com/ai/ai-tax-assistant-local-llm"
+slug: "/insights/ai-tax-assistant-local-llm"
+canonical: "https://www.taxproexchange.com/insights/ai-tax-assistant-local-llm"
 ---
 
 ## Promises, Promises...
