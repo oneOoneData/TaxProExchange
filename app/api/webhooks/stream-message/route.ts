@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createHmac } from 'crypto';
 import { sendMessageNotification, shouldSendEmail, type EmailPreferences } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+
+    // Verify Stream webhook signature
+    const streamSecret = process.env.STREAM_SECRET;
+    if (streamSecret) {
+      const signature = req.headers.get('x-signature') || '';
+      const expected = createHmac('sha256', streamSecret).update(rawBody).digest('hex');
+      if (signature !== expected) {
+        console.warn('Stream webhook: invalid signature');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
     console.log('🔔 Stream webhook called:', body.type);
     console.log('🔔 Full webhook payload:', JSON.stringify(body, null, 2));
     
