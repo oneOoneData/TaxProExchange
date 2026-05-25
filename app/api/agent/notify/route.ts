@@ -5,7 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // Protected by AGENT_SECRET env var.
 export async function POST(request: NextRequest) {
   const secret = request.headers.get('x-agent-secret');
-  if (secret !== process.env.AGENT_SECRET) {
+  const expectedSecret = process.env.AGENT_SECRET?.replace(/^﻿/, '').trim();
+  if (secret !== expectedSecret) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
