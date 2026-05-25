@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-18"
 category: "AI"
 pillar: "Tax Technology"
-slug: "/ai/8-hidden-risks-chatgpt-wrappers-tax-firms"
+slug: "/insights/8-hidden-risks-chatgpt-wrappers-tax-firms"
 keywords:
   - "ChatGPT wrappers tax"
   - "AI tax software risks"
@@ -22,7 +22,7 @@ keywords:
 previewImage: "/images/chatgpt-wrapper-risks.png"
 image: "/images/chatgpt-wrapper-risks.png"
 imageAlt: "A tax professional reviewing AI output with risk and caution markers"
-canonical: "https://www.taxproexchange.com/ai/8-hidden-risks-chatgpt-wrappers-tax-firms"
+canonical: "https://www.taxproexchange.com/insights/8-hidden-risks-chatgpt-wrappers-tax-firms"
 readingTime: 10
 robots: "index,follow"
 ogTitle: "8 Hidden Risks of Using ChatGPT Wrappers in Tax Firms"

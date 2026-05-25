@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-14"
 category: "AI"
 pillar: "Future of Tax Work"
-slug: "/ai/state-of-ai-in-tax-firms-2025"
+slug: "/insights/state-of-ai-in-tax-firms-2025"
 keywords:
   - "AI in tax firms"
   - "AI for CPAs"
@@ -24,7 +24,7 @@ keywords:
   - "tax firm automation roadmap"
 previewImage: "/images/the_hybrid_desk.png"
 imageAlt: "Tax professional’s hybrid desk with laptop, workpapers, and AI workflow on screen"
-canonical: "https://www.taxproexchange.com/ai/state-of-ai-in-tax-firms-2025"
+canonical: "https://www.taxproexchange.com/insights/state-of-ai-in-tax-firms-2025"
 readingTime: 12
 robots: "index,follow"
 ogTitle: "What’s Next for AI in Tax Firms"

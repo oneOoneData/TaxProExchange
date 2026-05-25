@@ -10,7 +10,7 @@ authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-22"
 category: "AI"
 pillar: "Tax Technology"
-slug: "/ai/juno-tax-automation-review"
+slug: "/insights/juno-tax-automation-review"
 keywords:
   - "Juno tax software"
   - "Juno tax automation review"
@@ -24,7 +24,7 @@ keywords:
   - "AI in tax firms"
 previewImage: "/images/juno-logo.png"
 imageAlt: "Juno Tax Automation platform review"
-canonical: "https://www.taxproexchange.com/ai/juno-tax-automation-review"
+canonical: "https://www.taxproexchange.com/insights/juno-tax-automation-review"
 readingTime: 12
 robots: "index,follow"
 ogTitle: "Juno's Tax Automation Features: A Technical Review"
