@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/search', '/jobs', '/p/(.*)', '/legal(.*)', '/trust', '/transparency']);
+const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/search', '/jobs', '/p/(.*)', '/legal(.*)', '/trust', '/transparency', '/partners', '/insights(.*)', '/for-firms', '/join', '/directory(.*)']);
 const isOnboarding = createRouteMatcher(['/onboarding', '/profile/edit', '/feedback']);
 const isDashboard = createRouteMatcher(['/dashboard']);
 const isFirmArea = createRouteMatcher(['/team(.*)', '/firm(.*)']);
