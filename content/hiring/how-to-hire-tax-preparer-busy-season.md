@@ -20,14 +20,14 @@ keywords:
   - "hire EA tax season"
   - "tax preparer staffing small firm"
   - "seasonal tax staff"
-previewImage: "/images/hiring-tax-preparer.png"
+previewImage: "/images/the_hybrid_desk.png"
 imageAlt: "CPA firm owner reviewing tax preparer applications"
 canonical: "https://www.taxproexchange.com/insights/how-to-hire-tax-preparer-busy-season"
 readingTime: 7
 robots: "index,follow"
 ogTitle: "How to Hire a Tax Preparer for Busy Season (Without Overpaying)"
 ogDescription: "Find qualified CPAs and EAs for tax season without $500 job posts or weeks of searching. A practical guide for small firm owners."
-ogImage: "/images/hiring-tax-preparer.png"
+ogImage: "/images/the_hybrid_desk.png"
 ---
 
 Every January, the same thing happens to small tax firms: work piles up, the team is stretched, and someone says "we need another preparer."
