@@ -6,10 +6,10 @@ export default function DualHero() {
   const [mode, setMode] = useState<"firm" | "pro">("firm");
 
   const firm = {
-    title: "Scale Your Tax Firm Smarter.",
+    title: "Stop paying $500 per job post.",
     subtitle:
-      "Instantly access verified CPAs, EAs & specialists for overflow, review, and niche expertise.",
-    cta: "Find Talent",
+      "Get unlimited access to verified CPAs, EAs & specialists for $30/month. Hire for overflow, review, and niche work — without the recruiting fees.",
+    cta: "Post Your First Job Free",
     href: "/firm",
   };
 
