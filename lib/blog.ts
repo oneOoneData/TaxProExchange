@@ -24,15 +24,31 @@ export interface BlogPost {
   };
 }
 
-const contentDirectory = path.join(process.cwd(), 'content/ai');
+const contentRoot = path.join(process.cwd(), 'content');
+
+function getAllMarkdownFiles(): { filePath: string; slug: string }[] {
+  const results: { filePath: string; slug: string }[] = [];
+  const walk = (dir: string) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (entry.name.endsWith('.md') && !entry.name.startsWith('DRAFT-')) {
+        results.push({ filePath: fullPath, slug: entry.name.replace(/\.md$/, '') });
+      }
+    }
+  };
+  walk(contentRoot);
+  return results;
+}
 
 export function getAllPosts(): BlogPost[] {
   try {
-    const filenames = fs.readdirSync(contentDirectory);
-    const posts = filenames
-      .filter(name => name.endsWith('.md') && !name.startsWith('DRAFT-'))
-      .map(filename => {
-        const filePath = path.join(contentDirectory, filename);
+    const files = getAllMarkdownFiles();
+    const posts = files
+      .map(({ filePath, slug }) => {
+        const filename = path.basename(filePath);
         const fileContents = fs.readFileSync(filePath, 'utf8');
         const { data, content } = matter(fileContents);
         
@@ -71,7 +87,10 @@ export function getAllPosts(): BlogPost[] {
 
 export function getPostBySlug(slug: string): BlogPost | null {
   try {
-    const filePath = path.join(contentDirectory, `${slug}.md`);
+    const allFiles = getAllMarkdownFiles();
+    const match = allFiles.find(f => f.slug === slug);
+    if (!match) return null;
+    const filePath = match.filePath;
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data, content } = matter(fileContents);
     
@@ -104,10 +123,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
 export function getAllSlugs(): string[] {
   try {
-    const filenames = fs.readdirSync(contentDirectory);
-    return filenames
-      .filter(name => name.endsWith('.md') && !name.startsWith('DRAFT-'))
-      .map(name => name.replace(/\.md$/, ''));
+    return getAllMarkdownFiles().map(f => f.slug);
   } catch (error) {
     console.error('Error reading blog slugs:', error);
     return [];
