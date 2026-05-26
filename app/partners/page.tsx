@@ -167,7 +167,7 @@ export default function PartnersPage() {
         <div className="max-w-xl mx-auto">
           <h2 className="text-2xl font-bold text-slate-900 mb-4">Ready to get started?</h2>
           <p className="text-slate-600 mb-8">
-            Send us a quick email and we'll have you set up with a referral link within 24 hours.
+            Send us a quick email and we&apos;ll have you set up with a referral link within 24 hours.
           </p>
           <a
             href="mailto:koen@taxproexchange.com?subject=Affiliate Program&body=Hi Koen, I'm interested in joining the TaxProExchange affiliate program. Here's a bit about my audience: "
