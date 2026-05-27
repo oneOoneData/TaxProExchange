@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import Link from 'next/link';
 import AppNavigation from '@/components/AppNavigation';
 import JsonLd from '@/components/seo/JsonLd';
@@ -154,6 +154,7 @@ export default function PricingPage() {
                 </p>
                 <ul className="space-y-3 mb-8 flex-1">
                   {[
+                    ['Post jobs to the talent pool', true],
                     ['Build a private bench of verified professionals', true],
                     ['Categorize by specialty (IRS rep, SALT, crypto, etc.)', true],
                     ['Add team members to manage your bench', true],
@@ -203,6 +204,7 @@ export default function PricingPage() {
                     ['Connection requests', true, true],
                     ['Mentorship access', true, true],
                     ['Job applications', true, true],
+                    ['Post jobs to the talent pool', false, true],
                     ['Private professional bench', false, true],
                     ['Team member access', false, true],
                     ['Categorize by specialty', false, true],

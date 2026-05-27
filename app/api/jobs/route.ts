@@ -197,6 +197,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Only firms can post jobs' }, { status: 403 });
     }
 
+    // Check active firm subscription — only paying customers can post jobs
+    const { data: firmMember } = await supabase
+      .from('firm_members')
+      .select('firm_id, firms!inner(subscription_status)')
+      .eq('profile_id', profile.id)
+      .eq('status', 'active')
+      .single();
+
+    const subscriptionStatus = (firmMember as any)?.firms?.subscription_status;
+    if (!firmMember || subscriptionStatus !== 'active') {
+      return NextResponse.json({
+        error: 'An active firm subscription is required to post jobs.',
+        code: 'SUBSCRIPTION_REQUIRED',
+        details: 'Upgrade to a firm account at taxproexchange.com/pricing to post jobs and access the full talent pool.'
+      }, { status: 403 });
+    }
+
     // Create the job
     const { data: job, error: jobError } = await supabase
       .from('jobs')
