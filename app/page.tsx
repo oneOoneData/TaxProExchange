@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import { siteUrl, generateFaqJsonLd, generateOrganizationJsonLd, websiteSearchLD } from '@/lib/seo';
 import HomePageClient from '@/components/HomePageClient';
