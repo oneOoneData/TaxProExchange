@@ -4,7 +4,7 @@ slug: "tax-pros-community-analysis"
 date: "2026-05-29"
 author: "Koen Van Duyse"
 description: "475 active CPAs, EAs, and tax professionals on TaxProExchange are reshaping how tax work gets done. Here's who they are, where they practice, what they specialize in—and the surprising gaps that create opportunity."
-previewImage: "https://v3.fal.media/files/rabbit/019e745d-4bb9-75f3-badb-87320da2343d.mp4"
+previewImage: "/images/tax-pros-hero.png"
 ---
 
 # Meet the Tax Pros on TaxProExchange: Who's Building the Future of Tax Practice
