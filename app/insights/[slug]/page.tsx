@@ -30,8 +30,8 @@ export async function generateMetadata({
   }
 
   const url = `${siteUrl}${post.data.slug || `/insights/${slug}`}`;
-  const imageUrl = post.data.image 
-    ? `${siteUrl}${post.data.image}` 
+  const imageUrl = post.data.previewImage || post.data.image
+    ? `${siteUrl}${post.data.previewImage || post.data.image}` 
     : `${siteUrl}/og-image.png`;
 
   return {
@@ -117,11 +117,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
             </header>
 
-            {post.data.image && (
+            {(post.data.previewImage || post.data.image) && (
               <div className="mb-8">
                 <div className="rounded-lg overflow-hidden">
                   <Image
-                    src={post.data.image}
+                    src={post.data.previewImage || post.data.image}
                     alt={post.data.title}
                     width={1200}
                     height={630}
