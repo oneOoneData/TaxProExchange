@@ -30,8 +30,9 @@ export async function generateMetadata({
   }
 
   const url = `${siteUrl}${post.data.slug || `/insights/${slug}`}`;
-  const imageUrl = post.data.previewImage || post.data.image
-    ? `${siteUrl}${post.data.previewImage || post.data.image}` 
+  const previewImagePath = post.data.previewImage || post.data.image;
+  const imageUrl = previewImagePath 
+    ? `${siteUrl}${previewImagePath}` 
     : `${siteUrl}/og-image.png`;
 
   return {
@@ -64,6 +65,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   if (!post) {
     notFound();
   }
+
+  const previewImagePath = post.data.previewImage || post.data.image;
 
   const relatedPosts = getAllPosts()
     .filter((p) => p.slug !== slug && p?.data?.title)
@@ -121,7 +124,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               <div className="mb-8">
                 <div className="rounded-lg overflow-hidden">
                   <Image
-                    src={post.data.previewImage || post.data.image}
+                    src={previewImagePath || '/images/placeholder.png'}
                     alt={post.data.title}
                     width={1200}
                     height={630}
