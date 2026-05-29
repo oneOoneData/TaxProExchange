@@ -17,18 +17,18 @@ keywords:
   - "IRS inflation adjustments"
   - "tax planning 2026"
   - "capital gains tax threshold"
-previewImage: "/images/the_hybrid_desk.png"
-imageAlt: "2026 Tax Planning Guide"
+previewImage: "/images/2026-tax-planning-hero.jpg"
+imageAlt: "2026 Tax Planning Professional Workspace"
 canonical: "https://www.taxproexchange.com/insights/irs-2026-inflation-adjustments"
 readingTime: 6
 robots: "index,follow"
 ogTitle: "2026 IRS Tax Adjustments: What Tax Pros Need to Know"
 ogDescription: "Higher standard deductions, updated brackets, and capital gains changes. Get the details for client planning."
-ogImage: "/images/the_hybrid_desk.png"
+ogImage: "/images/2026-tax-planning-hero.jpg"
 twitterCard: "summary_large_image"
 twitterTitle: "2026 IRS Inflation Adjustments Released"
 twitterDescription: "Standard deductions up to $32,200 for joint filers. New brackets and thresholds for capital gains planning."
-twitterImage: "/images/the_hybrid_desk.png"
+twitterImage: "/images/2026-tax-planning-hero.jpg"
 schemaType: "Article"
 ---
 
