@@ -24,11 +24,11 @@ readingTime: 6
 robots: "index,follow"
 ogTitle: "2026 IRS Tax Adjustments: What Tax Pros Need to Know"
 ogDescription: "Higher standard deductions, updated brackets, and capital gains changes. Get the details for client planning."
-ogImage: "/images/2026-tax-planning-hero.jpg"
+ogImage: "https://www.taxproexchange.com/images/2026-tax-planning-hero.jpg"
 twitterCard: "summary_large_image"
 twitterTitle: "2026 IRS Inflation Adjustments Released"
 twitterDescription: "Standard deductions up to $32,200 for joint filers. New brackets and thresholds for capital gains planning."
-twitterImage: "/images/2026-tax-planning-hero.jpg"
+twitterImage: "https://www.taxproexchange.com/images/2026-tax-planning-hero.jpg"
 schemaType: "Article"
 ---
 
