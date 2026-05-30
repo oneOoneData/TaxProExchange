@@ -115,7 +115,7 @@ export default function SuggestedMatches({ isFirmAdmin = false, profileId }: Sug
           </span>
         </div>
         <div className="text-center py-6">
-          <p className="text-slate-600 mb-4">You've used all your connection credits.</p>
+          <p className="text-slate-600 mb-4">You&apos;ve used all your connection credits.</p>
           {!isFirmAdmin && (
             <Link
               href="/for-firms"

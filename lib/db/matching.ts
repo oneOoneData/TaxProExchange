@@ -220,7 +220,7 @@ export async function getSuggestedMatches(profileId: string): Promise<SuggestedM
 /**
  * Use a connection credit
  */
-export async function useConnectionCredit(profileId: string): Promise<{ success: boolean; credits_remaining: number }> {
+export async function spendConnectionCredit(profileId: string): Promise<{ success: boolean; credits_remaining: number }> {
   const supabase = supabaseService();
   const { data: profile, error } = await supabase
     .from('profiles')
