@@ -20,10 +20,6 @@ export interface Referral {
 /**
  * Create a referral
  */
-  if (params.referrer_id === params.recipient_id) {
-    return { error: "Cannot send a referral to yourself" };
-  }
-
 export async function createReferral(params: {
   referrer_id: string;
   recipient_id: string;
@@ -32,6 +28,10 @@ export async function createReferral(params: {
   fee_amount: number;
   message?: string;
 }): Promise<{ data?: Referral; error?: string }> {
+  if (params.referrer_id === params.recipient_id) {
+    return { error: "Cannot send a referral to yourself" };
+  }
+
   const supabase = supabaseService();
 
   const { data, error } = await supabase
