@@ -13,6 +13,7 @@ import RecentJobsPreview from '@/components/dashboard/RecentJobsPreview';
 import ProfileHealth from '@/components/dashboard/ProfileHealth';
 import { DashboardDebug } from '@/components/debug/DashboardDebug';
 import DashboardTopEventCard from '@/components/DashboardTopEventCard';
+import SuggestedMatches from '@/components/dashboard/SuggestedMatches';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -98,13 +99,21 @@ export default async function DashboardPage() {
         </div>
 
 
-        {/* 2. Profile Health and Messages Section */}
+        {/* 2. Suggested Matches Section */}
+        <div className="mb-8">
+          <SuggestedMatches 
+            isFirmAdmin={canPostJobs}
+            profileId={profile?.id}
+          />
+        </div>
+
+        {/* 3. Profile Health and Messages Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <ProfileHealth profile={profile} />
           <MessagesPreview />
         </div>
 
-        {/* 3. New Jobs and Events Section */}
+        {/* 4. New Jobs and Events Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {userJobs.length > 0 ? (
             <JobsPreview jobs={userJobs} canPostJobs={canPostJobs} />
