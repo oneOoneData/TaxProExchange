@@ -162,9 +162,7 @@ export default function ConnectionsSummary() {
                         {other.first_name} {other.last_name}
                       </Link>
                       <p className="text-[11px] text-slate-400 truncate">
-                        {other.firm_name || other.headline || (
-                          conn.status === 'pending' ? requester ? 'Awaiting response' : 'Pending your decision'
-                        ) : null}
+                        {other.firm_name || other.headline || (conn.status === 'pending' ? (requester ? 'Awaiting response' : 'Pending your decision') : '')}
                       </p>
                     </div>
                   </div>
