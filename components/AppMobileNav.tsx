@@ -144,6 +144,13 @@ export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
                   <div className="text-slate-900 font-medium">{user.fullName || user.primaryEmailAddress?.emailAddress}</div>
                   <div className="mt-4 space-y-2">
                     <Link
+                      href="/connections"
+                      onClick={onClose}
+                      className="block py-2 px-4 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-center"
+                    >
+                      My Connections
+                    </Link>
+                    <Link
                       href="/messages"
                       onClick={onClose}
                       className="block py-2 px-4 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors text-center"

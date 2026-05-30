@@ -102,12 +102,12 @@ export default function MessagesPreview({ threads = [], unreadTotal = 0 }: Messa
             </svg>
           </div>
           <h4 className="font-medium text-gray-900 mb-1">No messages yet</h4>
-          <p className="text-sm text-gray-600 mb-3">Start by saying hi to 2 nearby pros.</p>
+          <p className="text-sm text-gray-600 mb-3">Connect with tax pros first, then message them here.</p>
           <Link
-            href="/search"
+            href="/connections"
             className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Browse Directory
+            Go to Connections
           </Link>
         </div>
       ) : (

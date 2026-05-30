@@ -72,6 +72,13 @@ export default function SuggestedMatches({ isFirmAdmin = false, profileId }: Sug
         setCreditsRemaining(data.credits_remaining);
         // Remove connected match from suggestions
         setMatches(prev => prev.filter(m => m.profile_id !== suggestedProfileId));
+        // Show a toast-like message that the request was sent
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-emerald-600 text-white text-sm font-medium rounded-lg shadow-lg';
+        toast.textContent = 'Connection request sent! View it in My Connections.';
+        toast.onclick = () => window.location.href = '/connections';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
       } else if (res.status === 402) {
         // Payment required — out of credits
         setCreditsRemaining(0);
