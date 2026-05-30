@@ -308,7 +308,7 @@ export default function ReferralPanel({ profileId }: ReferralPanelProps) {
               </p>
 
               {ref.message && (
-                <p className="text-xs text-slate-500 mt-1 italic">"{ref.message}"</p>
+                <p className="text-xs text-slate-500 mt-1 italic">&quot;{ref.message}&quot;</p>
               )}
 
               {/* Actions */}
