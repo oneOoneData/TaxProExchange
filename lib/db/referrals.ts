@@ -69,7 +69,13 @@ export async function getUserReferrals(profileId: string): Promise<Referral[]> {
     .eq('recipient_id', profileId)
     .order('created_at', { ascending: false });
 
-  return [...(sent || []), ...(received || [])];
+  // Deduplicate by ID (self-referrals appear in both queries)
+  const seen = new Set<string>();
+  return [...(sent || []), ...(received || [])].filter(r => {
+    if (seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
 }
 
 /**
