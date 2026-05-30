@@ -33,6 +33,11 @@ export async function POST(request: Request) {
 
     const { recipient_id, client_name, client_info, fee_amount, message } = await request.json();
 
+    // Prevent self-referrals
+    if (recipient_id === profile.id) {
+      return NextResponse.json({ error: 'Cannot send a referral to yourself' }, { status: 400 });
+    }
+
     if (!recipient_id || !client_name || !fee_amount) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }

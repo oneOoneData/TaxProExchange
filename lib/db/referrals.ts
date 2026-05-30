@@ -20,6 +20,10 @@ export interface Referral {
 /**
  * Create a referral
  */
+  if (params.referrer_id === params.recipient_id) {
+    return { error: "Cannot send a referral to yourself" };
+  }
+
 export async function createReferral(params: {
   referrer_id: string;
   recipient_id: string;
