@@ -143,6 +143,12 @@ export default function ReferralPanel({ profileId }: ReferralPanelProps) {
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6">
+      {/* Coming Soon Banner */}
+      <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-center">
+        <span className="text-sm font-semibold text-amber-800">
+          ⏳ Coming Soon — Payments are not yet enabled. Accept and Send actions are placeholders for now.
+        </span>
+      </div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-slate-900">Referrals</h2>
         <button
