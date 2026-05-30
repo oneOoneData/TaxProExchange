@@ -19,14 +19,18 @@ interface Connection {
   requester_profile_id: string;
   recipient_profile_id: string;
   created_at: string;
+  stream_channel_id?: string;
   requester_profile: Profile;
   recipient_profile: Profile;
 }
+
+type FilterKey = 'all' | 'accepted' | 'pending' | 'declined';
 
 export default function ConnectionsSummary() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterKey>('all');
 
   useEffect(() => {
     fetchConnections();
@@ -56,14 +60,38 @@ export default function ConnectionsSummary() {
     if (res.ok) fetchConnections();
   };
 
-  // Pending where current user is the recipient (incoming requests they need to act on)
+  const handleDelete = async (connectionId: string) => {
+    if (!confirm('Remove this connection?')) return;
+    const res = await fetch(`/api/connections/${connectionId}/delete`, { method: 'DELETE' });
+    if (res.ok) fetchConnections();
+  };
+
+  const getOtherProfile = (conn: Connection) =>
+    conn.requester_profile_id === currentProfileId ? conn.recipient_profile : conn.requester_profile;
+
+  const isRequester = (conn: Connection) =>
+    conn.requester_profile_id === currentProfileId;
+
+  const acceptedCount = connections.filter(c => c.status === 'accepted').length;
+  const pendingCount = connections.filter(c => c.status === 'pending').length;
+  const declinedCount = connections.filter(c => c.status === 'declined').length;
+  const totalCount = connections.length;
+
   const incomingPending = connections.filter(
     c => c.status === 'pending' && c.recipient_profile_id === currentProfileId
   );
 
-  // Total accepted
-  const acceptedCount = connections.filter(c => c.status === 'accepted').length;
-  const totalCount = connections.length;
+  const filteredConnections = connections.filter((conn) => {
+    if (filter === 'all') return true;
+    return conn.status === filter;
+  });
+
+  const stats = [
+    { key: 'all' as FilterKey, label: 'Total', count: totalCount, bg: 'bg-slate-50', text: 'text-slate-900', subText: 'text-slate-500' },
+    { key: 'accepted' as FilterKey, label: 'Active', count: acceptedCount, bg: 'bg-emerald-50', text: 'text-emerald-700', subText: 'text-emerald-600' },
+    { key: 'pending' as FilterKey, label: 'Pending', count: pendingCount, bg: 'bg-amber-50', text: 'text-amber-700', subText: 'text-amber-600' },
+    { key: 'declined' as FilterKey, label: 'Declined', count: declinedCount, bg: 'bg-red-50', text: 'text-red-600', subText: 'text-red-500' },
+  ];
 
   if (loading) {
     return (
@@ -86,83 +114,116 @@ export default function ConnectionsSummary() {
         </Link>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="bg-slate-50 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-slate-900">{totalCount}</p>
-          <p className="text-xs text-slate-500">Total</p>
-        </div>
-        <div className="bg-emerald-50 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-emerald-700">{acceptedCount}</p>
-          <p className="text-xs text-emerald-600">Active</p>
-        </div>
-        <div className="bg-amber-50 rounded-lg p-3 text-center">
-          <p className="text-2xl font-bold text-amber-700">{incomingPending.length}</p>
-          <p className="text-xs text-amber-600">Pending</p>
-        </div>
+      {/* Clickable stats */}
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        {stats.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setFilter(s.key)}
+            className={`rounded-lg p-3 text-center transition-all ${
+              filter === s.key
+                ? `${s.bg} ring-2 ring-${s.key === 'all' ? 'slate' : s.key === 'accepted' ? 'emerald' : s.key === 'pending' ? 'amber' : 'red'}-400`
+                : `${s.bg} hover:opacity-80`
+            }`}
+          >
+            <p className={`text-2xl font-bold ${s.text}`}>{s.count}</p>
+            <p className={`text-xs mt-0.5 ${s.subText}`}>{s.label}</p>
+          </button>
+        ))}
       </div>
 
-      {/* Incoming pending requests */}
-      <AnimatePresence>
-        {incomingPending.length > 0 && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            className="space-y-2"
-          >
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Incoming Requests
-            </p>
-            {incomingPending.slice(0, 3).map((conn) => {
-              const requester = conn.requester_profile;
+      {/* Connection list */}
+      {filteredConnections.length > 0 ? (
+        <div className="space-y-1.5 max-h-72 overflow-y-auto">
+          <AnimatePresence>
+            {filteredConnections.slice(0, 5).map((conn) => {
+              const other = getOtherProfile(conn);
+              const requester = isRequester(conn);
               return (
                 <motion.div
                   key={conn.id}
+                  layout
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-amber-50 border border-amber-100"
+                  exit={{ opacity: 0, x: -10 }}
+                  className="flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 transition-colors gap-2"
                 >
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/p/${requester.slug || requester.id}`}
-                      className="text-sm font-medium text-slate-900 hover:text-blue-600"
-                    >
-                      {requester.first_name} {requester.last_name}
-                    </Link>
-                    {requester.firm_name && (
-                      <p className="text-xs text-slate-500 truncate">{requester.firm_name}</p>
-                    )}
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-semibold text-slate-500">
+                        {other.first_name[0]}{other.last_name[0]}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <Link
+                        href={`/p/${other.slug || other.id}`}
+                        className="text-sm font-medium text-slate-900 hover:text-blue-600 truncate block"
+                      >
+                        {other.first_name} {other.last_name}
+                      </Link>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {other.firm_name || other.headline || (
+                          conn.status === 'pending' ? requester ? 'Awaiting response' : 'Pending your decision'
+                        ) : null}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-1.5 ml-3 shrink-0">
-                    <button
-                      onClick={() => handleDecision(conn.id, 'accepted')}
-                      className="px-3 py-1 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition-colors"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() => handleDecision(conn.id, 'declined')}
-                      className="px-3 py-1 bg-white text-slate-600 text-xs font-medium rounded-lg border border-slate-300 hover:bg-slate-50 transition-colors"
-                    >
-                      Decline
-                    </button>
+                  <div className="flex gap-1 shrink-0">
+                    {conn.status === 'accepted' && (
+                      <Link
+                        href={`/messages/${conn.id}`}
+                        className="px-2.5 py-1 bg-blue-600 text-white text-[11px] font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+                      >
+                        💬 Message
+                      </Link>
+                    )}
+                    {conn.status === 'pending' && !requester && (
+                      <>
+                        <button
+                          onClick={() => handleDecision(conn.id, 'accepted')}
+                          className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleDecision(conn.id, 'declined')}
+                          className="px-2.5 py-1 bg-white text-slate-600 text-[11px] font-medium rounded-lg border border-slate-300 hover:bg-slate-50 transition-colors"
+                        >
+                          Decline
+                        </button>
+                      </>
+                    )}
+                    {conn.status === 'pending' && requester && (
+                      <button
+                        onClick={() => handleDelete(conn.id)}
+                        className="px-2.5 py-1 bg-white text-red-500 text-[11px] font-medium rounded-lg border border-red-200 hover:bg-red-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    {conn.status === 'declined' && (
+                      <button
+                        onClick={() => handleDelete(conn.id)}
+                        className="px-2.5 py-1 bg-white text-slate-400 text-[11px] font-medium rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                      >
+                        Dismiss
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               );
             })}
-            {incomingPending.length > 3 && (
-              <Link
-                href="/messages?tab=pending"
-                className="block text-center text-xs text-blue-600 hover:text-blue-700 pt-1"
-              >
-                +{incomingPending.length - 3} more pending requests
-              </Link>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {totalCount === 0 && (
+          </AnimatePresence>
+          {filteredConnections.length > 5 && (
+            <Link
+              href={`/connections${filter !== 'all' ? '?tab=' + filter : ''}`}
+              className="block text-center text-xs text-blue-600 hover:text-blue-700 pt-2"
+            >
+              View all {filteredConnections.length} connections →
+            </Link>
+          )}
+        </div>
+      ) : totalCount === 0 ? (
         <div className="text-center py-4">
           <p className="text-sm text-slate-400 mb-3">
             Connect with other tax pros to grow your network.
@@ -174,16 +235,33 @@ export default function ConnectionsSummary() {
             Browse Directory
           </Link>
         </div>
-      )}
-
-      {totalCount > 0 && incomingPending.length === 0 && (
-        <div className="text-center pt-2">
-          <Link
-            href="/search"
+      ) : (
+        <div className="flex items-center justify-between py-3">
+          <p className="text-sm text-slate-400">No {filter} connections</p>
+          <button
+            onClick={() => setFilter('all')}
             className="text-xs text-blue-600 hover:text-blue-700"
           >
-            Find more tax pros to connect with →
+            Show all
+          </button>
+        </div>
+      )}
+
+      {/* Quick actions */}
+      {totalCount > 0 && (
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+          <Link
+            href="/search"
+            className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Find more
           </Link>
+          <span className="text-[11px] text-slate-400">
+            {acceptedCount} active · {pendingCount} pending
+          </span>
         </div>
       )}
     </div>
