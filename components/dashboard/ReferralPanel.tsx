@@ -221,11 +221,12 @@ export default function ReferralPanel({ profileId }: ReferralPanelProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">You Get</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">You Receive</label>
                   <div className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white text-emerald-700 font-medium">
                     ${Math.round(parseInt(formData.fee_amount || '0') * 0.9 / 100)}
                   </div>
                 </div>
+                  <p className="text-[10px] text-slate-400 mt-0.5">10% platform fee goes to TaxProExchange</p>
               </div>
 
               <div>
