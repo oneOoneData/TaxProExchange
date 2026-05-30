@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
-import { useConnectionCredit } from '@/lib/db/matching';
+import { spendConnectionCredit } from '@/lib/db/matching';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     // If not firm admin, use a credit
     let creditsRemaining = 999;
     if (!isFirmAdmin) {
-      const result = await useConnectionCredit(profile.id);
+      const result = await spendConnectionCredit(profile.id);
       if (!result.success) {
         return NextResponse.json({ 
           error: 'No connection credits remaining',
