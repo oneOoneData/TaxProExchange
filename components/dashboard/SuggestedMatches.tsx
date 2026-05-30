@@ -136,7 +136,15 @@ export default function SuggestedMatches({ isFirmAdmin = false, profileId }: Sug
   }
 
   if (matches.length === 0) {
-    return null; // Don't show if no matches and still have credits
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Suggested Matches</h2>
+        <div className="text-center py-6">
+          <p className="text-slate-600 mb-2">No matches found yet.</p>
+          <p className="text-sm text-slate-400">Make sure your profile is complete with your location and skills so we can suggest the right people.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
