@@ -19,8 +19,8 @@ export async function POST() {
       price: process.env.STRIPE_PRACTICE_BUYER_PRICE_ID,
       quantity: 1,
     }],
-    success_url: `${process.env.NEXT_PUBLIC_URL}/practices?unlocked=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_URL}/practices`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://taxproexchange.com'}/practices?unlocked=true`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://taxproexchange.com'}/practices`,
     metadata: { clerk_user_id: userId },
   });
 
