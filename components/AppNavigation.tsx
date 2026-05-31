@@ -121,6 +121,7 @@ export default function AppNavigation() {
               )}
             </div>
             
+            <Link href="/practices" className={isActive('/practices')}>Practices for Sale</Link>
             <Link href="/insights" className={isActive('/insights')}>Insights</Link>
           </nav>
           
