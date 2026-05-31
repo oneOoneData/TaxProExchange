@@ -44,26 +44,23 @@ export default function AdminPracticesPage() {
   }, [isLoaded, user]);
 
   const fetchPending = async () => {
-    const supabase = (await import('@supabase/supabase-js')).createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    const { data } = await supabase
-      .from('practice_listings')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false });
-    setListings(data || []);
+    const res = await fetch('/api/admin/practices');
+    if (res.ok) {
+      const data = await res.json();
+      setListings(data.listings || []);
+    }
     setLoading(false);
   };
 
-  const handleAction = async (id: string, action: 'active' | 'rejected') => {
-    const supabase = (await import('@supabase/supabase-js')).createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    await supabase.from('practice_listings').update({ status: action }).eq('id', id);
-    setListings(prev => prev.filter(l => l.id !== id));
+  const handleAction = async (id: string, status: string) => {
+    const res = await fetch('/api/admin/practices', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    });
+    if (res.ok) {
+      setListings(prev => prev.filter(l => l.id !== id));
+    }
   };
 
   if (!isLoaded || !user) return null;

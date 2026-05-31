@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
+import { auth } from '@clerk/nextjs/server';
 
 export async function POST(req: Request) {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const supabase = createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, email')
+    .eq('clerk_id', userId)
+    .single();
+
+  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
 
   const { listingId, message } = await req.json();
 
@@ -12,7 +21,7 @@ export async function POST(req: Request) {
   const { data: access } = await supabase
     .from('practice_buyer_access')
     .select('access_end')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .eq('status', 'active')
     .gt('access_end', new Date().toISOString())
     .single();
@@ -28,26 +37,7 @@ export async function POST(req: Request) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
 
-  // Get buyer info
-  const { data: buyerProfile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, email')
-    .eq('id', user.id)
-    .single();
-
   // Send email to seller via Resend
-  const resendPayload = {
-    from: 'TaxProExchange <support@taxproexchange.com>',
-    to: listing.email,
-    subject: `Someone is interested in your practice — ${listing.firm_name}`,
-    html: `<p>Hi ${listing.seller_name},</p>
-<p>A verified buyer on TaxProExchange is interested in your practice.</p>
-<p><strong>Buyer:</strong> ${buyerProfile?.first_name} ${buyerProfile?.last_name || 'A verified buyer'}</p>
-${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
-<p>Reply to this email to continue the conversation directly.</p>
-<p>— TaxProExchange</p>`
-  };
-
   try {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -55,7 +45,17 @@ ${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
         'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(resendPayload),
+      body: JSON.stringify({
+        from: 'TaxProExchange <support@taxproexchange.com>',
+        to: listing.email,
+        subject: `Someone is interested in your practice — ${listing.firm_name}`,
+        html: `<p>Hi ${listing.seller_name},</p>
+<p>A verified buyer on TaxProExchange is interested in your practice.</p>
+<p><strong>Buyer:</strong> ${profile.first_name} ${profile.last_name || ''}</p>
+${message ? `<p><strong>Message:</strong> ${message}</p>` : ''}
+<p>Reply to this email to continue the conversation directly.</p>
+<p>— TaxProExchange</p>`
+      }),
     });
   } catch (e) {
     console.error('Failed to send seller email:', e);
