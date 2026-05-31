@@ -114,7 +114,7 @@ export default function ListPracticePage() {
           {/* Seller Contact (Private) */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-amber-800 mb-3">Your Contact Info — Kept Private</h3>
-            <p className="text-xs text-amber-700 mb-4">Only shown to buyers who pay $150/month.</p>
+            <p className="text-xs text-amber-700 mb-4">Only shown to buyers who pay $150/year.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input required placeholder="Your name" value={form.seller_name} onChange={e => setForm({...form, seller_name: e.target.value})} className="px-3 py-2 border border-slate-300 rounded-lg text-sm" />
               <input required placeholder="Firm name" value={form.firm_name} onChange={e => setForm({...form, firm_name: e.target.value})} className="px-3 py-2 border border-slate-300 rounded-lg text-sm" />
