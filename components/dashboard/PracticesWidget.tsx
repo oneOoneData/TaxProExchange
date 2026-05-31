@@ -90,7 +90,7 @@ export default function PracticesWidget() {
             </Link>
             {!hasBuyerAccess && (
               <Link href="/practices" className="text-xs font-medium text-amber-600 hover:text-amber-700">
-                🔒 Unlock contacts $150/mo
+                🔒 Unlock contacts $150/year
               </Link>
             )}
           </div>

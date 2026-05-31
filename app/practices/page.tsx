@@ -107,7 +107,7 @@ export default function PracticesPage() {
                 onClick={() => setShowUpgradeModal(true)}
                 className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Unlock All Contact Info — $150/month
+                Unlock All Contact Info — $150/year
               </button>
             )}
             <Link
@@ -121,10 +121,10 @@ export default function PracticesPage() {
           {/* Value prop + blog links */}
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
             <p className="text-sm text-blue-900 font-medium mb-2">
-              $150/month gives you full access to every listing — seller name, firm, email, phone, and city.
+              $150/year gives you full access to every listing — seller name, firm, email, phone, and city.
             </p>
             <p className="text-xs text-blue-700">
-              No per-listing fees. One price, everything. Cancel anytime.{' '}
+              No per-listing fees. One price, everything. No auto-renewal.{' '}
               <Link href="/insights/how-to-buy-a-cpa-practice" className="underline hover:no-underline">How to buy a practice →</Link>{' · '}
               <Link href="/insights/cpa-practice-valuation-2026" className="underline hover:no-underline">Valuation guide →</Link>
             </p>
@@ -147,7 +147,7 @@ export default function PracticesPage() {
                 </li>
                 <li className="flex items-start gap-2 text-sm text-slate-700">
                   <span className="text-emerald-600 mt-0.5">✓</span>
-                  Access to all new listings added this month
+                  Access to all new listings added this year
                 </li>
                 <li className="flex items-start gap-2 text-sm text-slate-700">
                   <span className="text-emerald-600 mt-0.5">✓</span>
@@ -155,7 +155,7 @@ export default function PracticesPage() {
                 </li>
                 <li className="flex items-start gap-2 text-sm text-slate-700">
                   <span className="text-emerald-600 mt-0.5">✓</span>
-                  Cancel anytime
+                  No auto-renewal
                 </li>
               </ul>
               <p className="text-xs text-slate-500 mb-6">No per-listing fees. One price, everything.</p>
@@ -168,7 +168,7 @@ export default function PracticesPage() {
                   disabled={checkingOut}
                   className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
                 >
-                  {checkingOut ? 'Redirecting...' : 'Unlock Now — $150/month'}
+                  {checkingOut ? 'Redirecting...' : 'Unlock Now — $150/year'}
                 </button>
                 <button
                   onClick={() => setShowUpgradeModal(false)}
