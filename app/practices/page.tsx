@@ -35,6 +35,7 @@ export default function PracticesPage() {
   const [hasAccess, setHasAccess] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchListings();
@@ -58,12 +59,22 @@ export default function PracticesPage() {
     }
   };
 
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
+
   const handleUpgrade = async () => {
     setCheckingOut(true);
-    const res = await fetch('/api/practice-buyer/checkout', { method: 'POST' });
-    if (res.ok) {
-      const { url } = await res.json();
-      window.location.href = url;
+    setUpgradeError(null);
+    try {
+      const res = await fetch('/api/practice-buyer/checkout', { method: 'POST' });
+      if (res.ok) {
+        const { url } = await res.json();
+        window.location.href = url;
+      } else {
+        const err = await res.json();
+        setUpgradeError(err.error || 'Failed to create checkout session. Stripe may not be configured yet.');
+      }
+    } catch (e) {
+      setUpgradeError('Network error. Please try again.');
     }
     setCheckingOut(false);
   };
@@ -149,6 +160,9 @@ export default function PracticesPage() {
                 </li>
               </ul>
               <p className="text-xs text-slate-500 mb-6">No per-listing fees. One price, everything.</p>
+              {upgradeError && (
+                <p className="text-xs text-red-600 mb-3 bg-red-50 p-2 rounded">{upgradeError}</p>
+              )}
               <div className="flex gap-3">
                 <button
                   onClick={handleUpgrade}
