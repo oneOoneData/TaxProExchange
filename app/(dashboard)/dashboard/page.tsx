@@ -16,6 +16,7 @@ import DashboardTopEventCard from '@/components/DashboardTopEventCard';
 import SuggestedMatches from '@/components/dashboard/SuggestedMatches';
 import ConnectionsSummary from '@/components/dashboard/ConnectionsSummary';
 import ReferralPanel from '@/components/dashboard/ReferralPanel';
+import PracticesWidget from '@/components/dashboard/PracticesWidget';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -119,13 +120,18 @@ export default async function DashboardPage() {
           <ReferralPanel profileId={profile?.id || ''} />
         </div>
 
-        {/* 5. Profile Health and Messages Section */}
+        {/* 5. Practices for Sale Section */}
+        <div className="mb-8">
+          <PracticesWidget />
+        </div>
+
+        {/* 6. Profile Health and Messages Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <ProfileHealth profile={profile} />
           <MessagesPreview />
         </div>
 
-        {/* 6. New Jobs and Events Section */}
+        {/* 7. New Jobs and Events Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {userJobs.length > 0 ? (
             <JobsPreview jobs={userJobs} canPostJobs={canPostJobs} />
@@ -135,12 +141,12 @@ export default async function DashboardPage() {
           <DashboardTopEventCard />
         </div>
 
-        {/* 7. Opportunities Section */}
+        {/* 8. Opportunities Section */}
         <div className="mb-8">
           <Opportunities profile={profile} />
         </div>
 
-        {/* 8. Activity Section */}
+        {/* 9. Activity Section */}
         <div className="mt-8">
           <ActivityFeed 
             connections={connections} 
