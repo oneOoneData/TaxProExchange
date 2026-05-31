@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import AppNavigation from '@/components/AppNavigation';
+import Footer from '@/components/Footer';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
@@ -101,6 +103,7 @@ export default function ListPracticePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      <AppNavigation />
       <div className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900 mb-2">List Your Practice for Sale</h1>
@@ -274,6 +277,7 @@ export default function ListPracticePage() {
           </button>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }
