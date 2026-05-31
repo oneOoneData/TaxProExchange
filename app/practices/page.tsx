@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import AppNavigation from '@/components/AppNavigation';
+import Footer from '@/components/Footer';
 
 interface Listing {
   id: string;
@@ -81,15 +83,15 @@ export default function PracticesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      <AppNavigation />
       <div className="mx-auto max-w-6xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-slate-900 mb-3">Practices for Sale</h1>
-          <p className="text-slate-600 mb-6 max-w-2xl">
-            Retiring tax professionals list their practices here — verified, vetted, and ready for the next owner.
-            Browse anonymously, then unlock seller contact info when you&apos;re ready.
+          <p className="text-slate-600 mb-4 max-w-2xl">
+            Retiring tax professionals list their practices here. Browse anonymously, unlock seller contact info when you&apos;re ready.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-wrap gap-3 mb-6">
             {!hasAccess && (
               <button
                 onClick={() => setShowUpgradeModal(true)}
@@ -104,6 +106,18 @@ export default function PracticesPage() {
             >
               List Your Practice Free
             </Link>
+          </div>
+
+          {/* Value prop + blog links */}
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+            <p className="text-sm text-blue-900 font-medium mb-2">
+              $150/month gives you full access to every listing — seller name, firm, email, phone, and city.
+            </p>
+            <p className="text-xs text-blue-700">
+              No per-listing fees. One price, everything. Cancel anytime.{' '}
+              <Link href="/insights/how-to-buy-a-cpa-practice" className="underline hover:no-underline">How to buy a practice →</Link>{' · '}
+              <Link href="/insights/cpa-practice-valuation-2026" className="underline hover:no-underline">Valuation guide →</Link>
+            </p>
           </div>
         </div>
 
@@ -239,6 +253,7 @@ export default function PracticesPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

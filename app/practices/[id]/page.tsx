@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import AppNavigation from '@/components/AppNavigation';
+import Footer from '@/components/Footer';
 
 interface Listing {
   id: string;
@@ -82,6 +84,7 @@ export default function PracticeDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      <AppNavigation />
       <div className="mx-auto max-w-3xl px-4 py-8">
         <Link href="/practices" className="text-sm text-blue-600 hover:text-blue-700 mb-6 inline-block">← Back to all practices</Link>
 
@@ -207,6 +210,7 @@ export default function PracticeDetailPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
