@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../lib/supabase/server';
+import { createServerClient } from '@/lib/supabase/server';
+import { auth } from '@clerk/nextjs/server';
 
 const PUBLIC_FIELDS = [
   'id', 'state', 'years_established',
@@ -15,18 +16,29 @@ const PUBLIC_FIELDS = [
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { userId } = await auth();
 
+  let profileId: string | null = null;
   let hasBuyerAccess = false;
-  if (user) {
-    const { data: access } = await supabase
-      .from('practice_buyer_access')
-      .select('access_end, status')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .gt('access_end', new Date().toISOString())
+
+  if (userId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('clerk_id', userId)
       .single();
-    hasBuyerAccess = !!access;
+    profileId = profile?.id || null;
+
+    if (profile) {
+      const { data: access } = await supabase
+        .from('practice_buyer_access')
+        .select('access_end')
+        .eq('user_id', profile.id)
+        .eq('status', 'active')
+        .gt('access_end', new Date().toISOString())
+        .single();
+      hasBuyerAccess = !!access;
+    }
   }
 
   const fields = hasBuyerAccess ? '*' : PUBLIC_FIELDS.join(', ');
@@ -40,10 +52,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  if (hasBuyerAccess && user) {
+  // Log view
+  if (hasBuyerAccess && profileId) {
     await supabase.from('practice_listing_views').insert({
       listing_id: id,
-      viewer_user_id: user.id
+      viewer_user_id: profileId
     });
   }
 

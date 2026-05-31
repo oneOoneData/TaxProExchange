@@ -1,25 +1,27 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../lib/supabase/server';
+import { auth } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST() {
-  const supabase = createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  if (!process.env.STRIPE_PRACTICE_BUYER_PRICE_ID) {
+    return NextResponse.json({ error: 'Stripe price not configured' }, { status: 500 });
+  }
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [{
-      price: process.env.STRIPE_PRACTICE_BUYER_PRICE_ID!,
+      price: process.env.STRIPE_PRACTICE_BUYER_PRICE_ID,
       quantity: 1,
     }],
     success_url: `${process.env.NEXT_PUBLIC_URL}/practices?unlocked=true`,
     cancel_url: `${process.env.NEXT_PUBLIC_URL}/practices`,
-    customer_email: user.email,
-    metadata: { user_id: user.id },
+    metadata: { clerk_user_id: userId },
   });
 
   return NextResponse.json({ url: session.url });
