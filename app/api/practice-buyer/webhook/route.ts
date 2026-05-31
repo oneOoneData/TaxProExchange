@@ -14,8 +14,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = createClient();
+  const { createServerClient } = await import('@/lib/supabase/server');
+  const supabase = createServerClient();
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;

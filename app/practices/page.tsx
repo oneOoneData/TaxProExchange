@@ -87,7 +87,7 @@ export default function PracticesPage() {
           <h1 className="text-3xl font-semibold text-slate-900 mb-3">Practices for Sale</h1>
           <p className="text-slate-600 mb-6 max-w-2xl">
             Retiring tax professionals list their practices here — verified, vetted, and ready for the next owner.
-            Browse anonymously, then unlock seller contact info when you're ready.
+            Browse anonymously, then unlock seller contact info when you&apos;re ready.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             {!hasAccess && (

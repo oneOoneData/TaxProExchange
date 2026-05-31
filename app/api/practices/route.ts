@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '../../lib/supabase/server';
 
 const PUBLIC_FIELDS = [
   'id', 'state', 'years_established',
@@ -13,7 +13,7 @@ const PUBLIC_FIELDS = [
 ];
 
 export async function GET() {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data, error } = await supabase
     .from('practice_listings')
     .select(PUBLIC_FIELDS.join(', '))
@@ -25,7 +25,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

@@ -92,7 +92,7 @@ export default function ListPracticePage() {
             </svg>
           </div>
           <h2 className="text-xl font-semibold text-slate-900 mb-2">Your listing is under review</h2>
-          <p className="text-slate-600 mb-6">We'll email you when it's live — usually within 24 hours.</p>
+          <p className="text-slate-600 mb-6">We&apos;ll email you when it&apos;s live — usually within 24 hours.</p>
           <Link href="/practices" className="text-blue-600 hover:text-blue-700 font-medium">Back to practices →</Link>
         </div>
       </div>

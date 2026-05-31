@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '../../lib/supabase/server';
 
 const PUBLIC_FIELDS = [
   'id', 'state', 'years_established',
@@ -14,7 +14,7 @@ const PUBLIC_FIELDS = [
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   let hasBuyerAccess = false;
