@@ -59,7 +59,6 @@ export default function PracticesPage() {
     }
   };
 
-  const [upgradeError, setUpgradeError] = useState<string | null>(null);
 
   const handleUpgrade = async () => {
     setCheckingOut(true);
