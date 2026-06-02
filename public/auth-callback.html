@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html><head><title>Auth Callback</title></head><body>
+<h2>Token received</h2>
+<div id="token"></div>
+<p>Copy the text above and send it to Darkness.</p>
+<script>
+const hash = window.location.hash.substring(1);
+const params = new URLSearchParams(hash);
+const token = params.get('access_token');
+if(token) {
+  document.getElementById('token').textContent = token;
+  document.getElementById('token').style.cssText = 'word-break:break-all;background:#f4f4f4;padding:10px;border:1px solid #ccc;font-family:monospace;font-size:12px;';
+} else {
+  document.getElementById('token').textContent = 'No token found in URL';
+}
+</script></body></html>
