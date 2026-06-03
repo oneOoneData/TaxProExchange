@@ -33,32 +33,32 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
 
   const features = [
     {
-      title: 'Verified Professionals',
-      desc: 'CPA, EA, and CTEC IDs checked before profiles go live. Trust is the default.'
+      title: 'Find Overflow Help',
+      desc: 'When your firm is over capacity, find verified CPAs and EAs who can take on returns, reviews, and niche work — without a full-time hire.'
     },
     {
-      title: 'Smart Discovery',
-      desc: 'Find pros by credential, state, specialization, and availability.'
+      title: 'Filter by What Matters',
+      desc: 'Search by credential (CPA, EA, CTEC), state, specialization (SALT, crypto, trusts, IRS rep), and availability. No scrolling through irrelevant results.'
     },
     {
-      title: 'Handoff-Ready',
-      desc: 'Connect for overflow work, review & sign-off, or IRS representation — payments handled offline.'
+      title: 'No Per-Post Fees',
+      desc: '$30/month for the whole firm. Post unlimited overflow needs, build your bench, invite team members. No $500 job post nonsense.'
     },
     {
-      title: 'Mentorship Opportunities',
-      desc: 'Connect with experienced professionals for guidance or offer mentorship to those starting out.'
+      title: 'Credentials Verified',
+      desc: 'Every CPA license, EA enrollment, and CTEC registration is manually checked against state boards before profiles go live.'
     },
     {
-      title: 'Curated Events',
-      desc: 'Join webinars, workshops, and networking events designed for tax professionals.'
+      title: 'You Handle the Engagement',
+      desc: 'We handle discovery and connection. You handle scope, pricing, engagement letters, and compliance — the way you already do with any client.'
     },
   ];
 
   const steps = [
-    { n: '1', title: 'Join & Sign In', desc: 'Sign in with Google to get started.' },
-    { n: '2', title: 'Create Profile', desc: 'Set up your professional profile with credentials and specializations.' },
-    { n: '3', title: 'Connect & Collaborate', desc: 'Search, filter, and message other professionals. Handle scope and payment off-platform.' },
-    { n: '4', title: 'Grow & Learn', desc: 'Access mentorship and attend events to expand your expertise and network.' },
+    { n: '1', title: 'Find Who You Need', desc: 'Search by credential, state, specialization, and availability. See full profiles with experience, software, and work preferences.' },
+    { n: '2', title: 'Review & Select', desc: 'Check their profile, verify their credentials, and decide if they fit your firm\'s needs and compliance requirements.' },
+    { n: '3', title: 'Connect Directly', desc: 'Message them through the platform. Agree on scope, fees, and timeline. Handle engagement letters and payment off-platform.' },
+    { n: '4', title: 'Build Your Bench', desc: 'Add trusted pros to your firm\'s workspace for future overflow, reviews, and recurring niche work.' },
   ];
 
   return (
