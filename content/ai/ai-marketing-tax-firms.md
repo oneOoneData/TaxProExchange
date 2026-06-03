@@ -9,7 +9,7 @@ authorTPE: "https://www.taxproexchange.com/p/koen-van-duyse-8123510e"
 authorBio: "Koen is a tax professional and partner at a CPA firm in Southern California. With expertise in AI applications for tax practice and firm operations, he founded TaxProExchange to help CPAs and EAs scale their practices."
 authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2026-06-03"
-category: "AI"
+category: "Marketing & Growth"
 pillar: "AI & Automation"
 slug: "/insights/ai-marketing-tax-firms"
 keywords:

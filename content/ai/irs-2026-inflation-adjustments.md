@@ -9,7 +9,7 @@ authorTPE: "https://www.taxproexchange.com/p/koen-van-duyse-8123510e"
 authorBio: "Koen is a tax professional and partner at a CPA firm in Southern California. With expertise in AI applications for tax practice and firm operations, he founded TaxProExchange to help CPAs and EAs scale their practices. Author of articles on tax technology trends and CPA firm strategy."
 authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2026-05-28"
-category: "IRS Updates"
+category: "IRS & Compliance"
 pillar: "Tax Planning"
 slug: "/insights/irs-2026-inflation-adjustments"
 keywords:
