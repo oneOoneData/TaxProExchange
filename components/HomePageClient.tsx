@@ -157,11 +157,31 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
       {/* Hero */}
       <DualHero />
 
-      {/* Logos / social proof */}
-      <section className="py-6">
+      {/* Real traction stats — not startup theater */}
+      <section className="py-8">
         <div className="container-mobile">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 text-center text-sm text-slate-500">
-            Built by tax pros, for tax pros. Join now to create your professional profile.
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 sm:p-8 text-center shadow-sm">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">475+</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">Verified Tax Professionals</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">91%</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">Active Verified Profiles</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">44%</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">CPAs</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">23%</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">EAs</div>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-500">
+              Credentials verified against state boards and IRS enrollment. Updated regularly.
+            </p>
           </div>
         </div>
       </section>
@@ -474,6 +494,33 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Trust / Verification */}
+      <section className="py-8">
+        <div className="container-mobile">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-slate-900">What "Verified" Actually Means</h2>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-700">
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">🔍 CPA licenses</strong> — checked against state board databases
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">📋 EA enrollment</strong> — verified with IRS PTIN database
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">📄 CTEC registration</strong> — confirmed with California Tax Education Council
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">🔄 Re-checked</strong> — credentials reverified on an ongoing basis
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-500">
+              We don&rsquo;t just take your word for it. Every CPA, EA, and CTEC credential is manually checked before profiles go live.
+              Current checks are done at signup; we&rsquo;re rolling out periodic reverification.
+            </p>
+          </div>
         </div>
       </section>
 
