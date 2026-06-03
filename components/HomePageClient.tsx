@@ -505,7 +505,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
       <section className="py-8">
         <div className="container-mobile">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold text-slate-900">What "Verified" Actually Means</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">What &ldquo;Verified&rdquo; Actually Means</h2>
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-700">
               <div className="bg-slate-50 rounded-xl p-4">
                 <strong className="text-slate-900">🔍 CPA licenses</strong> — checked against state board databases
@@ -601,12 +601,12 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             <h2 className="text-2xl font-semibold text-slate-900">Where This Came From</h2>
             <div className="mt-4 text-sm text-slate-700 space-y-3 leading-relaxed">
               <p>
-                TaxProExchange started on Reddit. A frustrated tax pro posted about how every platform that promised "overflow help"
+                TaxProExchange started on Reddit. A frustrated tax pro posted about how every platform that promised &ldquo;overflow help&rdquo;
                 was either useless or wanted $500 per job post. The thread filled with other CPAs and EAs saying the same thing.
               </p>
               <p>
                 So we built the thing we wished existed: a simple directory of verified tax professionals where firms could find
-                overflow help, review partners, and niche specialists — without recruiters, middlemen, or per-post fees.
+                overflow help, review partners, and niche specialists &mdash; without recruiters, middlemen, or per-post fees.
               </p>
               <p>
                 It&rsquo;s still early. There are rough edges. But the core idea — verified CPAs and EAs, searchable by credential,

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import SearchPageClient from './SearchPageClient';
 import JsonLd from '@/components/seo/JsonLd';
 import { siteUrl, generateFaqJsonLd } from '@/lib/seo';
