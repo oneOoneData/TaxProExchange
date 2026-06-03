@@ -6,6 +6,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { siteUrl, generateArticleCollectionJsonLd, generateFaqJsonLd } from "@/lib/seo";
 import { getAllPosts } from "@/lib/blog";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import InsightsFilter from "@/components/InsightsFilter";
 
 export const metadata: Metadata = {
   title: "Insights: AI, Tax Trends & Tools for CPAs | TaxProExchange",
@@ -76,132 +77,63 @@ export default function InsightsPage() {
 
           <section className="mb-16">
             <h2 className="text-2xl font-semibold mb-6 text-slate-800">Recent Articles</h2>
-            <div className="space-y-6">
-              {/* AI Tools Wall - Featured Card (Pinned/Evergreen) - First Article */}
-              <div className="relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 hover:border-slate-300 hover:shadow-xl transition-all">
-                {/* Background pattern */}
-                <div className="absolute inset-0 opacity-5">
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(99, 102, 241, 0.1) 35px, rgba(99, 102, 241, 0.1) 70px)',
-                  }} />
+
+            {/* Featured Card - AI Tools Wall (always shows) */}
+            <div className="relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 hover:border-slate-300 hover:shadow-xl transition-all mb-8">
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(99, 102, 241, 0.1) 35px, rgba(99, 102, 241, 0.1) 70px)',
+                }} />
+              </div>
+              <div className="absolute top-4 right-4 z-10">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm">
+                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  </svg>
+                  <span className="text-xs font-semibold text-slate-700">Pinned</span>
                 </div>
-                
-                {/* Pin icon */}
-                <div className="absolute top-4 right-4 z-10">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm">
-                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                    </svg>
-                    <span className="text-xs font-semibold text-slate-700">Pinned</span>
+              </div>
+              <div className="relative p-8 md:p-10">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+                        Community Reviews
+                      </span>
+                    </div>
+                    <Link href="/insights/tools">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-3 text-slate-900 hover:text-blue-700 transition-colors cursor-pointer">
+                        AI Tools for Tax Pros
+                      </h2>
+                    </Link>
+                    <p className="text-lg text-slate-700 mb-2">
+                      Reviewed by the most critical audience on the planet: <span className="font-semibold">Reddit Users!</span>
+                    </p>
+                    <p className="text-slate-600 mb-4">
+                      Discover AI tools trusted by tax professionals.
+                    </p>
+                    <Link href="/insights/tools" className="inline-flex items-center gap-2 text-blue-600 font-medium hover:text-blue-700">
+                      Explore AI Tools →
+                    </Link>
                   </div>
-                </div>
-                
-                <div className="relative p-8 md:p-10">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
-                          Community Reviews
-                        </span>
-                      </div>
-                      <Link href="/insights/tools">
-                        <h2 className="text-2xl md:text-3xl font-bold mb-3 text-slate-900 hover:text-blue-700 transition-colors cursor-pointer">
-                          AI Tools for Tax Pros
-                        </h2>
-                      </Link>
-                      <p className="text-lg text-slate-700 mb-2">
-                        Reviewed by the most critical audience on the planet: <span className="font-semibold">Reddit Users!</span>
-                      </p>
-                      <p className="text-slate-600 mb-4">
-                        Discover AI tools trusted by tax professionals. Vote for your favorites, read real Reddit reviews, and explore resources from the tools themselves.
-                      </p>
-                      <div className="text-sm text-slate-500 mb-4 space-y-2">
-                        <p>
-                          <Link href="/insights/tools/methodology" className="text-blue-600 hover:text-blue-700 underline">
-                            Learn about our methodology
-                          </Link>
-                          {' '}— how we collect Reddit reviews, analyze sentiment, and ensure transparency in our AI tool ratings.
-                        </p>
-                        <p>
-                          Have feedback or suggestions?{' '}
-                          <Link href="/feedback" className="text-blue-600 hover:text-blue-700 underline">
-                            Let us know
-                          </Link>
-                          {' '}what we can improve.
-                        </p>
-                      </div>
-                      <Link href="/insights/tools" className="inline-flex items-center gap-2 text-blue-600 font-medium hover:text-blue-700">
-                        Explore AI Tools
-                        <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </Link>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <Link href="/insights/tools">
-                        <Image
-                          src="/images/tax_tool_reviews.png"
-                          alt="AI Tools for Tax Pros - Live Reviews"
-                          width={288}
-                          height={288}
-                          className="w-48 md:w-72 h-auto cursor-pointer"
-                          sizes="(max-width: 768px) 192px, 288px"
-                        />
-                      </Link>
-                    </div>
+                  <div className="flex-shrink-0">
+                    <Link href="/insights/tools">
+                      <Image
+                        src="/images/tax_tool_reviews.png"
+                        alt="AI Tools for Tax Pros"
+                        width={288}
+                        height={288}
+                        className="w-48 md:w-72 h-auto cursor-pointer"
+                        sizes="(max-width: 768px) 192px, 288px"
+                      />
+                    </Link>
                   </div>
                 </div>
               </div>
-
-              {/* Regular Articles */}
-              {posts.length > 0 && posts
-                .filter((post) => post?.data?.title && post?.slug)
-                .map((post) => (
-                  <article
-                    key={post.slug}
-                    className="border border-slate-200 rounded-lg overflow-hidden hover:border-slate-300 hover:shadow-md transition-all bg-white"
-                  >
-                    <Link href={`/insights/${post.slug}`}>
-                      {(post.data.previewImage || post.data.image) && (
-                        <div className="h-72 overflow-hidden bg-slate-100">
-                          <Image
-                            src={post.data.previewImage || post.data.image || '/images/placeholder.png'}
-                            alt={post.data.title || 'Article image'}
-                            width={800}
-                            height={450}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold mb-2 text-slate-900 hover:text-slate-700 line-clamp-2">
-                          {post.data.title || 'Untitled Article'}
-                        </h3>
-                        <p className="text-slate-600 mb-3 text-sm line-clamp-2">
-                          {post.data.description || ''}
-                        </p>
-                        <div className="flex items-center gap-3 text-xs text-slate-500">
-                          <time dateTime={post.data.date}>
-                            {post.data.date ? new Date(post.data.date).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }) : ''}
-                          </time>
-                          {post.data.author && (
-                            <>
-                              <span>•</span>
-                              <span>{post.data.author}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </article>
-                ))}
             </div>
+
+            {/* Filter + Article List */}
+            <InsightsFilter posts={posts.filter(p => p?.data?.title && p?.slug)} />
           </section>
 
           {/* Newsletter Signup */}
