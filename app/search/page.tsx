@@ -76,8 +76,8 @@ export default function SearchPage({ searchParams }: Props) {
       <JsonLd data={faqSchema} />
       <AnalyticsPageView eventName="view_search_prefilter" />
 
-      {/* Static SEO content — always visible to crawlers */}
-      <div className="sr-only md:not-sr-only max-w-6xl mx-auto px-4 pt-6 pb-2">
+      {/* Static SEO content — visible to crawlers and screen readers, not visible to visual users (appears inside search page nav below) */}
+      <div className="sr-only">
         <div className="text-sm text-slate-600 space-y-3">
           <p>
             <strong>Search 475+ verified tax professionals</strong> — CPAs, EAs, and CTEC-registered preparers.
