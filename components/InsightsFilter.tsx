@@ -17,11 +17,13 @@ interface Post {
   };
 }
 
-const CATEGORIES = ['All', 'AI', 'Practice Management', 'IRS Updates'];
+const CATEGORIES = ['All', 'AI & Automation', 'Marketing & Growth', 'Succession & Practice Sales', 'Practice Management', 'IRS & Compliance'];
 const CATEGORY_COLORS: Record<string, string> = {
-  'AI': 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+  'AI & Automation': 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+  'Marketing & Growth': 'bg-violet-100 text-violet-700 hover:bg-violet-200',
+  'Succession & Practice Sales': 'bg-amber-100 text-amber-700 hover:bg-amber-200',
   'Practice Management': 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200',
-  'IRS Updates': 'bg-amber-100 text-amber-700 hover:bg-amber-200',
+  'IRS & Compliance': 'bg-rose-100 text-rose-700 hover:bg-rose-200',
 };
 
 export default function InsightsFilter({ posts }: { posts: Post[] }) {

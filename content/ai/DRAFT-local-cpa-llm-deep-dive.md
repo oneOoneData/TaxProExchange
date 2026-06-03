@@ -8,7 +8,7 @@ authorTPE: "https://www.taxproexchange.com/p/koen-van-duyse-8123510e"
 authorBio: "Koen has been working in AI for the last two years, with an emphasis on conversational AI. In his spare time he is partner of a small tax firm in Southern California and runs the Tax Pro Exchange."
 authorImage: "/images/authors/koen-van-duyse.jpg"
 date: 2025-10-26
-category: "AI"
+category: "AI & Automation"
 pillar: "Local AI for Tax Firms"
 keywords: ["CPA LLM assistant","local AI for tax firms","OCR 1040","RAG for PDFs","AI tax automation","private LLM accounting"]
 image: "/images/local-cpa-llm-deep-dive.jpg"

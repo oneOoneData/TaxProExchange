@@ -8,7 +8,7 @@ authorTPE: "https://www.taxproexchange.com/p/koen-van-duyse-8123510e"
 authorBio: "Koen has been working in AI for the last two years, with an emphasis on conversational AI. In his spare time he is partner of a small tax firm in Southern California and runs the Tax Pro Exchange."
 authorImage: "/images/authors/koen-van-duyse.jpg"
 date: "2025-11-14"
-category: "AI"
+category: "AI & Automation"
 pillar: "Future of Tax Work"
 slug: "/insights/state-of-ai-in-tax-firms-2025"
 keywords:

@@ -4,7 +4,7 @@ description: "With 75% of CPA firms lacking a succession plan and boomer CPAs re
 author: "Koen Van Duyse"
 authorBio: "Koen has been working in AI for the last two years, with an emphasis on conversational AI. In his spare time he is partner of a small tax firm in Southern California and runs the Tax Pro Exchange."
 date: "2026-06-02"
-category: "Practice Management"
+category: "Succession & Practice Sales"
 pillar: "Practice Growth"
 slug: "/insights/cpa-succession-planning-2026"
 previewImage: "/images/the_hybrid_desk.png"

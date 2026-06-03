@@ -1,6 +1,7 @@
 ---
 title: "How to Sell Your Tax Practice: A Seller's Guide"
 description: "Ready to retire and sell your tax practice? Here's how to maximize your sale price, prepare for due diligence, time the market, and find the right buyer. Practical advice for CPAs and EAs planning their exit."
+category: "Succession & Practice Sales"
 date: "2026-05-31"
 previewImage: "/images/how-to-sell-your-tax-practice.jpg"
 author: "TaxProExchange"

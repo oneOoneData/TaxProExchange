@@ -1,6 +1,7 @@
 ---
 title: "Could an AI Agent Run Your Tax Firm? We Asked One to Try."
 description: "A thought experiment on what's technically possible today with agentic AI in tax — and why most firms should wait."
+category: "AI & Automation"
 date: "2026-05-31"
 previewImage: "/images/ai-agent-tax-firm.jpg"
 author: "TaxProExchange"
