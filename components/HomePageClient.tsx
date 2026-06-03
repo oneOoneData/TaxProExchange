@@ -368,8 +368,12 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
           {/* Preview of Team Dashboard */}
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.3 }} className="mt-16 max-w-5xl mx-auto">
             <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-3">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Demo Preview
+              </div>
               <h3 className="text-2xl font-semibold text-slate-900">See How Firms Build Their Bench</h3>
-              <p className="mt-2 text-slate-600">Organize and manage your trusted professionals in one place</p>
+              <p className="mt-2 text-slate-600">Sample dashboard — add your actual team members and categories</p>
             </div>
             <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-8 shadow-lg">
               {/* Mock Team Dashboard Screenshot */}
