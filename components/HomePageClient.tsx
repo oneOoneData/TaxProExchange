@@ -238,8 +238,8 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             ))}
           </div>
           <div className="mt-6 text-center">
-            <a href="/search" className="text-sm text-slate-500 hover:text-slate-700 underline">
-              See all search options →
+            <a href="/search" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              Browse all specialties and states →
             </a>
           </div>
         </div>
@@ -299,7 +299,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 </li>
               </ul>
               <a href="/join" className="block text-center rounded-2xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:shadow-md transition-all">
-                Join Free
+                Get Listed Free →
               </a>
             </motion.div>
 
@@ -538,8 +538,9 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 </div>
               ))}
             </div>
-            <div className="mt-6">
-              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">Join Now</a>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">Join Free →</a>
+              <a href="/firm" className="inline-block rounded-2xl border border-blue-600 text-blue-700 px-4 py-3 sm:px-5 text-sm font-medium hover:bg-blue-50 transition-colors">For Firms →</a>
             </div>
           </div>
         </div>
@@ -564,8 +565,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             viewport={{ once: true }}
             className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto"
           >
-            Join TaxProExchange today and start building your professional network.
-            Create your profile, get verified, and connect with other tax professionals.
+            475+ tax professionals are already here. No recruiter fees, no job board roulette — just verified CPAs, EAs, and specialists for the work you need.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -578,15 +578,42 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
               href="/join"
               className="inline-flex items-center px-6 py-3 sm:px-8 border border-transparent text-base font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all"
             >
-              Join Now
+              Join Free →
             </a>
             <a
-              href="#features"
+              href="/search"
               className="inline-flex items-center px-6 py-3 sm:px-8 border border-transparent text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
             >
-              Learn More
+              Search Professionals
             </a>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Reddit Origin Story */}
+      <section className="py-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-slate-900">Where This Came From</h2>
+            <div className="mt-4 text-sm text-slate-700 space-y-3 leading-relaxed">
+              <p>
+                TaxProExchange started on Reddit. A frustrated tax pro posted about how every platform that promised "overflow help"
+                was either useless or wanted $500 per job post. The thread filled with other CPAs and EAs saying the same thing.
+              </p>
+              <p>
+                So we built the thing we wished existed: a simple directory of verified tax professionals where firms could find
+                overflow help, review partners, and niche specialists — without recruiters, middlemen, or per-post fees.
+              </p>
+              <p>
+                It&rsquo;s still early. There are rough edges. But the core idea — verified CPAs and EAs, searchable by credential,
+                state, and specialty, for $30/month — is what every firm we&rsquo;ve talked to actually needed.
+              </p>
+              <p className="text-xs text-slate-500 pt-2">
+                The app is new. We&rsquo;re transparent about that. If something&rsquo;s missing or broken,{' '}
+                <a href="/feedback" className="text-blue-600 hover:text-blue-700 underline">tell us</a>.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
