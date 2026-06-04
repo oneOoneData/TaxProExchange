@@ -112,6 +112,9 @@ export default function DashboardLayoutClient({
                   <Link href="/mentorship" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
                     Mentorship
                   </Link>
+                  <Link href="/practices" className="block px-4 py-2 text-slate-700 hover:bg-slate-50 transition-colors">
+                    Practices for Sale
+                  </Link>
                 </div>
               )}
             </div>
