@@ -10,6 +10,7 @@ tags:
   - workpaper automation
   - tax prep
   - software review
+category: AI & Automation
 slug: solomon-ai-review
 previewImage: /images/solomon-ai-review.jpg
 ---

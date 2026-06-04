@@ -10,6 +10,7 @@ tags:
   - client communication
   - tax prep
   - software review
+category: AI & Automation
 slug: truss-ai-review
 previewImage: /images/truss-ai-review.jpg
 ---

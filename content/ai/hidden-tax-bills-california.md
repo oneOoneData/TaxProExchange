@@ -10,6 +10,7 @@ tags:
   - wealth tax
   - cost of living
   - tax planning
+category: IRS & Compliance
 slug: hidden-tax-bills-california
 previewImage: /images/hidden-tax-bills-california.jpg
 ---
