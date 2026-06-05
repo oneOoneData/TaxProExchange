@@ -40,46 +40,8 @@ Two non-negotiables travel with it: de-identify before you paste, and verify bef
 
 This is the foundation of your second brain. Fill it out once, save it, and reference it in every session.
 
-<style>
-.prompt-box {
-  background:#0f172a;
-  border-radius:8px;
-  padding:1.5rem;
-  margin:1.5rem 0;
-}
-.prompt-box,
-.prompt-box p,
-.prompt-box strong,
-.prompt-box li,
-.prompt-box ul,
-.prompt-box h1,
-.prompt-box h2,
-.prompt-box h3,
-.prompt-box h4 {
-  color:#f1f5f9 !important;
-}
-.prompt-box pre {
-  background:transparent !important;
-  padding:0 !important;
-  margin:0 !important;
-  font-size:0.875rem;
-  line-height:1.7;
-  white-space:pre-wrap;
-  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  color:#f1f5f9 !important;
-}
-.prompt-box ul {
-  margin-top:0.25rem;
-  margin-bottom:0.25rem;
-}
-.prompt-box li {
-  margin-top:0;
-  margin-bottom:0;
-}
-</style>
-
-<div class="prompt-box">
-<pre>
+<div class="not-prose" style="background:#0f172a;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#f1f5f9;background:transparent;padding:0;margin:0">
 **My Firm Profile**
 
 **Firm name:** [YOUR FIRM]
@@ -111,8 +73,8 @@ This is the foundation of your second brain. Fill it out once, save it, and refe
 
 Use this for every recurring task you want your second brain to handle.
 
-<div class="prompt-box">
-<pre>
+<div class="not-prose" style="background:#0f172a;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#f1f5f9;background:transparent;padding:0;margin:0">
 **Skill: [SKILL NAME, e.g., "Intake Summary"]**
 
 **When to use this skill:** [When a new client engagement letter is signed]

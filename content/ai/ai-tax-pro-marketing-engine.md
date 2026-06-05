@@ -38,8 +38,8 @@ One caution worth stating plainly: don't publish AI-written tax "advice" you hav
 
 Turn one piece of content into five formats.
 
-<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
-<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
+<div class="not-prose" style="background:#0f172a;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#f1f5f9;background:transparent;padding:0;margin:0">
 I have a piece of content about [TOPIC]. Here is my rough draft or notes:
 
 [PASTE YOUR NOTES OR DRAFT]
@@ -63,8 +63,8 @@ Keep the same core message. Adjust the tone per channel. No hype.
 
 Plan a month of social posts in 10 minutes.
 
-<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
-<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
+<div class="not-prose" style="background:#0f172a;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#f1f5f9;background:transparent;padding:0;margin:0">
 Create a monthly content calendar for my tax practice.
 
 Month: [MONTH]
