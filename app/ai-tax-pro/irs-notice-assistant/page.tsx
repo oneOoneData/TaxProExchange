@@ -3,6 +3,7 @@ import Link from 'next/link';
 import AppNavigation from '@/components/AppNavigation';
 import Footer from '@/components/Footer';
 import { CopyButton } from '@/components/CopyButton';
+import { EmailSignupForm } from '@/components/EmailSignupForm';
 import { siteUrl } from '@/lib/seo';
 
 export const metadata: Metadata = {
@@ -14,6 +15,13 @@ export const metadata: Metadata = {
     description: 'One real AI workflow you can run today. System prompt + skill template + example output.',
     url: `${siteUrl}/ai-tax-pro/irs-notice-assistant`,
     type: 'website',
+    images: [{ url: '/images/ai-tax-pro-og.jpg', width: 1200, height: 630, alt: 'IRS Notice Response Assistant — Free AI Prompt Template' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'IRS Notice Response Assistant — Free AI Prompt Template',
+    description: 'One real AI workflow you can run today. System prompt + skill template + example output.',
+    images: ['/images/ai-tax-pro-og.jpg'],
   },
 };
 
@@ -49,12 +57,16 @@ export default function IRSNoticeAssistant() {
             </p>
           </div>
 
+          <div className="mb-10">
+            <EmailSignupForm source="irs-notice-assistant" />
+          </div>
+
           <h2>System Prompt</h2>
           <p>Set this once. It tells the AI who you are and how you work.</p>
           <div className="bg-slate-900 text-slate-100 rounded-lg p-6 my-6">
             <pre className="text-sm leading-relaxed whitespace-pre-wrap font-mono" id="system-prompt">{`You are an AI assistant for a licensed tax preparation firm. Your role is to draft professional, accurate responses to IRS notices and correspondence.
 
-## Your firms standards
+## Your firm's standards
 - Responses are professional, concise, and factual.
 - Never admit liability or fault without explicit instructions from the preparer.
 - Always include: notice number, tax year, taxpayer name, and response date.

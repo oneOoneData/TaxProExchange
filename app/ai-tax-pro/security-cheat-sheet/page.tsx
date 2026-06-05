@@ -3,6 +3,7 @@ import Link from 'next/link';
 import AppNavigation from '@/components/AppNavigation';
 import Footer from '@/components/Footer';
 import { siteUrl } from '@/lib/seo';
+import { EmailSignupForm } from '@/components/EmailSignupForm';
 
 export const metadata: Metadata = {
   title: 'AI Data-Security Cheat Sheet — Free Checklist | TaxProExchange',
@@ -13,6 +14,13 @@ export const metadata: Metadata = {
     description: 'Vet any AI tool against §7216 and WISP requirements in 10 questions.',
     url: `${siteUrl}/ai-tax-pro/security-cheat-sheet`,
     type: 'website',
+    images: [{ url: '/images/ai-tax-pro-og.jpg', width: 1200, height: 630, alt: 'AI Data-Security Cheat Sheet' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI Data-Security Cheat Sheet — Free Checklist for Tax Pros',
+    description: 'Vet any AI tool against §7216 and WISP requirements in 10 questions.',
+    images: ['/images/ai-tax-pro-og.jpg'],
   },
 };
 
@@ -50,6 +58,10 @@ export default function SecurityCheatSheet() {
               &ldquo;I pasted it into ChatGPT&rdquo; is not a defense. These ten questions
               close that gap.
             </p>
+          </div>
+
+          <div className="mb-10">
+            <EmailSignupForm source="security-cheat-sheet" />
           </div>
 
           <div className="space-y-8">
