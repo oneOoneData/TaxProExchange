@@ -124,6 +124,7 @@ export default function AppNavigation() {
               )}
             </div>
             
+            <Link href="/ai-tax-pro" className={isActive('/ai-tax-pro')}>AI Tax Pro</Link>
             <Link href="/insights" className={isActive('/insights')}>Insights</Link>
           </nav>
           

@@ -164,6 +164,7 @@ export default function JobsPage() {
             </div>
             
             <Link href="/insights" className="hover:text-slate-900">Insights</Link>
+            <Link href="/ai-tax-pro" className="hover:text-slate-900">AI Tax Pro</Link>
           </nav>
           <div className="flex items-center gap-4">
             {isSignedIn ? (
