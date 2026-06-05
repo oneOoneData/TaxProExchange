@@ -119,6 +119,7 @@ export default function DashboardLayoutClient({
               )}
             </div>
             
+            <Link href="/ai-tax-pro" className="hover:text-slate-900">AI Tax Pro</Link>
             <Link href="/insights" className="hover:text-slate-900">Insights</Link>
           </nav>
           

@@ -25,6 +25,7 @@ export default function AppMobileNav({ isOpen, onClose }: AppMobileNavProps) {
   ];
 
   const bottomNavItems = [
+    { href: '/ai-tax-pro', label: 'AI Tax Pro' },
     { href: '/insights', label: 'Insights' },
   ];
 

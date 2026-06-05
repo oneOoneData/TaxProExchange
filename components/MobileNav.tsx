@@ -28,6 +28,7 @@ export default function MobileNav({ isOpen, onClose }: MobileNavProps) {
   ];
 
   const bottomNavItems = [
+    { href: '/ai-tax-pro', label: 'AI Tax Pro' },
     { href: '/insights', label: 'Insights' },
   ];
 
