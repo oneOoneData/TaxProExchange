@@ -44,8 +44,8 @@ Automate one workflow end to end — the document-chase email is a perfect first
 
 Use this to identify your best automation opportunities.
 
-<div class="bg-slate-900 text-slate-100 rounded-lg p-6 my-6">
-<pre class="text-sm leading-relaxed whitespace-pre-wrap font-mono">
+<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
 I want to identify which parts of my tax practice to automate first.
 
 ## My week
@@ -81,8 +81,8 @@ Please recommend:
 
 Once you've picked an automation target, use this to scope it.
 
-<div class="bg-slate-900 text-slate-100 rounded-lg p-6 my-6">
-<pre class="text-sm leading-relaxed whitespace-pre-wrap font-mono">
+<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
 ## Automation Specification
 
 **Workflow name:** [NAME]

@@ -40,8 +40,8 @@ Two non-negotiables travel with it: de-identify before you paste, and verify bef
 
 This is the foundation of your second brain. Fill it out once, save it, and reference it in every session.
 
-<div class="bg-slate-900 text-slate-100 rounded-lg p-6 my-6">
-<pre class="text-sm leading-relaxed whitespace-pre-wrap font-mono">
+<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
 ## My Firm Profile
 
 **Firm name:** [YOUR FIRM]
@@ -72,8 +72,8 @@ This is the foundation of your second brain. Fill it out once, save it, and refe
 
 Use this for every recurring task you want your second brain to handle.
 
-<div class="bg-slate-900 text-slate-100 rounded-lg p-6 my-6">
-<pre class="text-sm leading-relaxed whitespace-pre-wrap font-mono">
+<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
 ## Skill: [SKILL NAME, e.g., "Intake Summary"]
 
 **When to use this skill:** [When a new client engagement letter is signed]
