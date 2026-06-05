@@ -13,6 +13,13 @@ export const metadata: Metadata = {
     description: 'Six systems. Ready-to-use AI prompts. Free lead magnets. Build an AI-augmented tax practice without hiring.',
     url: `${siteUrl}/ai-tax-pro`,
     type: 'website',
+    images: [{ url: '/images/ai-tax-pro-og.jpg', width: 1200, height: 630, alt: 'The AI Tax Pro — Free Series' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The AI Tax Pro — Free Series for Tax Professionals',
+    description: 'Six systems. Ready-to-use AI prompts. Free lead magnets. Build an AI-augmented tax practice without hiring.',
+    images: ['/images/ai-tax-pro-og.jpg'],
   },
 };
 
@@ -115,7 +122,24 @@ export default function AITaxProLanding() {
           </div>
         </section>
 
-        {/* Free Lead Magnets */}
+        {/* Author credibility */}
+        <section className="border-t border-white/10">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            <div className="flex items-start gap-6">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                KB
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">Built by a practicing tax pro</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  These systems aren&apos;t theory. They&apos;re what I use in my own firm every day — built from
+                  real client work, not marketing white papers. Every prompt, template, and workflow
+                  here has been tested against actual returns, notices, and client conversations.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
         <section id="start-free" className="border-t border-white/10">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
             <h2 className="text-3xl font-bold text-white mb-4">Start free. Stay sharp.</h2>

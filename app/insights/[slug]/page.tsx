@@ -36,7 +36,7 @@ export async function generateMetadata({
     : `${siteUrl}/og-image.png`;
 
   return {
-    title: `${post.data.title} | TaxProExchange`,
+    title: post.data.title,
     description: post.data.description,
     alternates: { canonical: url },
     openGraph: {
