@@ -117,6 +117,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             </div>
             
             <a href="/insights" className="hover:text-slate-900">Insights</a>
+            <a href="/ai-tax-pro" className="hover:text-slate-900">AI Tax Pro</a>
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
