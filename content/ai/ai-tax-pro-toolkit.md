@@ -60,8 +60,8 @@ Voice AI receptionists, scheduling, and email automation — see the dedicated a
 
 Before you commit to any tool, run this prompt with your AI to get a customized evaluation.
 
-<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
-<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
+<div class="not-prose" style="background:#0f172a;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#f1f5f9;background:transparent;padding:0;margin:0">
 I am evaluating [TOOL NAME] for my tax practice.
 
 My firm:
