@@ -21,7 +21,7 @@ export function EmailSignupForm({ source }: { source: string }) {
 
       if (res.ok) {
         setStatus('success');
-        setMessage('You\'re in! Check your inbox for the welcome email.');
+        setMessage('You&apos;re in! Check your inbox for the welcome email.');
       } else {
         const data = await res.json();
         setStatus('error');
@@ -37,10 +37,10 @@ export function EmailSignupForm({ source }: { source: string }) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
         <div className="text-3xl mb-2">✅</div>
-        <h3 className="text-lg font-semibold text-green-900 mb-1">You're subscribed!</h3>
+        <h3 className="text-lg font-semibold text-green-900 mb-1">You&apos;re subscribed!</h3>
         <p className="text-green-700 text-sm">{message}</p>
         <p className="text-green-600 text-xs mt-3">
-          Check your inbox for the welcome email. Add support@taxproexchange.com to your contacts so we don't end up in spam.
+          Check your inbox for the welcome email. Add support@taxproexchange.com to your contacts so we don&apos;t end up in spam.
         </p>
       </div>
     );
