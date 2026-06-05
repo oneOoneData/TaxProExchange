@@ -40,9 +40,47 @@ Two non-negotiables travel with it: de-identify before you paste, and verify bef
 
 This is the foundation of your second brain. Fill it out once, save it, and reference it in every session.
 
-<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
-<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
-## My Firm Profile
+<style>
+.prompt-box {
+  background:#0f172a;
+  border-radius:8px;
+  padding:1.5rem;
+  margin:1.5rem 0;
+}
+.prompt-box,
+.prompt-box p,
+.prompt-box strong,
+.prompt-box li,
+.prompt-box ul,
+.prompt-box h1,
+.prompt-box h2,
+.prompt-box h3,
+.prompt-box h4 {
+  color:#f1f5f9 !important;
+}
+.prompt-box pre {
+  background:transparent !important;
+  padding:0 !important;
+  margin:0 !important;
+  font-size:0.875rem;
+  line-height:1.7;
+  white-space:pre-wrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color:#f1f5f9 !important;
+}
+.prompt-box ul {
+  margin-top:0.25rem;
+  margin-bottom:0.25rem;
+}
+.prompt-box li {
+  margin-top:0;
+  margin-bottom:0;
+}
+</style>
+
+<div class="prompt-box">
+<pre>
+**My Firm Profile**
 
 **Firm name:** [YOUR FIRM]
 **My role:** [Solo practitioner / Partner / Staff]
@@ -51,6 +89,7 @@ This is the foundation of your second brain. Fill it out once, save it, and refe
 **Average return complexity:** [Simple 1040 / Sch C / Multi-entity / International]
 
 **My communication style:**
+
 - Warmth level: [Formal / Professional / Warm / Casual]
 - Length: [Brief / Detailed / Client-adaptable]
 - Signature phrase or closing: [e.g., "To your success,"]
@@ -72,26 +111,30 @@ This is the foundation of your second brain. Fill it out once, save it, and refe
 
 Use this for every recurring task you want your second brain to handle.
 
-<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
-<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
-## Skill: [SKILL NAME, e.g., "Intake Summary"]
+<div class="prompt-box">
+<pre>
+**Skill: [SKILL NAME, e.g., "Intake Summary"]**
 
 **When to use this skill:** [When a new client engagement letter is signed]
 
 **Inputs:**
+
 - [INPUT 1, e.g., Client engagement letter]
 - [INPUT 2, e.g., Prior year tax return]
 - [INPUT 3, e.g., Organizer questionnaire responses]
 
 **Steps:**
+
 1. [STEP 1]
 2. [STEP 2]
 3. [STEP 3]
 
 **Output:**
+
 - [OUTPUT, e.g., Two-page summary with: entity type, filing requirements, estimated deadlines, red flags]
 
 **Done looks like:**
+
 - [CHECK 1]
 - [CHECK 2]
 
