@@ -35,8 +35,8 @@ The guardrails matter here too: a receptionist taking intake details is touching
 
 Use this to generate a custom receptionist script for your firm. Paste into your AI tool, fill in the brackets, and the AI will draft a full call flow.
 
-<div class="bg-slate-900 text-slate-100 rounded-lg p-6 my-6">
-<pre class="text-sm leading-relaxed whitespace-pre-wrap font-mono">
+<div style="background:#0f172a;color:#f1f5f9;border-radius:8px;padding:1.5rem;margin:1.5rem 0">
+<pre style="font-size:0.875rem;line-height:1.7;white-space:pre-wrap;font-family:monospace;color:#f1f5f9">
 I am building an AI voice receptionist script for my tax firm.
 
 ## My firm
