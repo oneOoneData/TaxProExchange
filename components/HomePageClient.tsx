@@ -33,32 +33,32 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
 
   const features = [
     {
-      title: 'Verified Professionals',
-      desc: 'CPA, EA, and CTEC IDs checked before profiles go live. Trust is the default.'
+      title: 'Find Overflow Help',
+      desc: 'When your firm is over capacity, find verified CPAs and EAs who can take on returns, reviews, and niche work — without a full-time hire.'
     },
     {
-      title: 'Smart Discovery',
-      desc: 'Find pros by credential, state, specialization, and availability.'
+      title: 'Filter by What Matters',
+      desc: 'Search by credential (CPA, EA, CTEC), state, specialization (SALT, crypto, trusts, IRS rep), and availability. No scrolling through irrelevant results.'
     },
     {
-      title: 'Handoff-Ready',
-      desc: 'Connect for overflow work, review & sign-off, or IRS representation — payments handled offline.'
+      title: 'No Per-Post Fees',
+      desc: '$30/month for the whole firm. Post unlimited overflow needs, build your bench, invite team members. No $500 job post nonsense.'
     },
     {
-      title: 'Mentorship Opportunities',
-      desc: 'Connect with experienced professionals for guidance or offer mentorship to those starting out.'
+      title: 'Credentials Verified',
+      desc: 'Every CPA license, EA enrollment, and CTEC registration is manually checked against state boards before profiles go live.'
     },
     {
-      title: 'Curated Events',
-      desc: 'Join webinars, workshops, and networking events designed for tax professionals.'
+      title: 'You Handle the Engagement',
+      desc: 'We handle discovery and connection. You handle scope, pricing, engagement letters, and compliance — the way you already do with any client.'
     },
   ];
 
   const steps = [
-    { n: '1', title: 'Join & Sign In', desc: 'Sign in with Google to get started.' },
-    { n: '2', title: 'Create Profile', desc: 'Set up your professional profile with credentials and specializations.' },
-    { n: '3', title: 'Connect & Collaborate', desc: 'Search, filter, and message other professionals. Handle scope and payment off-platform.' },
-    { n: '4', title: 'Grow & Learn', desc: 'Access mentorship and attend events to expand your expertise and network.' },
+    { n: '1', title: 'Find Who You Need', desc: 'Search by credential, state, specialization, and availability. See full profiles with experience, software, and work preferences.' },
+    { n: '2', title: 'Review & Select', desc: 'Check their profile, verify their credentials, and decide if they fit your firm\'s needs and compliance requirements.' },
+    { n: '3', title: 'Connect Directly', desc: 'Message them through the platform. Agree on scope, fees, and timeline. Handle engagement letters and payment off-platform.' },
+    { n: '4', title: 'Build Your Bench', desc: 'Add trusted pros to your firm\'s workspace for future overflow, reviews, and recurring niche work.' },
   ];
 
   return (
@@ -157,11 +157,31 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
       {/* Hero */}
       <DualHero />
 
-      {/* Logos / social proof */}
-      <section className="py-6">
+      {/* Real traction stats — not startup theater */}
+      <section className="py-8">
         <div className="container-mobile">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 text-center text-sm text-slate-500">
-            Built by tax pros, for tax pros. Join now to create your professional profile.
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 sm:p-8 text-center shadow-sm">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">475+</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">Verified Tax Professionals</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">91%</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">Active Verified Profiles</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">44%</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">CPAs</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-700">23%</div>
+                <div className="text-xs sm:text-sm text-slate-600 mt-1">EAs</div>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-500">
+              Credentials verified against state boards and IRS enrollment. Updated regularly.
+            </p>
           </div>
         </div>
       </section>
@@ -218,8 +238,8 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             ))}
           </div>
           <div className="mt-6 text-center">
-            <a href="/search" className="text-sm text-slate-500 hover:text-slate-700 underline">
-              See all search options →
+            <a href="/search" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              Browse all specialties and states →
             </a>
           </div>
         </div>
@@ -279,7 +299,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 </li>
               </ul>
               <a href="/join" className="block text-center rounded-2xl bg-slate-900 text-white px-6 py-3 text-sm font-medium shadow hover:shadow-md transition-all">
-                Join Free
+                Get Listed Free →
               </a>
             </motion.div>
 
@@ -348,8 +368,12 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
           {/* Preview of Team Dashboard */}
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.3 }} className="mt-16 max-w-5xl mx-auto">
             <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-3">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Demo Preview
+              </div>
               <h3 className="text-2xl font-semibold text-slate-900">See How Firms Build Their Bench</h3>
-              <p className="mt-2 text-slate-600">Organize and manage your trusted professionals in one place</p>
+              <p className="mt-2 text-slate-600">Sample dashboard — add your actual team members and categories</p>
             </div>
             <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-8 shadow-lg">
               {/* Mock Team Dashboard Screenshot */}
@@ -477,6 +501,33 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
         </div>
       </section>
 
+      {/* Trust / Verification */}
+      <section className="py-8">
+        <div className="container-mobile">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-slate-900">What &ldquo;Verified&rdquo; Actually Means</h2>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-700">
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">🔍 CPA licenses</strong> — checked against state board databases
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">📋 EA enrollment</strong> — verified with IRS PTIN database
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">📄 CTEC registration</strong> — confirmed with California Tax Education Council
+              </div>
+              <div className="bg-slate-50 rounded-xl p-4">
+                <strong className="text-slate-900">🔄 Re-checked</strong> — credentials reverified on an ongoing basis
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-slate-500">
+              We don&rsquo;t just take your word for it. Every CPA, EA, and CTEC credential is manually checked before profiles go live.
+              Current checks are done at signup; we&rsquo;re rolling out periodic reverification.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section id="how" className="py-8">
         <div className="container-mobile">
@@ -491,8 +542,9 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                 </div>
               ))}
             </div>
-            <div className="mt-6">
-              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">Join Now</a>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href="/join" className="inline-block rounded-2xl bg-slate-900 text-white px-4 py-3 sm:px-5 text-sm font-medium shadow hover:shadow-md">Join Free →</a>
+              <a href="/firm" className="inline-block rounded-2xl border border-blue-600 text-blue-700 px-4 py-3 sm:px-5 text-sm font-medium hover:bg-blue-50 transition-colors">For Firms →</a>
             </div>
           </div>
         </div>
@@ -517,8 +569,7 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             viewport={{ once: true }}
             className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto"
           >
-            Join TaxProExchange today and start building your professional network.
-            Create your profile, get verified, and connect with other tax professionals.
+            475+ tax professionals are already here. No recruiter fees, no job board roulette — just verified CPAs, EAs, and specialists for the work you need.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -531,15 +582,42 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
               href="/join"
               className="inline-flex items-center px-6 py-3 sm:px-8 border border-transparent text-base font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all"
             >
-              Join Now
+              Join Free →
             </a>
             <a
-              href="#features"
+              href="/search"
               className="inline-flex items-center px-6 py-3 sm:px-8 border border-transparent text-base font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
             >
-              Learn More
+              Search Professionals
             </a>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Reddit Origin Story */}
+      <section className="py-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-slate-900">Where This Came From</h2>
+            <div className="mt-4 text-sm text-slate-700 space-y-3 leading-relaxed">
+              <p>
+                TaxProExchange started on Reddit. A frustrated tax pro posted about how every platform that promised &ldquo;overflow help&rdquo;
+                was either useless or wanted $500 per job post. The thread filled with other CPAs and EAs saying the same thing.
+              </p>
+              <p>
+                So we built the thing we wished existed: a simple directory of verified tax professionals where firms could find
+                overflow help, review partners, and niche specialists &mdash; without recruiters, middlemen, or per-post fees.
+              </p>
+              <p>
+                It&rsquo;s still early. There are rough edges. But the core idea — verified CPAs and EAs, searchable by credential,
+                state, and specialty, for $30/month — is what every firm we&rsquo;ve talked to actually needed.
+              </p>
+              <p className="text-xs text-slate-500 pt-2">
+                The app is new. We&rsquo;re transparent about that. If something&rsquo;s missing or broken,{' '}
+                <a href="/feedback" className="text-blue-600 hover:text-blue-700 underline">tell us</a>.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

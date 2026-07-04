@@ -177,12 +177,12 @@ export default function PracticeDetailPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <h3 className="text-sm font-semibold text-amber-800 mb-1">Contact info locked</h3>
-              <p className="text-xs text-amber-700 mb-4">Pay $150/month to unlock seller name, firm, email, phone, and location — across all listings.</p>
+              <p className="text-xs text-amber-700 mb-4">Pay $150/year to unlock seller name, firm, email, phone, and location — across all listings.</p>
               <button
                 onClick={() => setShowUpgradeModal(true)}
                 className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Unlock All Contact Info — $150/month
+                Unlock All Contact Info — $150/year
               </button>
             </div>
           )}
@@ -196,11 +196,11 @@ export default function PracticeDetailPage() {
               <ul className="space-y-2 mb-6">
                 <li className="flex items-start gap-2 text-sm">✓ Full contact info for every listed practice</li>
                 <li className="flex items-start gap-2 text-sm">✓ Access to all new listings</li>
-                <li className="flex items-start gap-2 text-sm">✓ Cancel anytime</li>
+                <li className="flex items-start gap-2 text-sm">✓ No auto-renewal</li>
               </ul>
               <div className="flex gap-3">
                 <button onClick={handleUpgrade} disabled={checkingOut} className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-300">
-                  {checkingOut ? 'Redirecting...' : 'Unlock Now — $150/month'}
+                  {checkingOut ? 'Redirecting...' : 'Unlock Now — $150/year'}
                 </button>
                 <button onClick={() => setShowUpgradeModal(false)} className="px-4 py-2.5 border border-slate-300 text-slate-600 text-sm font-medium rounded-lg">
                   Not now

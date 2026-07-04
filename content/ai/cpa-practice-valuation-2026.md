@@ -1,6 +1,7 @@
 ---
 title: "CPA Practice Valuation in 2026: What Your Firm Is Really Worth"
 description: "How much is a tax or accounting practice worth in 2026? Here's the current market, the 1x–1.5x revenue rule, what drives premium pricing, and how to value a practice before you buy or sell."
+category: "Succession & Practice Sales"
 date: "2026-05-31"
 previewImage: "/images/cpa-practice-valuation-2026.jpg"
 author: "TaxProExchange"

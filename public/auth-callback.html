@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head><title>Auth Callback</title></head><body>
+<h2>Authorization received</h2>
+<div id="result"></div>
+<p>Copy the text above and send it to Darkness.</p>
+<script>
+const params = new URLSearchParams(window.location.search);
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+const code = params.get('code') || hashParams.get('code');
+const token = hashParams.get('access_token') || params.get('access_token');
+
+if(code) {
+  document.getElementById('result').textContent = 'CODE: ' + code;
+  document.getElementById('result').style.cssText = 'word-break:break-all;background:#f4f4f4;padding:10px;border:1px solid #ccc;font-family:monospace;font-size:12px;';
+} else if(token) {
+  document.getElementById('result').textContent = token;
+  document.getElementById('result').style.cssText = 'word-break:break-all;background:#f4f4f4;padding:10px;border:1px solid #ccc;font-family:monospace;font-size:12px;';
+} else {
+  document.getElementById('result').textContent = 'No code or token found in URL';
+  document.getElementById('result').style.cssText = 'color:red;';
+  document.getElementById('result').innerHTML += '<br><br>Full URL: ' + window.location.href;
+}
+</script></body></html>

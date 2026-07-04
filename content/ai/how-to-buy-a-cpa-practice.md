@@ -1,6 +1,7 @@
 ---
 title: "How to Buy a CPA Practice: A Buyer's Guide for 2026"
 description: "Thinking about buying a CPA practice? Here's what to look for, how to value the practice, what questions to ask the seller, and how to structure the deal. Practical advice from someone who's been through it."
+category: "Succession & Practice Sales"
 date: "2026-05-31"
 previewImage: "/images/how-to-buy-a-cpa-practice.jpg"
 author: "TaxProExchange"
