@@ -1,3 +1,4 @@
+﻿import { requireAdmin } from '@/lib/adminAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
@@ -11,6 +12,9 @@ function supabaseService() {
 }
 
 export async function POST() {
+  const authResult = await requireAdmin();
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -32,7 +36,7 @@ export async function POST() {
       }, { status: 500 });
     }
 
-    console.log(`🔍 Found ${profiles.length} profiles to check`);
+    console.log(`ðŸ” Found ${profiles.length} profiles to check`);
 
     const orphanedProfiles = [];
     const activeProfiles = [];
@@ -52,15 +56,15 @@ export async function POST() {
         } else if (clerkResponse.status === 404) {
           orphanedProfiles.push(profile);
         } else {
-          console.error(`❌ Unexpected Clerk response for ${profile.clerk_id}:`, clerkResponse.status);
+          console.error(`âŒ Unexpected Clerk response for ${profile.clerk_id}:`, clerkResponse.status);
         }
       } catch (error) {
-        console.error(`❌ Error checking profile ${profile.clerk_id}:`, error);
+        console.error(`âŒ Error checking profile ${profile.clerk_id}:`, error);
       }
     }
 
-    console.log(`🔍 Found ${orphanedProfiles.length} orphaned profiles`);
-    console.log(`🔍 Found ${activeProfiles.length} active profiles`);
+    console.log(`ðŸ” Found ${orphanedProfiles.length} orphaned profiles`);
+    console.log(`ðŸ” Found ${activeProfiles.length} active profiles`);
 
     return NextResponse.json({
       success: true,
@@ -87,6 +91,9 @@ export async function POST() {
 
 // Endpoint to actually delete orphaned profiles
 export async function DELETE() {
+  const authResult = await requireAdmin();
+  if (authResult instanceof NextResponse) return authResult;
+
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -124,7 +131,7 @@ export async function DELETE() {
           orphanedProfiles.push(profile);
         }
       } catch (error) {
-        console.error(`❌ Error checking profile ${profile.clerk_id}:`, error);
+        console.error(`âŒ Error checking profile ${profile.clerk_id}:`, error);
       }
     }
 
@@ -137,13 +144,13 @@ export async function DELETE() {
           .eq('id', profile.id);
           
         if (deleteError) {
-          console.error(`❌ Error deleting profile ${profile.id}:`, deleteError);
+          console.error(`âŒ Error deleting profile ${profile.id}:`, deleteError);
         } else {
           deletedProfiles.push(profile);
-          console.log(`✅ Deleted orphaned profile: ${profile.first_name} ${profile.last_name} (${profile.clerk_id})`);
+          console.log(`âœ… Deleted orphaned profile: ${profile.first_name} ${profile.last_name} (${profile.clerk_id})`);
         }
       } catch (error) {
-        console.error(`❌ Error deleting profile ${profile.id}:`, error);
+        console.error(`âŒ Error deleting profile ${profile.id}:`, error);
       }
     }
 
@@ -166,3 +173,4 @@ export async function DELETE() {
     }, { status: 500 });
   }
 }
+

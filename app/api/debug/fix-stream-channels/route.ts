@@ -1,5 +1,5 @@
+﻿import { requireAdmin } from '@/lib/adminAuth';
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { getServerStreamClient } from '@/lib/stream';
 
@@ -8,6 +8,9 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST() {
   try {
+  const authResult = await requireAdmin();
+  if (authResult instanceof NextResponse) return authResult;
+
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -143,3 +146,4 @@ export async function POST() {
     }, { status: 500 });
   }
 }
+
