@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI Sentiment Analysis for Reddit Reviews
  * Uses OpenAI to summarize Reddit discussions and determine sentiment
  */
@@ -10,7 +10,7 @@ let openaiInstance: OpenAI | null = null;
 
 function getOpenAI() {
   if (!openaiInstance) {
-    const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY or NEXT_PUBLIC_OPENAI_API_KEY environment variable is required');
     }
@@ -80,7 +80,7 @@ Format your response as JSON:
 }`;
 
   try {
-    console.log(`    🤖 Calling OpenAI API with ${redditComments.length} comments...`);
+    console.log(`    ðŸ¤– Calling OpenAI API with ${redditComments.length} comments...`);
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -103,7 +103,7 @@ Format your response as JSON:
       throw new Error('No response from OpenAI');
     }
 
-    console.log(`    ✅ Received OpenAI response (${content.length} chars)`);
+    console.log(`    âœ… Received OpenAI response (${content.length} chars)`);
     const parsed = JSON.parse(content) as SentimentAnalysis;
     
     // Validate sentiment label
@@ -116,14 +116,15 @@ Format your response as JSON:
       parsed.summary = parsed.summary.slice(0, 497) + '...';
     }
 
-    console.log(`    ✅ Parsed sentiment: ${parsed.sentiment_label}`);
+    console.log(`    âœ… Parsed sentiment: ${parsed.sentiment_label}`);
     return parsed;
   } catch (error) {
-    console.error('    ❌ Error analyzing sentiment:', error);
+    console.error('    âŒ Error analyzing sentiment:', error);
     if (error instanceof Error) {
       console.error(`    Error message: ${error.message}`);
     }
     throw error;
   }
 }
+
 

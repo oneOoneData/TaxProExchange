@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server';
+﻿import { NextResponse, NextRequest } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isPublic = createRouteMatcher(['/', '/about', '/pricing', '/sign-in', '/sign-up', '/search', '/jobs', '/p/(.*)', '/legal(.*)', '/trust', '/transparency', '/partners', '/insights(.*)', '/for-firms', '/join', '/directory(.*)']);
@@ -30,6 +30,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     response.headers.set('x-debug-bypass', 'localhost');
     return response;
+  }
+
+  // Block debug routes in production
+  if (pathname.startsWith('/api/debug/') && process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   // API routes bypass - let them handle their own auth
@@ -92,3 +97,4 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 export const config = {
   matcher: ['/((?!_next|.*\\..*).*)'],
 };
+

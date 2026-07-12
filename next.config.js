@@ -1,7 +1,7 @@
-/** @type {import('next').NextConfig} */
+﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
   // appDir is now stable in Next.js 14, no need for experimental flag
-  productionBrowserSourceMaps: true,
+  productionBrowserSourceMaps: false,
   
   // Image optimization configuration
   images: {
@@ -110,5 +110,6 @@ const nextConfig = {
 
 module.exports = {
   ...nextConfig,
-  productionBrowserSourceMaps: true
+  productionBrowserSourceMaps: false
 }
+
