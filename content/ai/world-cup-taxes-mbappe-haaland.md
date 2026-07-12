@@ -11,7 +11,7 @@ tags:
   - Haaland
   - Ronaldo
   - International Tax
-slug: /insights/world-cup-taxes-soccer-stars
+slug: /insights/world-cup-taxes-mbappe-haaland
 previewImage: /images/world-cup-taxes.jpg
 ---
 
