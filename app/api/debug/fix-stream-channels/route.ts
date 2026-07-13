@@ -11,12 +11,6 @@ export async function POST() {
   const authResult = await requireAdmin();
   if (authResult instanceof NextResponse) return authResult;
 
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is admin (you can modify this check as needed)
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Get all accepted connections without Stream channels
