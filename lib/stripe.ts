@@ -53,14 +53,15 @@ export async function createFirmCheckoutSession({
 }: {
   firmId: string;
   firmName: string;
-  customerEmail: string;
+  customerEmail?: string;
   successUrl: string;
   cancelUrl: string;
 }): Promise<Stripe.Checkout.Session> {
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'], // Explicitly enable card payments
-    customer_email: customerEmail,
+    // Only set when non-empty -- Stripe rejects an empty string.
+    ...(customerEmail ? { customer_email: customerEmail } : {}),
     allow_promotion_codes: true, // Enable coupon/promo code field
     line_items: [
       {
