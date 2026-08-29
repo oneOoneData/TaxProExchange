@@ -1,21 +1,29 @@
 /**
  * Firm Creation Page
- * 
+ *
  * Redirects unauthenticated users to /join
  * Shows firm creation form for authenticated users
  */
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 
-export default function FirmOnboardingPage() {
+type CreatedFirm = { id: string; name: string; profileId?: string | null };
+
+function FirmOnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoaded, userId } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Set once the firm record exists. While this is set we never create another
+  // firm -- the only remaining action is (re)starting Stripe checkout for it.
+  const [createdFirm, setCreatedFirm] = useState<CreatedFirm | null>(null);
+  const [checkingExisting, setCheckingExisting] = useState(true);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -24,8 +32,100 @@ export default function FirmOnboardingPage() {
     returns_band: '',
   });
 
+  // If the user already has a firm without an active subscription (e.g. a previous
+  // attempt where the Stripe redirect failed, or they cancelled checkout), resume
+  // that firm instead of showing a blank create form.
+  useEffect(() => {
+    if (!isLoaded || !userId) {
+      setCheckingExisting(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/firms');
+        if (res.ok) {
+          const data = await res.json();
+          const firms: any[] = data.firms || [];
+          const unpaid = firms.find(
+            (f) => f.subscription_status !== 'active' && f.subscription_status !== 'trialing'
+          );
+          if (!cancelled && unpaid) {
+            setCreatedFirm({ id: unpaid.id, name: unpaid.name });
+          }
+        }
+      } catch {
+        // Non-fatal -- fall through to the create form.
+      } finally {
+        if (!cancelled) setCheckingExisting(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, userId]);
+
+  const startCheckout = useCallback(async (firm: CreatedFirm) => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firmId: firm.id, profileId: firm.profileId ?? undefined }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to start checkout');
+      }
+      if (!data.url) {
+        throw new Error('No checkout URL received');
+      }
+      window.location.href = data.url;
+    } catch (err: any) {
+      setError(err.message);
+      setIsSubmitting(false);
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Step 1: create the firm (idempotent server-side -- resubmitting the same
+      // name returns the existing firm instead of making a duplicate).
+      const response = await fetch('/api/firms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create firm');
+      }
+
+      const firm: CreatedFirm = {
+        id: data.firm.id,
+        name: data.firm.name,
+        profileId: data.profileId ?? null,
+      };
+      setCreatedFirm(firm);
+
+      // Step 2 + 3: Stripe checkout. If this throws, createdFirm stays set and the
+      // UI switches to a "firm created, retry payment" state -- no new firm on retry.
+      await startCheckout(firm);
+    } catch (err: any) {
+      setError(err.message);
+      setIsSubmitting(false);
+    }
+  };
+
   // Loading state
-  if (!isLoaded) {
+  if (!isLoaded || checkingExisting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-gray-600">Loading...</div>
@@ -45,7 +145,7 @@ export default function FirmOnboardingPage() {
             <p className="text-lg text-gray-600 mb-8">
               Build and manage your trusted bench of verified tax professionals. $30/month, cancel anytime.
             </p>
-            
+
             <div className="space-y-4 mb-8">
               <div className="flex items-start gap-3 text-left">
                 <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -87,52 +187,61 @@ export default function FirmOnboardingPage() {
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+  const canceledCheckout = searchParams.get('checkout') === 'canceled';
 
-    try {
-      // Step 1: Create the firm
-      const response = await fetch('/api/firms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+  // Firm already exists (this attempt, a prior attempt, or a cancelled checkout).
+  // Do not show the create form -- it would make another firm.
+  if (createdFirm) {
+    return (
+      <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl">
+          <div className="bg-white shadow sm:rounded-lg p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  Your firm workspace is created
+                </h1>
+                <p className="text-gray-600">{createdFirm.name}</p>
+              </div>
+            </div>
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to create firm');
-      }
+            <p className="text-gray-700 mb-6">
+              {canceledCheckout
+                ? 'Payment was cancelled. Your workspace is saved — finish subscribing to start building your team ($30/month, cancel anytime).'
+                : 'One more step: subscribe to activate your workspace ($30/month, cancel anytime). We didn’t create a duplicate — this is the firm you already started.'}
+            </p>
 
-      const data = await response.json();
-      const firmId = data.firm.id;
-      
-      // Step 2: Create Stripe Checkout Session
-      const checkoutResponse = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firmId }),
-      });
+            {error && (
+              <div className="mb-4 rounded-md bg-red-50 p-4">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
 
-      if (!checkoutResponse.ok) {
-        const checkoutData = await checkoutResponse.json();
-        throw new Error(checkoutData.error || 'Failed to create checkout session');
-      }
-
-      const { url } = await checkoutResponse.json();
-      
-      // Step 3: Redirect to Stripe Checkout
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (err: any) {
-      setError(err.message);
-      setIsSubmitting(false);
-    }
-  };
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => startCheckout(createdFirm)}
+                disabled={isSubmitting}
+                className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Starting checkout…' : 'Continue to payment'}
+              </button>
+              <button
+                onClick={() => router.push('/team')}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+              >
+                Go to workspace
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -273,6 +382,9 @@ export default function FirmOnboardingPage() {
             {error && (
               <div className="mb-4 rounded-md bg-red-50 p-4">
                 <p className="text-sm text-red-800">{error}</p>
+                <p className="mt-1 text-xs text-red-700">
+                  Nothing was charged and no workspace was created. You can fix the details above and try again.
+                </p>
               </div>
             )}
 
@@ -354,7 +466,7 @@ export default function FirmOnboardingPage() {
                   disabled={isSubmitting}
                   className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Creating firm...' : 'Continue to Step 2: Payment'}
+                  {isSubmitting ? 'Creating firm…' : 'Continue to Step 2: Payment'}
                 </button>
                 <button
                   type="button"
@@ -369,5 +481,19 @@ export default function FirmOnboardingPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function FirmOnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      }
+    >
+      <FirmOnboardingContent />
+    </Suspense>
   );
 }

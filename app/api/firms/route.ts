@@ -139,6 +139,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Idempotency: if this user already created a firm with the same name, return it
+    // instead of creating a duplicate. The firm-creation flow redirects to Stripe after
+    // this call; when that redirect failed, users used to re-submit and pile up orphan
+    // firms. Matching on creator + case-insensitive name makes a retry a no-op.
+    const { data: existingFirm } = await supabase
+      .from('firms')
+      .select('*')
+      .eq('created_by_profile_id', profileId)
+      .ilike('name', validatedData.name)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingFirm) {
+      return NextResponse.json({
+        success: true,
+        firm: existingFirm,
+        profileId,
+        existing: true,
+      });
+    }
+
     // Generate unique slug
     let slug = generateSlug(validatedData.name);
     let slugExists = true;
@@ -149,7 +171,7 @@ export async function POST(request: NextRequest) {
         .from('firms')
         .select('id')
         .eq('slug', slug)
-        .single();
+        .maybeSingle();
 
       if (!data) {
         slugExists = false;
@@ -168,11 +190,34 @@ export async function POST(request: NextRequest) {
         size_band: validatedData.size_band || null,
         returns_band: validatedData.returns_band || null,
         slug,
+        created_by_profile_id: profileId,
       })
       .select()
       .single();
 
     if (firmError || !firm) {
+      // Unique-index violation from a concurrent/duplicate submission: return the
+      // firm that won the race rather than surfacing an error the user will retry.
+      if (firmError?.code === '23505') {
+        const { data: racedFirm } = await supabase
+          .from('firms')
+          .select('*')
+          .eq('created_by_profile_id', profileId)
+          .ilike('name', validatedData.name)
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (racedFirm) {
+          return NextResponse.json({
+            success: true,
+            firm: racedFirm,
+            profileId,
+            existing: true,
+          });
+        }
+      }
+
       console.error('Error creating firm:', firmError);
       return NextResponse.json(
         { error: 'Failed to create firm' },
@@ -203,6 +248,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       firm,
+      profileId,
     });
   } catch (error: any) {
     console.error('Error in POST /api/firms:', error);

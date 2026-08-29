@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { firmId } = body;
+    const { firmId, profileId: profileIdFromBody } = body;
 
     if (!firmId) {
       return NextResponse.json(
@@ -45,12 +45,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify user is a member of this firm
-    const { data: profile } = await supabase
+    // Resolve the caller's profile. Match on clerk_user_id OR clerk_id -- some rows only
+    // have one set, and /api/firms accepts either. Looking up a single column here used
+    // to 404 for those users, sending them back to re-submit the create form (=> duplicate
+    // firms). profileId passed from the client is used only as a tie-breaker, and only if
+    // that row is actually linked to (or unclaimed by) this Clerk user.
+    let profile:
+      | { id: string; public_email: string | null; email: string | null }
+      | null = null;
+
+    const { data: clerkMatches } = await supabase
       .from('profiles')
-      .select('id, public_email')
-      .eq('clerk_user_id', userId)
-      .single();
+      .select('id, public_email, email, clerk_id, clerk_user_id')
+      .or(`clerk_user_id.eq.${userId},clerk_id.eq.${userId}`)
+      .limit(5);
+
+    if (clerkMatches && clerkMatches.length > 0) {
+      profile =
+        (profileIdFromBody && clerkMatches.find((p) => p.id === profileIdFromBody)) ||
+        clerkMatches[0];
+    } else if (profileIdFromBody) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, public_email, email, clerk_id, clerk_user_id')
+        .eq('id', profileIdFromBody)
+        .maybeSingle();
+      // Only accept it if this profile isn't claimed by a different Clerk user.
+      if (
+        data &&
+        (!data.clerk_id || data.clerk_id === userId) &&
+        (!data.clerk_user_id || data.clerk_user_id === userId)
+      ) {
+        profile = data;
+      }
+    }
 
     if (!profile) {
       return NextResponse.json(
@@ -65,7 +93,7 @@ export async function POST(req: NextRequest) {
       .eq('firm_id', firmId)
       .eq('profile_id', profile.id)
       .eq('status', 'active')
-      .single();
+      .maybeSingle();
 
     if (!membership) {
       return NextResponse.json(
@@ -90,7 +118,9 @@ export async function POST(req: NextRequest) {
     const session = await createFirmCheckoutSession({
       firmId: firm.id,
       firmName: firm.name,
-      customerEmail: profile.public_email || '',
+      // Prefer public_email, fall back to the account email. Passing '' to Stripe
+      // throws ("Invalid email address"), which was another way this step failed.
+      customerEmail: profile.public_email || profile.email || undefined,
       successUrl,
       cancelUrl,
     });
