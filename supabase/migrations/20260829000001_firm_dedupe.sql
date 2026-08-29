@@ -58,15 +58,15 @@ DO $$
 DECLARE
   dupe_list text;
 BEGIN
-  SELECT string_agg(
-           format('  owner=%s name=%L count=%s', created_by_profile_id, lower(name), count(*)),
-           E'\n'
-         )
+  SELECT string_agg(line, E'\n')
   INTO dupe_list
-  FROM firms
-  WHERE created_by_profile_id IS NOT NULL
-  GROUP BY created_by_profile_id, lower(name)
-  HAVING count(*) > 1;
+  FROM (
+    SELECT format('  owner=%s name=%L count=%s', created_by_profile_id, lower(name), count(*)) AS line
+    FROM firms
+    WHERE created_by_profile_id IS NOT NULL
+    GROUP BY created_by_profile_id, lower(name)
+    HAVING count(*) > 1
+  ) d;
 
   IF dupe_list IS NOT NULL THEN
     RAISE EXCEPTION E'firms_owner_name_uniq blocked -- resolve these duplicate groups first:\n%', dupe_list;
