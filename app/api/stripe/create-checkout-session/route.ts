@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { createFirmCheckoutSession } from '@/lib/stripe';
 
@@ -51,14 +51,18 @@ export async function POST(req: NextRequest) {
     // firms). profileId passed from the client is used only as a tie-breaker, and only if
     // that row is actually linked to (or unclaimed by) this Clerk user.
     let profile:
-      | { id: string; public_email: string | null; email: string | null }
+      | { id: string; public_email: string | null }
       | null = null;
 
-    const { data: clerkMatches } = await supabase
+    const { data: clerkMatches, error: clerkMatchError } = await supabase
       .from('profiles')
-      .select('id, public_email, email, clerk_id, clerk_user_id')
+      .select('id, public_email, clerk_id, clerk_user_id')
       .or(`clerk_user_id.eq.${userId},clerk_id.eq.${userId}`)
       .limit(5);
+
+    if (clerkMatchError) {
+      console.error('create-checkout-session: profile lookup failed', clerkMatchError);
+    }
 
     if (clerkMatches && clerkMatches.length > 0) {
       profile =
@@ -67,7 +71,7 @@ export async function POST(req: NextRequest) {
     } else if (profileIdFromBody) {
       const { data } = await supabase
         .from('profiles')
-        .select('id, public_email, email, clerk_id, clerk_user_id')
+        .select('id, public_email, clerk_id, clerk_user_id')
         .eq('id', profileIdFromBody)
         .maybeSingle();
       // Only accept it if this profile isn't claimed by a different Clerk user.
@@ -115,12 +119,19 @@ export async function POST(req: NextRequest) {
     const successUrl = `${baseUrl}/team?firmId=${firmId}&checkout=success`;
     const cancelUrl = `${baseUrl}/firm?firmId=${firmId}&checkout=canceled`;
 
+    // Prefer the profile's public_email; fall back to the Clerk account email.
+    // Passing '' to Stripe throws ("Invalid email address"), so send undefined
+    // when we have nothing.
+    let customerEmail = profile.public_email || undefined;
+    if (!customerEmail) {
+      const u = await currentUser();
+      customerEmail = u?.emailAddresses?.[0]?.emailAddress || undefined;
+    }
+
     const session = await createFirmCheckoutSession({
       firmId: firm.id,
       firmName: firm.name,
-      // Prefer public_email, fall back to the account email. Passing '' to Stripe
-      // throws ("Invalid email address"), which was another way this step failed.
-      customerEmail: profile.public_email || profile.email || undefined,
+      customerEmail,
       successUrl,
       cancelUrl,
     });
