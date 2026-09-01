@@ -6,31 +6,43 @@ import { createServerClient } from '@/lib/supabase/server';
 import { FEATURE_FIRM_WORKSPACES } from './flags';
 
 /**
+ * Resolve a Clerk user id to a profile id.
+ *
+ * Profiles are inconsistent about which column holds the Clerk id: the webhook
+ * and onboarding paths set `clerk_id`, some API paths set `clerk_user_id`, and
+ * most rows only have one of the two (~97% have `clerk_id` only). Matching a
+ * single column here silently failed for those users, which broke every firm
+ * authz check below. Match on either.
+ */
+export async function resolveProfileId(clerkUserId: string): Promise<string | null> {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .or(`clerk_id.eq.${clerkUserId},clerk_user_id.eq.${clerkUserId}`)
+    .limit(1)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+/**
  * Get all firm IDs where the user is an active member
  */
 export async function getUserFirmIds(clerkUserId: string): Promise<string[]> {
   if (!FEATURE_FIRM_WORKSPACES) return [];
 
+  const profileId = await resolveProfileId(clerkUserId);
+  if (!profileId) return [];
+
   const supabase = createServerClient();
-  
-  // First, get the profile ID for this clerk user
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('clerk_user_id', clerkUserId)
-    .single();
-
-  if (!profile) return [];
-
-  // Then get all firms where this profile is an active member
   const { data, error } = await supabase
     .from('firm_members')
     .select('firm_id')
-    .eq('profile_id', profile.id)
+    .eq('profile_id', profileId)
     .eq('status', 'active');
 
   if (error || !data) return [];
-  
+
   return data.map((fm) => fm.firm_id);
 }
 
@@ -50,25 +62,17 @@ export async function isActiveFirmMember(
 ): Promise<boolean> {
   if (!FEATURE_FIRM_WORKSPACES) return false;
 
+  const profileId = await resolveProfileId(clerkUserId);
+  if (!profileId) return false;
+
   const supabase = createServerClient();
-  
-  // Get profile ID for this clerk user
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('clerk_user_id', clerkUserId)
-    .single();
-
-  if (!profile) return false;
-
-  // Check membership
   const { data, error } = await supabase
     .from('firm_members')
     .select('id')
     .eq('firm_id', firmId)
-    .eq('profile_id', profile.id)
+    .eq('profile_id', profileId)
     .eq('status', 'active')
-    .single();
+    .maybeSingle();
 
   return !error && !!data;
 }
@@ -82,26 +86,18 @@ export async function canManageFirm(
 ): Promise<boolean> {
   if (!FEATURE_FIRM_WORKSPACES) return false;
 
+  const profileId = await resolveProfileId(clerkUserId);
+  if (!profileId) return false;
+
   const supabase = createServerClient();
-  
-  // Get profile ID for this clerk user
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('clerk_user_id', clerkUserId)
-    .single();
-
-  if (!profile) return false;
-
-  // Check membership with admin/manager role
   const { data, error } = await supabase
     .from('firm_members')
     .select('role')
     .eq('firm_id', firmId)
-    .eq('profile_id', profile.id)
+    .eq('profile_id', profileId)
     .eq('status', 'active')
     .in('role', ['admin', 'manager'])
-    .single();
+    .maybeSingle();
 
   return !error && !!data;
 }
@@ -112,16 +108,5 @@ export async function canManageFirm(
 export async function getProfileIdFromClerkId(
   clerkUserId: string
 ): Promise<string | null> {
-  const supabase = createServerClient();
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('clerk_user_id', clerkUserId)
-    .single();
-
-  if (error || !data) return null;
-  
-  return data.id;
+  return resolveProfileId(clerkUserId);
 }
-

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
+import { resolveProfileId } from '@/lib/authz';
 
 export async function DELETE(
   request: NextRequest,
@@ -31,14 +32,10 @@ export async function DELETE(
     const { id: firmId } = await params;
     const supabase = createServerClient();
 
-    // Get requesting user's profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('clerk_user_id', userId)
-      .single();
+    // Get requesting user's profile (clerk_id OR clerk_user_id -- see resolveProfileId)
+    const profileId = await resolveProfileId(userId);
 
-    if (!profile) {
+    if (!profileId) {
       return NextResponse.json(
         { error: 'Profile not found' },
         { status: 404 }
@@ -50,9 +47,9 @@ export async function DELETE(
       .from('firm_members')
       .select('role')
       .eq('firm_id', firmId)
-      .eq('profile_id', profile.id)
+      .eq('profile_id', profileId)
       .eq('status', 'active')
-      .single();
+      .maybeSingle();
 
     if (!membership || membership.role !== 'admin') {
       return NextResponse.json(
