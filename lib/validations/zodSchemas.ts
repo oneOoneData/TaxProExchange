@@ -4,26 +4,52 @@ import { normalizeUrl, isValidUrl } from '@/lib/utils/url';
 
 // Credential type enum
 export const CredentialTypeEnum = z.enum([
-  "CPA", 
-  "EA", 
-  "CTEC", 
+  "CPA",
+  "EA",
+  "CTEC",
   "OR_Tax_Preparer",
   "OR_Tax_Consultant",
   "Tax Lawyer (JD)",
   "Accountant",
   "Financial Planner",
+  "Bookkeeper",
   "PTIN Only",
-  "Student", 
+  "Student",
   "Other"
 ]);
 
 // License kind enum
 export const LicenseKindEnum = z.enum([
-  "CPA_STATE_LICENSE", 
-  "EA_ENROLLMENT", 
-  "CTEC_REG", 
+  "CPA_STATE_LICENSE",
+  "EA_ENROLLMENT",
+  "CTEC_REG",
   "OTHER"
 ]);
+
+// Professional role enum -- orthogonal to credential_type. A profile can be
+// tagged as tax_pro, bookkeeper, or both; drives directory role filtering.
+export const ProfessionalRoleEnum = z.enum(["tax_pro", "bookkeeper"]);
+
+// Bookkeeping/software certification kind enum -- decoupled from
+// LicenseKindEnum, which assumes state-board semantics that don't apply to
+// QuickBooks ProAdvisor, Xero Certified, AIPB, NACPB, etc.
+export const CertificationKindEnum = z.enum([
+  "QBO_PROADVISOR",
+  "QBO_PROADVISOR_ADVANCED",
+  "XERO_CERTIFIED",
+  "AIPB_CB",
+  "NACPB_CPB",
+  "OTHER"
+]);
+
+// Individual certification schema
+export const CertificationSchema = z.object({
+  kind: CertificationKindEnum,
+  issuer: z.string().optional(),
+  cert_number: z.string().optional(),
+  expires_on: z.string().nullable().optional(),
+  notes: z.string().optional()
+}).passthrough(); // Allow additional fields like id, status
 
 // Individual license schema
 export const LicenseSchema = z.object({
@@ -46,10 +72,13 @@ export const ProfileCredentialSchema = z.object({
   credential_type: z.union([CredentialTypeEnum, z.literal('')]).refine((val) => val !== '', {
     message: "Please select your professional credential type"
   }),
-  licenses: z.array(LicenseSchema).default([])
+  licenses: z.array(LicenseSchema).default([]),
+  professional_roles: z.array(ProfessionalRoleEnum).min(1).default(['tax_pro']),
+  certifications: z.array(CertificationSchema).default([])
 }).superRefine((val, ctx) => {
-  // Students and "Other" credential type don't need licenses
-  if (val.credential_type === "Student" || val.credential_type === "Other") return;
+  // Students, "Other", and "Bookkeeper" credential types don't need licenses
+  // (bookkeepers are vetted via `certifications` instead, see CertificationSchema)
+  if (val.credential_type === "Student" || val.credential_type === "Other" || val.credential_type === "Bookkeeper") return;
   
   const validLicenses = val.licenses?.filter(license => 
     license.license_number && 
@@ -132,6 +161,7 @@ export const ProfileUpdateSchema = z.object({
   }).optional(),
   location_radius: z.number().min(1).max(500).default(50),
   specializations: z.array(z.string()).default([]),
+  industries: z.array(z.string()).default([]),
   locations: z.array(z.object({
     state: z.string(),
     city: z.string().optional()
@@ -169,10 +199,12 @@ export const CredentialUpdateSchema = z.object({
   credential_type: z.union([CredentialTypeEnum, z.literal('')]).refine((val) => val !== '', {
     message: "Please select your professional credential type"
   }),
-  licenses: z.array(LicenseSchema).default([])
+  licenses: z.array(LicenseSchema).default([]),
+  professional_roles: z.array(ProfessionalRoleEnum).min(1).default(['tax_pro']),
+  certifications: z.array(CertificationSchema).default([])
 }).superRefine((val, ctx) => {
-  // Students and "Other" credential type don't need licenses
-  if (val.credential_type === "Student" || val.credential_type === "Other") return;
+  // Students, "Other", and "Bookkeeper" credential types don't need licenses
+  if (val.credential_type === "Student" || val.credential_type === "Other" || val.credential_type === "Bookkeeper") return;
   
   const validLicenses = val.licenses?.filter(license => 
     license.license_number && 
@@ -272,6 +304,9 @@ export const jobSchema = z.object({
 export type CredentialType = z.infer<typeof CredentialTypeEnum>;
 export type LicenseKind = z.infer<typeof LicenseKindEnum>;
 export type License = z.infer<typeof LicenseSchema>;
+export type ProfessionalRole = z.infer<typeof ProfessionalRoleEnum>;
+export type CertificationKind = z.infer<typeof CertificationKindEnum>;
+export type Certification = z.infer<typeof CertificationSchema>;
 export type ProfileCredential = z.infer<typeof ProfileCredentialSchema>;
 export type ProfileUpdate = z.infer<typeof ProfileUpdateSchema>;
 export type CredentialUpdate = z.infer<typeof CredentialUpdateSchema>;

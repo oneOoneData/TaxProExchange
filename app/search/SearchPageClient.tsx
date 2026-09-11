@@ -26,6 +26,7 @@ interface Profile {
   accepting_work: boolean;
   verified: boolean;
   specializations: string[];
+  industries?: string[];
   states: string[];
   software: string[];
   avatar_url: string | null;
@@ -35,11 +36,13 @@ interface Profile {
   works_international?: boolean;
   countries?: string[];
   profile_type?: 'tax_professional' | 'firm_admin';
+  professional_roles?: ('tax_pro' | 'bookkeeper')[];
 }
 
 interface SearchFilters {
   q: string;
   credential_type: string;
+  role: string;
   state: string;
   specialization: string[];
   software: string;
@@ -92,6 +95,7 @@ export default function SearchPageClient() {
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     credential_type: '',
+    role: '',
     state: '',
     specialization: [],
     software: '',
@@ -320,6 +324,7 @@ export default function SearchPageClient() {
     const clearedFilters = {
       q: '',
       credential_type: '',
+      role: '',
       state: '',
       specialization: [],
       software: '',
@@ -685,6 +690,32 @@ export default function SearchPageClient() {
               />
             </div>
 
+            {/* Role tabs (mobile) */}
+            <div className="flex gap-2">
+              {[
+                { value: '', label: 'All' },
+                { value: 'tax_pro', label: 'Tax Pros' },
+                { value: 'bookkeeper', label: 'Bookkeepers' }
+              ].map(tab => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => {
+                    const newFilters = { ...filters, role: tab.value };
+                    setFilters(newFilters);
+                    debouncedSearch(newFilters, 1);
+                  }}
+                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                    filters.role === tab.value
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
             {/* Mobile Filter Row */}
             <div className="grid grid-cols-2 gap-3">
               {/* Credential Type */}
@@ -818,6 +849,35 @@ export default function SearchPageClient() {
                   />
                 </div>
 
+                {/* Role tabs (desktop) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Looking for</label>
+                  <div className="flex gap-2">
+                    {[
+                      { value: '', label: 'All' },
+                      { value: 'tax_pro', label: 'Tax Pros' },
+                      { value: 'bookkeeper', label: 'Bookkeepers' }
+                    ].map(tab => (
+                      <button
+                        key={tab.value}
+                        type="button"
+                        onClick={() => {
+                          const newFilters = { ...filters, role: tab.value };
+                          setFilters(newFilters);
+                          debouncedSearch(newFilters, 1);
+                        }}
+                        className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                          filters.role === tab.value
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Credential Type */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Credential Type</label>
@@ -925,12 +985,13 @@ export default function SearchPageClient() {
                  </button>
 
                 {/* Clear All Filters */}
-                {(filters.q || filters.credential_type || filters.state || filters.specialization.length > 0 || filters.software || filters.accepting_work || filters.verified_only || filters.years_experience) && (
+                {(filters.q || filters.credential_type || filters.role || filters.state || filters.specialization.length > 0 || filters.software || filters.accepting_work || filters.verified_only || filters.years_experience) && (
                   <button
                                        onClick={() => {
                     const clearedFilters = {
                       q: '',
                       credential_type: '',
+                      role: '',
                       state: '',
                       specialization: [],
                       software: '',
@@ -1002,8 +1063,17 @@ export default function SearchPageClient() {
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                             {profile.credential_type}
                           </span>
+                          {profile.professional_roles && profile.professional_roles.length > 0 && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                              {profile.professional_roles.includes('tax_pro') && profile.professional_roles.includes('bookkeeper')
+                                ? 'Tax Pro & Bookkeeper'
+                                : profile.professional_roles.includes('bookkeeper')
+                                ? 'Bookkeeper'
+                                : 'Tax Pro'}
+                            </span>
+                          )}
                         </div>
-                        
+
                         <p className="text-slate-600 font-medium mb-2">{profile.headline}</p>
                         {profile.firm_name && (
                           <p className="text-slate-500 text-sm mb-2">{profile.firm_name}</p>

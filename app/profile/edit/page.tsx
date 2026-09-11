@@ -40,6 +40,8 @@ interface ProfileForm {
   opportunities: string;
   credential_type: string;
   licenses: any[];
+  professional_roles: string[];
+  certifications: any[];
   firm_name: string;
   public_email: string;
   phone: string;
@@ -52,6 +54,7 @@ interface ProfileForm {
   works_international: boolean;
   countries: string[];
   specializations: string[];
+  industries: string[];
   states: string[];
   software: string[];
   other_software: string[];
@@ -83,6 +86,12 @@ interface SpecializationGroup {
   key: string;
   label: string;
   items: Specialization[];
+}
+
+interface Industry {
+  id: string;
+  slug: string;
+  label: string;
 }
 
 
@@ -202,6 +211,8 @@ export default function EditProfilePage() {
     opportunities: '',
     credential_type: '',
     licenses: [],
+    professional_roles: ['tax_pro'],
+    certifications: [],
     firm_name: '',
     public_email: '',
     phone: '',
@@ -214,6 +225,7 @@ export default function EditProfilePage() {
     works_international: false,
     countries: [],
     specializations: [],
+    industries: [],
     // Mentorship preferences
     is_open_to_mentor: false,
     is_seeking_mentor: false,
@@ -229,6 +241,7 @@ export default function EditProfilePage() {
     }
   });
   const [specializationGroups, setSpecializationGroups] = useState<SpecializationGroup[]>([]);
+  const [industryOptions, setIndustryOptions] = useState<Industry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [stateSearchTerm, setStateSearchTerm] = useState('');
   const [showWrapUp, setShowWrapUp] = useState(false);
@@ -303,6 +316,8 @@ export default function EditProfilePage() {
               opportunities: p.opportunities || '',
               credential_type: p.credential_type || '',
               licenses: p.licenses || [],
+              professional_roles: p.professional_roles?.length ? p.professional_roles : ['tax_pro'],
+              certifications: p.certifications || [],
               firm_name:  p.firm_name  || '',
               public_email: p.public_email || user.emailAddresses[0]?.emailAddress || '',
               phone:      p.phone      || '',
@@ -315,6 +330,7 @@ export default function EditProfilePage() {
               works_international: p.works_international ?? false,
               countries: p.countries || [],
               specializations: p.specializations || [],
+              industries: p.industries || [],
               // Mentorship preferences
               is_open_to_mentor: mentorshipPrefs.is_open_to_mentor,
               is_seeking_mentor: mentorshipPrefs.is_seeking_mentor,
@@ -391,6 +407,8 @@ export default function EditProfilePage() {
           opportunities: profileForm.opportunities.trim(),
           credential_type: profileForm.credential_type,
           licenses: profileForm.licenses || [],
+          professional_roles: profileForm.professional_roles?.length ? profileForm.professional_roles : ['tax_pro'],
+          certifications: profileForm.certifications || [],
           firm_name: profileForm.firm_name.trim(),
           public_email: profileForm.public_email.trim(),
           phone: profileForm.phone.trim(),
@@ -403,6 +421,7 @@ export default function EditProfilePage() {
           works_international: profileForm.works_international,
           countries: profileForm.countries,
           specializations: profileForm.specializations,
+          industries: profileForm.industries,
           states: profileForm.states,
           software: profileForm.software,
           other_software: profileForm.other_software,
@@ -542,6 +561,15 @@ export default function EditProfilePage() {
     }));
   };
 
+  const toggleIndustry = (industrySlug: string) => {
+    setProfileForm(prev => ({
+      ...prev,
+      industries: prev.industries.includes(industrySlug)
+        ? prev.industries.filter(i => i !== industrySlug)
+        : [...prev.industries, industrySlug]
+    }));
+  };
+
   // Filter specializations based on search term
   const filteredGroups = specializationGroups.map(group => ({
     ...group,
@@ -631,11 +659,12 @@ export default function EditProfilePage() {
       errors.credential_type = 'Please select your credential type';
     }
     
-    // Validate licenses for non-Student and non-Other credentials
-    if (profileForm.credential_type && 
-        profileForm.credential_type !== 'Student' && 
-        profileForm.credential_type !== 'Other') {
-      
+    // Validate licenses for credential types that require a state-board license
+    if (profileForm.credential_type &&
+        profileForm.credential_type !== 'Student' &&
+        profileForm.credential_type !== 'Other' &&
+        profileForm.credential_type !== 'Bookkeeper') {
+
       const validLicenses = profileForm.licenses?.filter(license => 
         license.license_number && 
         license.license_number.trim().length >= 2 && 
@@ -749,6 +778,24 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     fetchSpecializations();
+  }, []);
+
+  const fetchIndustries = async () => {
+    try {
+      const response = await fetch('/api/industries');
+      if (response.ok) {
+        const data = await response.json();
+        setIndustryOptions(data);
+      } else {
+        console.error('Industries API error:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching industries:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIndustries();
   }, []);
 
   const renderSpecializationsStep = () => (
@@ -884,6 +931,31 @@ export default function EditProfilePage() {
         title="Tax Specializations & Areas of Expertise"
         subtitle="Select all the areas where you have expertise and experience"
       />
+
+      {/* Industries served -- benefits tax pros and bookkeepers alike */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Industries you serve
+        </label>
+        <p className="text-sm text-gray-500 mb-3">
+          Select any client industries you have experience with (optional)
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {industryOptions.map((industry) => (
+            <label
+              key={industry.slug}
+              className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2 cursor-pointer hover:border-gray-300"
+            >
+              <input
+                type="checkbox"
+                checked={profileForm.industries.includes(industry.slug)}
+                onChange={() => toggleIndustry(industry.slug)}
+              />
+              <span className="text-sm text-gray-700">{industry.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
@@ -1204,11 +1276,15 @@ export default function EditProfilePage() {
                 <CredentialSection
                   value={{
                     credential_type: profileForm.credential_type as any,
-                    licenses: profileForm.licenses
+                    licenses: profileForm.licenses,
+                    professional_roles: profileForm.professional_roles as any,
+                    certifications: profileForm.certifications
                   }}
                   onChange={(credentialData) => {
                     updateForm('credential_type', credentialData.credential_type);
                     updateForm('licenses', credentialData.licenses);
+                    updateForm('professional_roles', credentialData.professional_roles || ['tax_pro']);
+                    updateForm('certifications', credentialData.certifications || []);
                     // Clear validation errors when changing credentials
                     const newErrors = { ...validationErrors };
                     delete newErrors.credential_type;

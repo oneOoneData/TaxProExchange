@@ -1,14 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CredentialType, License } from '@/lib/validations/zodSchemas';
+import { CredentialType, License, ProfessionalRole, Certification } from '@/lib/validations/zodSchemas';
+import CertificationSection from './CertificationSection';
 
 interface CredentialSectionProps {
   value: {
     credential_type: CredentialType;
     licenses: License[];
+    professional_roles?: ProfessionalRole[];
+    certifications?: Certification[];
   };
-  onChange: (value: { credential_type: CredentialType; licenses: License[] }) => void;
+  onChange: (value: {
+    credential_type: CredentialType;
+    licenses: License[];
+    professional_roles: ProfessionalRole[];
+    certifications: Certification[];
+  }) => void;
   errors?: any;
 }
 
@@ -21,6 +29,7 @@ const CREDENTIAL_TYPES = [
   { value: 'Tax Lawyer (JD)', label: 'Tax Lawyer (JD)' },
   { value: 'Accountant', label: 'Accountant' },
   { value: 'Financial Planner', label: 'Financial Planner / Advisor' },
+  { value: 'Bookkeeper', label: 'Bookkeeper (QuickBooks/Xero certified, no state license)' },
   { value: 'PTIN Only', label: 'PTIN Only' },
   { value: 'Other', label: 'Other Professional' },
   { value: 'Student', label: 'Student' }
@@ -41,8 +50,15 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
+// Credential types that don't require a state-board license -- verified
+// against these consistently in every branch below (Zod mirrors this list
+// in lib/validations/zodSchemas.ts's superRefine checks).
+const NO_LICENSE_CREDENTIAL_TYPES: CredentialType[] = ['Student', 'Other', 'Bookkeeper'];
+
 export default function CredentialSection({ value, onChange, errors }: CredentialSectionProps) {
   const [licenses, setLicenses] = useState<License[]>(value.licenses || []);
+  const professionalRoles = value.professional_roles || ['tax_pro'];
+  const certifications = value.certifications || [];
 
   // Update licenses when value prop changes (e.g., when profile data loads)
   useEffect(() => {
@@ -51,16 +67,12 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
 
   // Initialize license when credential type is set but no licenses exist
   useEffect(() => {
-    // Students, "Other", "Accountant", and "Financial Planner" don't need licenses
-    if (value.credential_type && 
-        value.credential_type !== 'Student' && 
-        value.credential_type !== 'Other' &&
-        value.credential_type !== 'Accountant' &&
-        value.credential_type !== 'Financial Planner' &&
+    if (value.credential_type &&
+        !NO_LICENSE_CREDENTIAL_TYPES.includes(value.credential_type) &&
         (!value.licenses || value.licenses.length === 0)) {
       const licenseKind = getLicenseKindForCredential(value.credential_type);
       const issuingAuthority = getIssuingAuthorityForCredential(value.credential_type);
-      
+
       const newLicense: License = {
         license_kind: licenseKind as any,
         license_number: '',
@@ -69,10 +81,11 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
         expires_on: '',
         board_profile_url: ''
       };
-      
+
       setLicenses([newLicense]);
-      onChange({ credential_type: value.credential_type, licenses: [newLicense] });
+      onChange({ ...value, credential_type: value.credential_type, licenses: [newLicense], professional_roles: professionalRoles, certifications });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value.credential_type, value.licenses, onChange]);
 
   const getLicenseKindForCredential = (credential_type: CredentialType): string => {
@@ -104,15 +117,21 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
   };
 
   const updateCredentialType = (credential_type: CredentialType) => {
-    if (credential_type === 'Student' || credential_type === 'Other') {
-      // Students and "Other" don't need licenses
+    // Cross-field coupling: selecting "Bookkeeper" as the credential type
+    // auto-adds 'bookkeeper' to professional_roles without removing 'tax_pro'
+    // if it's already there -- someone can be both.
+    const nextRoles = credential_type === 'Bookkeeper' && !professionalRoles.includes('bookkeeper')
+      ? [...professionalRoles, 'bookkeeper'] as ProfessionalRole[]
+      : professionalRoles;
+
+    if (NO_LICENSE_CREDENTIAL_TYPES.includes(credential_type)) {
       setLicenses([]);
-      onChange({ credential_type, licenses: [] });
+      onChange({ ...value, credential_type, licenses: [], professional_roles: nextRoles, certifications });
     } else {
       // Professional credentials need at least one license
       const licenseKind = getLicenseKindForCredential(credential_type);
       const issuingAuthority = getIssuingAuthorityForCredential(credential_type);
-      
+
       if (licenses.length === 0) {
         const newLicense: License = {
           license_kind: licenseKind as any,
@@ -123,7 +142,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
           board_profile_url: ''
         };
         setLicenses([newLicense]);
-        onChange({ credential_type, licenses: [newLicense] });
+        onChange({ ...value, credential_type, licenses: [newLicense], professional_roles: nextRoles, certifications });
       } else {
         // Update existing license with correct type and issuing authority
         const updatedLicenses = licenses.map(license => ({
@@ -136,22 +155,40 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
           state: credential_type === 'CPA' ? license.state : undefined
         }));
         setLicenses(updatedLicenses);
-        onChange({ credential_type, licenses: updatedLicenses });
+        onChange({ ...value, credential_type, licenses: updatedLicenses, professional_roles: nextRoles, certifications });
       }
     }
+  };
+
+  const toggleProfessionalRole = (role: ProfessionalRole) => {
+    const has = professionalRoles.includes(role);
+    let nextRoles = has
+      ? professionalRoles.filter((r) => r !== role)
+      : [...professionalRoles, role];
+    if (nextRoles.length === 0) nextRoles = [role]; // keep at least one role selected
+
+    // Cross-field coupling, the other direction: checking only "bookkeeper"
+    // (no tax_pro) while credential_type is still unset should default the
+    // credential to Bookkeeper rather than falling through to 'Student'.
+    let nextCredentialType = value.credential_type;
+    if (!nextCredentialType && nextRoles.length === 1 && nextRoles[0] === 'bookkeeper') {
+      nextCredentialType = 'Bookkeeper';
+    }
+
+    onChange({ ...value, credential_type: nextCredentialType, professional_roles: nextRoles as ProfessionalRole[], licenses, certifications });
   };
 
   const updateLicense = (index: number, field: keyof License, fieldValue: any) => {
     const updatedLicenses = [...licenses];
     updatedLicenses[index] = { ...updatedLicenses[index], [field]: fieldValue };
     setLicenses(updatedLicenses);
-    onChange({ credential_type: value.credential_type, licenses: updatedLicenses });
+    onChange({ ...value, credential_type: value.credential_type, licenses: updatedLicenses, professional_roles: professionalRoles, certifications });
   };
 
           const addLicense = () => {
      const licenseKind = getLicenseKindForCredential(value.credential_type);
      const issuingAuthority = getIssuingAuthorityForCredential(value.credential_type);
-     
+
      const newLicense: License = {
        license_kind: licenseKind as any,
        license_number: '',
@@ -162,14 +199,20 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
      };
      const updatedLicenses = [...licenses, newLicense];
      setLicenses(updatedLicenses);
-     onChange({ credential_type: value.credential_type, licenses: updatedLicenses });
+     onChange({ ...value, credential_type: value.credential_type, licenses: updatedLicenses, professional_roles: professionalRoles, certifications });
    };
 
   const removeLicense = (index: number) => {
     const updatedLicenses = licenses.filter((_, i) => i !== index);
     setLicenses(updatedLicenses);
-    onChange({ credential_type: value.credential_type, licenses: updatedLicenses });
+    onChange({ ...value, credential_type: value.credential_type, licenses: updatedLicenses, professional_roles: professionalRoles, certifications });
   };
+
+  const updateCertifications = (updated: Certification[]) => {
+    onChange({ ...value, credential_type: value.credential_type, licenses, professional_roles: professionalRoles, certifications: updated });
+  };
+
+  const showCertifications = value.credential_type === 'Bookkeeper' || professionalRoles.includes('bookkeeper');
 
   return (
     <div className="space-y-6">
@@ -184,11 +227,38 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
           <div>
             <h3 className="font-medium text-blue-900 mb-1">Privacy & Verification</h3>
             <p className="text-sm text-blue-800">
-              <strong>This information is not made public.</strong> We only use it to verify your credentials against official registries. 
+              <strong>This information is not made public.</strong> We only use it to verify your credentials against official registries.
               Your public profile will show verification badges and credential types only.
             </p>
           </div>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          What kind of work do you do? *
+        </label>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <label className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={professionalRoles.includes('tax_pro')}
+              onChange={() => toggleProfessionalRole('tax_pro')}
+            />
+            <span className="text-sm text-gray-700">Tax preparation</span>
+          </label>
+          <label className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={professionalRoles.includes('bookkeeper')}
+              onChange={() => toggleProfessionalRole('bookkeeper')}
+            />
+            <span className="text-sm text-gray-700">Bookkeeping</span>
+          </label>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          Select both if you do both -- this drives which directory searches you show up in.
+        </p>
       </div>
 
       <div>
@@ -238,6 +308,13 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
           <p className="text-sm text-blue-800">
             <strong>Financial Planner / Advisor profiles</strong> can join without tax-specific credentials. You can add credentials like CFP or CPA later in your profile settings if applicable.
+          </p>
+        </div>
+      ) : value.credential_type === 'Bookkeeper' ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Bookkeeper profiles</strong> don&rsquo;t need a state license. Add your certifications below instead
+            (QuickBooks ProAdvisor, Xero Certified, AIPB, NACPB, etc.) -- these help other professionals and clients find you.
           </p>
         </div>
       ) : (
@@ -311,8 +388,8 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                     placeholder="e.g., CA Board of Accountancy, IRS, CTEC"
                     readOnly={['CTEC', 'EA', 'PTIN Only'].includes(value.credential_type)}
                     className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      ['CTEC', 'EA', 'PTIN Only'].includes(value.credential_type) 
-                        ? 'bg-gray-50 text-gray-600 cursor-not-allowed' 
+                      ['CTEC', 'EA', 'PTIN Only'].includes(value.credential_type)
+                        ? 'bg-gray-50 text-gray-600 cursor-not-allowed'
                         : ''
                     }`}
                   />
@@ -381,7 +458,7 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
                 </div>
               </div>
 
-              
+
             </div>
           ))}
 
@@ -409,6 +486,14 @@ export default function CredentialSection({ value, onChange, errors }: Credentia
             <p className="text-sm text-red-600">{errors.licenses}</p>
           )}
         </div>
+      )}
+
+      {showCertifications && (
+        <CertificationSection
+          value={certifications}
+          onChange={updateCertifications}
+          errors={errors}
+        />
       )}
     </div>
   );

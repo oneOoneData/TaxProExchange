@@ -39,8 +39,8 @@ async function getProfile(slug: string) {
       firm_name, linkedin_url, public_email, phone, website_url,
       accepting_work, works_multistate, works_international,
       years_experience, entity_revenue_range, opportunities,
-      public_contact, countries, specializations, states, software, other_software,
-      primary_location, created_at
+      public_contact, countries, specializations, industries, states, software, other_software,
+      primary_location, created_at, professional_roles
     `)
     .eq('slug', slug)
     .single();
@@ -65,26 +65,37 @@ async function getProfile(slug: string) {
     return null;
   }
 
-  // Fetch specializations, locations, software, and licenses separately
-  const [specializationsResult, locationsResult, softwareResult, licensesResult] = await Promise.all([
+  // Fetch specializations, industries, locations, software, licenses, and
+  // certifications separately
+  const [specializationsResult, industriesResult, locationsResult, softwareResult, licensesResult, certificationsResult] = await Promise.all([
     supabase.from('profile_specializations').select('specialization_slug').eq('profile_id', data.id),
+    supabase.from('profile_industries').select('industry_slug').eq('profile_id', data.id),
     supabase.from('profile_locations').select('state').eq('profile_id', data.id),
     supabase.from('profile_software').select('software_slug').eq('profile_id', data.id),
     supabase.from('licenses').select(`
       id, license_kind, license_number, issuing_authority,
       state, expires_on, board_profile_url, status
-    `).eq('profile_id', (data as any)?.id || '').eq('status', 'verified')
+    `).eq('profile_id', (data as any)?.id || '').eq('status', 'verified'),
+    // IMPORTANT: this is the PUBLIC profile route -- never select cert_number
+    // or select('*') here. Only kind/issuer/expires_on/status are safe to
+    // ship in this page's serialized props.
+    supabase.from('certifications').select(`
+      id, kind, issuer, expires_on, status
+    `).eq('profile_id', (data as any)?.id || '')
   ]);
 
   // Update the profile data with the fetched specializations, locations, and software
   data.specializations = specializationsResult.data?.map(s => s.specialization_slug) || [];
+  (data as any).industries = industriesResult.data?.map(i => i.industry_slug) || [];
   data.states = locationsResult.data?.map(l => l.state) || [];
   data.software = softwareResult.data?.map(s => s.software_slug) || [];
   const licenses = licensesResult.data || [];
+  const certifications = certificationsResult.data || [];
 
   return {
     ...(data as any),
-    licenses: licenses || []
+    licenses: licenses || [],
+    certifications: certifications || []
   };
 }
 
@@ -157,11 +168,14 @@ export default async function ProfilePage({ params }: Props) {
     public_contact: p.public_contact || false,
     countries: p.countries || [],
     specializations: p.specializations || [],
+    industries: p.industries || [],
     states: p.states || [],
     software: p.software || [],
     other_software: p.other_software || [],
     opportunities: p.opportunities || '',
     licenses: p.licenses || [],
+    certifications: p.certifications || [],
+    professional_roles: p.professional_roles?.length ? p.professional_roles : ['tax_pro'],
     works_multistate: p.works_multistate || false,
     works_international: p.works_international || false,
     years_experience: p.years_experience || '',

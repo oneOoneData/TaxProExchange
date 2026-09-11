@@ -22,6 +22,17 @@ interface License {
   status: string;
 }
 
+// Note: intentionally no cert_number here -- the public profile route never
+// selects it (see app/p/[slug]/page.tsx), so it must never appear in this
+// client-rendered shape either.
+interface Certification {
+  id: string;
+  kind: string;
+  issuer?: string;
+  expires_on?: string;
+  status: string;
+}
+
 interface Profile {
   id: string;
   slug: string;
@@ -42,11 +53,14 @@ interface Profile {
   works_international: boolean;
   countries: string[];
   specializations: string[];
+  industries?: string[];
   states: string[];
   software: string[];
   other_software: string[];
   opportunities: string;
   licenses?: License[];
+  certifications?: Certification[];
+  professional_roles?: ('tax_pro' | 'bookkeeper')[];
   avatar_url: string | null;
   years_experience?: string;
   entity_revenue_range?: string;
@@ -492,6 +506,15 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                 <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-slate-100 text-slate-700">
                   {profile.credential_type}
                 </span>
+                {profile.professional_roles && profile.professional_roles.length > 0 && (
+                  <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-indigo-100 text-indigo-700">
+                    {profile.professional_roles.includes('tax_pro') && profile.professional_roles.includes('bookkeeper')
+                      ? 'Tax Pro & Bookkeeper'
+                      : profile.professional_roles.includes('bookkeeper')
+                      ? 'Bookkeeper'
+                      : 'Tax Pro'}
+                  </span>
+                )}
                 {profile.works_multistate && (
                   <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-700">
                     Multi-State
@@ -745,6 +768,53 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                     </div>
                   )}
                 </div>
+              </motion.div>
+            )}
+
+            {/* Industries served */}
+            {profile.industries && profile.industries.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.27 }}
+                className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
+              >
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Industries Served</h2>
+                <div className="flex flex-wrap gap-2">
+                  {safeMap(profile.industries, industrySlug => (
+                    <span
+                      key={industrySlug}
+                      className="inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium bg-amber-100 text-amber-700"
+                    >
+                      {industrySlug.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Certifications (self-reported; admin review is future work) */}
+            {profile.certifications && profile.certifications.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28 }}
+                className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6"
+              >
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4">Certifications</h2>
+                <div className="flex flex-wrap gap-2">
+                  {profile.certifications.map((cert) => (
+                    <span
+                      key={cert.id}
+                      className="inline-flex items-center px-3 py-2 rounded-xl text-sm font-medium bg-sky-100 text-sky-700"
+                      title={cert.expires_on ? `Expires ${cert.expires_on}` : undefined}
+                    >
+                      {cert.kind.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {cert.issuer ? ` · ${cert.issuer}` : ''}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-3">Self-reported by the professional</p>
               </motion.div>
             )}
 
