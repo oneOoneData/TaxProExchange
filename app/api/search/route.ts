@@ -135,8 +135,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
     const credential_type = searchParams.get('credential_type') || '';
+    // Role filter: '', 'tax_pro', or 'bookkeeper' -- narrows the directory to
+    // one professional_roles value; '' (default) shows everyone.
+    const role = searchParams.get('role') || '';
     // Handle multiple specializations - get all values for this parameter
     const specializations = searchParams.getAll('specialization');
+    const industries = searchParams.getAll('industry');
     const software = searchParams.get('software') || '';
     // Normalize state filter to uppercase 2-letter code
     const stateParam = searchParams.get('state') || '';
@@ -172,9 +176,15 @@ export async function GET(request: NextRequest) {
         years_experience,
         software,
         created_at,
-        profile_type
+        profile_type,
+        professional_roles
 `, { count: 'exact' })
       .eq('is_listed', true); // Show all profiles where is_listed = true (user controls this)
+
+    // Apply role filter (tax_pro / bookkeeper) if specified
+    if (role) {
+      supabaseQuery = supabaseQuery.contains('professional_roles', [role]);
+    }
 
     // Apply verified filter based on user preference
     if (verified_only === 'true') {
@@ -400,6 +410,30 @@ export async function GET(request: NextRequest) {
         supabaseQuery = supabaseQuery.in('id', profileIds);
       } else {
         // No profiles with these specializations, return empty result
+        return NextResponse.json({
+          profiles: [],
+          pagination: {
+            page,
+            limit,
+            total: 0,
+            totalPages: 0
+          }
+        });
+      }
+    }
+
+    // Apply industry filter if specified - same join-and-intersect pattern as specializations
+    if (industries && industries.length > 0) {
+      const { data: profileIndustries } = await supabase
+        .from('profile_industries')
+        .select('profile_id')
+        .in('industry_slug', industries);
+
+      if (profileIndustries && profileIndustries.length > 0) {
+        const profileIds = profileIndustries.map(pi => pi.profile_id);
+        supabaseQuery = supabaseQuery.in('id', profileIds);
+      } else {
+        // No profiles with these industries, return empty result
         return NextResponse.json({
           profiles: [],
           pagination: {
@@ -667,6 +701,7 @@ export async function GET(request: NextRequest) {
     // Fetch specializations, locations, software, and licenses in batches to reduce query volume
     const profileIds = filteredProfiles.map(profile => profile.id);
     const specializationsByProfile = new Map<string, string[]>();
+    const industriesByProfile = new Map<string, string[]>();
     const locationsByProfile = new Map<string, string[]>();
     const softwareByProfile = new Map<string, string[]>();
     const licensesByProfile = new Map<string, any[]>();
@@ -683,6 +718,7 @@ export async function GET(request: NextRequest) {
     if (profileIds.length > 0) {
       const [
         { data: specializations },
+        { data: industryRows },
         { data: locations },
         { data: software },
         { data: licenses },
@@ -690,6 +726,10 @@ export async function GET(request: NextRequest) {
         supabase
           .from('profile_specializations')
           .select('profile_id, specialization_slug')
+          .in('profile_id', profileIds),
+        supabase
+          .from('profile_industries')
+          .select('profile_id, industry_slug')
           .in('profile_id', profileIds),
         supabase
           .from('profile_locations')
@@ -709,6 +749,10 @@ export async function GET(request: NextRequest) {
         addToMap(specializationsByProfile, row.profile_id, row.specialization_slug);
       });
 
+      industryRows?.forEach((row: { profile_id: string; industry_slug: string }) => {
+        addToMap(industriesByProfile, row.profile_id, row.industry_slug);
+      });
+
       locations?.forEach((row: { profile_id: string; state: string }) => {
         addToMap(locationsByProfile, row.profile_id, row.state);
       });
@@ -725,6 +769,7 @@ export async function GET(request: NextRequest) {
     const profilesWithDetails = filteredProfiles.map((profile) => ({
       ...profile,
       specializations: specializationsByProfile.get(profile.id) || [],
+      industries: industriesByProfile.get(profile.id) || [],
       states: locationsByProfile.get(profile.id) || [],
       software: softwareByProfile.get(profile.id) || [],
       licenses: licensesByProfile.get(profile.id) || [],

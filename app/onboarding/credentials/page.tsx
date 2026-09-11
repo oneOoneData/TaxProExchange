@@ -6,7 +6,12 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
 import CredentialSection from '@/components/forms/CredentialSection';
-import { CredentialType, License } from '@/lib/validations/zodSchemas';
+import { CredentialType, License, ProfessionalRole, Certification } from '@/lib/validations/zodSchemas';
+
+// Credential types that don't require a state-board license (kept in sync
+// with the same list in components/forms/CredentialSection.tsx and the Zod
+// superRefine checks in lib/validations/zodSchemas.ts).
+const NO_LICENSE_CREDENTIAL_TYPES: CredentialType[] = ['Student', 'Other', 'Bookkeeper'];
 
 export default function CredentialsPage() {
   const { user, isLoaded } = useUser();
@@ -16,7 +21,9 @@ export default function CredentialsPage() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [credentialData, setCredentialData] = useState({
     credential_type: 'Student' as CredentialType,
-    licenses: [] as License[]
+    licenses: [] as License[],
+    professional_roles: ['tax_pro'] as ProfessionalRole[],
+    certifications: [] as Certification[]
   });
 
   // Redirect if not authenticated
@@ -42,10 +49,9 @@ export default function CredentialsPage() {
       errors.credential_type = 'Please select your credential type';
     }
     
-    // Validate licenses for non-Student and non-Other credentials
-    if (credentialData.credential_type && 
-        credentialData.credential_type !== 'Student' && 
-        credentialData.credential_type !== 'Other') {
+    // Validate licenses for credential types that require a state-board license
+    if (credentialData.credential_type &&
+        !NO_LICENSE_CREDENTIAL_TYPES.includes(credentialData.credential_type)) {
       
       const validLicenses = credentialData.licenses?.filter(license => 
         license.license_number && 
@@ -108,6 +114,8 @@ export default function CredentialsPage() {
           public_email: email,
           credential_type: credentialData.credential_type,
           licenses: credentialData.licenses,
+          professional_roles: credentialData.professional_roles,
+          certifications: credentialData.certifications,
           // Add required fields for validation
           accepting_work: true,
           public_contact: false,
@@ -116,6 +124,7 @@ export default function CredentialsPage() {
           countries: [],
           other_software: [],
           specializations: [],
+          industries: [],
           locations: [],
           software: []
         };
@@ -124,7 +133,9 @@ export default function CredentialsPage() {
         updateData = {
           clerk_id: user.id,
           credential_type: credentialData.credential_type,
-          licenses: credentialData.licenses
+          licenses: credentialData.licenses,
+          professional_roles: credentialData.professional_roles,
+          certifications: credentialData.certifications
         };
       }
       
@@ -174,6 +185,8 @@ export default function CredentialsPage() {
           public_email: email,
           credential_type: 'Student', // Default to Student when skipping
           licenses: [],
+          professional_roles: ['tax_pro'],
+          certifications: [],
           accepting_work: true,
           public_contact: false,
           works_multistate: false,
@@ -181,6 +194,7 @@ export default function CredentialsPage() {
           countries: [],
           other_software: [],
           specializations: [],
+          industries: [],
           locations: [],
           software: []
         };

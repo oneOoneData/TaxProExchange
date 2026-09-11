@@ -140,10 +140,14 @@ export async function GET(request: Request) {
     console.log('🔍 Profile ID:', profile.id);
 
     // Fetch related data
-    const [specializationsResult, locationsResult, softwareResult, licensesResult] = await Promise.all([
+    const [specializationsResult, industriesResult, locationsResult, softwareResult, licensesResult, certificationsResult] = await Promise.all([
       supabase
         .from('profile_specializations')
         .select('specialization_slug')
+        .eq('profile_id', profile.id),
+      supabase
+        .from('profile_industries')
+        .select('industry_slug')
         .eq('profile_id', profile.id),
       supabase
         .from('profile_locations')
@@ -156,37 +160,50 @@ export async function GET(request: Request) {
       supabase
         .from('licenses')
         .select('id, license_kind, license_number, issuing_authority, state, expires_on, board_profile_url, status')
+        .eq('profile_id', profile.id),
+      // This is the user's own profile -- cert_number is fine here (unlike
+      // the public profile route, which must never select it).
+      supabase
+        .from('certifications')
+        .select('id, kind, issuer, cert_number, expires_on, notes, status')
         .eq('profile_id', profile.id)
     ]);
 
     console.log('🔍 Related data results:', {
       specializations: specializationsResult,
+      industries: industriesResult,
       locations: locationsResult,
       software: softwareResult,
-      licenses: licensesResult
+      licenses: licensesResult,
+      certifications: certificationsResult
     });
 
     // Process licenses - include license_number since this is the user's own profile
     const processedLicenses = licensesResult.data || [];
+    const processedCertifications = certificationsResult.data || [];
 
     // Debug logging
     console.log('Profile data being returned:', {
       profile: profile,
       specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
+      industries: industriesResult.data?.map(i => i.industry_slug) || [],
       locations: locationsResult.data?.map(l => ({ state: l.state, city: l.city })) || [],
       software: softwareResult.data?.map(s => s.software_slug) || [],
       other_software: profile.other_software || [],
-      licenses: processedLicenses
+      licenses: processedLicenses,
+      certifications: processedCertifications
     });
 
     // Return profile with actual relationship data (never include license_number)
     return NextResponse.json({
       ...profile,
       specializations: specializationsResult.data?.map(s => s.specialization_slug) || [],
+      industries: industriesResult.data?.map(i => i.industry_slug) || [],
       locations: locationsResult.data?.map(l => ({ state: l.state, city: l.city })) || [],
       software: softwareResult.data?.map(s => s.software_slug) || [],
       other_software: profile.other_software || [],
-      licenses: processedLicenses
+      licenses: processedLicenses,
+      certifications: processedCertifications
     });
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -207,10 +224,15 @@ export async function PUT(request: Request) {
     
     // Check what type of update this is
     const requestKeys = Object.keys(body);
-    const isCredentialUpdate = requestKeys.length <= 3 && 
-                              requestKeys.includes('clerk_id') &&
-                              requestKeys.includes('credential_type') &&
-                              requestKeys.includes('licenses');
+    // Credential-only updates (onboarding Step 1, or a later credential edit)
+    // may include professional_roles/certifications alongside credential_type
+    // and licenses -- check that every key belongs to this narrow set, rather
+    // than a hardcoded key count, so adding those fields doesn't accidentally
+    // fall through to full-profile validation.
+    const CREDENTIAL_UPDATE_KEYS = new Set(['clerk_id', 'credential_type', 'licenses', 'professional_roles', 'certifications']);
+    const isCredentialUpdate = requestKeys.includes('credential_type') &&
+                              requestKeys.includes('licenses') &&
+                              requestKeys.every(key => CREDENTIAL_UPDATE_KEYS.has(key));
     
     const isEmailPreferencesUpdate = requestKeys.length <= 3 && 
                                     requestKeys.includes('clerk_id') &&
@@ -241,17 +263,21 @@ export async function PUT(request: Request) {
     const validatedData = validationResult.data;
     
     // Handle different update types
-    let specializations, locations, software, other_software, public_contact, 
-        works_multistate, works_international, countries, email_preferences, 
-        primary_location, location_radius, credential_type, licenses, 
+    let specializations, locations, software, other_software, public_contact,
+        works_multistate, works_international, countries, email_preferences,
+        primary_location, location_radius, credential_type, licenses,
         years_experience, entity_revenue_range, firm_size, annual_returns_range,
-        connection_email_notifications, profileData;
-    
+        connection_email_notifications, profileData,
+        professional_roles, certifications, industries;
+
     if (isCredentialUpdate) {
       // For credential-only updates
       const credentialData = validatedData as any;
       credential_type = credentialData.credential_type;
       licenses = credentialData.licenses;
+      professional_roles = credentialData.professional_roles;
+      certifications = credentialData.certifications;
+      industries = [];
       // Set defaults for other fields
       specializations = [];
       locations = [];
@@ -287,6 +313,9 @@ export async function PUT(request: Request) {
       location_radius = undefined;
       credential_type = undefined;
       licenses = undefined;
+      professional_roles = undefined;
+      certifications = undefined;
+      industries = undefined;
       years_experience = undefined;
       entity_revenue_range = undefined;
       firm_size = undefined;
@@ -330,6 +359,7 @@ export async function PUT(request: Request) {
       
       ({
         specializations,
+        industries,
         locations,
         software,
         other_software,
@@ -342,12 +372,14 @@ export async function PUT(request: Request) {
         location_radius,
         credential_type,
         licenses,
+        professional_roles,
+        certifications,
         years_experience,
         entity_revenue_range,
         firm_size,
         annual_returns_range,
         connection_email_notifications,
-        ...profileData 
+        ...profileData
       } = fullProfileData);
       
       // Override with normalized primary_location
@@ -464,6 +496,9 @@ export async function PUT(request: Request) {
         updateData = {
           ...updateData,
           credential_type,
+          ...(professional_roles !== undefined && {
+            professional_roles: professional_roles?.length ? professional_roles : ['tax_pro']
+          }),
         };
       } else {
         // For full profile updates, update all fields
@@ -485,6 +520,7 @@ export async function PUT(request: Request) {
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           credential_type,
+          professional_roles: professional_roles?.length ? professional_roles : ['tax_pro'],
         };
       }
       
@@ -528,6 +564,7 @@ export async function PUT(request: Request) {
           clerk_id,
           ...profileData,
           credential_type: credential_type || 'Student', // Ensure credential_type is always set
+          professional_roles: professional_roles?.length ? professional_roles : ['tax_pro'],
           slug: generateSlug(profileData.first_name, profileData.last_name, clerk_id),
           public_contact: public_contact ?? false,
           works_multistate: works_multistate ?? false,
@@ -650,8 +687,75 @@ export async function PUT(request: Request) {
           .insert(softwareData);
       }
       
+      // Save industries (same delete-then-insert pattern as specializations;
+      // no denormalized profiles.industries write, matching how
+      // profiles.specializations is likewise never written here -- both are
+      // read back via their junction table join, not the denormalized column)
+      if (industries && industries.length > 0) {
+        await supabase
+          .from('profile_industries')
+          .delete()
+          .eq('profile_id', profileId);
+
+        const industryData = industries.map((slug: string) => ({
+          profile_id: profileId,
+          industry_slug: slug
+        }));
+
+        const { error: industryInsertError } = await supabase
+          .from('profile_industries')
+          .insert(industryData);
+
+        if (industryInsertError) {
+          console.log('❌ Insert industries error:', industryInsertError);
+        }
+      } else if (industries && industries.length === 0) {
+        // Explicit empty array means "clear my industries"
+        await supabase
+          .from('profile_industries')
+          .delete()
+          .eq('profile_id', profileId);
+      }
+
+      // Save certifications (bookkeeping/software certs -- decoupled from
+      // licenses; see lib/validations/zodSchemas.ts CertificationSchema)
+      if (certifications && certifications.length > 0) {
+        const { error: certDeleteError } = await supabase
+          .from('certifications')
+          .delete()
+          .eq('profile_id', profileId);
+
+        if (certDeleteError) {
+          console.log('❌ Delete certifications error:', certDeleteError);
+        }
+
+        const certificationData = certifications.map((cert: any) => ({
+          profile_id: profileId,
+          kind: cert.kind,
+          issuer: cert.issuer || null,
+          cert_number: cert.cert_number || null, // Private field, never returned publicly
+          expires_on: cert.expires_on || null,
+          notes: cert.notes || null,
+          status: 'self_reported'
+        }));
+
+        const { error: certInsertError } = await supabase
+          .from('certifications')
+          .insert(certificationData);
+
+        if (certInsertError) {
+          console.log('❌ Insert certifications error:', certInsertError);
+        }
+      } else if (certifications && certifications.length === 0) {
+        // Explicit empty array means "clear my certifications"
+        await supabase
+          .from('certifications')
+          .delete()
+          .eq('profile_id', profileId);
+      }
+
       // Handle licenses with privacy protection
-      if (credential_type && credential_type !== "Student" && credential_type !== "Other" && licenses && licenses.length > 0) {
+      if (credential_type && credential_type !== "Student" && credential_type !== "Other" && credential_type !== "Bookkeeper" && licenses && licenses.length > 0) {
         console.log('🔍 SAVING LICENSES:', {
           profileId,
           credential_type,
@@ -694,8 +798,8 @@ export async function PUT(request: Request) {
         } else {
           console.log('✅ Licenses saved successfully');
         }
-      } else if (credential_type === "Student" || credential_type === "Other" || credential_type === "Accountant" || credential_type === "Financial Planner") {
-        // Students, "Other", "Accountant", and "Financial Planner" don't require tax licenses - remove any existing ones
+      } else if (credential_type === "Student" || credential_type === "Other" || credential_type === "Bookkeeper" || credential_type === "Accountant" || credential_type === "Financial Planner") {
+        // Students, "Other", "Bookkeeper", "Accountant", and "Financial Planner" don't require tax licenses - remove any existing ones
         console.log('🔍 Removing licenses for non-tax-credential profile type:', credential_type);
         await supabase
           .from('licenses')
