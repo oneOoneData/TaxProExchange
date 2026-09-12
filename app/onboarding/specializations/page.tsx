@@ -13,12 +13,30 @@ export default function SpecializationsPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [professionalRoles, setProfessionalRoles] = useState<string[]>(['tax_pro']);
 
   useEffect(() => {
     if (isLoaded && !user) {
       router.push('/sign-in');
     }
   }, [isLoaded, user, router]);
+
+  // Fetch the profile's professional_roles so this step can focus the
+  // specialization picker on bookkeeping categories for bookkeeper-only
+  // profiles, rather than showing every tax-filing category first.
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/profile?clerk_id=${user.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((profile) => {
+        if (profile?.professional_roles?.length) {
+          setProfessionalRoles(profile.professional_roles);
+        }
+      })
+      .catch(() => {
+        // Non-fatal -- just keep the default tax_pro-oriented view
+      });
+  }, [user]);
 
   if (!isLoaded || !user) {
     return (
@@ -62,6 +80,9 @@ export default function SpecializationsPage() {
     router.push('/profile/edit');
   };
 
+  const isBookkeeper = professionalRoles.includes('bookkeeper');
+  const bookkeeperOnly = isBookkeeper && !professionalRoles.includes('tax_pro');
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-slate-200">
@@ -100,8 +121,14 @@ export default function SpecializationsPage() {
               selected={selected}
               onToggle={handleToggle}
               onClear={() => setSelected([])}
-              title="Tax Specializations"
-              subtitle="Select all areas where you have expertise and experience"
+              title={bookkeeperOnly ? "Bookkeeping Specializations" : "Specializations"}
+              subtitle={
+                bookkeeperOnly
+                  ? "Select the bookkeeping and accounting areas where you have expertise"
+                  : "Select all areas where you have expertise and experience"
+              }
+              priorityCategoryIds={isBookkeeper ? ['bookkeeping-close'] : undefined}
+              defaultOpenIds={bookkeeperOnly ? ['bookkeeping-close'] : undefined}
             />
           </div>
 

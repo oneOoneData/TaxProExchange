@@ -9,16 +9,43 @@ type Props = {
   onClear: () => void;                  // clear all selections
   title?: string;
   subtitle?: string;
+  // Category ids to render first, ahead of the rest (e.g. bookkeeper
+  // profiles want "bookkeeping-close" surfaced instead of buried third).
+  // Omit to keep the original catalog order.
+  priorityCategoryIds?: string[];
+  // Category ids to default-open. Omit to keep the original default
+  // ("common" + "returns-entities") -- callers pass this to focus a
+  // role-specific view (e.g. a bookkeeper-only profile) without changing
+  // behavior for everyone else.
+  defaultOpenIds?: string[];
 };
 
-export default function SpecializationPicker({ selected, onToggle, onClear, title = "Tax Specializations", subtitle = "Select all the areas where you have expertise and experience", }: Props) {
+export default function SpecializationPicker({
+  selected,
+  onToggle,
+  onClear,
+  title = "Specializations",
+  subtitle = "Select all the areas where you have expertise and experience",
+  priorityCategoryIds,
+  defaultOpenIds,
+}: Props) {
   const [q, setQ] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [openCats, setOpenCats] = useState<Record<string, boolean>>(() => {
-    // Default open common + core returns
-    const defaults: Record<string, boolean> = { common: true, "returns-entities": true };
+    const ids = defaultOpenIds ?? ["common", "returns-entities"];
+    const defaults: Record<string, boolean> = {};
+    ids.forEach((id) => { defaults[id] = true; });
     return defaults;
   });
+
+  const orderedCategories = useMemo(() => {
+    if (!priorityCategoryIds || priorityCategoryIds.length === 0) return CATEGORIES;
+    const priority = CATEGORIES
+      .filter((c) => priorityCategoryIds.includes(c.id))
+      .sort((a, b) => priorityCategoryIds.indexOf(a.id) - priorityCategoryIds.indexOf(b.id));
+    const rest = CATEGORIES.filter((c) => !priorityCategoryIds.includes(c.id));
+    return [...priority, ...rest];
+  }, [priorityCategoryIds]);
 
   const normalizedQuery = q.trim().toLowerCase();
 
@@ -140,7 +167,7 @@ export default function SpecializationPicker({ selected, onToggle, onClear, titl
       {/* Categories */}
       {!normalizedQuery && (
         <div className="space-y-3">
-          {CATEGORIES.filter((c) => (c.advanced ? showAdvanced : true)).map((cat) => (
+          {orderedCategories.filter((c) => (c.advanced ? showAdvanced : true)).map((cat) => (
             <section key={cat.id} className="border border-gray-200 rounded-lg p-3">
               <button type="button" onClick={() => toggleCat(cat.id)} className="w-full text-left">
                 <div className="flex items-center justify-between">
