@@ -945,6 +945,7 @@ export default function EditProfilePage() {
         }
         priorityCategoryIds={isBookkeeper ? ['bookkeeping-close'] : undefined}
         defaultOpenIds={bookkeeperOnly ? ['bookkeeping-close'] : undefined}
+        hideCommonWork={bookkeeperOnly}
       />
 
       {/* Industries served -- benefits tax pros and bookkeepers alike */}
