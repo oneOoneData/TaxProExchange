@@ -1,6 +1,6 @@
 // /components/SpecializationPicker.tsx
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES, COMMON_WORK, ALL_ITEMS, SpecItem, SpecCategory } from "@/constants/specializations";
 
 type Props = {
@@ -16,8 +16,14 @@ type Props = {
   // Category ids to default-open. Omit to keep the original default
   // ("common" + "returns-entities") -- callers pass this to focus a
   // role-specific view (e.g. a bookkeeper-only profile) without changing
-  // behavior for everyone else.
+  // behavior for everyone else. May arrive after the initial render if the
+  // caller has to fetch the profile's role first -- see the effect below.
   defaultOpenIds?: string[];
+  // Hides the "Common Work" section entirely (it's a fixed, tax-filing
+  // oriented bucket -- 1040, S-Corp, etc. -- that doesn't fit a
+  // bookkeeper-only profile even collapsed, since its own label invites a
+  // click). Omit/false to keep showing it.
+  hideCommonWork?: boolean;
 };
 
 export default function SpecializationPicker({
@@ -28,6 +34,7 @@ export default function SpecializationPicker({
   subtitle = "Select all the areas where you have expertise and experience",
   priorityCategoryIds,
   defaultOpenIds,
+  hideCommonWork = false,
 }: Props) {
   const [q, setQ] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -37,6 +44,26 @@ export default function SpecializationPicker({
     ids.forEach((id) => { defaults[id] = true; });
     return defaults;
   });
+
+  // defaultOpenIds often depends on the profile's professional_roles, which
+  // the caller may still be fetching when this component first mounts --
+  // the useState initializer above only runs once, so a role that resolves
+  // after mount would otherwise be silently ignored. Re-apply it the first
+  // time it actually changes (keyed by value, not array identity, so this
+  // doesn't fire on every render and doesn't stomp on the user's own
+  // manual expand/collapse clicks afterward).
+  const defaultOpenKey = (defaultOpenIds || []).join(",");
+  const appliedDefaultOpenKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (appliedDefaultOpenKey.current === defaultOpenKey) return;
+    appliedDefaultOpenKey.current = defaultOpenKey;
+    if (defaultOpenIds && defaultOpenIds.length > 0) {
+      const defaults: Record<string, boolean> = {};
+      defaultOpenIds.forEach((id) => { defaults[id] = true; });
+      setOpenCats(defaults);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultOpenKey]);
 
   const orderedCategories = useMemo(() => {
     if (!priorityCategoryIds || priorityCategoryIds.length === 0) return CATEGORIES;
@@ -146,7 +173,7 @@ export default function SpecializationPicker({
       )}
 
       {/* Common work */}
-      {!normalizedQuery && (
+      {!normalizedQuery && !hideCommonWork && (
         <section>
           <button type="button" onClick={() => toggleCat("common")} className="w-full text-left py-2">
             <div className="flex items-center justify-between">

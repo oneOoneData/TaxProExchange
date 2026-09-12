@@ -129,6 +129,7 @@ export default function SpecializationsPage() {
               }
               priorityCategoryIds={isBookkeeper ? ['bookkeeping-close'] : undefined}
               defaultOpenIds={bookkeeperOnly ? ['bookkeeping-close'] : undefined}
+              hideCommonWork={bookkeeperOnly}
             />
           </div>
 
