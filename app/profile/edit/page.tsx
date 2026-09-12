@@ -570,6 +570,11 @@ export default function EditProfilePage() {
     }));
   };
 
+  // Drives the specialization picker's focus -- a bookkeeper-only profile
+  // shouldn't see every tax-filing category first.
+  const isBookkeeper = profileForm.professional_roles.includes('bookkeeper');
+  const bookkeeperOnly = isBookkeeper && !profileForm.professional_roles.includes('tax_pro');
+
   // Filter specializations based on search term
   const filteredGroups = specializationGroups.map(group => ({
     ...group,
@@ -928,8 +933,18 @@ export default function EditProfilePage() {
         selected={profileForm.specializations}
         onToggle={toggleSpecialization}
         onClear={clearAllSpecializations}
-        title="Tax Specializations & Areas of Expertise"
-        subtitle="Select all the areas where you have expertise and experience"
+        title={
+          bookkeeperOnly
+            ? "Bookkeeping Specializations"
+            : "Tax Specializations & Areas of Expertise"
+        }
+        subtitle={
+          bookkeeperOnly
+            ? "Select the bookkeeping and accounting areas where you have expertise"
+            : "Select all the areas where you have expertise and experience"
+        }
+        priorityCategoryIds={isBookkeeper ? ['bookkeeping-close'] : undefined}
+        defaultOpenIds={bookkeeperOnly ? ['bookkeeping-close'] : undefined}
       />
 
       {/* Industries served -- benefits tax pros and bookkeepers alike */}
