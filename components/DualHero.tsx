@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 export default function DualHero() {
-  const [mode, setMode] = useState<"firm" | "pro">("firm");
+  const [mode, setMode] = useState<"firm" | "pro" | "bookkeeper">("firm");
 
   const firm = {
     title: "Stop paying $500 per job post.",
@@ -21,7 +21,15 @@ export default function DualHero() {
     href: "/join",
   };
 
-  const content = mode === "firm" ? firm : pro;
+  const bookkeeper = {
+    title: "Grow Your Bookkeeping Practice.",
+    subtitle:
+      "Join a verified network of tax pros and bookkeepers. Get discovered by tax pros looking for reliable books, and refer overflow work back and forth.",
+    cta: "Join Free",
+    href: "/join",
+  };
+
+  const content = mode === "firm" ? firm : mode === "pro" ? pro : bookkeeper;
 
   return (
     <section className="w-full py-20">
@@ -45,6 +53,15 @@ export default function DualHero() {
             }`}
           >
             For Tax Pros
+          </button>
+
+          <button
+            onClick={() => setMode("bookkeeper")}
+            className={`px-5 py-2 rounded-full text-sm ${
+              mode === "bookkeeper" ? "bg-white shadow font-semibold" : "text-gray-500"
+            }`}
+          >
+            For Bookkeepers
           </button>
         </div>
 
