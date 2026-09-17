@@ -5,6 +5,7 @@ import { siteUrl, generateFaqJsonLd } from '@/lib/seo';
 import SolutionCTA from '@/components/seo/SolutionCTA';
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView';
 import DemoRequestButton from '@/components/DemoRequestButton';
+import AppNavigation from '@/components/AppNavigation';
 
 export const metadata: Metadata = {
   title: 'For Tax Firms: Verified Overflow Staffing & Niche Expertise | TaxProExchange',
@@ -69,6 +70,7 @@ export default function ForFirmsPage() {
       <JsonLd data={organizationSchema} />
       <JsonLd data={faqSchema} />
       <AnalyticsPageView eventName="view_for_firms" />
+      <AppNavigation />
 
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
         {/* Hero */}

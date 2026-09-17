@@ -6,6 +6,7 @@ import SolutionCTA from '@/components/seo/SolutionCTA';
 import { SOLUTIONS, Solution } from '@/lib/constants/solutions';
 import { siteUrl, generateFaqJsonLd } from '@/lib/seo';
 import AnalyticsPageView from '@/components/analytics/AnalyticsPageView';
+import AppNavigation from '@/components/AppNavigation';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -77,6 +78,7 @@ export default async function SolutionPage({ params }: Props) {
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={faqSchema} />
       <AnalyticsPageView eventName="view_solution" properties={{ slug, title: solution.title }} />
+      <AppNavigation />
 
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
         {/* Hero */}
@@ -94,6 +96,14 @@ export default async function SolutionPage({ params }: Props) {
               <p className="mt-4 text-xl text-slate-300">
                 {solution.description}
               </p>
+              <div className="mt-8">
+                <Link
+                  href="/join"
+                  className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-slate-900 bg-white hover:bg-slate-100 shadow-lg transition-all"
+                >
+                  Create Firm Account
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -196,15 +206,15 @@ export default async function SolutionPage({ params }: Props) {
               Browse verified CPAs, EAs, and tax professionals with the exact expertise you need.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/join"
+                className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-slate-900 bg-white hover:bg-slate-100 shadow-lg transition-all"
+              >
+                Create Firm Account
+              </Link>
               <SolutionCTA to={solution.searchQuery}>
                 Search Verified Pros
               </SolutionCTA>
-              <Link
-                href="/for-firms"
-                className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all"
-              >
-                Explore All Solutions
-              </Link>
             </div>
           </div>
         </section>
