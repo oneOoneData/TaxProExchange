@@ -98,7 +98,7 @@ export async function postJobToFacebook(job: {
     return;
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com').replace(/\/+$/, '');
   const jobUrl = `${appUrl}/jobs/${job.id}`;
   const message = buildJobMessage(job, jobUrl);
 
