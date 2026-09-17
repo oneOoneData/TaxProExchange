@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${solution.title} | TaxProExchange`,
+    title: solution.title,
     description: solution.description,
     alternates: { canonical: `${siteUrl}/solutions/${slug}` },
     openGraph: {
