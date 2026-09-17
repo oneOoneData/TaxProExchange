@@ -151,6 +151,7 @@ export default function ForFirmsPage() {
                 { title: 'Trusts & Estates', href: '/solutions/trusts-and-estates', desc: 'Form 1041, 706, and fiduciary returns' },
                 { title: 'K-1 & Partnership Returns', href: '/solutions/k1-surge-support', desc: 'Form 1065 and partnership surge support' },
                 { title: 'White-Label Prep', href: '/solutions/white-label-tax-prep', desc: 'Behind-the-scenes prep under your brand' },
+                { title: 'RIAs & Wealth Management', href: '/solutions/ria-wealth-management', desc: 'Tax support for RIAs, without hiring in-house' },
               ].map((useCase) => (
                 <Link
                   key={useCase.href}

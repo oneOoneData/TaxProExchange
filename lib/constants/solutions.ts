@@ -326,5 +326,44 @@ White-label arrangements are common during busy season, when launching a new ser
         answer: 'Any return type: 1040, 1065, 1120-S, 1120, 1041, 990, and more. Filter by specialization to find professionals with the expertise your firm needs.'
       }
     ]
+  },
+  {
+    slug: 'ria-wealth-management',
+    title: 'Tax Support for RIAs & Wealth Management Firms',
+    description: 'RIAs and wealth management firms connect with verified CPAs and EAs for client tax prep, K-1s from alternative investments, and multi-state HNW returns—without hiring in-house.',
+    h1: 'Tax Support for RIAs & Wealth Management Firms',
+    intro: `Your RIA manages the portfolio—but your clients still need their taxes done, and referring them out risks the relationship. TaxProExchange connects independent RIAs and wealth management firms with verified CPAs and EAs who handle the tax side: multi-state returns, K-1s from alternative investments and private funds, trust and estate filings, and coordination around advisory fee billing and custodian activity.
+
+Every professional in our directory is credential-verified before their profile goes live, so you can bring in tax expertise for a client relationship without adding headcount or building an in-house tax practice. Many are experienced working alongside RIAs and understand the coordination points that matter—cost basis from custodian statements, distributions, and timing around client review meetings.
+
+Search by specialization (trusts & estates, multi-state, partnership/K-1) and state license to find a CPA or EA who fits your client base. Reach out directly, agree on scope and fees, and keep the client relationship yours.`,
+    whenToUse: [
+      'Your RIA doesn\'t offer tax prep in-house and you\'re currently referring clients elsewhere—and sometimes losing them',
+      'A client has K-1s from alternative investments, multi-state income, or a trust that needs specialized handling',
+      'You want a tax professional who understands custodian activity and advisory fee billing, not just a generic preparer'
+    ],
+    searchQuery: '/search?accepting_work=true&specialization=trusts_estates',
+    faqs: [
+      {
+        question: 'Can a CPA on TaxProExchange work directly with our clients?',
+        answer: 'Yes. You introduce the CPA or EA to your client (or stay in the loop, your choice), and they handle preparation directly. You decide how hands-on to be in the relationship.'
+      },
+      {
+        question: 'Do professionals here have experience with K-1s from alternative investments and private funds?',
+        answer: 'Many do. Filter by partnership/K-1 specialization and review each profile\'s experience before reaching out—profiles list specializations like partnership returns, multi-state, and trusts & estates.'
+      },
+      {
+        question: 'Can they handle multi-state clients with complex residency situations?',
+        answer: 'Yes. Filter by multi-state/SALT specialization to find CPAs experienced in nexus, apportionment, and multi-state HNW returns.'
+      },
+      {
+        question: 'How are professionals verified?',
+        answer: 'We manually check CPA state board records, IRS EA enrollment, and CTEC registration before any profile goes live. Only verified, active credentials appear in search results.'
+      },
+      {
+        question: 'Is there a cost to browse or connect?',
+        answer: 'Creating a firm account and browsing verified professionals is free. You negotiate scope and fees directly with the professional you choose to work with.'
+      }
+    ]
   }
 ];
