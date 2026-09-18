@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 
 export default function TermsPage() {
-  const lastUpdated = '2025-01-27';
+  const lastUpdated = '2026-09-18';
   
   // Set page title
   useEffect(() => {
@@ -46,7 +46,9 @@ export default function TermsPage() {
             </ul>
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">4. Acceptable Use</h2>
-            <p className="text-slate-700 mb-4">You agree not to use the Service to:</p>
+            <p className="text-slate-700 mb-4">
+              TaxProExchange exists to connect tax professionals for referral work, overflow engagements, and mentorship — not to sell products, software, or &quot;business opportunity&quot; packages to other members. You agree not to use the Service to:
+            </p>
             <ul className="list-disc pl-6 text-slate-700 mb-4 space-y-2">
               <li>Violate any applicable laws or regulations</li>
               <li>Infringe upon the rights of others</li>
@@ -54,6 +56,8 @@ export default function TermsPage() {
               <li>Harass, abuse, or harm other users</li>
               <li>Attempt to gain unauthorized access to the Service</li>
               <li>Use the Service for commercial purposes without authorization</li>
+              <li>Send unsolicited promotional pitches, or solicit other members to purchase software, courses, or paid &quot;partner up&quot; / business-opportunity packages unrelated to genuine referral or mentorship engagements</li>
+              <li>Recruit other members into franchise-style, multi-level, or EFIN-sharing arrangements</li>
             </ul>
 
             <h2 className="text-2xl font-semibold text-slate-900 mt-8 mb-4">5. Professional Standards</h2>
