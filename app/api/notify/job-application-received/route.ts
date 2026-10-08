@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { supabaseService } from '@/lib/supabaseService';
 import { sendEmail } from '@/lib/email';
 
@@ -49,6 +50,8 @@ export async function POST(request: NextRequest) {
       job_id,
       applicant_name,
       applicant_headline,
+      applicant_public_email,
+      applicant_slug,
       proposed_rate,
       proposed_timeline,
       cover_note
@@ -127,22 +130,26 @@ export async function POST(request: NextRequest) {
           <p><strong>Name:</strong> ${applicant_name}</p>
           <p><strong>Professional Title:</strong> ${applicant_headline}</p>
           <p><strong>Proposed Rate:</strong> ${formatProposedRate()}</p>
+          ${applicant_public_email ? `<p><strong>Email:</strong> <a href="mailto:${applicant_public_email}" style="color: #1f2937;">${applicant_public_email}</a></p>` : ''}
+          ${applicant_slug ? `<p><a href="${getAppBaseUrl()}/p/${applicant_slug}" style="color: #1f2937;">View full profile →</a></p>` : ''}
         </div>
-        
+
         <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h4 style="margin-top: 0; color: #92400e;">Cover Note</h4>
           <p style="font-style: italic;">"${cover_note}"</p>
         </div>
-        
-        <p>You can review this application and manage all applications for this job in your TaxProExchange dashboard.</p>
-        
+
+        <p>
+          You can message ${applicant_name.split(' ')[0]} through TaxProExchange from your dashboard${applicant_public_email ? `, or email them directly at <a href="mailto:${applicant_public_email}">${applicant_public_email}</a>` : ''}.
+        </p>
+
         <div style="margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job_id}/applications" 
+          <a href="${getAppBaseUrl()}/jobs/${job_id}/applications"
              style="background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Review Application
+            Review &amp; Message Applicant
           </a>
         </div>
-        
+
         <p>Take action on this application to keep candidates informed about their status.</p>
         
         <p>Best regards,<br>The TaxProExchange Team</p>
@@ -165,14 +172,14 @@ You've received a new application for your job posting "${job_title}".
 Applicant Details:
 - Name: ${applicant_name}
 - Professional Title: ${applicant_headline}
-- Proposed Rate: ${formatProposedRate()}
+- Proposed Rate: ${formatProposedRate()}${applicant_public_email ? `\n- Email: ${applicant_public_email}` : ''}${applicant_slug ? `\n- Profile: ${getAppBaseUrl()}/p/${applicant_slug}` : ''}
 
 Cover Note:
 "${cover_note}"
 
-You can review this application and manage all applications for this job in your TaxProExchange dashboard.
+You can message ${applicant_name.split(' ')[0]} through TaxProExchange from your dashboard${applicant_public_email ? `, or email them directly at ${applicant_public_email}` : ''}.
 
-Review Application: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job_id}/applications
+Review & Message Applicant: ${getAppBaseUrl()}/jobs/${job_id}/applications
 
 Take action on this application to keep candidates informed about their status.
 
@@ -189,7 +196,9 @@ This is an automated notification from TaxProExchange. Please do not reply to th
         to: jobPosterEmail,
         subject,
         html: htmlContent,
-        text: textContent
+        text: textContent,
+        category: 'application_received',
+        metadata: { job_id, applicant_name },
       });
       
       console.log(`Job application notification sent to ${jobPosterEmail}`);

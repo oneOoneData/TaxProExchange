@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 
@@ -70,7 +71,7 @@ export async function PATCH(
     // Send notification email to applicant about status change
     if (application?.profiles?.public_email) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/application-status-changed`, {
+        await fetch(`${getAppBaseUrl()}/api/notify/application-status-changed`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

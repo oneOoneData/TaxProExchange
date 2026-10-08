@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { postJobToFacebook } from '@/lib/facebook';
@@ -260,7 +261,7 @@ export async function POST(request: Request) {
 
     // Send job notifications to eligible users
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-created`, {
+      await fetch(`${getAppBaseUrl()}/api/notify/job-created`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

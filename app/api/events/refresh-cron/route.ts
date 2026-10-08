@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAppBaseUrl } from '@/lib/url';
 import OpenAI from "openai";
 import { createServerClient } from "@/lib/supabase/server";
 import { ingestEvents } from "@/lib/normalizeEvent";
@@ -72,7 +73,7 @@ IMPORTANT: All events must have start_date in 2025 or 2026, not 2024.
             publishable: validationResult.publishable,
             errors: validationResult.errors
           },
-          reviewUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/events-review`,
+          reviewUrl: `${getAppBaseUrl()}/admin/events-review`,
           dateRange: {
             from: new Date().toLocaleDateString(),
             to: new Date(Date.now() + 180*24*60*60*1000).toLocaleDateString()

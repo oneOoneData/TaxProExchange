@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { sendEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
         <p>You can view your application details and any additional information in your TaxProExchange dashboard.</p>
         
         <div style="margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/profile/applications" 
+          <a href="${getAppBaseUrl()}/profile/applications" 
              style="background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
             View My Applications
           </a>
@@ -94,7 +95,7 @@ ${notes ? `Notes: ${notes}` : ''}
 
 You can view your application details and any additional information in your TaxProExchange dashboard.
 
-View My Applications: ${process.env.NEXT_PUBLIC_APP_URL}/profile/applications
+View My Applications: ${getAppBaseUrl()}/profile/applications
 
 If you have any questions, please don't hesitate to reach out.
 
@@ -111,7 +112,8 @@ This is an automated notification from TaxProExchange. Please do not reply to th
         to: applicant_email,
         subject,
         html: htmlContent,
-        text: textContent
+        text: textContent,
+        category: 'application_status_changed'
       });
       
       console.log(`Application status notification sent to ${applicant_email}`);

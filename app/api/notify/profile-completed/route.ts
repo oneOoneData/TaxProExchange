@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { sendProfileCompletionNotification } from '@/lib/email';
 import { supabaseService } from '@/lib/supabaseService';
 
@@ -64,11 +65,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Create admin view link using the public profile route with admin parameter
-    const adminViewLink = `${process.env.NEXT_PUBLIC_APP_URL}/p/${profile.slug}?admin=true`;
+    const adminViewLink = `${getAppBaseUrl()}/p/${profile.slug}?admin=true`;
     
     // Create direct approval/rejection links
-    const approveLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profile_id}&action=approve`;
-    const rejectLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profile_id}&action=reject`;
+    const approveLink = `${getAppBaseUrl()}/api/admin/email-approve?profileId=${profile_id}&action=approve`;
+    const rejectLink = `${getAppBaseUrl()}/api/admin/email-approve?profileId=${profile_id}&action=reject`;
     
     console.log('📧 Generated admin links:', { adminViewLink, approveLink, rejectLink });
 

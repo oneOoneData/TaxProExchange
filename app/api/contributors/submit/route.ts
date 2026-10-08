@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { supabaseService } from '@/lib/supabaseService';
 import { sendEmail } from '@/lib/email';
 import { headers } from 'next/headers';
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
 
     // Send admin notification email (non-blocking)
     const adminEmail = process.env.ADMIN_EMAIL || 'koen@cardifftax.com';
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+    const siteUrl = getAppBaseUrl();
     
     try {
       const html = `

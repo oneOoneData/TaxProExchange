@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { sendEmail } from '@/lib/email';
 import { supabaseService } from '@/lib/supabaseService';
 import { auth } from '@clerk/nextjs/server';
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+const siteUrl = getAppBaseUrl();
 
 interface ContributorPublishedData {
   contributorName: string;

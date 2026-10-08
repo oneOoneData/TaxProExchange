@@ -1,5 +1,6 @@
 // app/api/profile/route.ts
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { ProfileUpdateSchema } from '@/lib/validations/zodSchemas';
@@ -840,7 +841,7 @@ export async function PUT(request: Request) {
     // Send notification email to admin when profile is completed
     if (profile && profile.onboarding_complete) {
       try {
-        const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/profile-completed`, {
+        const notificationResponse = await fetch(`${getAppBaseUrl()}/api/notify/profile-completed`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -871,7 +872,7 @@ export async function PUT(request: Request) {
     if (isNewProfile && profile && !profileError) {
       const recipientEmail = profile.public_email || userEmail;
       if (recipientEmail) {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+        const appUrl = getAppBaseUrl();
         const firstName = profile.first_name || 'there';
         const unsubscribeUrl = generateUnsubscribeUrl(profile.id, 'marketing');
 
@@ -962,7 +963,7 @@ Unsubscribe: ${unsubscribeUrl}`,
       const emailPrefs = profile.email_preferences as any;
       const marketingOptIn = emailPrefs?.marketing_updates ?? false;
       
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/hubspot/sync-contact`, {
+      fetch(`${getAppBaseUrl()}/api/hubspot/sync-contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

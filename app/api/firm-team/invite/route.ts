@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email notification to professional
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com';
+    const appUrl = getAppBaseUrl();
     const professional = invitation.profiles as any;
     const firmData = invitation.firms as any;
     

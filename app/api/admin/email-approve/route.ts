@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/adminAuth';
 
@@ -156,7 +157,7 @@ export async function GET(request: NextRequest) {
               to: emailToSend,
               firstName: updatedProfile.first_name,
               slug: updatedProfile.slug,
-              managePrefsUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings`
+              managePrefsUrl: `${getAppBaseUrl()}/settings`
             });
 
             // Mark as notified
@@ -457,7 +458,7 @@ export async function POST(request: NextRequest) {
               to: emailToSend,
               firstName: updatedProfile.first_name,
               slug: updatedProfile.slug,
-              managePrefsUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings`
+              managePrefsUrl: `${getAppBaseUrl()}/settings`
             });
 
             // Mark as notified

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { auth } from '@clerk/nextjs/server';
 import { sendConnectionRequestNotification, shouldSendEmail, type EmailPreferences } from '@/lib/email';
@@ -131,7 +132,7 @@ export async function POST(req: Request) {
                 requesterCredential: requesterProfile.credential_type || '',
                 recipientName: `${recipientProfile.first_name} ${recipientProfile.last_name}`,
                 recipientEmail: recipientEmail,
-                acceptLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/messages`
+                acceptLink: `${getAppBaseUrl()}/messages`
               });
             } else {
               console.error('No email found for recipient:', recipientProfileId);

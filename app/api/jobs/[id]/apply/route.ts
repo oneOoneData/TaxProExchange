@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 
@@ -32,7 +33,7 @@ export async function POST(
     // Get user's profile
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, visibility_state, headline')
+      .select('id, first_name, last_name, visibility_state, headline, public_email, slug')
       .eq('clerk_id', userId)
       .single();
 
@@ -116,7 +117,7 @@ export async function POST(
     
     // 1. Notify job poster about new application
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-application-received`, {
+      await fetch(`${getAppBaseUrl()}/api/notify/job-application-received`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,6 +126,8 @@ export async function POST(
           job_id: jobId,
           applicant_name: applicantName,
           applicant_headline: profile.headline || 'Tax Professional',
+          applicant_public_email: profile.public_email || null,
+          applicant_slug: profile.slug || null,
           proposed_rate: proposed_rate,
           proposed_timeline: proposed_timeline,
           cover_note: cover_note,
@@ -138,7 +141,7 @@ export async function POST(
 
     // 2. Send confirmation email to applicant
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/application-confirmation`, {
+      await fetch(`${getAppBaseUrl()}/api/notify/application-confirmation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
