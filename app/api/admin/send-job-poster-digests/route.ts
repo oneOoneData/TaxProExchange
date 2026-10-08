@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { sendEmail } from '@/lib/email';
@@ -246,7 +247,7 @@ export async function POST(request: NextRequest) {
           ` : ''}
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}/applications" 
+            <a href="${getAppBaseUrl()}/jobs/${job.id}/applications" 
                style="background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Review All Applications
             </a>
@@ -293,7 +294,7 @@ ${jobApplications.filter(a => a.status === 'applied').slice(0, 3).map(app => `
 ${jobApplications.filter(a => a.status === 'applied').length > 3 ? `+ ${jobApplications.filter(a => a.status === 'applied').length - 3} more applicant${jobApplications.filter(a => a.status === 'applied').length - 3 !== 1 ? 's' : ''}` : ''}
 ` : ''}
 
-Review All Applications: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}/applications
+Review All Applications: ${getAppBaseUrl()}/jobs/${job.id}/applications
 
 Keep your applicants informed by updating their status regularly. This helps maintain engagement and professionalism.
 

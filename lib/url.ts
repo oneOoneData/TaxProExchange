@@ -6,11 +6,6 @@
  * the codebase build links as `${BASE}/path`, producing `.com//path`. This
  * helper normalizes both sides of the join so it's safe regardless of how
  * the env var is set.
- *
- * NOTE: this file is identical to the one added in PR #30
- * (fix/email-links-contact-logging) -- duplicated here so this branch
- * doesn't depend on that PR merging first. Keep them in sync; they'll
- * merge cleanly since the content matches.
  */
 const DEFAULT_APP_URL = 'https://www.taxproexchange.com';
 

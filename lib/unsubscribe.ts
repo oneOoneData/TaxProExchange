@@ -1,3 +1,4 @@
+import { getAppBaseUrl } from './url';
 ﻿import { createHmac } from 'crypto';
 
 export function signUnsubscribeToken(profileId: string): string {
@@ -7,7 +8,7 @@ export function signUnsubscribeToken(profileId: string): string {
 }
 
 export function generateUnsubscribeUrl(profileId: string, type = 'marketing'): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+  const appUrl = getAppBaseUrl();
   const token = signUnsubscribeToken(profileId);
   return `${appUrl}/api/unsubscribe?pid=${profileId}&token=${token}&type=${type}`;
 }

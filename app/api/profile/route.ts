@@ -1,9 +1,10 @@
 // app/api/profile/route.ts
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { ProfileUpdateSchema } from '@/lib/validations/zodSchemas';
-import { parseReferralCookie } from '@/lib/cookies';
+import { parseReferralCookie, parseAcquisitionCookie } from '@/lib/cookies';
 import { sendEmail } from '@/lib/email';
 import { generateUnsubscribeUrl } from '@/lib/unsubscribe';
 
@@ -538,7 +539,7 @@ export async function PUT(request: Request) {
       let referrerProfileId = null;
       const cookieHeader = request.headers.get('cookie');
       const refSlug = parseReferralCookie(cookieHeader);
-      
+
       if (refSlug) {
         // Look up the referrer's profile ID by slug
         const { data: referrerProfile } = await supabase
@@ -546,11 +547,19 @@ export async function PUT(request: Request) {
           .select('id')
           .eq('slug', refSlug)
           .single();
-        
+
         if (referrerProfile) {
           referrerProfileId = referrerProfile.id;
           console.log('🎯 Referral tracking:', { refSlug, referrerProfileId });
         }
+      }
+
+      // First-touch UTM/src capture (separate from referrer_profile_id above --
+      // this is server-authoritative from the cookie AcquisitionTracker sets on
+      // landing, not client-submitted body data). See dev-attribution-tracking-2026-10.
+      const acquisitionData = parseAcquisitionCookie(cookieHeader);
+      if (acquisitionData) {
+        console.log('🎯 Acquisition tracking:', acquisitionData);
       }
 
       // Auto-accept legal terms for new profiles
@@ -589,6 +598,11 @@ export async function PUT(request: Request) {
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           referrer_profile_id: referrerProfileId,
+          // First-touch UTM/src, server-authoritative from the cookie (not client body)
+          utm_source: acquisitionData?.utm_source || null,
+          utm_medium: acquisitionData?.utm_medium || null,
+          utm_campaign: acquisitionData?.utm_campaign || null,
+          landing_src: acquisitionData?.landing_src || null,
           // Auto-accept legal terms
           tos_version: LEGAL_VERSIONS.TOS,
           tos_accepted_at: now,
@@ -827,7 +841,7 @@ export async function PUT(request: Request) {
     // Send notification email to admin when profile is completed
     if (profile && profile.onboarding_complete) {
       try {
-        const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/profile-completed`, {
+        const notificationResponse = await fetch(`${getAppBaseUrl()}/api/notify/profile-completed`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -858,7 +872,7 @@ export async function PUT(request: Request) {
     if (isNewProfile && profile && !profileError) {
       const recipientEmail = profile.public_email || userEmail;
       if (recipientEmail) {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+        const appUrl = getAppBaseUrl();
         const firstName = profile.first_name || 'there';
         const unsubscribeUrl = generateUnsubscribeUrl(profile.id, 'marketing');
 
@@ -949,7 +963,7 @@ Unsubscribe: ${unsubscribeUrl}`,
       const emailPrefs = profile.email_preferences as any;
       const marketingOptIn = emailPrefs?.marketing_updates ?? false;
       
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/hubspot/sync-contact`, {
+      fetch(`${getAppBaseUrl()}/api/hubspot/sync-contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

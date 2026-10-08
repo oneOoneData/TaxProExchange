@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 import { verifiedListedHtml, verifiedListedText } from './verifiedListedTemplate';
+import { getAppBaseUrl } from './url';
+import { supabaseService } from './supabaseService';
 
 // Initialize Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -43,6 +45,12 @@ export interface ProfileCompletionEmailData {
   firmName: string;
   isListed: boolean;
   visibilityState: string;
+  acquisitionSource?: string | null;
+  acquisitionSourceDetail?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  landingSrc?: string | null;
   adminViewLink: string;
   approveLink: string;
   rejectLink: string;
@@ -174,7 +182,7 @@ export const emailTemplates = {
           <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #0ea5e9;">
             <p style="margin: 0; color: #0c4a6e; font-weight: 500;">
               Got work to hand off or need a specialist?<br>
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/new" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">👉 Post a job on TaxProExchange</a>
+              <a href="${getAppBaseUrl()}/jobs/new" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">👉 Post a job on TaxProExchange</a>
             </p>
           </div>
           
@@ -182,21 +190,47 @@ export const emailTemplates = {
             <p>You're receiving this because you have job notifications enabled in your account settings.</p>
             <p><strong>Don't want these emails?</strong> You can easily turn off job notifications:</p>
             <ul style="margin: 10px 0; padding-left: 20px;">
-              <li>Go to your <a href="${process.env.NEXT_PUBLIC_APP_URL}/settings" style="color: #4299e1;">Settings page</a></li>
+              <li>Go to your <a href="${getAppBaseUrl()}/settings" style="color: #4299e1;">Settings page</a></li>
               <li>Scroll down to "Email Preferences"</li>
               <li>Uncheck "Job Notifications"</li>
               <li>Click "Save Preferences"</li>
             </ul>
-            <p>Or <a href="${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications" style="color: #4299e1;">click here to unsubscribe</a> from job notifications.</p>
+            <p>Or <a href="${getAppBaseUrl()}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications" style="color: #4299e1;">click here to unsubscribe</a> from job notifications.</p>
             <p>TaxProExchange - Connecting verified tax professionals</p>
           </div>
         </body>
       </html>
     `,
-    text: `New Job Opportunity: ${data.title}\n\nCompensation: ${data.payout}\nDeadline: ${data.deadline}\n\nView Job: ${data.link}\n\n---\nGot work to hand off or need a specialist?\n👉 Post a job on TaxProExchange: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/new\n\n---\nYou're receiving this because you have job notifications enabled in your account settings.\n\nDon't want these emails? You can easily turn off job notifications:\n1. Go to your Settings page: ${process.env.NEXT_PUBLIC_APP_URL}/settings\n2. Scroll down to "Email Preferences"\n3. Uncheck "Job Notifications"\n4. Click "Save Preferences"\n\nOr click here to unsubscribe: ${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications\n\nTaxProExchange - Connecting verified tax professionals`
+    text: `New Job Opportunity: ${data.title}\n\nCompensation: ${data.payout}\nDeadline: ${data.deadline}\n\nView Job: ${data.link}\n\n---\nGot work to hand off or need a specialist?\n👉 Post a job on TaxProExchange: ${getAppBaseUrl()}/jobs/new\n\n---\nYou're receiving this because you have job notifications enabled in your account settings.\n\nDon't want these emails? You can easily turn off job notifications:\n1. Go to your Settings page: ${getAppBaseUrl()}/settings\n2. Scroll down to "Email Preferences"\n3. Uncheck "Job Notifications"\n4. Click "Save Preferences"\n\nOr click here to unsubscribe: ${getAppBaseUrl()}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications\n\nTaxProExchange - Connecting verified tax professionals`
   }),
 
-  profileCompletion: (data: ProfileCompletionEmailData): EmailTemplate => ({
+  profileCompletion: (data: ProfileCompletionEmailData): EmailTemplate => {
+    // Build a single human-readable source line from the self-reported
+    // dropdown + any first-touch UTM/src data, e.g.
+    // "Referred by a colleague (Jane Doe)" or "facebook (utm_campaign: firm-overflow)".
+    const sourceLabels: Record<string, string> = {
+      google_search: 'Google / search',
+      facebook: 'Facebook',
+      linkedin: 'LinkedIn',
+      referred_by_colleague: 'Referred by a colleague',
+      email_from_taxproexchange: 'Email from TaxProExchange',
+      other: 'Other',
+    };
+    const sourceParts: string[] = [];
+    if (data.acquisitionSource) {
+      const label = sourceLabels[data.acquisitionSource] || data.acquisitionSource;
+      sourceParts.push(data.acquisitionSourceDetail ? `${label} (${data.acquisitionSourceDetail})` : label);
+    }
+    const utmBits = [
+      data.utmSource ? `utm_source: ${data.utmSource}` : null,
+      data.utmMedium ? `utm_medium: ${data.utmMedium}` : null,
+      data.utmCampaign ? `utm_campaign: ${data.utmCampaign}` : null,
+      data.landingSrc ? `src: ${data.landingSrc}` : null,
+    ].filter(Boolean);
+    if (utmBits.length) sourceParts.push(utmBits.join(', '));
+    const sourceLine = sourceParts.length ? sourceParts.join(' — ') : null;
+
+    return {
     subject: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}`,
     html: `
       <!DOCTYPE html>
@@ -220,7 +254,8 @@ export const emailTemplates = {
               ${data.ptin ? `<strong>PTIN:</strong> ${data.ptin}<br>` : ''}
               <strong>Headline:</strong> ${data.headline || 'Not specified'}<br>
               <strong>Firm:</strong> ${data.firmName || 'Not specified'}<br>
-              <strong>Profile Status:</strong> ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}
+              <strong>Profile Status:</strong> ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}<br>
+              <strong>Source:</strong> ${sourceLine || 'Not specified'}
             </div>
           </div>
           
@@ -253,8 +288,9 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\n${data.ptin ? `PTIN: ${data.ptin}\n` : ''}Headline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\nProfile Status: ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
-  }),
+    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\n${data.ptin ? `PTIN: ${data.ptin}\n` : ''}Headline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\nProfile Status: ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}\nSource: ${sourceLine || 'Not specified'}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
+    };
+  },
 
   connectionRequest: (data: ConnectionRequestEmailData): EmailTemplate => ({
     subject: `New Connection Request from ${data.requesterName}`,
@@ -333,10 +369,10 @@ export const emailTemplates = {
           </div>
           
           <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 30px; font-size: 14px; color: #718096;">
-            <p>You're receiving this because you have message notifications enabled. <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/settings" style="color: #10b981; text-decoration: none;">Change your email preferences</a>.</p>
+            <p>You're receiving this because you have message notifications enabled. <a href="${getAppBaseUrl()}/settings" style="color: #10b981; text-decoration: none;">Change your email preferences</a>.</p>
             <p style="margin: 10px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/api/unsubscribe?token=${data.recipientProfileId ? Buffer.from(data.recipientProfileId).toString('base64') : ''}&type=messages" style="color: #718096; text-decoration: underline;">Unsubscribe from message notifications</a> | 
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/api/unsubscribe?token=${data.recipientProfileId ? Buffer.from(data.recipientProfileId).toString('base64') : ''}&type=all" style="color: #718096; text-decoration: underline;">Unsubscribe from all emails</a>
+              <a href="${getAppBaseUrl()}/api/unsubscribe?token=${data.recipientProfileId ? Buffer.from(data.recipientProfileId).toString('base64') : ''}&type=messages" style="color: #718096; text-decoration: underline;">Unsubscribe from message notifications</a> | 
+              <a href="${getAppBaseUrl()}/api/unsubscribe?token=${data.recipientProfileId ? Buffer.from(data.recipientProfileId).toString('base64') : ''}&type=all" style="color: #718096; text-decoration: underline;">Unsubscribe from all emails</a>
             </p>
             <p>TaxProExchange - Connecting verified tax professionals</p>
           </div>
@@ -591,7 +627,37 @@ type SendEmailArgs = {
   from?: string; // Add from parameter
   listUnsubscribe?: string; // mailto:… or https://…
   headers?: Record<string, string>; // Custom email headers
+  category?: string; // e.g. 'application_received', 'connection_request' — for transactional_email_log
+  metadata?: Record<string, unknown>; // extra context to log (job_id, profile_id, etc.)
 };
+
+// Best-effort row in transactional_email_log. Never throws — a logging
+// failure must never block or fail the actual send.
+async function logTransactionalEmail(args: {
+  to: string | string[];
+  subject: string;
+  category?: string;
+  metadata?: Record<string, unknown>;
+  resendId?: string;
+  status: 'sent' | 'failed';
+  error?: string;
+}) {
+  try {
+    const toEmail = Array.isArray(args.to) ? args.to.join(', ') : args.to;
+    const supabase = supabaseService();
+    await supabase.from('transactional_email_log').insert({
+      category: args.category || 'uncategorized',
+      to_email: toEmail,
+      subject: args.subject,
+      resend_id: args.resendId || null,
+      status: args.status,
+      error: args.error || null,
+      metadata: args.metadata || null,
+    });
+  } catch (logError) {
+    console.error('Failed to write transactional_email_log (non-fatal):', logError);
+  }
+}
 
 // Send email function
 export async function sendEmail({
@@ -603,6 +669,8 @@ export async function sendEmail({
   from,
   listUnsubscribe = `mailto:${process.env.EMAIL_REPLY_TO || 'support@taxproexchange.com'}?subject=unsubscribe`,
   headers: customHeaders = {},
+  category,
+  metadata,
 }: SendEmailArgs) {
   try {
     const fromAddress = from || process.env.EMAIL_FROM || 'TaxProExchange <support@taxproexchange.com>';
@@ -623,25 +691,46 @@ export async function sendEmail({
 
     if (result.error) {
       console.error('Resend email error:', result.error);
+      await logTransactionalEmail({
+        to, subject, category, metadata,
+        status: 'failed',
+        error: result.error.message,
+      });
       throw new Error(`Resend error: ${result.error.message}`);
     }
 
     console.log('Email sent successfully:', result);
+    await logTransactionalEmail({
+      to, subject, category, metadata,
+      status: 'sent',
+      resendId: (result as any)?.data?.id,
+    });
     return result;
   } catch (error) {
     console.error('Email service error:', error);
+    // Log failures that happen before/outside the Resend call itself (e.g.
+    // thrown by resend.emails.send). The result.error branch above already
+    // logged Resend-reported failures, so avoid a duplicate row for those.
+    if (!(error instanceof Error) || !error.message.startsWith('Resend error:')) {
+      await logTransactionalEmail({
+        to, subject, category, metadata,
+        status: 'failed',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
     throw error;
   }
 }
 
 // Legacy sendEmail function for backward compatibility
-export async function sendEmailLegacy(to: string, template: EmailTemplate) {
+export async function sendEmailLegacy(to: string, template: EmailTemplate, category?: string) {
   return sendEmail({
     to,
     subject: template.subject,
     html: template.html,
     text: template.text,
     replyTo: template.replyTo,
+    category,
   });
 }
 
@@ -687,13 +776,13 @@ export async function sendBatchJobNotifications(notifications: JobCreatedEmailDa
 export async function sendProfileCompletionNotification(data: ProfileCompletionEmailData) {
   const adminEmail = process.env.ADMIN_EMAIL || 'support@taxproexchange.com';
   const template = emailTemplates.profileCompletion(data);
-  return sendEmailLegacy(adminEmail, template);
+  return sendEmailLegacy(adminEmail, template, 'profile_verification');
 }
 
 // Send connection request notification
 export async function sendConnectionRequestNotification(data: ConnectionRequestEmailData) {
   const template = emailTemplates.connectionRequest(data);
-  return sendEmailLegacy(data.recipientEmail, template);
+  return sendEmailLegacy(data.recipientEmail, template, 'connection_request');
 }
 
 // Send message notification
@@ -715,7 +804,7 @@ export async function sendVerifiedListedEmail(opts: {
   slug: string;
   managePrefsUrl?: string;
 }) {
-  const SITE_URL = process.env.SITE_URL || 'https://www.taxproexchange.com';
+  const SITE_URL = getAppBaseUrl();
   const FOUNDING_MEMBER_URL = process.env.FOUNDING_MEMBER_URL || 'https://buymeacoffee.com/koenf';
   const SURVEY_URL = process.env.AI_SURVEY_URL || 'https://www.taxproexchange.com/insights/survey';
   

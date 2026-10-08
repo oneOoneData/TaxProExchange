@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
         // Send individual connection request email for each connection
         for (const connection of connections) {
           try {
-            const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notifications/connection-request`, {
+            const emailResponse = await fetch(`${getAppBaseUrl()}/api/notifications/connection-request`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

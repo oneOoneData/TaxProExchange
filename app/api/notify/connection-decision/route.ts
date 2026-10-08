@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
         <p>${actionText}</p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/messages" 
+          <a href="${getAppBaseUrl()}/messages" 
              style="background-color: ${isAccepted ? '#10b981' : '#1f2937'}; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
             ${actionButton}
           </a>
@@ -173,7 +174,7 @@ ${responder_firm ? responder_firm : ''}
 
 ${actionText}
 
-${actionButton}: ${process.env.NEXT_PUBLIC_APP_URL}/messages
+${actionButton}: ${getAppBaseUrl()}/messages
 
 ${isAccepted ? `
 You can now:
@@ -198,7 +199,8 @@ This is an automated notification from TaxProExchange. Please do not reply to th
         to: requesterEmail,
         subject,
         html: htmlContent,
-        text: textContent
+        text: textContent,
+        category: 'connection_decision'
       });
       
       console.log(`Connection decision notification sent to ${requesterEmail}`);

@@ -4,6 +4,7 @@ import Script from 'next/script';
 import './globals.css';
 import 'stream-chat-react/dist/css/v2/index.css';
 import DomainAwareLayout from '@/components/DomainAwareLayout';
+import AcquisitionTracker from '@/components/AcquisitionTracker';
 import JsonLd from '@/components/seo/JsonLd';
 import { getOrganizationJsonLd, getWebsiteJsonLd } from '@/lib/seo';
 
@@ -91,6 +92,7 @@ export default function RootLayout({
           />
         )}
         
+        <AcquisitionTracker />
         <DomainAwareLayout>
           {children}
         </DomainAwareLayout>

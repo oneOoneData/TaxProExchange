@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import Stripe from 'stripe';
 
@@ -19,8 +20,8 @@ export async function POST() {
       price: process.env.STRIPE_PRACTICE_BUYER_PRICE_ID,
       quantity: 1,
     }],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://taxproexchange.com'}/practices?unlocked=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://taxproexchange.com'}/practices`,
+    success_url: `${getAppBaseUrl()}/practices?unlocked=true`,
+    cancel_url: `${getAppBaseUrl()}/practices`,
     metadata: { clerk_user_id: userId },
   });
 

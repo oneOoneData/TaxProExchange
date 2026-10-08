@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { createHmac } from 'crypto';
 import { sendMessageNotification, shouldSendEmail, type EmailPreferences } from '@/lib/email';
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
 
     // Send email notification
     const messagePreview = message.text?.substring(0, 100) || 'New message';
-    const messageLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/messages`;
+    const messageLink = `${getAppBaseUrl()}/messages`;
 
     console.log('🔔 Sending message notification email to:', recipientProfile.public_email);
     

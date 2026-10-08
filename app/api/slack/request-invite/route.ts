@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { getCurrentProfile } from '@/lib/db/profile';
 import { sendEmail } from '@/lib/email';
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Prepare user information
     const userName = `${profile.first_name} ${profile.last_name}`.trim();
     const userEmail = profile.public_email || profile.user_id;
-    const profileUrl = `${process.env.NEXT_PUBLIC_APP_URL}/p/${profile.slug}`;
+    const profileUrl = `${getAppBaseUrl()}/p/${profile.slug}`;
 
     // Send notification emails to all admins
     const emailPromises = admins.map(admin => 

@@ -25,6 +25,8 @@ export default function CredentialsPage() {
     professional_roles: ['tax_pro'] as ProfessionalRole[],
     certifications: [] as Certification[]
   });
+  const [acquisitionSource, setAcquisitionSource] = useState('');
+  const [acquisitionSourceDetail, setAcquisitionSourceDetail] = useState('');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -116,6 +118,8 @@ export default function CredentialsPage() {
           licenses: credentialData.licenses,
           professional_roles: credentialData.professional_roles,
           certifications: credentialData.certifications,
+          acquisition_source: acquisitionSource || undefined,
+          acquisition_source_detail: acquisitionSourceDetail || undefined,
           // Add required fields for validation
           accepting_work: true,
           public_contact: false,
@@ -187,6 +191,8 @@ export default function CredentialsPage() {
           licenses: [],
           professional_roles: ['tax_pro'],
           certifications: [],
+          acquisition_source: acquisitionSource || undefined,
+          acquisition_source_detail: acquisitionSourceDetail || undefined,
           accepting_work: true,
           public_contact: false,
           works_multistate: false,
@@ -293,6 +299,37 @@ export default function CredentialsPage() {
                 general: error || undefined
               }}
             />
+          </div>
+
+          {/* How did you hear about us? (optional) */}
+          <div className="mb-8">
+            <label htmlFor="acquisition_source" className="block text-sm font-medium text-slate-700 mb-2">
+              How did you hear about us? <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <select
+              id="acquisition_source"
+              value={acquisitionSource}
+              onChange={(e) => setAcquisitionSource(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select one...</option>
+              <option value="google_search">Google / search</option>
+              <option value="facebook">Facebook</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="referred_by_colleague">Referred by a colleague</option>
+              <option value="email_from_taxproexchange">Email from TaxProExchange</option>
+              <option value="other">Other</option>
+            </select>
+            {(acquisitionSource === 'other' || acquisitionSource === 'referred_by_colleague') && (
+              <input
+                type="text"
+                value={acquisitionSourceDetail}
+                onChange={(e) => setAcquisitionSourceDetail(e.target.value)}
+                placeholder={acquisitionSource === 'referred_by_colleague' ? "Who referred you? (optional)" : "Tell us more (optional)"}
+                maxLength={500}
+                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            )}
           </div>
 
           {/* Error Message */}

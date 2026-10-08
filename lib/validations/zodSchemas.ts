@@ -170,7 +170,12 @@ export const ProfileUpdateSchema = z.object({
   years_experience: z.enum(['1-2', '3-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31+']).optional(),
   entity_revenue_range: z.enum(['< $1M', '$1M - $10M', '$10M - $50M', '$50M - $100M', '$100M - $500M', '$500M - $1B', '> $1B']).nullable().optional(),
   firm_size: z.enum(['solo_1', '2_5', '6_10', '11_20', '21_50', '50_plus']).nullable().optional(),
-  annual_returns_range: z.enum(['lt_100', '100_999', '1000_4999', '5000_plus']).nullable().optional()
+  annual_returns_range: z.enum(['lt_100', '100_999', '1000_4999', '5000_plus']).nullable().optional(),
+  // Self-reported "How did you hear about us?" (dropdown + optional free text).
+  // UTM/src fields are NOT part of this schema -- those are resolved server-side
+  // from a first-touch cookie, not trusted client input (see app/api/profile/route.ts).
+  acquisition_source: z.string().max(100).optional(),
+  acquisition_source_detail: z.string().max(500).optional()
 }).merge(ProfileCredentialSchema);
 
 // Email preferences update schema (for settings page)

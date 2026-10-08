@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/profile/applications" 
+          <a href="${getAppBaseUrl()}/profile/applications" 
              style="background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
             View My Applications
           </a>
@@ -182,7 +183,7 @@ What happens next?
 - If accepted, you can start messaging the job poster directly
 - You can track all your applications in your dashboard
 
-View My Applications: ${process.env.NEXT_PUBLIC_APP_URL}/profile/applications
+View My Applications: ${getAppBaseUrl()}/profile/applications
 
 Thank you for using TaxProExchange. We wish you the best of luck with your application!
 
@@ -199,7 +200,8 @@ This is an automated notification from TaxProExchange. Please do not reply to th
         to: applicantEmail,
         subject,
         html: htmlContent,
-        text: textContent
+        text: textContent,
+        category: 'application_confirmation'
       });
       
       console.log(`Application confirmation sent to ${applicantEmail}`);

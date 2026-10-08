@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { supabaseService } from '@/lib/supabaseService';
 
 export const dynamic = 'force-dynamic';
@@ -59,7 +60,7 @@ export async function GET() {
         job_notifications_enabled: user.email_preferences?.job_notifications
       })) || [],
       totalEligibleUsers: users?.length || 0,
-      testEndpoint: `${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-created`,
+      testEndpoint: `${getAppBaseUrl()}/api/notify/job-created`,
       instructions: [
         '1. This shows users who would receive job notifications',
         '2. To test actual notifications, POST to the test endpoint with job_id',
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
     }
 
     // Call the actual notification endpoint
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/job-created`, {
+    const response = await fetch(`${getAppBaseUrl()}/api/notify/job-created`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
