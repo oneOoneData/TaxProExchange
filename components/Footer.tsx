@@ -2,6 +2,7 @@
 
 import { useUser } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
+import { FEATURE_PUBLIC_MCP } from '@/lib/flags';
 
 export default function Footer() {
   const { user, isLoaded } = useUser();
@@ -73,6 +74,9 @@ export default function Footer() {
             <span className="opacity-0">© {currentYear} TaxProExchange</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
+            {FEATURE_PUBLIC_MCP && (
+              <a href="/connect-ai" className="hover:text-slate-900">Connect Your AI Assistant</a>
+            )}
             <a href="/trust" className="hover:text-slate-900">Trust & Verification</a>
             <a href="/transparency" className="hover:text-slate-900">Transparency</a>
             <a href="/legal/privacy" className="hover:text-slate-900">Privacy</a>

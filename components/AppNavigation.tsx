@@ -8,6 +8,7 @@ import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
 import { JoinButton } from '@/components/JoinButton';
 import MobileNav from '@/components/MobileNav';
+import { FEATURE_PUBLIC_MCP } from '@/lib/flags';
 
 export default function AppNavigation() {
   const { user, isLoaded } = useUser();
@@ -126,6 +127,9 @@ export default function AppNavigation() {
             
             <Link href="/ai-tax-pro" className={isActive('/ai-tax-pro')}>AI Tax Pro</Link>
             <Link href="/insights" className={isActive('/insights')}>Insights</Link>
+            {FEATURE_PUBLIC_MCP && (
+              <Link href="/connect-ai" className={isActive('/connect-ai')}>Connect AI</Link>
+            )}
           </nav>
           
           <div className="flex items-center gap-4">

@@ -4,6 +4,7 @@ import AppNavigation from '@/components/AppNavigation';
 import JsonLd from '@/components/seo/JsonLd';
 import DemoRequestButton from '@/components/DemoRequestButton';
 import { siteUrl, generateFaqJsonLd } from '@/lib/seo';
+import { FEATURE_PUBLIC_MCP } from '@/lib/flags';
 
 export const metadata: Metadata = {
   title: 'Pricing – Free for Tax Professionals, $30/mo for Firms | TaxProExchange',
@@ -162,6 +163,7 @@ export default function PricingPage() {
                     ['Public firm profile page (optional)', true],
                     ['Flat rate — no per-seat fees', true],
                     ['Priority support', true],
+                    ...(FEATURE_PUBLIC_MCP ? [['Connect your AI assistant (Claude, Cowork) to search the directory', true]] : []),
                   ].map(([item, blue]) => (
                     <li key={item as string} className="flex items-start gap-3">
                       <Check blue={blue as boolean} />
