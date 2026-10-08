@@ -26,17 +26,17 @@ export async function POST(request: NextRequest) {
     const supabase = supabaseService();
     let { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('slug, first_name, last_name, visibility_state, ptin, is_listed')
+      .select('slug, first_name, last_name, visibility_state, ptin, is_listed, acquisition_source, acquisition_source_detail, utm_source, utm_medium, utm_campaign, landing_src')
       .eq('id', profile_id)
       .single();
 
     if (profileError || !profile) {
       console.error('Failed to get profile slug:', profileError);
-      
+
       // Try to get profile by ID as fallback
       const { data: fallbackProfile, error: fallbackError } = await supabase
         .from('profiles')
-        .select('slug, first_name, last_name, visibility_state, ptin, is_listed')
+        .select('slug, first_name, last_name, visibility_state, ptin, is_listed, acquisition_source, acquisition_source_detail, utm_source, utm_medium, utm_campaign, landing_src')
         .eq('id', profile_id)
         .single();
       
@@ -85,6 +85,12 @@ export async function POST(request: NextRequest) {
         firmName: firm_name || '',
         isListed: profile.is_listed,
         visibilityState: profile.visibility_state,
+        acquisitionSource: profile.acquisition_source || null,
+        acquisitionSourceDetail: profile.acquisition_source_detail || null,
+        utmSource: profile.utm_source || null,
+        utmMedium: profile.utm_medium || null,
+        utmCampaign: profile.utm_campaign || null,
+        landingSrc: profile.landing_src || null,
         adminViewLink: adminViewLink,
         approveLink: approveLink,
         rejectLink: rejectLink

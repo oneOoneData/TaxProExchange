@@ -106,6 +106,87 @@ export function parseReferralCookie(cookieHeader: string | null): string | null 
 }
 
 /**
+ * Shape of the first-touch acquisition data captured from the landing URL.
+ */
+export interface AcquisitionData {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  landing_src?: string;
+}
+
+const ACQUISITION_COOKIE_NAME = 'acquisition';
+
+/**
+ * Set the first-touch acquisition cookie (client-side). No-op if the cookie
+ * already exists -- this is first-touch attribution, so a later landing
+ * with different UTM params must never overwrite the original source.
+ * @param data - UTM/src values read from the landing URL
+ */
+export function setAcquisitionCookie(data: AcquisitionData) {
+  if (typeof document === 'undefined') return;
+  if (getAcquisitionCookie()) return; // already captured -- first touch wins
+
+  // Drop empty keys so the stored JSON only has what was actually present.
+  const cleaned = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => !!v)
+  );
+  if (Object.keys(cleaned).length === 0) return;
+
+  const value = encodeURIComponent(JSON.stringify(cleaned));
+  document.cookie = `${ACQUISITION_COOKIE_NAME}=${value}; path=/; max-age=${90 * 24 * 60 * 60}; samesite=lax`;
+}
+
+/**
+ * Get the acquisition cookie (client-side).
+ * @returns Parsed acquisition data or null
+ */
+export function getAcquisitionCookie(): AcquisitionData | null {
+  if (typeof document === 'undefined') return null;
+
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const eqIndex = cookie.indexOf('=');
+    if (eqIndex === -1) continue;
+    const name = cookie.slice(0, eqIndex).trim();
+    const value = cookie.slice(eqIndex + 1).trim();
+    if (name === ACQUISITION_COOKIE_NAME) {
+      try {
+        return JSON.parse(decodeURIComponent(value));
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Parse the acquisition cookie from a cookie header (server-side).
+ * @param cookieHeader - Cookie header string
+ * @returns Parsed acquisition data or null
+ */
+export function parseAcquisitionCookie(cookieHeader: string | null): AcquisitionData | null {
+  if (!cookieHeader) return null;
+
+  const cookies = cookieHeader.split(';');
+  for (let cookie of cookies) {
+    const eqIndex = cookie.indexOf('=');
+    if (eqIndex === -1) continue;
+    const name = cookie.slice(0, eqIndex).trim();
+    const value = cookie.slice(eqIndex + 1).trim();
+    if (name === ACQUISITION_COOKIE_NAME) {
+      try {
+        return JSON.parse(decodeURIComponent(value));
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Delete a cross-subdomain cookie in a NextResponse
  * @param response - NextResponse object
  * @param name - Cookie name

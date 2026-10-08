@@ -43,6 +43,12 @@ export interface ProfileCompletionEmailData {
   firmName: string;
   isListed: boolean;
   visibilityState: string;
+  acquisitionSource?: string | null;
+  acquisitionSourceDetail?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  landingSrc?: string | null;
   adminViewLink: string;
   approveLink: string;
   rejectLink: string;
@@ -196,7 +202,33 @@ export const emailTemplates = {
     text: `New Job Opportunity: ${data.title}\n\nCompensation: ${data.payout}\nDeadline: ${data.deadline}\n\nView Job: ${data.link}\n\n---\nGot work to hand off or need a specialist?\n👉 Post a job on TaxProExchange: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/new\n\n---\nYou're receiving this because you have job notifications enabled in your account settings.\n\nDon't want these emails? You can easily turn off job notifications:\n1. Go to your Settings page: ${process.env.NEXT_PUBLIC_APP_URL}/settings\n2. Scroll down to "Email Preferences"\n3. Uncheck "Job Notifications"\n4. Click "Save Preferences"\n\nOr click here to unsubscribe: ${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?email=${encodeURIComponent(data.recipientEmail)}&type=job_notifications\n\nTaxProExchange - Connecting verified tax professionals`
   }),
 
-  profileCompletion: (data: ProfileCompletionEmailData): EmailTemplate => ({
+  profileCompletion: (data: ProfileCompletionEmailData): EmailTemplate => {
+    // Build a single human-readable source line from the self-reported
+    // dropdown + any first-touch UTM/src data, e.g.
+    // "Referred by a colleague (Jane Doe)" or "facebook (utm_campaign: firm-overflow)".
+    const sourceLabels: Record<string, string> = {
+      google_search: 'Google / search',
+      facebook: 'Facebook',
+      linkedin: 'LinkedIn',
+      referred_by_colleague: 'Referred by a colleague',
+      email_from_taxproexchange: 'Email from TaxProExchange',
+      other: 'Other',
+    };
+    const sourceParts: string[] = [];
+    if (data.acquisitionSource) {
+      const label = sourceLabels[data.acquisitionSource] || data.acquisitionSource;
+      sourceParts.push(data.acquisitionSourceDetail ? `${label} (${data.acquisitionSourceDetail})` : label);
+    }
+    const utmBits = [
+      data.utmSource ? `utm_source: ${data.utmSource}` : null,
+      data.utmMedium ? `utm_medium: ${data.utmMedium}` : null,
+      data.utmCampaign ? `utm_campaign: ${data.utmCampaign}` : null,
+      data.landingSrc ? `src: ${data.landingSrc}` : null,
+    ].filter(Boolean);
+    if (utmBits.length) sourceParts.push(utmBits.join(', '));
+    const sourceLine = sourceParts.length ? sourceParts.join(' — ') : null;
+
+    return {
     subject: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}`,
     html: `
       <!DOCTYPE html>
@@ -220,7 +252,8 @@ export const emailTemplates = {
               ${data.ptin ? `<strong>PTIN:</strong> ${data.ptin}<br>` : ''}
               <strong>Headline:</strong> ${data.headline || 'Not specified'}<br>
               <strong>Firm:</strong> ${data.firmName || 'Not specified'}<br>
-              <strong>Profile Status:</strong> ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}
+              <strong>Profile Status:</strong> ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}<br>
+              <strong>Source:</strong> ${sourceLine || 'Not specified'}
             </div>
           </div>
           
@@ -253,8 +286,9 @@ export const emailTemplates = {
         </body>
       </html>
     `,
-    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\n${data.ptin ? `PTIN: ${data.ptin}\n` : ''}Headline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\nProfile Status: ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
-  }),
+    text: `New Profile Ready for Verification: ${data.firstName} ${data.lastName}\n\nEmail: ${data.email}\nCredential Type: ${data.credentialType}\n${data.ptin ? `PTIN: ${data.ptin}\n` : ''}Headline: ${data.headline || 'Not specified'}\nFirm: ${data.firmName || 'Not specified'}\nProfile Status: ${data.isListed ? 'Listed' : 'Not Listed'} | ${data.visibilityState.replace('_', ' ').toUpperCase()}\nSource: ${sourceLine || 'Not specified'}\n\nReview Profile: ${data.adminViewLink}\n\nQuick Actions:\n- Approve: ${data.approveLink}\n- Reject: ${data.rejectLink}\n\nAction Required: This profile has completed onboarding and is ready for your review.`
+    };
+  },
 
   connectionRequest: (data: ConnectionRequestEmailData): EmailTemplate => ({
     subject: `New Connection Request from ${data.requesterName}`,
