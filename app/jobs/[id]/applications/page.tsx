@@ -21,6 +21,7 @@ interface Application {
     headline: string;
     credential_type: string;
     slug: string;
+    public_email?: string | null;
   };
 }
 

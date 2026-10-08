@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 
@@ -106,14 +107,15 @@ export async function POST(request: NextRequest) {
     const recipientName = (connection.recipient as any).first_name;
     const firmName = (connection.requester as any).firm_name ? ` at ${(connection.requester as any).firm_name}` : '';
     
-    const viewRequestUrl = `${process.env.NEXT_PUBLIC_APP_URL}/messages`;
-    const notificationSettingsUrl = `${process.env.NEXT_PUBLIC_APP_URL}/settings`;
+    const viewRequestUrl = `${getAppBaseUrl()}/messages`;
+    const notificationSettingsUrl = `${getAppBaseUrl()}/settings`;
 
     // Send email
     console.log('📧 Attempting to send connection request email to:', userEmail);
     const emailResult = await sendEmail({
       to: userEmail,
       subject: 'You have a pending connection request on TaxProExchange',
+      category: 'connection_request',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #1f2937; margin-bottom: 20px;">New Connection Request</h2>

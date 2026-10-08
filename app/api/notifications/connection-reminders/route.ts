@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 
@@ -131,8 +132,8 @@ export async function POST(request: NextRequest) {
           return `${requester.first_name} ${requester.last_name}${firmName}`;
         }).join(', ');
 
-        const viewRequestUrl = `${process.env.NEXT_PUBLIC_APP_URL}/messages`;
-        const notificationSettingsUrl = `${process.env.NEXT_PUBLIC_APP_URL}/settings`;
+        const viewRequestUrl = `${getAppBaseUrl()}/messages`;
+        const notificationSettingsUrl = `${getAppBaseUrl()}/settings`;
 
         // Send email
         console.log(`Sending email to ${userEmail} for ${pendingCount} pending requests`);

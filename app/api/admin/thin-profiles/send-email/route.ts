@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
@@ -31,7 +32,7 @@ function generateProfileOptimizationEmail(data: {
   profileEditUrl: string;
   unsubscribeUrl: string;
 }) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+  const appUrl = getAppBaseUrl();
 
   const exampleBios: Record<string, string> = {
     'CPA': `"15 years specializing in S-Corporation taxation and multi-state SALT compliance. I help small businesses navigate complex situations and take on overflow work during peak season — second reviews, partnership returns, and entity structuring. Licensed in CA, TX, and NV."`,
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest) {
 
     // Send emails with rate limiting
     const results = [];
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.taxproexchange.com';
+    const appUrl = getAppBaseUrl();
 
     for (let i = 0; i < profiles.length; i++) {
       const profile = profiles[i];

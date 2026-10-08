@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
         <p>This person would like to connect with you on TaxProExchange. You can accept or decline their request.</p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/messages" 
+          <a href="${getAppBaseUrl()}/messages" 
              style="background-color: #1f2937; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
             View Connection Request
           </a>
@@ -146,7 +147,7 @@ ${requester_firm ? requester_firm : ''}
 
 This person would like to connect with you on TaxProExchange. You can accept or decline their request.
 
-View Connection Request: ${process.env.NEXT_PUBLIC_APP_URL}/messages
+View Connection Request: ${getAppBaseUrl()}/messages
 
 Building connections with other tax professionals can help you find new opportunities and collaborate on projects.
 
@@ -163,7 +164,8 @@ This is an automated notification from TaxProExchange. Please do not reply to th
         to: recipientEmail,
         subject,
         html: htmlContent,
-        text: textContent
+        text: textContent,
+        category: 'connection_request'
       });
       
       console.log(`Connection request notification sent to ${recipientEmail}`);

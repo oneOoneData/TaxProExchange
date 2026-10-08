@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { sendEmail } from '@/lib/email';
@@ -54,7 +55,7 @@ export async function POST(
     }
 
     const supabase = createServerClient();
-    const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com';
+    const rawAppUrl = getAppBaseUrl();
     const appUrl = rawAppUrl.replace(/\/+$/, '');
 
     const { data: firm, error: firmError } = await supabase

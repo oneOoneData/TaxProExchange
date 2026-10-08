@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { supabaseService } from '@/lib/supabaseService';
 import { sendBatchJobNotifications, JobCreatedEmailData } from '@/lib/email';
 
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
           ...job.software_required,
           ...job.specialization_keys
         ].slice(0, 5), // Limit to 5 badges
-        link: `${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}`,
+        link: `${getAppBaseUrl()}/jobs/${job.id}`,
         recipientEmail: user.public_email,
         recipientName: `${user.first_name} ${user.last_name}`
       }));

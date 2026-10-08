@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { getServerStreamClient } from '@/lib/stream';
@@ -175,7 +176,7 @@ export async function POST(
         .single();
 
       if (requesterProfile && responderProfile) {
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify/connection-decision`, {
+        await fetch(`${getAppBaseUrl()}/api/notify/connection-decision`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

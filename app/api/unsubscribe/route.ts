@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { signUnsubscribeToken } from '@/lib/unsubscribe';
 
@@ -141,7 +142,7 @@ export async function GET(req: NextRequest) {
             <p>You will no longer receive ${type === 'all' ? 'any' : 'these'} email notifications from TaxProExchange.</p>
           </div>
           <p>You can still access your account and change your preferences at any time:</p>
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://taxproexchange.com'}/settings" class="button">Manage Email Preferences</a>
+          <a href="${getAppBaseUrl()}/settings" class="button">Manage Email Preferences</a>
           <p>If you have any questions, please contact us at support@taxproexchange.com</p>
         </body>
       </html>

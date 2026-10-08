@@ -17,6 +17,7 @@ interface Application {
     headline: string;
     credential_type: string;
     slug: string;
+    public_email?: string | null;
   };
 }
 
@@ -216,6 +217,23 @@ export function ApplicationCard({ application, onStatusUpdate, connectionState, 
               </button>
             )}
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            {connectionState.status === 'accepted'
+              ? 'You\'re connected — message them here through TaxProExchange'
+              : 'Send a connection request to message them here through TaxProExchange'}
+            {application.applicant.public_email && (
+              <>
+                {', or email them directly at '}
+                <a
+                  href={`mailto:${application.applicant.public_email}`}
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  {application.applicant.public_email}
+                </a>
+              </>
+            )}
+            .
+          </p>
         </div>
       )}
     </div>

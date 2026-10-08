@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { sendProfileCompletionNotification } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
@@ -24,9 +25,9 @@ export async function POST(request: NextRequest) {
       firmName: 'Doe & Associates',
       isListed: true,
       visibilityState: 'pending_verification',
-      adminViewLink: `${process.env.NEXT_PUBLIC_APP_URL}/p/test-profile?admin=true`,
-      approveLink: `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profileId}&action=approve`,
-      rejectLink: `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/email-approve?profileId=${profileId}&action=reject`
+      adminViewLink: `${getAppBaseUrl()}/p/test-profile?admin=true`,
+      approveLink: `${getAppBaseUrl()}/api/admin/email-approve?profileId=${profileId}&action=approve`,
+      rejectLink: `${getAppBaseUrl()}/api/admin/email-approve?profileId=${profileId}&action=reject`
     };
 
     console.log('📧 Sending test admin approval email to:', to);

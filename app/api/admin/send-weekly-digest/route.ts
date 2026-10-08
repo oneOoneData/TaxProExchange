@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/lib/url';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/email';
 import { requireAdmin } from '@/lib/adminAuth';
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
           ` : ''}
           
           <div style="text-align: center; margin: 20px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}" style="background: #4299e1; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Job Details</a>
+            <a href="${getAppBaseUrl()}/jobs/${job.id}" style="background: #4299e1; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View Job Details</a>
           </div>
         </div>
       `;
@@ -194,13 +195,13 @@ export async function POST(request: NextRequest) {
           ${jobsHtml}
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View All Jobs</a>
+            <a href="${getAppBaseUrl()}/jobs" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">View All Jobs</a>
           </div>
           
           <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #0ea5e9;">
             <p style="margin: 0; color: #0c4a6e; font-weight: 500;">
               Got work to hand off or need a specialist?<br>
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/new" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">👉 Post a job on TaxProExchange</a>
+              <a href="${getAppBaseUrl()}/jobs/new" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">👉 Post a job on TaxProExchange</a>
             </p>
           </div>
           
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
             <p>You're receiving this because you have job notifications enabled in your account settings.</p>
             <p><strong>Don't want these emails?</strong> You can easily turn off job notifications:</p>
             <ul style="margin: 10px 0; padding-left: 20px;">
-              <li>Go to your <a href="${process.env.NEXT_PUBLIC_APP_URL}/settings" style="color: #4299e1;">Settings page</a></li>
+              <li>Go to your <a href="${getAppBaseUrl()}/settings" style="color: #4299e1;">Settings page</a></li>
               <li>Scroll down to "Email Preferences"</li>
               <li>Uncheck "Job Notifications"</li>
               <li>Click "Save Preferences"</li>
@@ -255,22 +256,22 @@ Posted by: ${jobPoster}${firmName}
 Compensation: ${formatPayout()}
 Deadline: ${formatDeadline()}
 ${job.description ? `Description: ${job.description.substring(0, 200)}${job.description.length > 200 ? '...' : ''}` : ''}
-View Job: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/${job.id}
+View Job: ${getAppBaseUrl()}/jobs/${job.id}
 
 ---`;
 }).join('\n')}
 
-View All Jobs: ${process.env.NEXT_PUBLIC_APP_URL}/jobs
+View All Jobs: ${getAppBaseUrl()}/jobs
 
 Got work to hand off or need a specialist?
-Post a job on TaxProExchange: ${process.env.NEXT_PUBLIC_APP_URL}/jobs/new
+Post a job on TaxProExchange: ${getAppBaseUrl()}/jobs/new
 
 ---
 
 You're receiving this because you have job notifications enabled in your account settings.
 
 Don't want these emails? You can easily turn off job notifications:
-1. Go to your Settings page: ${process.env.NEXT_PUBLIC_APP_URL}/settings
+1. Go to your Settings page: ${getAppBaseUrl()}/settings
 2. Scroll down to "Email Preferences"
 3. Uncheck "Job Notifications"
 4. Click "Save Preferences"
