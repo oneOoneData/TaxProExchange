@@ -12,6 +12,7 @@ import MobileNav from '@/components/MobileNav';
 import FeaturedProfiles from '@/components/FeaturedProfiles';
 import BuyMeACoffee from '@/components/BuyMeACoffee';
 import DualHero from '@/components/DualHero';
+import { FEATURE_PUBLIC_MCP } from '@/lib/flags';
 
 interface HomePageClientProps {
   faqs: Array<{ question: string; answer: string }>;
@@ -118,6 +119,9 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
             
             <a href="/insights" className="hover:text-slate-900">Insights</a>
             <a href="/ai-tax-pro" className="hover:text-slate-900">AI Tax Pro</a>
+            {FEATURE_PUBLIC_MCP && (
+              <a href="/connect-ai" className="hover:text-slate-900">Connect AI</a>
+            )}
           </nav>
           <div className="flex items-center gap-4">
             {user ? (
@@ -358,6 +362,14 @@ export default function HomePageClient({ faqs }: HomePageClientProps) {
                     </svg>
                     <span className="text-slate-700">Collaborative team management</span>
                   </li>
+                  {FEATURE_PUBLIC_MCP && (
+                    <li className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-slate-700">Connect your AI assistant (Claude, Cowork) to search the directory</span>
+                    </li>
+                  )}
                 </ul>
                 <a href="/firm" className="block text-center rounded-2xl bg-blue-600 text-white px-6 py-3 text-sm font-medium shadow-lg hover:shadow-xl transition-all hover:bg-blue-700">
                   Start Firm Workspace
