@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
-import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
+import { FEATURE_FIRM_WORKSPACES, FEATURE_PUBLIC_MCP } from '@/lib/flags';
 
 interface Firm {
   id: string;
@@ -55,6 +55,10 @@ function FirmSettingsContent() {
   const [inviteMessage, setInviteMessage] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+  const [mcpKeyStatus, setMcpKeyStatus] = useState<{ hasKey: boolean; key: { key_prefix: string; created_at: string; last_used_at: string | null } | null } | null>(null);
+  const [mcpNewKey, setMcpNewKey] = useState<string | null>(null);
+  const [isMcpKeyBusy, setIsMcpKeyBusy] = useState(false);
+  const [mcpKeyError, setMcpKeyError] = useState<string | null>(null);
 
   // Guard: redirect if flag is off
   useEffect(() => {
@@ -118,8 +122,69 @@ function FirmSettingsContent() {
 
   const selectedFirm = firms.find((f) => f.id === selectedFirmId);
   const isAdmin = selectedFirm?.user_role === 'admin';
-  const hasActiveSubscription = selectedFirm && 
+  const hasActiveSubscription = selectedFirm &&
     (selectedFirm.subscription_status === 'active' || selectedFirm.subscription_status === 'trialing');
+
+  // Load AI assistant (public MCP) key status when firm is selected
+  useEffect(() => {
+    setMcpNewKey(null);
+    setMcpKeyError(null);
+    if (!FEATURE_PUBLIC_MCP || !selectedFirmId || !isAdmin || !hasActiveSubscription) {
+      setMcpKeyStatus(null);
+      return;
+    }
+
+    const loadKeyStatus = async () => {
+      try {
+        const response = await fetch(`/api/firms/${selectedFirmId}/mcp-key`);
+        if (response.ok) {
+          setMcpKeyStatus(await response.json());
+        }
+      } catch (error) {
+        console.error('Error loading AI assistant key status:', error);
+      }
+    };
+
+    loadKeyStatus();
+  }, [selectedFirmId, isAdmin, hasActiveSubscription]);
+
+  const handleGenerateMcpKey = async () => {
+    if (!selectedFirmId) return;
+    setIsMcpKeyBusy(true);
+    setMcpKeyError(null);
+    try {
+      const response = await fetch(`/api/firms/${selectedFirmId}/mcp-key`, { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to generate key');
+      setMcpNewKey(data.apiKey);
+      const statusResponse = await fetch(`/api/firms/${selectedFirmId}/mcp-key`);
+      if (statusResponse.ok) setMcpKeyStatus(await statusResponse.json());
+    } catch (error) {
+      setMcpKeyError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsMcpKeyBusy(false);
+    }
+  };
+
+  const handleRevokeMcpKey = async () => {
+    if (!selectedFirmId) return;
+    if (!window.confirm('Revoke this key? Any AI assistant connected with it will stop working immediately.')) return;
+    setIsMcpKeyBusy(true);
+    setMcpKeyError(null);
+    try {
+      const response = await fetch(`/api/firms/${selectedFirmId}/mcp-key`, { method: 'DELETE' });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to revoke key');
+      }
+      setMcpKeyStatus({ hasKey: false, key: null });
+      setMcpNewKey(null);
+    } catch (error) {
+      setMcpKeyError(error instanceof Error ? error.message : 'An error occurred');
+    } finally {
+      setIsMcpKeyBusy(false);
+    }
+  };
 
   if (!isLoaded || isLoading) {
     return (
@@ -298,6 +363,77 @@ function FirmSettingsContent() {
             </div>
           </div>
         </div>
+
+        {/* AI Assistant Access Section */}
+        {FEATURE_PUBLIC_MCP && (
+          <div className="bg-white shadow sm:rounded-lg mb-6">
+            <div className="px-4 py-5 sm:p-6">
+              <h2 className="text-lg font-medium text-gray-900 mb-1">Connect your AI assistant</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Let your AI assistant (Claude Desktop, Cowork) search the TaxProExchange verified
+                directory directly. Read-only, no contact details -- it hands back profile links.{' '}
+                <Link href="/connect-ai" className="text-blue-600 hover:underline">
+                  Setup guide
+                </Link>
+              </p>
+
+              {!hasActiveSubscription ? (
+                <p className="text-sm text-gray-500">An active subscription is required for this feature.</p>
+              ) : !isAdmin ? (
+                <p className="text-sm text-gray-500">Only firm admins can manage the AI assistant key.</p>
+              ) : (
+                <div className="space-y-3">
+                  {mcpKeyError && <p className="text-sm text-red-600">{mcpKeyError}</p>}
+
+                  {mcpNewKey && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <p className="text-sm font-medium text-amber-900 mb-2">
+                        Copy this key now -- it won&rsquo;t be shown again:
+                      </p>
+                      <code className="block bg-white border border-amber-200 rounded px-3 py-2 text-xs break-all select-all">
+                        {mcpNewKey}
+                      </code>
+                    </div>
+                  )}
+
+                  {mcpKeyStatus?.hasKey && mcpKeyStatus.key ? (
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-gray-600">
+                        Active key <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{mcpKeyStatus.key.key_prefix}&hellip;</code>
+                        {' '}&middot; created {new Date(mcpKeyStatus.key.created_at).toLocaleDateString()}
+                        {mcpKeyStatus.key.last_used_at && ` · last used ${new Date(mcpKeyStatus.key.last_used_at).toLocaleDateString()}`}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleGenerateMcpKey}
+                          disabled={isMcpKeyBusy}
+                          className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          Rotate
+                        </button>
+                        <button
+                          onClick={handleRevokeMcpKey}
+                          disabled={isMcpKeyBusy}
+                          className="px-3 py-1.5 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                        >
+                          Revoke
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleGenerateMcpKey}
+                      disabled={isMcpKeyBusy}
+                      className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 disabled:opacity-50"
+                    >
+                      {isMcpKeyBusy ? 'Generating...' : 'Generate API Key'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Team Members Section */}
         <div className="bg-white shadow sm:rounded-lg mb-6">
