@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseService } from '@/lib/supabaseService';
 import { ProfileUpdateSchema } from '@/lib/validations/zodSchemas';
-import { parseReferralCookie } from '@/lib/cookies';
+import { parseReferralCookie, parseAcquisitionCookie } from '@/lib/cookies';
 import { sendEmail } from '@/lib/email';
 import { generateUnsubscribeUrl } from '@/lib/unsubscribe';
 
@@ -538,7 +538,7 @@ export async function PUT(request: Request) {
       let referrerProfileId = null;
       const cookieHeader = request.headers.get('cookie');
       const refSlug = parseReferralCookie(cookieHeader);
-      
+
       if (refSlug) {
         // Look up the referrer's profile ID by slug
         const { data: referrerProfile } = await supabase
@@ -546,11 +546,19 @@ export async function PUT(request: Request) {
           .select('id')
           .eq('slug', refSlug)
           .single();
-        
+
         if (referrerProfile) {
           referrerProfileId = referrerProfile.id;
           console.log('🎯 Referral tracking:', { refSlug, referrerProfileId });
         }
+      }
+
+      // First-touch UTM/src capture (separate from referrer_profile_id above --
+      // this is server-authoritative from the cookie AcquisitionTracker sets on
+      // landing, not client-submitted body data). See dev-attribution-tracking-2026-10.
+      const acquisitionData = parseAcquisitionCookie(cookieHeader);
+      if (acquisitionData) {
+        console.log('🎯 Acquisition tracking:', acquisitionData);
       }
 
       // Auto-accept legal terms for new profiles
@@ -589,6 +597,11 @@ export async function PUT(request: Request) {
           connection_email_notifications: connection_email_notifications ?? true,
           onboarding_complete: true,
           referrer_profile_id: referrerProfileId,
+          // First-touch UTM/src, server-authoritative from the cookie (not client body)
+          utm_source: acquisitionData?.utm_source || null,
+          utm_medium: acquisitionData?.utm_medium || null,
+          utm_campaign: acquisitionData?.utm_campaign || null,
+          landing_src: acquisitionData?.landing_src || null,
           // Auto-accept legal terms
           tos_version: LEGAL_VERSIONS.TOS,
           tos_accepted_at: now,

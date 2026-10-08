@@ -181,6 +181,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Carry the creating profile's acquisition source through to the firm so a
+    // free->paid conversion (this is the free->paid "Create Firm Account" step,
+    // pre-Stripe) attributes to the original signup channel, not just "paid".
+    // See dev-attribution-tracking-2026-10. Best-effort: a lookup failure here
+    // must never block firm creation.
+    let acquisitionFields: Record<string, string | null> = {};
+    try {
+      const { data: creatorProfile } = await supabase
+        .from('profiles')
+        .select('acquisition_source, acquisition_source_detail, utm_source, utm_medium, utm_campaign, landing_src')
+        .eq('id', profileId)
+        .maybeSingle();
+      if (creatorProfile) {
+        acquisitionFields = creatorProfile;
+      }
+    } catch (acquisitionError) {
+      console.error('Non-fatal: failed to copy acquisition source onto firm:', acquisitionError);
+    }
+
     // Create firm
     const { data: firm, error: firmError } = await supabase
       .from('firms')
@@ -191,6 +210,7 @@ export async function POST(request: NextRequest) {
         returns_band: validatedData.returns_band || null,
         slug,
         created_by_profile_id: profileId,
+        ...acquisitionFields,
       })
       .select()
       .single();
