@@ -45,10 +45,10 @@ export const CertificationKindEnum = z.enum([
 // Individual certification schema
 export const CertificationSchema = z.object({
   kind: CertificationKindEnum,
-  issuer: z.string().optional(),
-  cert_number: z.string().optional(),
+  issuer: z.string().nullish(),
+  cert_number: z.string().nullish(),
   expires_on: z.string().nullable().optional(),
-  notes: z.string().optional()
+  notes: z.string().nullish()
 }).passthrough(); // Allow additional fields like id, status
 
 // Individual license schema
