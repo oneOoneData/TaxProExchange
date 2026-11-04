@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const { data: inviterProfile, error: inviterError } = await supabase
       .from('profiles')
       .select('id, first_name, last_name')
-      .eq('clerk_user_id', userId)
+      .or(`clerk_id.eq.${userId},clerk_user_id.eq.${userId}`)
       .single();
 
     if (inviterError || !inviterProfile) {

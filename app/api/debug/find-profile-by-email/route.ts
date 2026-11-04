@@ -35,7 +35,7 @@ export async function GET() {
     const { data: profileByClerkId, error: clerkError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('clerk_user_id', userId)
+      .or(`clerk_id.eq.${userId},clerk_user_id.eq.${userId}`)
       .maybeSingle();
 
     // Search for any profile that might match

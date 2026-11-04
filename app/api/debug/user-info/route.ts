@@ -23,7 +23,7 @@ export async function GET() {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('id, first_name, last_name, clerk_user_id')
-      .eq('clerk_user_id', userId)
+      .or(`clerk_id.eq.${userId},clerk_user_id.eq.${userId}`)
       .maybeSingle();
 
     // Get all profiles to see what clerk_user_id values exist

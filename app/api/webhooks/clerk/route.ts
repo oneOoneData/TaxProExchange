@@ -169,7 +169,7 @@ export async function POST(request: Request) {
           
           const { error: syncError } = await supabase
             .from('profiles')
-            .update({ clerk_id: u.id })
+            .update({ clerk_id: u.id, clerk_user_id: u.id })
             .eq('id', existingProfile.id);
 
           if (syncError) {

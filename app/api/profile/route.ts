@@ -571,6 +571,7 @@ export async function PUT(request: Request) {
         .from('profiles')
         .insert({
           clerk_id,
+          clerk_user_id: clerk_id,
           ...profileData,
           credential_type: credential_type || 'Student', // Ensure credential_type is always set
           professional_roles: professional_roles?.length ? professional_roles : ['tax_pro'],

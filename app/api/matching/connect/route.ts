@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       const { data: profile2 } = await supabase
         .from('profiles')
         .select('id, connection_credits_remaining, profile_type')
-        .eq('clerk_user_id', userId)
+        .or(`clerk_id.eq.${userId},clerk_user_id.eq.${userId}`)
         .single();
       profile = profile2;
     }

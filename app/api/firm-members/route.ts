@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
-      .eq('clerk_user_id', userId)
+      .or(`clerk_id.eq.${userId},clerk_user_id.eq.${userId}`)
       .single();
 
     if (!profile) {
