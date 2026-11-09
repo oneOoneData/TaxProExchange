@@ -1,6 +1,6 @@
 ---
 title: "TaxDome Price Increase 2026: Why Small Firms Could Pay 2x (or More) — and the Best Alternatives"
-description: "TaxDome just moved from per-seat to per-client pricing: $1,500/year for 150 active clients, then $15 per account. Large teams save; solo and small firms with big client lists can see their bill double or worse. Here's the math, the best TaxDome alternatives (Karbon, Canopy, Financial Cents, Uku), and whether building your own client portal is realistic."
+description: "TaxDome just moved from per-seat to per-client pricing: $1,500/year for 150 active clients, then $15 per account. Large teams save; solo and small firms with big client lists can see their bill double or worse. Here's the math, the best TaxDome alternatives (BytesHood, Canopy, Karbon, Financial Cents, Uku), and whether building your own client portal is realistic."
 date: 2026-11-08
 author: Koen Van Duyse
 category: Practice Management
@@ -12,6 +12,7 @@ tags:
   - Karbon
   - Canopy
   - Financial Cents
+  - BytesHood
 keywords:
   - TaxDome price increase
   - TaxDome pricing 2026
@@ -21,6 +22,7 @@ keywords:
   - TaxDome vs Karbon
   - TaxDome vs Canopy
   - Financial Cents vs TaxDome
+  - BytesHood vs TaxDome
   - build your own client portal tax firm
   - practice management software for small tax firms
 slug: taxdome-price-increase-alternatives-2026
@@ -39,7 +41,7 @@ I'm a solo preparer myself. My own TaxDome renewal quote went from roughly **$80
 - **TaxDome's new price:** $1,500/year base, includes 150 active client accounts and up to 20 team members. Extra accounts cost $15 each on demand, or less in prepaid packs.
 - **Who pays more:** Solo and 2–3 person firms with more than ~150 active clients.
 - **Who pays less:** Firms with many staff and a modest client count.
-- **Best alternatives for small firms:** Financial Cents or Uku (cheapest), Canopy (closest all-in-one), Karbon (team workflow and email).
+- **Best alternatives for small firms:** BytesHood (unlimited clients, tax-focused), Financial Cents or Uku (cheapest), Canopy (closest all-in-one), Karbon (team workflow and email).
 - **Build your own:** Realistic now for tech-comfortable firms using AI coding tools — but you inherit the security and compliance burden.
 
 ## What Changed: TaxDome's Old vs. New Pricing
@@ -114,10 +116,21 @@ Prices below are annual-billing list prices as published in mid-to-late 2026. Se
 | Tool | Pricing model | Solo cost / year | Client portal | E-signature | Best for |
 |---|---|---|---|---|---|
 | **TaxDome (new)** | Per active client | $1,500 (≤150 clients) | Yes, plus mobile app | Unlimited | Larger teams, all-in-one |
+| **BytesHood** | Per firm (staff seats), unlimited clients | $500 (first-year intro) | Yes | Included; KBA $1.50–$2 per check | Solo and small tax firms leaving TaxDome |
 | **Canopy** | Per user + credits | ~$888 (Standard) | Included | Included; KBA ~$1.25/credit | Tax-focused all-in-one, resolution work |
 | **Karbon** | Per user | ~$708 (Team) | Basic | Credits sold separately | Teams, email-heavy workflow |
 | **Financial Cents** | Per user | ~$228 (Solo) | Yes | Check current plan | Budget solo/small firms |
 | **Uku** | Per user | ~$228 (Solo) | Yes | Included (Solo) | Bookkeeping-heavy firms |
+
+### BytesHood — the newcomer built for small tax firms
+
+[BytesHood](https://www.byteshood.com/) is a newer practice suite from a US-based team in Binghamton, New York, and it's pitched squarely at the firms TaxDome's new model squeezes: **unlimited clients, priced by staff seat**.
+
+- **Pricing:** Single (one seat) **$45/month or $500/year**; Firm (three seats) **$79/month or $800/year**. Both are first-year introductory prices, so ask what year two costs. 14-day free trial, no credit card.
+- **What's included:** Client management and return workflows, client portal with documents, messages and e-signatures, remote **Form 8879/8878 signing with KBA** ($2 per check, $1.50 prepaid), billing with your choice of payment processor, plus an IRS/state notice tracker and payroll and sales tax filing trackers.
+- **Switching:** A built-in "Move in" migration tool with a TaxDome-specific path. It brings over accounts, contacts, documents and invoice history, and can be undone within 30 days. Message threads and past e-signature records stay behind, so export those first.
+- **Watch for:** It's young. Its own materials don't mention a client mobile app, organizers or email sync, so confirm those before you commit — and expect a smaller ecosystem and fewer peer reviews than the established names.
+- **Good fit if:** You're a solo or small tax practice with a large client list and you mainly need portal, e-sign with KBA, and billing at a predictable price.
 
 ### Canopy — the closest like-for-like replacement
 
@@ -229,7 +242,7 @@ Existing customers keep their current plan and price until their first renewal o
 
 ### What is the cheapest alternative to TaxDome?
 
-Financial Cents and Uku both list solo plans around $19/month (about $228/year). They're lighter than TaxDome, so you may need to add a separate e-signature tool.
+Financial Cents and Uku both list solo plans around $19/month (about $228/year), but they're lighter than TaxDome and you may need a separate e-signature tool. For a tax-focused option with unlimited clients, BytesHood starts at $500/year (first-year introductory price) including portal and e-signature, with KBA charged per check.
 
 ### Is Canopy cheaper than TaxDome?
 
@@ -251,14 +264,14 @@ Run your numbers, test an alternative, and decide on your terms rather than your
 
 *Pricing reviewed November 8, 2026. TaxDome figures are from TaxDome's announcement as reported by Accounting Today and TaxDome's published documentation. Competitor prices are list prices from vendor pages and comparison articles; several were published by competing vendors. Prices, discounts and renewal terms change — confirm directly with each vendor. TaxProExchange is not affiliated with any vendor mentioned.*
 
-**Sources:** [Accounting Today — TaxDome switches from per-seat to per-client pricing](https://www.accountingtoday.com/news/taxdome-switches-from-per-seat-to-per-client-pricing) · [CountingWorks PRO — TaxDome's new pricing explained](https://countingworkspro.com/blog/taxdomes-new-pricing-explained-for-accounting-firms) · [Portico — TaxDome pricing explained](https://www.portico.run/blog/post/taxdome-pricing) · [Financial Cents vs TaxDome](https://financial-cents.com/financial-cents-vs-taxdome/) · [Financial Cents — Karbon pricing](https://financial-cents.com/resources/articles/karbon-pricing/) · [Uku — Canopy pricing](https://getuku.com/articles/canopy-pricing/) · [Uku — TaxDome pricing](https://getuku.com/articles/taxdome-pricing/) · [IRS Publication 5708 (WISP)](https://revenuefiles.delaware.gov/2024/FedState/IRS_Handout_Pub_5708_WISP.pdf)
+**Sources:** [BytesHood](https://www.byteshood.com/) · [BytesHood — Switch from TaxDome](https://www.byteshood.com/switch) · [Accounting Today — TaxDome switches from per-seat to per-client pricing](https://www.accountingtoday.com/news/taxdome-switches-from-per-seat-to-per-client-pricing) · [CountingWorks PRO — TaxDome's new pricing explained](https://countingworkspro.com/blog/taxdomes-new-pricing-explained-for-accounting-firms) · [Portico — TaxDome pricing explained](https://www.portico.run/blog/post/taxdome-pricing) · [Financial Cents vs TaxDome](https://financial-cents.com/financial-cents-vs-taxdome/) · [Financial Cents — Karbon pricing](https://financial-cents.com/resources/articles/karbon-pricing/) · [Uku — Canopy pricing](https://getuku.com/articles/canopy-pricing/) · [Uku — TaxDome pricing](https://getuku.com/articles/taxdome-pricing/) · [IRS Publication 5708 (WISP)](https://revenuefiles.delaware.gov/2024/FedState/IRS_Handout_Pub_5708_WISP.pdf)
 
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"How much does TaxDome cost in 2026?","acceptedAnswer":{"@type":"Answer","text":"New TaxDome customers pay $1,500 per year, which includes 150 active client accounts and up to 20 team members. Additional accounts cost $15 each on demand, or less in prepaid packs. An AI add-on is $200/month."}},
 {"@type":"Question","name":"Did TaxDome raise its prices?","acceptedAnswer":{"@type":"Answer","text":"TaxDome switched from per-user pricing ($800–$1,200 per user per year) to per-client pricing. Solo practitioners and small firms with more than about 150 active clients will generally pay more; larger teams with modest client counts will often pay less."}},
 {"@type":"Question","name":"When does TaxDome's new pricing apply to existing customers?","acceptedAnswer":{"@type":"Answer","text":"Existing customers keep their current plan and price until their first renewal on or after January 1, 2027."}},
-{"@type":"Question","name":"What is the cheapest alternative to TaxDome?","acceptedAnswer":{"@type":"Answer","text":"Financial Cents and Uku both list solo plans around $19/month (about $228/year), though you may need a separate e-signature tool."}},
+{"@type":"Question","name":"What is the cheapest alternative to TaxDome?","acceptedAnswer":{"@type":"Answer","text":"Financial Cents and Uku both list solo plans around $19/month (about $228/year), though you may need a separate e-signature tool. BytesHood, a tax-focused suite with unlimited clients, starts at $500/year (first-year introductory price) including portal and e-signature."}},
 {"@type":"Question","name":"Is Canopy cheaper than TaxDome?","acceptedAnswer":{"@type":"Answer","text":"For a solo preparer with many clients, often yes: Canopy Standard is about $74 per user per month billed annually, with documents, portal and e-signature included. Usage-based extras can add up."}},
 {"@type":"Question","name":"Can a tax firm build its own client portal?","acceptedAnswer":{"@type":"Answer","text":"Yes. Using managed services and AI coding tools, a tech-comfortable firm can build a secure portal, but it then owns the full security and compliance burden, including a WISP under the FTC Safeguards Rule and identity verification for e-signed Forms 8879."}}
 ]}
