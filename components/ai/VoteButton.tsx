@@ -73,28 +73,6 @@ export default function VoteButton({
     checkVoteStatus();
   }, [toolId, isSignedIn]);
 
-  // Poll for vote updates (every 30 seconds)
-  useEffect(() => {
-    if (!isSignedIn) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch('/api/ai-tools');
-        if (response.ok) {
-          const data = await response.json();
-          const tool = data.tools.find((t: any) => t.id === toolId);
-          if (tool) {
-            setVotes(tool.votes);
-          }
-        }
-      } catch (error) {
-        console.error('Error polling votes:', error);
-      }
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [toolId, isSignedIn]);
-
   return (
     <button
       onClick={handleVote}

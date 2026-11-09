@@ -1,3 +1,51 @@
+
+// ---------------------------------------------------------------------------
+// Reddit access. Reddit blocks most unauthenticated JSON requests from cloud
+// hosts (Vercel), which silently stopped review collection. If
+// REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET are set (a "script" or "web" app at
+// reddit.com/prefs/apps), we use app-only OAuth against oauth.reddit.com.
+// ---------------------------------------------------------------------------
+const REDDIT_UA = process.env.REDDIT_USER_AGENT || 'web:taxproexchange-tools:v1.1 (by /u/RepliKoen)';
+let redditToken: { value: string; expires: number } | null = null;
+
+async function getRedditToken(): Promise<string | null> {
+  const id = process.env.REDDIT_CLIENT_ID;
+  const secret = process.env.REDDIT_CLIENT_SECRET;
+  if (!id || !secret) return null;
+  if (redditToken && redditToken.expires > Date.now() + 60_000) return redditToken.value;
+  try {
+    const res = await fetch('https://www.reddit.com/api/v1/access_token', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': REDDIT_UA,
+      },
+      body: 'grant_type=client_credentials',
+    });
+    if (!res.ok) {
+      console.warn(`Reddit OAuth failed: ${res.status}`);
+      return null;
+    }
+    const json = await res.json();
+    redditToken = { value: json.access_token, expires: Date.now() + json.expires_in * 1000 };
+    return redditToken.value;
+  } catch (e) {
+    console.warn('Reddit OAuth error', e);
+    return null;
+  }
+}
+
+/** Fetch a Reddit JSON URL (www.reddit.com/...), via OAuth when configured. */
+async function redditFetch(url: string): Promise<Response> {
+  const token = await getRedditToken();
+  if (token) {
+    const oauthUrl = url.replace(/^https:\/\/(www\.)?reddit\.com/, 'https://oauth.reddit.com').replace(/\.json(?=\?|$)/, '');
+    return fetch(oauthUrl, { headers: { Authorization: `Bearer ${token}`, 'User-Agent': REDDIT_UA } });
+  }
+  return fetch(url, { headers: { 'User-Agent': REDDIT_UA } });
+}
+
 /**
  * Reddit API integration for fetching reviews/comments about AI tools
  * Uses Reddit's public JSON API (no auth required for reading)
@@ -90,11 +138,7 @@ export async function fetchRedditReviews(
       
       console.log(`    Searching r/${subreddit} with query: "${queryPhrase}"`);
       
-      const response = await fetch(searchUrl, {
-        headers: {
-          'User-Agent': 'TaxProExchange/1.0 (AI Tools Review Aggregator)',
-        },
-      });
+      const response = await redditFetch(searchUrl);
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -268,11 +312,7 @@ export async function fetchRedditPostComments(postUrl: string): Promise<RedditPo
     // e.g., https://reddit.com/r/taxpros/comments/abc123/title -> https://reddit.com/r/taxpros/comments/abc123.json
     const apiUrl = postUrl.replace(/\/$/, '') + '.json';
 
-    const response = await fetch(apiUrl, {
-      headers: {
-        'User-Agent': 'TaxProExchange/1.0 (AI Tools Review Aggregator)',
-      },
-    });
+    const response = await redditFetch(apiUrl);
 
     if (!response.ok) {
       console.warn(`Failed to fetch Reddit comments: ${response.status}`);
