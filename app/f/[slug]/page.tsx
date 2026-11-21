@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { createServerClient } from '@/lib/supabase/server';
 import { FEATURE_FIRM_WORKSPACES } from '@/lib/flags';
 import { siteUrl } from '@/lib/seo';
+import { normalizeUrl } from '@/lib/utils/url';
 
 interface PageProps {
   params: Promise<{
@@ -146,7 +147,7 @@ export default async function FirmProfilePage({ params }: PageProps) {
 
             {firm.website && (
               <a
-                href={firm.website}
+                href={normalizeUrl(firm.website)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"

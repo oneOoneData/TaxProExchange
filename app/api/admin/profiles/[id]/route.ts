@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/adminAuth';
+import { normalizeUrl } from '@/lib/utils/url';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -196,6 +197,11 @@ export async function PATCH(
     for (const field of allowedProfileFields) {
       if (body[field] !== undefined) {
         updateData[field] = body[field];
+      }
+    }
+    for (const urlField of ['website_url', 'linkedin_url']) {
+      if (typeof updateData[urlField] === 'string') {
+        updateData[urlField] = normalizeUrl(updateData[urlField]);
       }
     }
 
