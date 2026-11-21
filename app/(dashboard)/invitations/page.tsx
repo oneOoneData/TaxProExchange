@@ -10,6 +10,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
+import { normalizeUrl } from '@/lib/utils/url';
 
 interface Invitation {
   id: string;
@@ -170,7 +171,7 @@ function InvitationsContent() {
                     </div>
                     {invitation.firms.website && (
                       <a
-                        href={invitation.firms.website}
+                        href={normalizeUrl(invitation.firms.website)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:text-blue-700"

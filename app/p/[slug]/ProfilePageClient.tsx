@@ -10,6 +10,7 @@ import { safeMap, safeLength } from '@/lib/safe';
 import { getCountryName } from '@/lib/constants/countries';
 import MobileNav from '@/components/MobileNav';
 import ProfileJsonLd from '@/components/ProfileJsonLd';
+import { normalizeUrl } from '@/lib/utils/url';
 
 interface License {
   id: string;
@@ -857,12 +858,12 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                 <div className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors mb-3">
                   <p className="text-sm text-slate-500 mb-1">Website</p>
                   <a
-                    href={profile.website_url.startsWith('http') ? profile.website_url : `https://${profile.website_url}`}
+                    href={normalizeUrl(profile.website_url)}
                     target="_blank"
                     rel="nofollow noopener noreferrer"
                     className="text-slate-900 hover:text-slate-700 break-all flex items-center gap-1"
                   >
-                    {profile.firm_name || profile.website_url.replace(/^https?:\/\//, '')}
+                    {profile.firm_name || normalizeUrl(profile.website_url).replace(/^https?:\/\//, '')}
                     <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
